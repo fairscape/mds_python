@@ -1,4 +1,5 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Extra
+from typing import List
 
 class UserView(BaseModel):
 	id: str
@@ -6,11 +7,8 @@ class UserView(BaseModel):
 	name: str
 	email: str
 
-class Group(BaseModel):
+class Group(BaseModel, extra=Extra.allow):
 	id: str
 	name: str
 	owner: UserView
 	members: List[UserView]
-
-	class Config:
-		extra = allow
