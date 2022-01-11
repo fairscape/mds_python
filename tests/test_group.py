@@ -5,9 +5,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 import mds
 import unittest
 
-
-class TestGroup(unittest.TestCase):
-
+class TestUserView(unittest.TestCase):
 	def test_userview(self):
 		member = mds.UserView(
 			id = "ark:99999/testuser1",
@@ -16,7 +14,10 @@ class TestGroup(unittest.TestCase):
 			)
 
 		self.assertEqual(member.id, "ark:99999/testuser1")
-		print("hello")
+
+
+class TestGroup(unittest.TestCase):
+
 
 
 	def test_group(self):
