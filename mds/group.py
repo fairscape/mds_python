@@ -1,10 +1,6 @@
-from pydantic import BaseModel, Extra, validator, ValidationError
+from pydantic import BaseModel, Extra, validator, ValidationError, root_validator
 from typing import List
-
-def validate_ark(guid: str) -> str:
-	if 'ark:' not in guid:
-		raise ValueError(f"ark: prefix not in identifier {guid}")
-	return guid
+from .helpers import validate_ark
 
 
 class UserView(BaseModel):
@@ -14,6 +10,10 @@ class UserView(BaseModel):
 	email: str
 
 	_validate_guid = validator('id', allow_reuse=True)(validate_ark)
+
+	@root_validator
+	def check_valid_jsonld(cls, values):
+		return values
 
 
 class Group(BaseModel, extra=Extra.allow):

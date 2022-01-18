@@ -5,6 +5,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 import mds
 import unittest
 
+
 class TestUserView(unittest.TestCase):
 
 	def test_userview(self):
@@ -17,6 +18,7 @@ class TestUserView(unittest.TestCase):
 		self.assertEqual(member.id, "ark:99999/testuser1")
 
 	def test_userview_id_validation(self):
+		# ark prefix missing
 		with self.assertRaises(ValueError):
 			member = mds.UserView(
 				id = "99999/testuser1",
