@@ -11,6 +11,12 @@ class TestValidateArk(unittest.TestCase):
 		with self.assertRaises(ValueError):
 			mds.validate_ark("99999/test-ark")
 
+		with self.assertRaises(ValueError):
+			mds.validate_ark("ark99999/test-ark")
+
+		with self.assertRaises(ValueError):
+			mds.validate_ark(":99999/test-ark")
+
 	def test_validate_ark_naan_error(self):
 		with self.assertRaises(ValueError):
 			mds.validate_ark("ark:9999/test-ark")
@@ -30,6 +36,10 @@ class TestValidateArk(unittest.TestCase):
 	def test_validate_ark_postfix_missing(self):
 		with self.assertRaises(ValueError):
 			mds.validate_ark("ark:99999/")
+
+	def test_missing_slash(self):
+		with self.assertRaises(ValueError):
+			mds.validate_ark("ark:99999CAMA-test")
 
 if __name__=="__main__":
 	unittest.main()
