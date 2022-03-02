@@ -8,18 +8,8 @@ class MongoConfig():
 		self.user = user
 		self.password = password
 		self.database = database
-		self.client = None
 
 
 	def connect(self) -> pymongo.MongoClient: 
-		connection_uri = f"mongodb://{quote_plus(self.user)}:" + 
-			f"{quote_plus(self.password)}@{self.host}:{str(self.port)}"
-
-		self.client = pymongo.MongoClient(connection_uri)
-
-		return self.client
-
-
-	def close(self) -> None:
-		if self.client is not None:
-			self.client.close()
+		connection_uri = f"mongodb://{quote_plus(self.user)}:" + f"{quote_plus(self.password)}@{self.host}:{str(self.port)}"
+		return pymongo.MongoClient(connection_uri)

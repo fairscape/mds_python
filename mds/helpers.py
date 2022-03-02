@@ -1,4 +1,5 @@
 import re
+from pydantic import BaseModel, validator
 
 def validate_ark(guid: str) -> str:
 
@@ -15,3 +16,10 @@ def validate_ark(guid: str) -> str:
 		raise ValueError(f"ark syntax error: Missing Identifier Postfix guid: {guid}")
 
 	return guid
+
+
+class CompactView(BaseModel):
+	id: str
+	type: str
+	name: str
+	_validate_guid = validator('id', allow_reuse=True)(validate_ark)
