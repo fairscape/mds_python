@@ -1,7 +1,5 @@
+from pydantic import BaseModel, Extra, validator, ValidationError, root_validator, EmailStr
 from typing import List
-
-from pydantic import BaseModel, Extra, validator, root_validator, EmailStr
-
 from .helpers import validate_ark
 
 
@@ -16,6 +14,10 @@ class UserView(BaseModel):
     @root_validator
     def check_valid_jsonld(cls, values):
         return values
+
+	@root_validator
+	def check_valid_jsonld(cls, values):
+		return values
 
 
 class Group(BaseModel, extra=Extra.allow):

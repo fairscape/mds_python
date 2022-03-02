@@ -6,6 +6,7 @@ import sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 
+
 class TestUserView(unittest.TestCase):
 
     def test_userview(self):
@@ -25,6 +26,7 @@ class TestUserView(unittest.TestCase):
                 name="test user1",
                 email="testuser1@example.org"
             )
+
 
     def test_userview_json(self):
         pass
