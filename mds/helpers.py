@@ -1,5 +1,5 @@
 import re
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, validator, Field
 
 def validate_ark(guid: str) -> str:
 
@@ -19,8 +19,7 @@ def validate_ark(guid: str) -> str:
 
 
 class CompactView(BaseModel):
-	id: str
-	type: str
+	id: Field(str, alias="@id")
+	type: Field(str, alias="@type")
 	name: str
 	_validate_guid = validator('id', allow_reuse=True)(validate_ark)
-

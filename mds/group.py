@@ -15,10 +15,6 @@ class UserView(BaseModel):
     def check_valid_jsonld(cls, values):
         return values
 
-	@root_validator
-	def check_valid_jsonld(cls, values):
-		return values
-
 
 class Group(BaseModel, extra=Extra.allow):
     id: str
