@@ -23,3 +23,4 @@ class CompactView(BaseModel):
 	type: str
 	name: str
 	_validate_guid = validator('id', allow_reuse=True)(validate_ark)
+
