@@ -42,5 +42,20 @@ class TestValidateArk(unittest.TestCase):
             mds.validate_ark("ark:99999CAMA-test")
 
 
+class TestCompactView(unittest.TestCase)
+    def test_compact_vew(self):
+        pass
+
+    def test_user_compact_view(self):
+        pass
+
+    def test_software_compact_view(self):
+        pass
+
+    def test_dataset_compact_view(self):
+        pass
+
+
+
 if __name__ == "__main__":
     unittest.main()

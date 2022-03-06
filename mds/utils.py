@@ -1,5 +1,6 @@
+from pydantic import BaseModel, validator, Field, EmailStr
+from typing import Literal
 import re
-from pydantic import BaseModel, validator, Field
 
 def validate_ark(guid: str) -> str:
 
@@ -23,3 +24,20 @@ class CompactView(BaseModel):
 	type: Field(str, alias="@type")
 	name: str
 	_validate_guid = validator('id', allow_reuse=True)(validate_ark)
+
+
+class UserCompactView(CompactView):
+	type: Field(str, alias="@type") = Literal["Person"]
+	email: EmailStr  # requires installation of module email-validator
+
+
+class SoftwareCompactView(CompactView):
+	type: Field(str, alias="@type") = Literal["evi:Software"]
+
+
+class DatasetCompactView(CompactView):
+	type: Field(str, alias="@type") = Literal["evi:Dataset"]
+
+
+
+
