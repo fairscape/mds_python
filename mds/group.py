@@ -4,7 +4,6 @@ from mds.utils import FairscapeBaseModel, UserCompactView
 
 
 class Group(FairscapeBaseModel, extra=Extra.allow):
-    id: str
-    name: str
+    type: Literal["Organization"]
     owner: UserCompactView
     members: List[UserCompactView]

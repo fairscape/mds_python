@@ -4,7 +4,7 @@ from mds.utils import FairscapeBaseModel, OrganizationCompactView, ProjectCompac
 
 
 class User(FairscapeBaseModel, extra=Extra.allow):
-    type: Literal['Person']
+    type: Literal["Person"]
     email: EmailStr  # requires installation of module email-validator
     password: str
     is_admin: bool
