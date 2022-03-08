@@ -1,5 +1,5 @@
 from pydantic import Extra
-from typing import List
+from typing import List, Literal
 from mds.utils import FairscapeBaseModel, UserCompactView
 
 
