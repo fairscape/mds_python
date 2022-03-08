@@ -5,8 +5,6 @@ from mds.utils import FairscapeBaseModel, OrganizationCompactView, UserCompactVi
 
 
 class Computation(FairscapeBaseModel, extra=Extra.allow):
-    id: str
-    name: str
     owner: UserCompactView
     author: str
     dateCreated: date
