@@ -1,15 +1,21 @@
-from pydantic import BaseModel, Extra, validator, ValidationError, root_validator
-from typing import List
-from mds import UserView
+from pydantic import  Extra
+from typing import List, Literal, Union
+from mds.utils import FairscapeBaseModel, UserCompactView, ComputationCompactView
 
 
-class Software(BaseModel, extra=Extra.allow):
-    id: str
-    name: str
-    owner: UserView
-    author: str
+class Software(FairscapeBaseModel, extra=Extra.allow):
+    type: Literal["evi:Software"]
+    owner: UserCompactView
+    author: Union[str, UserCompactView]
     downloadUrl: str
     citation: str
-    # evi:usedBy: List[Computation]
+    usedBy: List[ComputationCompactView]
+
+    class Config:
+        fields = {
+            "usedBy": {
+                "alias": "evi:usedBy"
+            }
+        }
 
 

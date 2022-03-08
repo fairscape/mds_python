@@ -19,7 +19,7 @@ def validate_ark(guid: str) -> str:
 	return guid
 
 
-class CompactView(BaseModel):
+class FairscapeBaseModel(BaseModel):
 	id:   str 
 	type: str
 	name: str
@@ -44,35 +44,26 @@ class CompactView(BaseModel):
 	_validate_guid = validator('id', allow_reuse=True)(validate_ark)
 
 
-
-
-class UserCompactView(CompactView):
+class UserCompactView(FairscapeBaseModel):
 	type: Literal["Person"]
 	email: EmailStr  
 
-	# Haven't figured out how to default values
-	# This only works for optional values
-	# i.e. Optional[str]
-	#@validator("type", pre=True, always=True)
-	#def set_type(cls, type):
-	#	return type or "Person"
 
-	#class Config:
-	#	fields = {
-	#		"type": {
-	#			"default": "Person"
-	#		}
-	#	}
-
-	
-
-
-class SoftwareCompactView(CompactView):
+class SoftwareCompactView(FairscapeBaseModel):
 	type: Literal["evi:Software"] 
 
 
-class DatasetCompactView(CompactView):
+class DatasetCompactView(FairscapeBaseModel):
 	type: Literal["evi:Dataset"] 
+
+
+class OrganizationCompactView(FairscapeBaseModel):
+	type: Literal["Organization"]
+
+
+class ComputationCompactView(FairscapeBaseModel):
+	type: Literal["evi:Computation"]
+
 
 
 

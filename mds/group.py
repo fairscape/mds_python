@@ -1,12 +1,10 @@
-from pydantic import BaseModel, Extra, validator, Field
+from pydantic import Extra
 from typing import List
-from .utils import validate_ark, UserCompactView
+from mds.utils import FairscapeBaseModel, UserCompactView
 
 
-class Group(BaseModel, extra=Extra.allow):
+class Group(FairscapeBaseModel, extra=Extra.allow):
     id: str
     name: str
     owner: UserCompactView
     members: List[UserCompactView]
-
-    _validate_guid = validator('id', allow_reuse=True)(validate_ark)
