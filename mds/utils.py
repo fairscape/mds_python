@@ -1,5 +1,5 @@
 from pydantic import BaseModel, validator, Field, EmailStr
-from typing import Literal
+from typing import Literal, Optional
 import re
 
 def validate_ark(guid: str) -> str:
@@ -20,23 +20,59 @@ def validate_ark(guid: str) -> str:
 
 
 class CompactView(BaseModel):
-	id: Field(str, alias="@id")
-	type: Field(str, alias="@type")
+	id:   str 
+	type: str
 	name: str
+
+	class Config:
+		allow_population_by_field_name = True
+		validate_assignment = True
+		fields = {
+			"id": {
+				"title": "id",
+				"alias": "@id",
+				},
+			"type": {
+				"title": "type",
+				"alias": "@type",
+			},
+			"name": {
+				"title": "name",
+			}
+		}
+
 	_validate_guid = validator('id', allow_reuse=True)(validate_ark)
 
 
+
+
 class UserCompactView(CompactView):
-	type: Field(str, alias="@type") = Literal["Person"]
-	email: EmailStr  # requires installation of module email-validator
+	type: Literal["Person"]
+	email: EmailStr  
+
+	# Haven't figured out how to default values
+	# This only works for optional values
+	# i.e. Optional[str]
+	#@validator("type", pre=True, always=True)
+	#def set_type(cls, type):
+	#	return type or "Person"
+
+	#class Config:
+	#	fields = {
+	#		"type": {
+	#			"default": "Person"
+	#		}
+	#	}
+
+	
 
 
 class SoftwareCompactView(CompactView):
-	type: Field(str, alias="@type") = Literal["evi:Software"]
+	type: Literal["evi:Software"] 
 
 
 class DatasetCompactView(CompactView):
-	type: Field(str, alias="@type") = Literal["evi:Dataset"]
+	type: Literal["evi:Dataset"] 
 
 
 
