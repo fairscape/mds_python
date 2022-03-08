@@ -1,1 +1,1 @@
-__all__ = [".group", ".computation", ".mongo", ".software", ".user", ".utils"]
+__all__ = ["group", "computation", "mongo", "software", "user", "utils"]
