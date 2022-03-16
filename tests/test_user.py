@@ -82,7 +82,7 @@ class TestUserCRUD(unittest.TestCase):
     def test_user_read(self):
         test_user = mds.User.construct(
             _fields_set={"id"}, 
-            **{"@id": self.test_data["@id"]}
+            **{"@id": self.user_data["@id"]}
             )
 
         test_user.read(self.test_collection)

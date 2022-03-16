@@ -32,7 +32,7 @@ class User(FairscapeBaseModel, extra=Extra.allow):
             else:
                 return (False, "", 200)
 
-        except pymongo.errors.ConnectionError as e:
+        except pymongo.errors.ConnectionFailure as e:
             return (False, f"MongoConnectionError: {str(e)}", 500)
 
         # catch all exceptions
