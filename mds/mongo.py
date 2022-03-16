@@ -11,5 +11,5 @@ class MongoConfig():
 
 
 	def connect(self) -> pymongo.MongoClient: 
-		connection_uri = f"mongodb://{quote_plus(self.user)}:" + f"{quote_plus(self.password)}@{self.host}:{str(self.port)}"
+		connection_uri = f"mongodb://{quote_plus(self.user)}:" + f"{quote_plus(self.password)}@{self.host_uri}:{str(self.port)}"
 		return pymongo.MongoClient(connection_uri)

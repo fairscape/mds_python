@@ -1,15 +1,18 @@
 from pydantic import Extra
-from typing import List, Union, Computation
-from pydantic.types import date
+from typing import List, Union, Literal
+from datetime import datetime
 from mds.utils import FairscapeBaseModel, OrganizationCompactView, UserCompactView, SoftwareCompactView, DatasetCompactView
 
 
-class Computation(FairscapeBaseModel, extra=Extra.allow):
+class Computation(FairscapeBaseModel):
     type: Literal["evi:Computation"]
     owner: UserCompactView
     author: str
-    dateCreated: date
-    dateFinished: date
+    dateCreated: datetime
+    dateFinished: datetime
     associatedWith: List[Union[OrganizationCompactView, UserCompactView]]
     usedSoftware: List[SoftwareCompactView]
     usedDataset: List[DatasetCompactView]
+
+    class Config:
+        extra = Extra.allow
