@@ -65,6 +65,9 @@ class ComputationCompactView(FairscapeBaseModel):
 	type: Literal["evi:Computation"]
 
 
+class ProjectCompactView(FairscapeBaseModel):
+	type: Literal["Project"]
+
 
 
 

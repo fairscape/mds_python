@@ -52,7 +52,7 @@ class TestCompactView(unittest.TestCase):
             "name": "Test Dataset"
             } 
 
-        cv = CompactView(
+        cv = FairscapeBaseModel(
             id=test_data["@id"],
             type=test_data["@type"],
             name=test_data["name"]
