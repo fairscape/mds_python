@@ -20,14 +20,16 @@ class TestMongoConfig(unittest.TestCase):
 		# 	container.name
 		pass
 
+	def test_client_creation(self):
+
+		client = MongoConfig().connect()
+		pass
 
 	def test_connection_local(self):
 		# make sure connection exists and can be reached
 		client = MongoConfig().connect()
 		client.ping()
 
-	def test_client_creation(self):
-		pass
 
 	def tearDown(self):
 		pass
