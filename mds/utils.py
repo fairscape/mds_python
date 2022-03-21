@@ -1,6 +1,8 @@
-from pydantic import BaseModel, validator, Field, EmailStr
-from typing import Literal, Optional
 import re
+from typing import Literal
+
+from pydantic import BaseModel, validator, EmailStr
+
 
 def validate_ark(guid: str) -> str:
 
@@ -69,5 +71,15 @@ class ProjectCompactView(FairscapeBaseModel):
 	type: Literal["Project"]
 
 
+class EvidenceGraphCompactView(FairscapeBaseModel):
+	type: Literal["evi:EvidenceGraph"]
+	#graph: str
 
+	#class Config:
+	#	fields = {
+	#		"graph": {
+	#			"title": "graph",
+	#			"alias": "@graph"
+	#		}
+	#	}
 

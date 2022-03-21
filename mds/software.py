@@ -1,4 +1,4 @@
-from pydantic import  Extra
+from pydantic import Extra
 from typing import List, Literal, Union
 from mds.utils import FairscapeBaseModel, UserCompactView, ComputationCompactView
 
@@ -18,5 +18,3 @@ class Software(FairscapeBaseModel):
                 "alias": "evi:usedBy"
             }
         }
-
-

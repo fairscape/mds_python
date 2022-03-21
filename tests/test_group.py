@@ -35,21 +35,24 @@ class TestUserView(unittest.TestCase):
 class TestGroup(unittest.TestCase):
 
     def test_group_initilization(self):
-        owner = mds.UserView(
+        owner = mds.utils.UserCompactView(
             id="ark:99999/testowner",
             name="test owner",
+            type="Person",
             email="testowner@example.org"
         )
         self.assertEqual(owner.id, "ark:99999/testowner")
 
-        member = mds.UserView(
+        member = mds.utils.UserCompactView(
             id="ark:99999/testuser1",
             name="test user1",
+            type="Person",
             email="testuser1@example.org"
         )
         grp = mds.Group(
             id="ark:99999/CAMA-users",
             name="Cama Users",
+            type="Organization",
             owner=owner,
             members=[member]
         )

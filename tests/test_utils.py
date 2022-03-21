@@ -1,9 +1,9 @@
 import os
 import sys
 import unittest
+from mds.utils import *
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from mds.utils import *
 
 
 class TestValidateArk(unittest.TestCase):
@@ -42,21 +42,21 @@ class TestValidateArk(unittest.TestCase):
             validate_ark("ark:99999CAMA-test")
 
 
-class TestCompactView(unittest.TestCase): 
+class TestCompactView(unittest.TestCase):
     test_ark = "ark:99999/valid_test"
 
     def test_compact_vew(self):
         test_data = {
-            "@id": "ark:99999/valid_test", 
-            "@type": "Dataset", 
+            "@id": "ark:99999/valid_test",
+            "@type": "Dataset",
             "name": "Test Dataset"
-            } 
+        }
 
         cv = FairscapeBaseModel(
             id=test_data["@id"],
             type=test_data["@type"],
             name=test_data["name"]
-            )
+        )
 
         self.assertDictEqual(cv.dict(by_alias=True), test_data)
 
@@ -70,12 +70,11 @@ class TestUserCompactView(unittest.TestCase):
     }
 
     def test_basic(self):
-
         user_cv = UserCompactView(
-            id    = self.test_data["@id"],
-            type  = self.test_data["@type"],
-            name  = self.test_data["name"],
-            email = self.test_data["email"]
+            id=self.test_data["@id"],
+            type=self.test_data["@type"],
+            name=self.test_data["name"],
+            email=self.test_data["email"]
         )
 
         self.assertDictEqual(user_cv.dict(by_alias=True), self.test_data)
@@ -83,10 +82,10 @@ class TestUserCompactView(unittest.TestCase):
     def test_missing(self):
         # If you forget to assign a value it won't default like expected
 
-        cv_default = CompactView(
-            id    = self.test_data["@id"],
-            name  = self.test_data["name"],
-            email = self.test_data["email"]
+        cv_default = FairscapeBaseModel(
+            id=self.test_data["@id"],
+            name=self.test_data["name"],
+            email=self.test_data["email"]
         )
 
         print(cv_default.json(by_alias=True))
@@ -95,12 +94,11 @@ class TestUserCompactView(unittest.TestCase):
         self.assertDictEqual(cv_default.dict(by_alias=True), self.test_data)
 
     def test_without_validation(self):
-
         user_cv = UserCompactView(
-            id    = self.test_data["@id"],
-            type  = self.test_data["@type"],
-            name  = self.test_data["name"],
-            email = self.test_data["email"]
+            id=self.test_data["@id"],
+            type=self.test_data["@type"],
+            name=self.test_data["name"],
+            email=self.test_data["email"]
         )
 
         fields_set = user_cv.__fields_set__
@@ -113,7 +111,6 @@ class TestUserCompactView(unittest.TestCase):
 class TestSoftwareCompactView(unittest.TestCase):
 
     def test_software_compact_view(self):
-
         test_data = {
             "@id": "ark:99999/valid_user",
             "@type": "evi:Software",
@@ -121,9 +118,9 @@ class TestSoftwareCompactView(unittest.TestCase):
         }
 
         software_cv = SoftwareCompactView(
-            id = test_data["@id"],
-            type = test_data["@type"],
-            name = test_data["name"]
+            id=test_data["@id"],
+            type=test_data["@type"],
+            name=test_data["name"]
         )
 
         self.assertDictEqual(software_cv.dict(by_alias=True), test_data)
@@ -139,13 +136,12 @@ class TestDatasetCompactView(unittest.TestCase):
         }
 
         dataset_cv = DatasetCompactView(
-            id = test_data["@id"],
-            type = test_data["@type"],
-            name = test_data["name"]
+            id=test_data["@id"],
+            type=test_data["@type"],
+            name=test_data["name"]
         )
 
         self.assertDictEqual(dataset_cv.dict(by_alias=True), test_data)
-
 
 
 if __name__ == "__main__":
