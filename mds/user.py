@@ -15,7 +15,7 @@ class User(FairscapeBaseModel, extra=Extra.allow):
     software: List[SoftwareCompactView]
     computations: List[ComputationCompactView]
 
-  
+
     def create(self, MongoCollection: pymongo.collection.Collection) -> Tuple[bool, str, int]: 
 
         # creating a new user we must set their owned objects to none
@@ -24,38 +24,40 @@ class User(FairscapeBaseModel, extra=Extra.allow):
         self.software = []
         self.computations = []
 
+        # check if the user already exists in the database
+        if MongoCollection.find_one({"@id": self.id}):
+            return (False, "document already exists", 400)
+
         try: 
-            create_request = MongoCollection.insert_one(self.json(by_alias=True))
+            create_request = MongoCollection.insert_one(self.dict(by_alias=True))
 
             if create_request.acknowledged:
                 return (True, "", 200)
             else:
-                return (False, "", 200)
+                return (False, "", 400)
+
+
+        except pymongo.errors.DuplicateKeyError as e:
+            return (False, f"DuplicateKeyError: {str(e)}", 400)
+        
+        except pymongo.errors.WriteError as e:
+            return (False, f"MongoWriteError: {str(e)}", 500)
 
         except pymongo.errors.ConnectionFailure as e:
             return (False, f"MongoConnectionError: {str(e)}", 500)
 
         # catch all exceptions
         except Exception as e:
-            return (False, f"Error: {str(e)}", 400)
+            return (False, f"Error: {str(e)}", 500)
 
 
     def read(self, MongoCollection) -> Tuple[bool, str, int]:
 
         try: 
-            query = test_collection.find_one(
-                {"@id": test_data["@id"]}, 
+            query = MongoCollection.find_one(
+                {"@id": self.id}, 
                 projection={"_id": False}
                 )
-            
-        except pymongo.errors.ConnectionFailure as e:
-            return (False, f"MongoConnectionError: {str(e)}", 500)
-
-        # catch all exceptions
-        except Exception as e:
-            return (False, f"Undetermined Error: {e}", 400)
-
-        else:
 
             # check that the results are not empty
             if query:
@@ -65,14 +67,51 @@ class User(FairscapeBaseModel, extra=Extra.allow):
                 return (True, "", 200)
 
             else:
-                return (False, "No record found", 404)
+                return (False, "no record found", 404)
+            
+        except pymongo.errors.ConnectionFailure as e:
+            return (False, f"MongoConnectionError: {str(e)}", 500)
 
 
-    def delete(self, MongoCollection) -> Tuple[bool, str]:
-        pass
+        except pymongo.errors.ExecutionTimeout as e:
+            return (False, f"MongoExecutionTimeoutError: {str(e)}", 500)
 
-    def update(self, MongoCollection) -> Tuple[bool, str]:
-        pass
+
+        # catch all exceptions
+        except Exception as e:
+            return (False, f"Undetermined Error: {e}", 500)
+
+
+    def delete(self, MongoCollection) -> Tuple[bool, str, int]:
+
+
+        full_user_query = MongoCollection.find_one({"@id": self.id}) 
+
+        # make sure the user exists
+        if full_user_query == None:
+            return (False, "User not Found", 404)
+
+        # check that user doesn't have any owned objects
+        if MongoCollection.find_one({"owner": self.id}):
+            return (False, "Cannot Delete User with Owned Objects", 400)
+
+        # delete 
+        MongoCollection.delete_one({"@id": self.id})
+        return (True, "", 200)
+
+
+    def update(self, MongoCollection) -> Tuple[bool, str, int]:
+ 
+        new_values = {
+            "$set":  {k: value for k,value in self.dict() if value != None}
+        }
+
+        result = MongoCollection.update_one({"@id": self.id}, new_values)
+
+        return (True, "", 200)
+
+
+
 
 
 
