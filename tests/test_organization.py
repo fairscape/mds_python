@@ -23,12 +23,24 @@ class TestDataset(unittest.TestCase):
             email="testuser1@example.org"
         )
 
+        test_data = {
+            "@id": "ark:99999/valid_project",
+            "@type": "Project",
+            "name": "Test Project"
+        }
+
+        project_cv = mds.utils.ProjectCompactView(
+            id=test_data["@id"],
+            type=test_data["@type"],
+            name=test_data["name"]
+        )
+
         mds.Organization(
             id="ark:99999/UVA",
             name="An organization",
             type="Organization",
             owner=owner_inst1,
-            projects=[]
+            projects=[project_cv]
         )
 
 

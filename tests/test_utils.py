@@ -42,6 +42,28 @@ class TestValidateArk(unittest.TestCase):
             validate_ark("ark:99999CAMA-test")
 
 
+class TestValidateEmail(unittest.TestCase):
+    def test_validate_email_missing_username(self):
+        with self.assertRaises(ValueError):
+            validate_email("@example.com")
+
+    def test_validate_email_missing_domain(self):
+        with self.assertRaises(ValueError):
+            validate_ark("someone@")
+
+    def test_validate_email_missing_at_symbol(self):
+        with self.assertRaises(ValueError):
+            validate_ark("usernameexample.com")
+
+    def test_validate_email_missing_dot_symbol(self):
+        with self.assertRaises(ValueError):
+            validate_ark("username@examplecom")
+
+    def test_validate_email_complete(self):
+        with self.assertRaises(ValueError):
+            validate_ark("lastname.firstname@subdomain.domain.com")
+
+
 class TestCompactView(unittest.TestCase):
     test_ark = "ark:99999/valid_test"
 
@@ -142,6 +164,96 @@ class TestDatasetCompactView(unittest.TestCase):
         )
 
         self.assertDictEqual(dataset_cv.dict(by_alias=True), test_data)
+
+
+class TestComputationCompactView(unittest.TestCase):
+
+    def test_computation_compact_view(self):
+        test_data = {
+            "@id": "ark:99999/valid_computation",
+            "@type": "evi:Computation",
+            "name": "Test Computation"
+        }
+
+        computation_cv = ComputationCompactView(
+            id=test_data["@id"],
+            type=test_data["@type"],
+            name=test_data["name"]
+        )
+
+        self.assertDictEqual(computation_cv.dict(by_alias=True), test_data)
+
+
+class TestEvidenceGraphCompactView(unittest.TestCase):
+
+    def test_evidencegraph_compact_view(self):
+        test_data = {
+            "@id": "ark:99999/valid_evidencegraph",
+            "@type": "evi:EvidenceGraph",
+            "name": "Test EvidenceGraph"
+        }
+
+        evidencegraph_cv = EvidenceGraphCompactView(
+            id=test_data["@id"],
+            type=test_data["@type"],
+            name=test_data["name"]
+        )
+
+        self.assertDictEqual(evidencegraph_cv.dict(by_alias=True), test_data)
+
+
+class TestOrganizationCompactView(unittest.TestCase):
+
+    def test_organization_compact_view(self):
+        test_data = {
+            "@id": "ark:99999/valid_organization",
+            "@type": "Organization",
+            "name": "Test Organization"
+        }
+
+        organization_cv = OrganizationCompactView(
+            id=test_data["@id"],
+            type=test_data["@type"],
+            name=test_data["name"]
+        )
+
+        self.assertDictEqual(organization_cv.dict(by_alias=True), test_data)
+
+
+class TestProjectCompactView(unittest.TestCase):
+
+    def test_project_compact_view(self):
+        test_data = {
+            "@id": "ark:99999/valid_project",
+            "@type": "Project",
+            "name": "Test Project"
+        }
+
+        project_cv = ProjectCompactView(
+            id=test_data["@id"],
+            type=test_data["@type"],
+            name=test_data["name"]
+        )
+
+        self.assertDictEqual(project_cv.dict(by_alias=True), test_data)
+
+
+class TestDataDownloadCompactView(unittest.TestCase):
+
+    def test_project_compact_view(self):
+        test_data = {
+            "@id": "ark:99999/valid_downloadable_data",
+            "@type": "DataDownload",
+            "name": "A dataset in downloadable form."
+        }
+
+        datadownload_cv = DataDownloadCompactView(
+            id=test_data["@id"],
+            type=test_data["@type"],
+            name=test_data["name"]
+        )
+
+        self.assertDictEqual(datadownload_cv.dict(by_alias=True), test_data)
 
 
 if __name__ == "__main__":

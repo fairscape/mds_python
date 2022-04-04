@@ -1,12 +1,12 @@
 from typing import List, Literal, Tuple
-from pydantic import EmailStr, Extra
+from pydantic import Extra
 from mds.utils import FairscapeBaseModel, OrganizationCompactView, ProjectCompactView, DatasetCompactView, SoftwareCompactView, ComputationCompactView
 import pymongo
 
 
 class User(FairscapeBaseModel, extra=Extra.allow):
     type: Literal["Person"]
-    email: EmailStr  # requires installation of module email-validator
+    email: str
     password: str
     is_admin: bool
     organizations: List[OrganizationCompactView]

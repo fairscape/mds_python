@@ -1,4 +1,4 @@
-from typing import Literal, List, Union
+from typing import Literal, List
 from mds.utils import FairscapeBaseModel, UserCompactView, ProjectCompactView
 
 

@@ -1,7 +1,7 @@
 import unittest
 
 import mds
-
+from datetime import datetime
 
 # import os, sys
 # sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -23,17 +23,41 @@ class TestDataset(unittest.TestCase):
             email="testuser1@example.org"
         )
 
+        test_data = {
+            "@id": "ark:99999/valid_project",
+            "@type": "Project",
+            "name": "Test Project"
+        }
+
+        project_cv = mds.utils.ProjectCompactView(
+            id=test_data["@id"],
+            type=test_data["@type"],
+            name=test_data["name"]
+        )
+
+        test_data = {
+            "@id": "ark:99999/valid_organization",
+            "@type": "Organization",
+            "name": "Test Organization"
+        }
+
+        organization_cv = mds.utils.OrganizationCompactView(
+            id=test_data["@id"],
+            type=test_data["@type"],
+            name=test_data["name"]
+        )
+
         mds.Dataset(
             id="ark:99999/CAMA-users",
             name="A demo dataset",
             type="evi:Dataset",
             owner=owner_inst1,
-            #includedInDataCatalog=,
-            #sourceOrganization=,
+            includedInDataCatalog=project_cv,
+            sourceOrganization=organization_cv,
             distribution="csv",
             author=user,
-            dateCreated="2022-02-15 09:26:03",
-            dateModified="2022-02-15 09:30:03"
+            dateCreated=datetime(2022, 2, 15, 9, 26, 3),
+            dateModified=datetime(2022, 2, 15, 9, 30, 12),
         )
 
 

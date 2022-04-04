@@ -1,4 +1,6 @@
 import unittest
+from datetime import datetime
+
 import mds
 
 
@@ -16,34 +18,28 @@ class TestComputation(unittest.TestCase):
         )
         self.assertEqual(owner_inst1.id, "ark:99999/testowner1")
 
-        owner_inst2 = mds.utils.UserCompactView(
-            id="ark:99999/testowner2",
-            name="test owner2",
-            type="Person",
-            email="testowner2@example.org"
-        )
-        self.assertEqual(owner_inst2.id, "ark:99999/testowner2")
+        test_data = {
+            "@id": "ark:99999/valid_user",
+            "@type": "evi:Software",
+            "name": "Test Software"
+        }
 
-        software_inst1 = mds.Software(
-            id="ark:99999/CAMA-users",
-            name="john doe",
-            type="evi:Software",
-            owner=owner_inst1,
-            author="author1",
-            downloadUrl="ark:99999/downloaddir/thisfile",
-            citation="doi://blabla",
-            usedBy=[]
+        software_cv = mds.utils.SoftwareCompactView(
+            id=test_data["@id"],
+            type=test_data["@type"],
+            name=test_data["name"]
         )
-        comp = mds.Computation(
+
+        mds.Computation(
             id="ark:99999/CAMA-users",
             name="john doe",
             type="evi:Computation",
-            owner=owner_inst2,
+            owner=owner_inst1,
             author="author1",
-            dateCreated="2022-02-15 09:26:03",
-            dateFinished="2022-02-15 09:30:03",
+            dateCreated=datetime(2022, 2, 15, 9, 26, 3),
+            dateFinished=datetime(2022, 2, 15, 9, 30, 3),
             associatedWith=[],
-            usedSoftware=[software_inst1],
+            usedSoftware=[software_cv],
             usedDataset=[]
         )
 

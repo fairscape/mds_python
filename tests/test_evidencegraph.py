@@ -15,7 +15,8 @@ class TestEvidenceGraph(unittest.TestCase):
             email="testowner1@example.org"
         )
         self.assertEqual(owner_inst1.id, "ark:99999/testowner1")
-        eg = mds.EvidenceGraph(
+
+        mds.EvidenceGraph(
             id="ark:99999/CAMA-users",
             name="a demo evidencegraph",
             type="evi:EvidenceGraph",

@@ -6,8 +6,8 @@ from mds.utils import FairscapeBaseModel, UserCompactView, ProjectCompactView, O
 class Dataset(FairscapeBaseModel):
     type: Literal["evi:Dataset"]
     owner: UserCompactView
-    #includedInDataCatalog: ProjectCompactView
-    #sourceOrganization: OrganizationCompactView
+    includedInDataCatalog: ProjectCompactView
+    sourceOrganization: OrganizationCompactView
     distribution: str
     author: Union[str, UserCompactView]
     dateCreated: datetime

@@ -1,7 +1,8 @@
 from pydantic import Extra
 from typing import List, Union, Literal
 from datetime import datetime
-from mds.utils import FairscapeBaseModel, OrganizationCompactView, UserCompactView, SoftwareCompactView, DatasetCompactView
+from mds.utils import FairscapeBaseModel, OrganizationCompactView, UserCompactView, SoftwareCompactView, \
+    DatasetCompactView
 
 
 class Computation(FairscapeBaseModel):

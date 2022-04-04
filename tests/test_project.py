@@ -1,7 +1,5 @@
 import unittest
-from datetime import datetime
 import mds
-
 
 # import os, sys
 # sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -26,64 +24,66 @@ class TestProject(unittest.TestCase):
         )
         self.assertEqual(owner_inst2.id, "ark:99999/testowner2")
 
-        software_inst1 = mds.Software(
-            id="ark:99999/CAMA-users",
-            name="john doe",
-            type="evi:Software",
-            owner=owner_inst1,
-            author="author1",
-            downloadUrl="ark:99999/downloaddir/thisfile",
-            citation="doi://blabla",
-            usedBy=[]
-        )
-        computation = mds.Computation(
-            id="ark:99999/CAMA-users",
-            name="john doe",
-            type="evi:Computation",
-            owner=owner_inst2,
-            author="author1",
-            dateCreated=datetime(2022, 2, 15, 9, 26, 30, 342380),
-            dateFinished=datetime(2022, 2, 15, 9, 30, 3, 342380),
-            associatedWith=[],
-            usedSoftware=[software_inst1],
-            usedDataset=[]
+
+
+        test_data = {
+            "@id": "ark:99999/valid_dataset",
+            "@type": "evi:Dataset",
+            "name": "Test Dataset"
+        }
+
+        dataset_cv = mds.utils.DatasetCompactView(
+            id=test_data["@id"],
+            type=test_data["@type"],
+            name=test_data["name"]
         )
 
-        user = mds.utils.UserCompactView(
-            id="ark:99999/testuser1",
-            name="test user1",
-            type="Person",
-            email="testuser1@example.org"
+        test_data = {
+            "@id": "ark:99999/valid_user",
+            "@type": "evi:Software",
+            "name": "Test Software"
+        }
+
+        software_cv = mds.utils.SoftwareCompactView(
+            id=test_data["@id"],
+            type=test_data["@type"],
+            name=test_data["name"]
         )
 
-        ds = mds.Dataset(
-            id="ark:99999/CAMA-users",
-            name="A demo dataset",
-            type="evi:Dataset",
-            owner=owner_inst1,
-            #includedInDataCatalog=,
-            #sourceOrganization=,
-            distribution="csv",
-            author=user,
-            dateCreated=datetime(2022, 2, 15, 9, 26, 30),
-            dateModified=datetime(2022, 2, 16, 9, 26, 30, 342380),
+        test_data = {
+            "@id": "ark:99999/valid_computation",
+            "@type": "evi:Computation",
+            "name": "Test Computation"
+        }
+
+        computation_cv = mds.utils.ComputationCompactView(
+            id=test_data["@id"],
+            type=test_data["@type"],
+            name=test_data["name"]
         )
-        eg = mds.EvidenceGraph(
-            id="ark:99999/CAMA-users",
-            name="a demo evidencegraph",
-            type="evi:EvidenceGraph",
-            owner=owner_inst1,
-            graph=""
+
+        test_data = {
+            "@id": "ark:99999/valid_evidencegraph",
+            "@type": "evi:EvidenceGraph",
+            "name": "Test EvidenceGraph"
+        }
+
+        evidencegraph_cv = mds.utils.EvidenceGraphCompactView(
+            id=test_data["@id"],
+            type=test_data["@type"],
+            name=test_data["name"]
         )
+
+
         mds.Project(
             id="ark:99999/Fairscape",
             name="Fairscepe project",
             type="Project",
             owner=owner_inst1,
-            datasets=[ds],
-            computations=[computation],
-            software=[software_inst1],
-            evidencegraphs=[eg]
+            datasets=[dataset_cv],
+            computations=[computation_cv],
+            software=[software_cv],
+            evidencegraphs=[evidencegraph_cv]
         )
 
 

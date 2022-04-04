@@ -1,5 +1,6 @@
-from typing import Literal, List, Union
-from mds.utils import FairscapeBaseModel, UserCompactView, DatasetCompactView, ComputationCompactView, SoftwareCompactView, EvidenceGraphCompactView
+from typing import Literal, List
+from mds.utils import FairscapeBaseModel, UserCompactView, DatasetCompactView, ComputationCompactView, \
+    SoftwareCompactView, EvidenceGraphCompactView
 
 
 class Project(FairscapeBaseModel):
@@ -9,4 +10,3 @@ class Project(FairscapeBaseModel):
     computations: List[ComputationCompactView]
     software: List[SoftwareCompactView]
     evidencegraphs: List[EvidenceGraphCompactView]
-

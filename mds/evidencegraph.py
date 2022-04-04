@@ -1,6 +1,8 @@
-from pydantic import Extra
 from typing import Literal
-from mds.utils import FairscapeBaseModel, UserCompactView, EvidenceGraphCompactView
+
+from pydantic import Extra
+
+from mds.utils import FairscapeBaseModel, UserCompactView
 
 
 class EvidenceGraph(FairscapeBaseModel):
