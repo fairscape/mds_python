@@ -1,6 +1,6 @@
 from typing import List, Literal, Tuple
 from pydantic import EmailStr, Extra
-from mds.utils import FairscapeBaseModel, OrganizationCompactView, ProjectCompactView, DatasetCompactView, SoftwareCompactView, ComputationCompactView
+from mds.utils import FairscapeBaseModel, OrganizationCompactView, ProjectCompactView, DatasetCompactView, SoftwareCompactView, ComputationCompactView, OperationStatus
 import pymongo
 
 
@@ -16,7 +16,7 @@ class User(FairscapeBaseModel, extra=Extra.allow):
     computations: List[ComputationCompactView]
 
 
-    def create(self, MongoCollection: pymongo.collection.Collection) -> Tuple[bool, str, int]: 
+    def create(self, MongoCollection: pymongo.collection.Collection) -> OperationStatus: 
 
         # creating a new user we must set their owned objects to none
         self.projects = []
@@ -24,93 +24,51 @@ class User(FairscapeBaseModel, extra=Extra.allow):
         self.software = []
         self.computations = []
 
-        # check if the user already exists in the database
-        if MongoCollection.find_one({"@id": self.id}):
-            return (False, "document already exists", 400)
-
-        try: 
-            create_request = MongoCollection.insert_one(self.dict(by_alias=True))
-
-            if create_request.acknowledged:
-                return (True, "", 200)
-            else:
-                return (False, "", 400)
+        return super().create(MongoCollection)
 
 
-        except pymongo.errors.DuplicateKeyError as e:
-            return (False, f"DuplicateKeyError: {str(e)}", 400)
-        
-        except pymongo.errors.WriteError as e:
-            return (False, f"MongoWriteError: {str(e)}", 500)
-
-        except pymongo.errors.ConnectionFailure as e:
-            return (False, f"MongoConnectionError: {str(e)}", 500)
-
-        # catch all exceptions
-        except Exception as e:
-            return (False, f"Error: {str(e)}", 500)
+    def read(self, MongoCollection: pymongo.collection.Collection) -> OperationStatus:
+        return super().read(MongoCollection)
 
 
-    def read(self, MongoCollection) -> Tuple[bool, str, int]:
-
-        try: 
-            query = MongoCollection.find_one(
-                {"@id": self.id}, 
-                projection={"_id": False}
-                )
-
-            # check that the results are not empty
-            if query:
-                # update class with values from database
-                for key, value in query.items():
-                    setattr(self, key, value)
-                return (True, "", 200)
-
-            else:
-                return (False, "no record found", 404)
-            
-        except pymongo.errors.ConnectionFailure as e:
-            return (False, f"MongoConnectionError: {str(e)}", 500)
+    def delete(self, MongoCollection: pymongo.collection.Collection) -> OperationStatus:
+        return super().delete(MongoCollection)
 
 
-        except pymongo.errors.ExecutionTimeout as e:
-            return (False, f"MongoExecutionTimeoutError: {str(e)}", 500)
-
-
-        # catch all exceptions
-        except Exception as e:
-            return (False, f"Undetermined Error: {e}", 500)
-
-
-    def delete(self, MongoCollection) -> Tuple[bool, str, int]:
-
-
-        full_user_query = MongoCollection.find_one({"@id": self.id}) 
-
-        # make sure the user exists
-        if full_user_query == None:
-            return (False, "User not Found", 404)
-
-        # check that user doesn't have any owned objects
-        if MongoCollection.find_one({"owner": self.id}):
-            return (False, "Cannot Delete User with Owned Objects", 400)
-
-        # delete 
-        MongoCollection.delete_one({"@id": self.id})
-        return (True, "", 200)
-
-
-    def update(self, MongoCollection) -> Tuple[bool, str, int]:
+    def update(self, MongoCollection: pymongo.collection.Collection) -> OperationStatus: 
+        return super().update()
  
-        new_values = {
-            "$set":  {k: value for k,value in self.dict() if value != None}
-        }
 
-        result = MongoCollection.update_one({"@id": self.id}, new_values)
-
-        return (True, "", 200)
+    def addProject(self, MongoCollection: pymongo.collection.Collection, Project: ProjectCompactView):
+        return self.update_append(MongoCollection, "projects", Project)
 
 
+    def removeProject(self, MongoCollection: pymongo.collection.Collection, Project: ProjectCompactView):
+        return self.update_remove(MongoCollection, "projects", Project)
+
+
+    def addDataset(self, MongoCollection: pymongo.collection.Collection, Dataset: DatasetCompactView):
+        return self.update_append(MongoCollection, "datasets", Dataset)
+
+
+    def removeDataset(self, MongoCollection: pymongo.collection.Collection, Dataset: DatasetCompactView):
+        return self.update_remove(MongoCollection, "datasets", Dataset)
+
+
+    def addSoftware(self, MongoCollection: pymongo.collection.Collection, Software: SoftwareCompactView):
+        return self.update_append(MongoCollection, "datasets", Software)
+
+
+    def removeSoftware(self, MongoCollection: pymongo.collection.Collection, Software: SoftwareCompactView):
+        return self.update_remove(MongoCollection, "datasets", Software)
+
+
+    def addComputation(self, MongoCollection: pymongo.collection.Collection, Computation: ComputationCompactView):
+        return self.update_append(MongoCollection, "computations", Computation)
+
+
+    def removeSoftware(self, MongoCollection: pymongo.collection.Collection, Computation: ComputationCompactView):
+        return self.update_remove(MongoCollection, "computations", Computation)
 
 
 

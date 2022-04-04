@@ -36,7 +36,7 @@ class TestUser(unittest.TestCase):
 
         # create indexes
 
-    def test_user_initialization(self):
+    def test_1_model_initialization(self):
         owner_inst1 = mds.utils.UserCompactView(
             id="ark:99999/testowner1",
             name="test owner1",
@@ -69,77 +69,125 @@ class TestUser(unittest.TestCase):
         )
 
 
-
-
-    def test_user_crud(self):
+    def test_2_mongo_create(self):
         test_user = mds.User(**self.user_data)
-        write_success, message, code = test_user.create(self.test_collection)
+        create_status = test_user.create(self.test_collection)
 
         #print(f"UserCreate: {write_success}\tMessage: {message}\tCode: {code}")
-        self.assertTrue(write_success)
-        self.assertEqual(message, "")
-        self.assertEqual(code, 200)
+        self.assertTrue(create_status.success)
+        self.assertEqual(create_status.message, "")
+        self.assertEqual(create_status.status_code, 200)
 
         # try to create the same user and make sure it fails
         test_user = mds.User(**self.user_data)
-        write_success, message, code = test_user.create(self.test_collection)
+        duplicate_status = test_user.create(self.test_collection)
 
-        self.assertFalse(write_success)
-        self.assertEqual(message, "document already exists")
-        self.assertEqual(code, 400)
+        self.assertFalse(duplicate_status.success)
+        self.assertEqual(duplicate_status.message, "document already exists")
+        self.assertEqual(duplicate_status.status_code, 400)
 
 
-
-    #def test_user_read(self):
+    def test_3_mongo_read(self):
         find_user = mds.User.construct(id = self.user_data["@id"])
         test_user = mds.User(**self.user_data)
         
 
-        result, message, code = find_user.read(self.test_collection)
+        read_status = find_user.read(self.test_collection)
 
-        self.assertTrue(result)
-        self.assertEqual(message, "")
-        self.assertEqual(code, 200)
+        self.assertTrue(read_status.success)
+        self.assertEqual(read_status.message, "")
+        self.assertEqual(read_status.status_code, 200)
         self.assertDictEqual(find_user.dict(by_alias=True), test_user.dict(by_alias=True))
 
         #print(f"UserRead\tSuccess: {result}\tMessage: {message}\tStatusCode: {code}")
 
 
-    
-
-
-    #def test_user_read_not_found(self):
+    def test_4_mongo_read_not_found(self):
         # try to find a nonexistant user 
         fake_user_id = "ark:99999/notauser"
         nonexistant_user = mds.User.construct(id=fake_user_id)
 
-        result, message , code = nonexistant_user.read(self.test_collection)
+        not_found = nonexistant_user.read(self.test_collection)
 
-        self.assertFalse(result)
-        self.assertEqual(message, "no record found")
-        self.assertEqual(code, 404)
+        self.assertFalse(not_found.success)
+        self.assertEqual(not_found.message, "no record found")
+        self.assertEqual(not_found.status_code, 404)
 
 
-    #def test_user_delete(self):
+    def test_5_mongo_delete(self):
         test_user = mds.User.construct(id=self.user_data["@id"])
 
-        result, message, code = test_user.delete(self.test_collection)
+        delete_status = test_user.delete(self.test_collection)
 
-        self.assertTrue(result)
-        self.assertEqual(message, "")
-        self.assertEqual(code, 200)
+        self.assertTrue(delete_status.success)
+        self.assertEqual(delete_status.message, "")
+        self.assertEqual(delete_status.status_cdoe, 200)
 
 
-    #def test_user_update(self):
+    def test_6_user_project(self):
+        
+        test_user = mds.User(**self.user_data)
+
+        create_status = test_user.create(self.test_collection)
+
+        self.assertTrue(create_status.success)
+        self.assertEqual(create_status.message, "")
+        self.assertEqual(create_status.status_code, 200)
+
+        # add a project to a user
+        proj = mds.utils.ProjectCompactView(id="ark:99999/test_proj", name="Test Project", type="Project")
+
+        add = test_user.addProject(self.test_collection, proj)
+
+        self.assertTrue(add.success)
+        self.assertEqual(add.message, "")
+        self.assertEqual(add.status_code, 200)
+
+        # check that read updates the existance of the new project
+        read_status = test_user.read(self.test_collection)
+
+        self.assertTrue(read_status.success)
+        self.assertEqual(read_status.message, "")
+        self.assertEqual(read_status.status_code, 200)
+
+        # assert that the new project is in the user model
+        self.assertEqual(1, len[test_user.projects])
+
+        # remove the project from the user
+
+        remove_status = test_user.removeProject(self.test_collection, proj)
+
+        self.assertTrue(remove_status.success)
+        self.assertEqual(remove_status.message, "")
+        self.assertEqual(remove_status.status_code, 200)
+
+        #  check that the updated model has no projects 
+        updated_user = mds.User.construct(id=test_user.id)
+
+        read_status = updated_user.read(self.test_collection)
+
+        self.assertTrue(read_status.success)
+        self.assertEqual(read_status.message, "")
+        self.assertEqual(read_status.status_code, 200)
+
+        self.assertEqual(0, len(updated_user.projects))
+
+
+    def test_7_user_dataset(self):
         pass
 
+    def test_8_user_computation(self):
+        pass
+
+    def test_9_user_software(self):
+        pass
     
     def tearDown(self) -> None:
 
         self.test_collection.drop() 
         return super().tearDown()
 
-    
+
 
 if __name__ == "__main__":
     unittest.main()
