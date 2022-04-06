@@ -38,6 +38,14 @@ class User(FairscapeBaseModel, extra=Extra.allow):
     def update(self, MongoCollection: pymongo.collection.Collection) -> OperationStatus: 
         return super().update()
  
+    
+    def addOrganization(self, MongoCollection: pymongo.collection.Collection, Organization: OrganizationCompactView):
+        return self.update_append(MongoCollection, "organizations", Organization)
+
+
+    def removeOrganization(self, MongoCollection: pymongo.collection.Collection, Organization: OrganizationCompactView):
+        return self.update_remove(MongoCollection, "organizations", Organization)
+
 
     def addProject(self, MongoCollection: pymongo.collection.Collection, Project: ProjectCompactView):
         return self.update_append(MongoCollection, "projects", Project)
@@ -56,18 +64,18 @@ class User(FairscapeBaseModel, extra=Extra.allow):
 
 
     def addSoftware(self, MongoCollection: pymongo.collection.Collection, Software: SoftwareCompactView):
-        return self.update_append(MongoCollection, "datasets", Software)
+        return self.update_append(MongoCollection, "software", Software)
 
 
     def removeSoftware(self, MongoCollection: pymongo.collection.Collection, Software: SoftwareCompactView):
-        return self.update_remove(MongoCollection, "datasets", Software)
+        return self.update_remove(MongoCollection, "software", Software)
 
 
     def addComputation(self, MongoCollection: pymongo.collection.Collection, Computation: ComputationCompactView):
         return self.update_append(MongoCollection, "computations", Computation)
 
 
-    def removeSoftware(self, MongoCollection: pymongo.collection.Collection, Computation: ComputationCompactView):
+    def removeComputation(self, MongoCollection: pymongo.collection.Collection, Computation: ComputationCompactView):
         return self.update_remove(MongoCollection, "computations", Computation)
 
 

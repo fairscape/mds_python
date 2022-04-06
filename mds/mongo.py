@@ -2,7 +2,7 @@ import pymongo
 from urllib.parse import quote_plus
 
 class MongoConfig():
-	def __init__(self, host_uri: str, port: int, user: str, password: str, database: str):
+	def __init__(self, host_uri: str, port: int, user: str, password: str, database: str = None):
 		self.host_uri = host_uri
 		self.port = port 
 		self.user = user
