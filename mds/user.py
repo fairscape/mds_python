@@ -5,11 +5,11 @@ import pymongo
 
 
 class User(FairscapeBaseModel, extra=Extra.allow):
-    type: Literal["Person"]
+    type = "Person"
     email: EmailStr  # requires installation of module email-validator
     password: str
     is_admin: bool
-    organizations: List[OrganizationCompactView]
+    organizations: list[OrganizationCompactView]
     projects: List[ProjectCompactView]
     datasets: List[DatasetCompactView]
     software: List[SoftwareCompactView]

@@ -1,5 +1,4 @@
 from pydantic import BaseModel, validator, Field, EmailStr
-from typing import Literal, Optional, Tuple
 import re
 import pymongo
 
@@ -59,6 +58,7 @@ class OperationStatus():
 
 
 class FairscapeBaseModel(BaseModel):
+    context = {"@vocab": "https://schema.org/", "evi": "https://w3id.org/EVI#"}
     id:   str
     type: str
     name: str
@@ -67,6 +67,10 @@ class FairscapeBaseModel(BaseModel):
         allow_population_by_field_name = True
         validate_assignment = True
         fields = {
+                "context": {
+                    "title": "context",
+                    "alias": "@context",
+                    },
                 "id": {
                         "title": "id",
                         "alias": "@id",
@@ -83,7 +87,7 @@ class FairscapeBaseModel(BaseModel):
     _validate_guid = validator('id', allow_reuse=True)(validate_ark)
 
 
-    def create(self, MongoCollection: pymongo.collection.Collection) -> OperationStatus:
+    def create(self, MongoCollection: pymongo.collection.Collection, bson = None) -> OperationStatus:
         """
         Persist instance of model in mongo
 
@@ -94,28 +98,64 @@ class FairscapeBaseModel(BaseModel):
         ----------
         self : FairscapeBaseModel
         MongoCollection : pymongo.collection.Collection
+        bson: A representation of the object using bson, allows for use of embedded document storage in Mongo
 
         Returns
         -------
         mds.utils.OperationStatus
         """
 
-        if MongoCollection.find_one({"@id": self.id}):
-            return OperationStatus(False, "document already exists", 400)
+        # check if a bson representation is passed
+        # if not use the pydantic aliasing
+        if bson is None:
+            insert_document = self.dict(by_alias=True)
+        else:
+            insert_document = bson
 
         try:
-            create_request = MongoCollection.insert_one(self.dict(by_alias=True))
-            if create_request.acknowledged:
+
+            if MongoCollection.find_one({"@id": self.id}):
+                return OperationStatus(False, "document already exists", 400)
+
+
+            create_request = MongoCollection.insert_one(insert_document)
+            if create_request.acknowledged and create_request.inserted_id:
                 return OperationStatus(True, "", 200)
             else:
                 return OperationStatus(False, "", 400)
 
+        # write specific exception handling
+        except pymongo.errors.DocumentTooLarge as e:
+            return OperationStatus(False, f"Mongo Error Document Too Large: {str(e)}", 500)
+
         except pymongo.errors.DuplicateKeyError as e:
-            return OperationStatus(False, f"DuplicateKeyError: {str(e)}", 400)
+            return OperationStatus(False, f"Mongo Duplicate Key Error: {str(e)}", 500)
+  
         except pymongo.errors.WriteError as e:
-            return OperationStatus(False, f"MongoWriteError: {str(e)}", 500)
+            return OperationStatus(False, f"Mongo Write Error: {str(e)}", 500)
+
+        # default exceptions for all mongo operations
+        except pymongo.errors.ConnectionInvalid as e:
+            return OperationStatus(False, f"Mongo Connection Invalid: {str(e)}", 500)
+
+        except pymongo.errors.ConnectionError as e:
+            return OperationStatus(False, f"Mongo Connection Error: {str(e)}", 500)
+        
         except pymongo.errors.ConnectionFailure as e:
-            return OperationStatus(False, f"MongoConnectionError: {str(e)}", 500)
+            return OperationStatus(False, f"Mongo Connection Failure: {str(e)}", 500)
+
+        except pymongo.errors.ExecutionTimeout as e:
+            return OperationStatus(False, f"Mongo Execution Timeout: {str(e)}", 500)
+
+        except pymongo.errors.InvalidName as e:
+            return OperationStatus(False, f"Mongo Error Invalid Name: {str(e)}", 500)
+
+        except pymongo.errors.NetworkTimeout as e:
+            return OperationStatus(False, f"Mongo Error Network Timeout: {str(e)}", 500)
+
+        except pymongo.errors.OperationFailure as e:
+            return OperationStatus(False, f"Mongo Error Operation Failure: {str(e)}", 500)
+        
 
         # catch all exceptions
         except Exception as e:
@@ -139,15 +179,48 @@ class FairscapeBaseModel(BaseModel):
         mds.utils.OperationStatus
         """
 
-        full_user_query = MongoCollection.find_one({"@id": self.id})
+        try:
 
-        # make sure the object exists
-        if full_user_query == None:
-            return OperationStatus(False, "Object not Found", 404)
+            # make sure the object exists
+            # if it doesn't return a 404
+            if MongoCollection.find_one({"@id": self.id}) is None:
+                return OperationStatus(False, "Object not Found", 404)
 
-        # TODO check the output status
-        MongoCollection.delete_one({"@id": self.id})
-        return OperationStatus(True, "", 200)
+            # preform the delete one operation
+            delete_result = MongoCollection.delete_one({"@id": self.id})
+
+            # if the transaction is successfull, return a successfull OperationStatus
+            if delete_result.acknowledged and delete_result.deleted_count == 1:
+                return OperationStatus(True, "", 200)
+            else:
+            # otherwise return the string of the error
+                return OperationStatus(False, f"Delete Error: {str(delete_result)}", 400)
+                
+        # default exceptions for all mongo operations
+        except pymongo.errors.ConnectionInvalid as e:
+            return OperationStatus(False, f"Mongo Connection Invalid: {str(e)}", 500)
+
+        except pymongo.errors.ConnectionError as e:
+            return OperationStatus(False, f"Mongo Connection Error: {str(e)}", 500)
+        
+        except pymongo.errors.ConnectionFailure as e:
+            return OperationStatus(False, f"Mongo Connection Failure: {str(e)}", 500)
+
+        except pymongo.errors.ExecutionTimeout as e:
+            return OperationStatus(False, f"Mongo Execution Timeout: {str(e)}", 500)
+
+        except pymongo.errors.InvalidName as e:
+            return OperationStatus(False, f"Mongo Error Invalid Name: {str(e)}", 500)
+
+        except pymongo.errors.NetworkTimeout as e:
+            return OperationStatus(False, f"Mongo Error Network Timeout: {str(e)}", 500)
+
+        except pymongo.errors.OperationFailure as e:
+            return OperationStatus(False, f"Mongo Error Operation Failure: {str(e)}", 500)
+
+        # catch all exceptions
+        except Exception as e:
+            return OperationStatus(False, f"Error: {str(e)}", 500)
 
 
     def update(self, MongoCollection: pymongo.collection.Collection) -> OperationStatus:
@@ -169,22 +242,65 @@ class FairscapeBaseModel(BaseModel):
         mds.utils.OperationStatus
         """
 
-        if MongoCollection.find_one({"@id": self.id}):
-            return OperationStatus(False, "object not found", 404)
+        try: 
 
-        new_values = {
-                "$set":  {k: value for k,value in self.dict() if value != None}
-        }
+            new_values = {
+                    "$set":  {k: value for k,value in self.dict() if value != None}
+            }
 
-        # TODO use result to check transaction success
-        update_result = MongoCollection.update_one({"@id": self.id}, new_values)
+            update_result = MongoCollection.update_one({"@id": self.id}, new_values)
 
-        return OperationStatus(True, "", 200)
+            if update_result.acknowledged and update_result.modified_count == 1:
+                return OperationStatus(True, "", 200)
+            
+            if update_result.matched_count == 0:
+                return OperationStatus(False, "object not found", 404)
+
+            else:
+                return OperationStatus(False, "", 500)
+
+        # update specific mongo exceptions
+        except pymongo.errors.DocumentTooLarge as e:
+            return OperationStatus(False, f"Mongo Error Document Too Large: {str(e)}", 500)
+
+        except pymongo.errors.DuplicateKeyError as e:
+            return OperationStatus(False, f"Mongo Duplicate Key Error: {str(e)}", 500)
+  
+        except pymongo.errors.WriteError as e:
+            return OperationStatus(False, f"Mongo Write Error: {str(e)}", 500)
+
+        # default exceptions for all mongo operations
+        except pymongo.errors.ConnectionInvalid as e:
+            return OperationStatus(False, f"Mongo Connection Invalid: {str(e)}", 500)
+
+        except pymongo.errors.ConnectionError as e:
+            return OperationStatus(False, f"Mongo Connection Error: {str(e)}", 500)
+        
+        except pymongo.errors.ConnectionFailure as e:
+            return OperationStatus(False, f"Mongo Connection Failure: {str(e)}", 500)
+
+        except pymongo.errors.ExecutionTimeout as e:
+            return OperationStatus(False, f"Mongo Execution Timeout: {str(e)}", 500)
+
+        except pymongo.errors.InvalidName as e:
+            return OperationStatus(False, f"Mongo Error Invalid Name: {str(e)}", 500)
+
+        except pymongo.errors.NetworkTimeout as e:
+            return OperationStatus(False, f"Mongo Error Network Timeout: {str(e)}", 500)
+
+        except pymongo.errors.OperationFailure as e:
+            return OperationStatus(False, f"Mongo Error Operation Failure: {str(e)}", 500)
+
+        # catch all exceptions
+        except Exception as e:
+            return OperationStatus(False, f"Error: {str(e)}", 500)
 
 
-    def read(self, MongoCollection: pymongo.collection.Collection) -> OperationStatus:
+
+    def read(self, MongoCollection: pymongo.collection.Collection, exclude: list[str] = None) -> OperationStatus:
         """
-        Read an instance of a model in mongo and unpack the values into the current fairscape base model attributes
+        Read an instance of a model in mongo and unpack the values into the current  
+        FairscapeBaseModel attributes
 
         This is the superclass method for read operations in fairscape.
 
@@ -192,34 +308,63 @@ class FairscapeBaseModel(BaseModel):
         ----------
         self : FairscapeBaseModel
         MongoCollection : pymongo.collection.Collection
+        exclude: list[str] a list of field names to exclude from the returned document
         Returns
         -------
         mds.utils.OperationStatus
         """
+
+        # given passed list of fields to exclude from query
+        # form the projection argument to the find_one mongo command
+        if exclude:
+            query_projection ={excluded_field: False for excluded_field in exclude}
+            query_projection["_id"] = False
+        else:
+            query_projection = {"_id": False}
+
         try:
+            # run the query
             query = MongoCollection.find_one(
                     {"@id": self.id},
-                    projection={"_id": False}
+                    projection= query_projection
             )
 
             # check that the results are not empty
             if query:
                 # update class with values from database
-                for key, value in query.items():
+                for key, value in query.items():       
                     setattr(self, key, value)
                 return OperationStatus(True, "", 200)
 
             else:
                 return OperationStatus(False, "no record found", 404)
 
+        # default exceptions for all mongo operations
+        except pymongo.errors.ConnectionInvalid as e:
+            return OperationStatus(False, f"Mongo Connection Invalid: {str(e)}", 500)
+
+        except pymongo.errors.ConnectionError as e:
+            return OperationStatus(False, f"Mongo Connection Error: {str(e)}", 500)
+        
         except pymongo.errors.ConnectionFailure as e:
-            return OperationStatus(False, f"MongoConnectionError: {str(e)}", 500)
+            return OperationStatus(False, f"Mongo Connection Failure: {str(e)}", 500)
+
         except pymongo.errors.ExecutionTimeout as e:
-            return OperationStatus(False, f"MongoExecutionTimeoutError: {str(e)}", 500)
+            return OperationStatus(False, f"Mongo Execution Timeout: {str(e)}", 500)
+
+        except pymongo.errors.InvalidName as e:
+            return OperationStatus(False, f"Mongo Error Invalid Name: {str(e)}", 500)
+
+        except pymongo.errors.NetworkTimeout as e:
+            return OperationStatus(False, f"Mongo Error Network Timeout: {str(e)}", 500)
+
+        except pymongo.errors.OperationFailure as e:
+            return OperationStatus(False, f"Mongo Error Operation Failure: {str(e)}", 500)
+        
 
         # catch all exceptions
         except Exception as e:
-            return OperationStatus(False, f"Undetermined Error: {e}", 500)
+            return OperationStatus(False, f"Error: {str(e)}", 500)
 
 
     def update_append(self, MongoCollection, Field: str, Item) -> OperationStatus:

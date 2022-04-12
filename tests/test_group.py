@@ -1,52 +1,27 @@
-import mds
 import unittest
 import os
 import sys
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-
-
-class TestUserView(unittest.TestCase):
-
-    def test_userview(self):
-        member = mds.UserView(
-            id="ark:99999/testuser1",
-            name="test user1",
-            email="testuser1@example.org"
-        )
-
-        self.assertEqual(member.id, "ark:99999/testuser1")
-
-    def test_userview_id_validation(self):
-        # ark prefix missing
-        with self.assertRaises(ValueError):
-            member = mds.UserView(
-                id="99999/testuser1",
-                name="test user1",
-                email="testuser1@example.org"
-            )
-
-
-    def test_userview_json(self):
-        pass
+import mds
 
 
 class TestGroup(unittest.TestCase):
 
-    def test_group_initilization(self):
-        owner = mds.UserView(
+    def test_0_group_initilization(self):
+        owner = mds.utils.UserCompactView(
             id="ark:99999/testowner",
             name="test owner",
             email="testowner@example.org"
         )
-        self.assertEqual(owner.id, "ark:99999/testowner")
 
-        member = mds.UserView(
+        member = mds.utils.UserCompactView(
             id="ark:99999/testuser1",
             name="test user1",
             email="testuser1@example.org"
         )
+
         grp = mds.Group(
             id="ark:99999/CAMA-users",
             name="Cama Users",
@@ -54,11 +29,19 @@ class TestGroup(unittest.TestCase):
             members=[member]
         )
 
-    def test_group_id_validation(self):
+    
+    def test_1_group_json(self):
         pass
 
-    def test_group_json(self):
+    def test_2_group_create(self):
         pass
+
+    def test_3_group_delete(self):
+        pass
+    
+    def test_4_group_user(self):
+        pass
+
 
 
 if __name__ == "__main__":
