@@ -1,16 +1,20 @@
 from pydantic import Extra
-from typing import List, Literal
-from mds.utils import FairscapeBaseModel, UserCompactView, OperationStatus
+from .utils import FairscapeBaseModel, UserCompactView, OperationStatus
 from pymongo.collection import Collection
 
 
 class Group(FairscapeBaseModel, extra=Extra.allow):
+    context = {"@vocab": "https://schema.org/", "evi": "https://w3id.org/EVI#"}
     type = "Organization"
     owner: UserCompactView
-    members: List[UserCompactView]
+    members: list[UserCompactView]
 
 
     def create(self, MongoCollection: Collection) -> OperationStatus:
+        # check that the owner exists
+
+        # embeded bson document
+
         return super().create(MongoCollection)
 
 
@@ -34,8 +38,9 @@ class Group(FairscapeBaseModel, extra=Extra.allow):
     
     def addUser(self, MongoCollection: Collection, Member) -> OperationStatus:
 
-        pass
+        return OperationStatus(True, "", 200)
 
     def removeUser(self, MongoCollection: Collection, Member) -> OperationStatus:
-        pass
+
+        return OperationStatus(True, "", 200)
 

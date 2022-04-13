@@ -1,8 +1,5 @@
-import os
-import sys
+import test_path
 import unittest
-
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import mds
 
 class TestValidateArk(unittest.TestCase):

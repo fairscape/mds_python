@@ -1,10 +1,11 @@
 from pydantic import Extra
 from typing import List, Union, Literal
 from datetime import datetime
-from mds.utils import FairscapeBaseModel, OrganizationCompactView, UserCompactView, SoftwareCompactView, DatasetCompactView
+from .utils import FairscapeBaseModel, OrganizationCompactView, UserCompactView, SoftwareCompactView, DatasetCompactView
 
 
 class Computation(FairscapeBaseModel):
+    context = {"@vocab": "https://schema.org/", "evi": "https://w3id.org/EVI#"}
     type: Literal["evi:Computation"]
     owner: UserCompactView
     author: str

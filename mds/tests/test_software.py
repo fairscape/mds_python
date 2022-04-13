@@ -1,10 +1,7 @@
+import test_path
 import unittest
-
 import mds
 
-
-# import os, sys
-# sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 class TestSoftware(unittest.TestCase):
     def test_software_initialization(self):

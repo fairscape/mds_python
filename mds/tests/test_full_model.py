@@ -1,9 +1,10 @@
-import mds
 import unittest
+import test_path
+from mds.models import *
 
 class TestFullModel(unittest.TestCase):
     def test_user_initialization(self):
-        owner_inst1 = mds.utils.UserCompactView(
+        owner_inst1 = UserCompactView(
             id="ark:99999/testowner1",
             name="test owner1",
             type="Person",
@@ -11,7 +12,7 @@ class TestFullModel(unittest.TestCase):
         )
         self.assertEqual(owner_inst1.id, "ark:99999/testowner1")
 
-        owner_inst2 = mds.UserCompactView(
+        owner_inst2 = UserCompactView(
             id="ark:99999/testowner2",
             name="test owner2",
             type="Person",
@@ -19,7 +20,7 @@ class TestFullModel(unittest.TestCase):
         )
         self.assertEqual(owner_inst2.id, "ark:99999/testowner2")
         
-        software_inst1 = mds.Software(
+        software_inst1 = Software(
             id="ark:99999/CAMA-users",
             name="test software",
             type="evi:Software",
@@ -30,7 +31,7 @@ class TestFullModel(unittest.TestCase):
             usedBy= []
         )
         
-        computation_inst1 = mds.Computation(
+        computation_inst1 = Computation(
             id="ark:99999/CAMA-users",
             name="john doe",
             type="evi:Computation",
@@ -41,7 +42,7 @@ class TestFullModel(unittest.TestCase):
             usedSoftware=[software_inst1]
         )
 
-        mds.User(
+        User(
             id="ark:99999/testuser1",
             name="test user1",
             type="Person",

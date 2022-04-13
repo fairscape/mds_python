@@ -1,10 +1,11 @@
 from typing import List, Literal, Tuple
 from pydantic import EmailStr, Extra
-from mds.utils import FairscapeBaseModel, OrganizationCompactView, ProjectCompactView, DatasetCompactView, SoftwareCompactView, ComputationCompactView, OperationStatus
+from .utils import FairscapeBaseModel, OrganizationCompactView, ProjectCompactView, DatasetCompactView, SoftwareCompactView, ComputationCompactView, OperationStatus
 import pymongo
 
 
 class User(FairscapeBaseModel, extra=Extra.allow):
+    context = {"@vocab": "https://schema.org/", "evi": "https://w3id.org/EVI#"}
     type = "Person"
     email: EmailStr  # requires installation of module email-validator
     password: str

@@ -58,7 +58,7 @@ class OperationStatus():
 
 
 class FairscapeBaseModel(BaseModel):
-    context = {"@vocab": "https://schema.org/", "evi": "https://w3id.org/EVI#"}
+    
     id:   str
     type: str
     name: str
