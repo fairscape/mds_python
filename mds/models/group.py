@@ -1,6 +1,6 @@
 from pydantic import Extra
-from .utils import FairscapeBaseModel, UserCompactView, OperationStatus
 from pymongo.collection import Collection
+from .utils import FairscapeBaseModel, UserCompactView, OperationStatus
 
 
 class Group(FairscapeBaseModel, extra=Extra.allow):

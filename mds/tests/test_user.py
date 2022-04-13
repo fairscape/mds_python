@@ -1,6 +1,7 @@
 import test_path
 import unittest
-import mds
+from mds.models import *
+from mds import MongoConfig
 
 
 class TestUser(unittest.TestCase):
@@ -18,7 +19,7 @@ class TestUser(unittest.TestCase):
         "computations": []
         }		
 
-    mongo_client = mds.MongoConfig(
+    mongo_client = MongoConfig(
             host_uri = "localhost",
             port = 27017,
             user = "root",
@@ -38,7 +39,7 @@ class TestUser(unittest.TestCase):
 
 
     def test_1_model_initialization(self):
-        member = mds.UserCompactView(
+        member = UserCompactView(
             id="ark:99999/testuser1",
             name="test user1",
             email="testuser1@example.org"
@@ -47,20 +48,20 @@ class TestUser(unittest.TestCase):
 
         # ark prefix missing
         with self.assertRaises(ValueError):
-            member = mds.UserCompactView(
+            member = UserCompactView(
                 id="99999/testuser1",
                 name="test user1",
                 email="testuser1@example.org"
             )
 
-        owner_inst1 = mds.utils.UserCompactView(
+        owner_inst1 = utils.UserCompactView(
             id="ark:99999/testowner1",
             name="test owner1",
             email="testowner1@example.org"
         )
         self.assertEqual(owner_inst1.id, "ark:99999/testowner1")
 
-        owner_inst2 = mds.UserCompactView(
+        owner_inst2 = UserCompactView(
             id="ark:99999/testowner2",
             name="test owner2",
             email="testowner2@example.org"
@@ -69,7 +70,7 @@ class TestUser(unittest.TestCase):
         
 
         
-        owner_inst3 = mds.UserCompactView(
+        owner_inst3 = UserCompactView(
             **{
                 "id":"ark:99999/testowner2",
                 "type": "guy",
@@ -78,11 +79,12 @@ class TestUser(unittest.TestCase):
 
             }
         )
+
         self.assertEqual(owner_inst3.id, "ark:99999/testowner2")
         # TODO: fix incorrect typing for classes
         self.assertEqual(owner_inst3.type, "guy")
         
-        full_user = mds.User(
+        full_user = User(
             id="ark:99999/testuser1",
             name="test user1",
             type="Person",
@@ -100,7 +102,7 @@ class TestUser(unittest.TestCase):
 
 
     def test_2_mongo_create(self):
-        test_user = mds.User(**self.user_data)
+        test_user = User(**self.user_data)
         create_status = test_user.create(self.test_collection)
 
         #print(f"UserCreate: {write_success}\tMessage: {message}\tCode: {code}")
@@ -109,7 +111,7 @@ class TestUser(unittest.TestCase):
         self.assertEqual(create_status.status_code, 200)
 
         # try to create the same user and make sure it fails
-        test_user = mds.User(**self.user_data)
+        test_user = User(**self.user_data)
         duplicate_status = test_user.create(self.test_collection)
 
         self.assertFalse(duplicate_status.success)
@@ -118,8 +120,8 @@ class TestUser(unittest.TestCase):
 
 
     def test_3_mongo_read(self):
-        find_user = mds.User.construct(id = self.user_data["@id"])
-        test_user = mds.User(**self.user_data)
+        find_user = User.construct(id = self.user_data["@id"])
+        test_user = User(**self.user_data)
         
 
         read_status = find_user.read(self.test_collection)
@@ -135,7 +137,7 @@ class TestUser(unittest.TestCase):
     def test_4_mongo_read_not_found(self):
         # try to find a nonexistant user 
         fake_user_id = "ark:99999/notauser"
-        nonexistant_user = mds.User.construct(id=fake_user_id)
+        nonexistant_user = User.construct(id=fake_user_id)
 
         not_found = nonexistant_user.read(self.test_collection)
 
@@ -145,7 +147,7 @@ class TestUser(unittest.TestCase):
 
 
     def test_5_mongo_delete(self):
-        test_user = mds.User.construct(id=self.user_data["@id"])
+        test_user = User.construct(id=self.user_data["@id"])
 
         delete_status = test_user.delete(self.test_collection)
 
@@ -156,7 +158,7 @@ class TestUser(unittest.TestCase):
 
     def test_6a_user_project(self):
         
-        test_user = mds.User(**self.user_data)
+        test_user = User(**self.user_data)
 
         create_status = test_user.create(self.test_collection)
 
@@ -165,7 +167,7 @@ class TestUser(unittest.TestCase):
         self.assertEqual(create_status.status_code, 200)
 
         # add a project to a user
-        proj = mds.utils.ProjectCompactView(id="ark:99999/test_proj", name="Test Project")
+        proj = ProjectCompactView(id="ark:99999/test_proj", name="Test Project")
 
         add = test_user.addProject(self.test_collection, proj)
 
@@ -192,7 +194,7 @@ class TestUser(unittest.TestCase):
         self.assertEqual(remove_status.status_code, 200)
 
         #  check that the updated model has no projects 
-        updated_user = mds.User.construct(id=test_user.id)
+        updated_user = User.construct(id=test_user.id)
 
         read_status = updated_user.read(self.test_collection)
 
@@ -205,9 +207,9 @@ class TestUser(unittest.TestCase):
 
     def test_6b_user_dataset(self):
 
-        dataset = mds.utils.ProjectCompactView(id="ark:99999/test_data", name="Test Dataset")
+        dataset = DatasetCompactView(id="ark:99999/test_data", name="Test Dataset")
 
-        test_user = mds.User(**self.user_data)
+        test_user = User(**self.user_data)
         add = test_user.addDataset(self.test_collection, dataset)
 
         self.assertTrue(add.success)
@@ -239,10 +241,10 @@ class TestUser(unittest.TestCase):
 
 
     def test_6c_user_computation(self):
-        computation = mds.utils.ComputationCompactView(id="ark:99999/test_comp", name="Test software")
 
+        computation = ComputationCompactView(id="ark:99999/test_comp", name="Test computation")
 
-        test_user = mds.User(**self.user_data)
+        test_user = User(**self.user_data)
         add = test_user.addComputation(self.test_collection, computation)
 
         self.assertTrue(add.success)
@@ -274,9 +276,9 @@ class TestUser(unittest.TestCase):
 
 
     def test_6d_user_software(self):
-        software = mds.utils.SoftwareCompactView(id="ark:99999/test_soft", name="Test Software")
+        software = SoftwareCompactView(id="ark:99999/test_soft", name="Test Software")
 
-        test_user = mds.User(**self.user_data)
+        test_user = User(**self.user_data)
         add = test_user.addSoftware(self.test_collection, software)
 
         self.assertTrue(add.success)
@@ -308,9 +310,9 @@ class TestUser(unittest.TestCase):
 
 
     def test_6e_user_organization(self):
-        org = mds.utils.OrganizationCompactView(id="ark:99999/test_org", name="Test Org")
+        org = OrganizationCompactView(id="ark:99999/test_org", name="Test Org")
 
-        test_user = mds.User(**self.user_data)
+        test_user = User(**self.user_data)
         add = test_user.addOrganization(self.test_collection, org)
 
         self.assertTrue(add.success)

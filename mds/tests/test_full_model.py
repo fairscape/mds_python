@@ -52,4 +52,6 @@ class TestFullModel(unittest.TestCase):
             software=[software_inst1],
             computations=[computation_inst1]
         )
-	
+
+if __name__=="__main__":
+    unittest.main()	

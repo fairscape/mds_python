@@ -1,7 +1,8 @@
 import unittest
 import json
 import test_path
-import mds
+from mds.models import *
+from mds import MongoConfig
 
 
 class TestGroup(unittest.TestCase):
@@ -10,19 +11,19 @@ class TestGroup(unittest.TestCase):
 
     def test_0_group_initilization(self):
 
-        owner = mds.utils.UserCompactView(
+        owner = UserCompactView(
             id="ark:99999/testowner",
             name="test owner",
             email="testowner@example.org"
         )
 
-        member = mds.utils.UserCompactView(
+        member = UserCompactView(
             id="ark:99999/testuser1",
             name="test user1",
             email="testuser1@example.org"
         )
 
-        grp = mds.Group(
+        grp = Group(
             id="ark:99999/CAMA-users",
             name="Cama Users",
             owner=owner,
@@ -45,19 +46,19 @@ class TestGroup(unittest.TestCase):
     
     def test_1_group_json(self):
 
-        owner = mds.utils.UserCompactView(
+        owner = UserCompactView(
             id="ark:99999/testowner",
             name="test owner",
             email="testowner@example.org"
         )
 
-        member = mds.utils.UserCompactView(
+        member = UserCompactView(
             id="ark:99999/testuser1",
             name="test user1",
             email="testuser1@example.org"
         )
 
-        grp = mds.Group(
+        grp = Group(
             id="ark:99999/CAMA-users",
             name="Cama Users",
             owner=owner,

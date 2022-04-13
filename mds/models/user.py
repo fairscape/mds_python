@@ -1,6 +1,6 @@
 from typing import List, Literal, Tuple
 from pydantic import EmailStr, Extra
-from .utils import FairscapeBaseModel, OrganizationCompactView, ProjectCompactView, DatasetCompactView, SoftwareCompactView, ComputationCompactView, OperationStatus
+from .utils import * 
 import pymongo
 
 

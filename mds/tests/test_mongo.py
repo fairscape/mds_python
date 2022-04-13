@@ -1,7 +1,6 @@
 import test_path
-import mds
 import unittest
-import docker
+from mds import MongoConfig
 
 
 class TestMongoConfig(unittest.TestCase):

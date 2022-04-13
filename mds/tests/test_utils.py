@@ -1,41 +1,42 @@
 import test_path
 import unittest
-import mds
+from mds.models import *
+from mds import MongoConfig
 
 class TestValidateArk(unittest.TestCase):
     def test_validate_ark_missing_ark(self):
         with self.assertRaises(ValueError):
-            mds.utils.validate_ark("99999/test-ark")
+            validate_ark("99999/test-ark")
 
         with self.assertRaises(ValueError):
-            mds.utils.validate_ark("ark99999/test-ark")
+           validate_ark("ark99999/test-ark")
 
         with self.assertRaises(ValueError):
-            mds.utils.validate_ark(":99999/test-ark")
+            validate_ark(":99999/test-ark")
 
     def test_validate_ark_naan_error(self):
         with self.assertRaises(ValueError):
-            mds.utils.validate_ark("ark:9999/test-ark")
+            validate_ark("ark:9999/test-ark")
 
         with self.assertRaises(ValueError):
-            mds.utils.validate_ark("ark:999/test-ark")
+            validate_ark("ark:999/test-ark")
 
         with self.assertRaises(ValueError):
-            mds.utils.validate_ark("ark:99/test-ark")
+            validate_ark("ark:99/test-ark")
 
         with self.assertRaises(ValueError):
-            mds.utils.validate_ark("ark:9/test-ark")
+            validate_ark("ark:9/test-ark")
 
         with self.assertRaises(ValueError):
-            mds.utils.validate_ark("ark:/test-ark")
+            validate_ark("ark:/test-ark")
 
     def test_validate_ark_postfix_missing(self):
         with self.assertRaises(ValueError):
-            mds.utils.validate_ark("ark:99999/")
+            validate_ark("ark:99999/")
 
     def test_missing_slash(self):
         with self.assertRaises(ValueError):
-            mds.utils.validate_ark("ark:99999CAMA-test")
+            validate_ark("ark:99999CAMA-test")
 
 
 class TestFairscapeBaseModel(unittest.TestCase):
@@ -53,7 +54,7 @@ class TestFairscapeBaseModel(unittest.TestCase):
     "software": [],
     "computations": []
     }		
-    mongo_client = mds.MongoConfig(
+    mongo_client = MongoConfig(
             host_uri = "localhost",
             port = 27017,
             user = "root",
@@ -73,7 +74,7 @@ class TestFairscapeBaseModel(unittest.TestCase):
             "name": "Test Dataset"
             } 
 
-        cv = mds.utils.FairscapeBaseModel(
+        cv = FairscapeBaseModel(
             id=test_data["@id"],
             type=test_data["@type"],
             name=test_data["name"]
@@ -88,7 +89,7 @@ class TestFairscapeBaseModel(unittest.TestCase):
 
     def test_1_mongo_0_create(self):
 
-        test_base_model = mds.utils.FairscapeBaseModel(**self.test_data)
+        test_base_model = FairscapeBaseModel(**self.test_data)
         res = test_base_model.create(self.test_collection)
         self.assertTrue(res.success)
         self.assertEqual(res.message, "")
@@ -99,8 +100,8 @@ class TestFairscapeBaseModel(unittest.TestCase):
 
         identifier = self.test_data["@id"]
 
-        read_test = mds.User.construct(id=identifier)
-        test_base_model = mds.utils.FairscapeBaseModel(**self.test_data)
+        read_test = User.construct(id=identifier)
+        test_base_model = FairscapeBaseModel(**self.test_data)
 
         read_status = read_test.read(self.test_collection)
 
@@ -116,7 +117,7 @@ class TestFairscapeBaseModel(unittest.TestCase):
     def test_1_mongo_2_delete(self):
         identifier = self.test_data["@id"]
 
-        delete_test = mds.User.construct(id=identifier)
+        delete_test = User.construct(id=identifier)
 
         del_status = delete_test.delete(self.test_collection)
         self.assertTrue(del_status.success)
@@ -140,12 +141,12 @@ class TestFairscapeBaseModel(unittest.TestCase):
             "email": "test@example.org"
         }
 
-        user_cv = mds.UserCompactView(**test_data)
+        user_cv = UserCompactView(**test_data)
         validated_user_cv = user_cv.dict(by_alias=True)
         validated_user_cv.pop("@context", None)
         self.assertDictEqual(validated_user_cv, test_data)
 
-        cv_default = mds.UserCompactView(
+        cv_default = UserCompactView(
             id    = test_data["@id"],
             name  = test_data["name"],
             email = test_data["email"]
@@ -155,10 +156,10 @@ class TestFairscapeBaseModel(unittest.TestCase):
         cv_dict.pop("@context", None)
         self.assertDictEqual(cv_dict, test_data)
 
-        user_cv = mds.UserCompactView(**test_data)
+        user_cv = UserCompactView(**test_data)
 
         fields_set = user_cv.__fields_set__
-        constructed_copy = mds.UserCompactView.construct(_fields_set=fields_set, **user_cv.dict())
+        constructed_copy = UserCompactView.construct(_fields_set=fields_set, **user_cv.dict())
 
 
         self.assertDictEqual(user_cv.dict(), constructed_copy.dict())
@@ -172,7 +173,7 @@ class TestFairscapeBaseModel(unittest.TestCase):
             "name": "Test Software"
         }
 
-        software_cv = mds.SoftwareCompactView(**test_data)
+        software_cv = SoftwareCompactView(**test_data)
 
         validated_software_cv = software_cv.dict(by_alias=True)
         validated_software_cv.pop("@context", None)
@@ -187,7 +188,7 @@ class TestFairscapeBaseModel(unittest.TestCase):
             "name": "Test Dataset"
         }
 
-        dataset_cv = mds.DatasetCompactView(**test_data)
+        dataset_cv = DatasetCompactView(**test_data)
         validated_dataset_cv = dataset_cv.dict(by_alias=True)
         validated_dataset_cv.pop("@context", None)
 
