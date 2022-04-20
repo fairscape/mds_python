@@ -1,4 +1,4 @@
-from typing import List, Literal, Tuple
+from typing import List, Literal, Tuple, Optional
 from pydantic import EmailStr, Extra
 from .utils import * 
 import pymongo
@@ -9,15 +9,17 @@ class User(FairscapeBaseModel, extra=Extra.allow):
     type = "Person"
     email: EmailStr  # requires installation of module email-validator
     password: str
-    is_admin: bool
-    organizations: list[OrganizationCompactView]
-    projects: List[ProjectCompactView]
-    datasets: List[DatasetCompactView]
-    software: List[SoftwareCompactView]
-    computations: List[ComputationCompactView]
+    organizations: Optional[list[OrganizationCompactView]] = []
+    projects: Optional[list[ProjectCompactView]] = []
+    datasets: Optional[list[DatasetCompactView]] = []
+    software: Optional[list[SoftwareCompactView]] = [] 
+    computations: Optional[list[ComputationCompactView]] = []
 
 
     def create(self, MongoCollection: pymongo.collection.Collection) -> OperationStatus: 
+
+        # TODO hash the given password with the salt
+
 
         # creating a new user we must set their owned objects to none
         self.projects = []
@@ -33,6 +35,7 @@ class User(FairscapeBaseModel, extra=Extra.allow):
 
 
     def delete(self, MongoCollection: pymongo.collection.Collection) -> OperationStatus:
+        #TODO make sure user doesn't have any owned resources
         return super().delete(MongoCollection)
 
 
@@ -80,5 +83,11 @@ class User(FairscapeBaseModel, extra=Extra.allow):
         return self.update_remove(MongoCollection, "computations", Computation)
 
 
+def ListUsers(mongo_collection: pymongo.collection.Collection):
+    cursor = mongo_collection.find(
+        filter = {"@type": "Person"},
+        projection = {"_id": False}
+    )
+    return [ {"@id": user.get("@id"), "name": user.get("name")} for user in cursor]
 
 

@@ -1,5 +1,5 @@
 import unittest
-import test_path
+import path
 from mds.models import *
 from mds import MongoConfig
 

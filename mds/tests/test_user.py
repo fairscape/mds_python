@@ -1,10 +1,11 @@
-import test_path
+import path
 import unittest
 from mds.models import *
 from mds import MongoConfig
 
 
 class TestUser(unittest.TestCase):
+    maxDiff = None
     user_data = {
         "@id": "ark:99999/test-user",
         "name": "Test User",
@@ -18,7 +19,6 @@ class TestUser(unittest.TestCase):
         "software": [],
         "computations": []
         }		
-
     mongo_client = MongoConfig(
             host_uri = "localhost",
             port = 27017,
@@ -39,6 +39,10 @@ class TestUser(unittest.TestCase):
 
 
     def test_1_model_initialization(self):
+
+        # clear test collection of data
+        self.test_collection.delete_many({})
+
         member = UserCompactView(
             id="ark:99999/testuser1",
             name="test user1",
@@ -54,7 +58,7 @@ class TestUser(unittest.TestCase):
                 email="testuser1@example.org"
             )
 
-        owner_inst1 = utils.UserCompactView(
+        owner_inst1 = UserCompactView(
             id="ark:99999/testowner1",
             name="test owner1",
             email="testowner1@example.org"
@@ -81,6 +85,7 @@ class TestUser(unittest.TestCase):
         )
 
         self.assertEqual(owner_inst3.id, "ark:99999/testowner2")
+
         # TODO: fix incorrect typing for classes
         self.assertEqual(owner_inst3.type, "guy")
         
@@ -98,7 +103,17 @@ class TestUser(unittest.TestCase):
             projects=[],
         )
 
-        self.test_collection.delete_many({})
+        full_user_missing = User(
+            id="ark:99999/testuser1",
+            name="test user1",
+            type="Person",
+            email="testuser1@example.org",
+            password="strongpw",
+            is_admin=False,
+        )
+
+        self.assertDictEqual(full_user.dict(by_alias=True), full_user_missing.dict(by_alias=True))
+
 
 
     def test_2_mongo_create(self):

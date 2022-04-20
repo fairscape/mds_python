@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Response 
-from models import User, Group 
-from mongo import MongoConfig
+from mds.models import User, Group, ListUsers
+from mds.mongo import MongoConfig
 
 app = FastAPI()
 
@@ -14,6 +14,22 @@ def get_config():
             ).connect()
 
 
+"""
+def mongo_operation(callable) -> operation_status:
+
+	# TODO refactor connection
+	mongo_client = get_config()
+	mongo_db = mongo_client["test"]
+	mongo_collection = mongo_db["testcol"]
+
+	create_status = callable()
+
+	mongo_client.close()
+"""
+
+@app.get("/ark:{NAAN}/{identifier}")
+def resolve_ark():
+	pass
 
 @app.post("/user", status_code = 201)
 def user_create(user: User, response: Response):
@@ -32,6 +48,21 @@ def user_create(user: User, response: Response):
 	else:
 		response.status_code = create_status.status_code
 		return {"error": create_status.message}
+
+
+@app.get("/user")
+def user_list(response: Response):
+
+	# TODO refactor connection
+	mongo_client = get_config()
+	mongo_db = mongo_client["test"]
+	mongo_collection = mongo_db["testcol"]
+
+	users = ListUsers(mongo_collection)
+
+	mongo_client.close()
+
+	return users
 
 
 @app.get("/user/{user_id: path}")
@@ -55,7 +86,7 @@ def user_get(user_id: str, response: Response):
 		return {"error": read_status.message}
 
 
-@app.put("/user/{user_id}")
+@app.put("/user/{user_id: path}")
 def user_update(user: User, response: Response):
 	# TODO refactor connection
 	mongo_client = get_config()

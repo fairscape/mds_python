@@ -1,4 +1,4 @@
-import test_path
+import path
 import unittest
 from mds import MongoConfig
 

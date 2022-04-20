@@ -12,8 +12,8 @@ class Computation(FairscapeBaseModel):
     dateCreated: datetime
     dateFinished: datetime
     associatedWith: List[Union[OrganizationCompactView, UserCompactView]]
-    usedSoftware: List[SoftwareCompactView]
-    usedDataset: List[DatasetCompactView]
+    usedSoftware: SoftwareCompactView
+    usedDataset: DatasetCompactView
 
     class Config:
         extra = Extra.allow

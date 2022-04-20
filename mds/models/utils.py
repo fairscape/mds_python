@@ -1,4 +1,5 @@
 from pydantic import BaseModel, validator, Field, EmailStr
+from typing import Optional
 import re
 import pymongo
 
@@ -56,9 +57,7 @@ class OperationStatus():
         return f"Success: {self.success}\tMessage: {self.message}\tStatusCode: {self.status_code}"
 
 
-
 class FairscapeBaseModel(BaseModel):
-    
     id:   str
     type: str
     name: str
