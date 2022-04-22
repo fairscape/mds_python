@@ -17,3 +17,4 @@ class Computation(FairscapeBaseModel):
 
     class Config:
         extra = Extra.allow
+

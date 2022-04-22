@@ -17,6 +17,9 @@ class Software(FairscapeBaseModel):
         fields = {
             "usedBy": {
                 "alias": "evi:usedBy"
+            },
+            "type": {
+                "alias": "@type"
             }
         }
 

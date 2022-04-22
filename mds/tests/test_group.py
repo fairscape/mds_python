@@ -169,24 +169,23 @@ class TestGroup(unittest.TestCase):
     def test_2_group_create_3_member_doesnt_exist(self):
         pass
 
-
-    def test_3_group_delete_0(self):
-        test_group = Group(**self.group_data)
-
-
-    def test_3_group_delete_1_doesnt_exist(self):
+    def test_3_group_read_0(self):
         pass
 
 
-    def test_4_group_read_0(self):
-        pass
-
-
-    def test_4_group_read_1_doesnt_exist(self):
+    def test_3_group_read_1_doesnt_exist(self):
         pass
 
     
-    def test_4_group_read_2_data_doesnt_validate(self):
+    def test_3_group_read_2_data_doesnt_validate(self):
+        pass
+
+
+    def test_4_group_delete_0(self):
+        test_group = Group(**self.group_data)
+
+
+    def test_4_group_delete_1_doesnt_exist(self):
         pass
 
 
