@@ -29,7 +29,7 @@ class User(FairscapeBaseModel, extra=Extra.allow):
         self.software = []
         # self.computations = []
 
-        return super().create(MongoCollection, None)  # Does not work without bson positional parameter
+        return super().create(MongoCollection)
 
     def read(self, MongoCollection: pymongo.collection.Collection) -> OperationStatus:
         return super().read(MongoCollection)
