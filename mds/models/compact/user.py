@@ -1,4 +1,5 @@
 from mds.models.fairscape_base import *
+from mds.utilities.utils import validate_email
 
 
 class UserCompactView(FairscapeBaseModel):
