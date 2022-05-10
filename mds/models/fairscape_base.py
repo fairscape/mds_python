@@ -1,9 +1,7 @@
-from os import O_EXCL
 from pydantic import BaseModel, validator
 from typing import List
 import pymongo
-from requests import delete
-from mds.utilities.utils import validate_ark, validate_email
+from mds.utilities.utils import validate_ark
 from mds.utilities.operation_status import OperationStatus
 
 

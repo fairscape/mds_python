@@ -6,6 +6,7 @@ from mds.models.compact.organization import OrganizationCompactView
 from mds.models.compact.software import SoftwareCompactView
 from mds.models.fairscape_base import *
 from mds.utilities.operation_status import OperationStatus
+from mds.utilities.utils import validate_email
 
 
 class User(FairscapeBaseModel, extra=Extra.allow):
