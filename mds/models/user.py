@@ -1,93 +1,49 @@
-from typing import List, Literal, Tuple, Optional
-from pydantic import EmailStr, Extra
-from .utils import * 
-import pymongo
+from typing import Optional
+
+from pydantic import Extra
+
+from mds.models.compact.organization import OrganizationCompactView
+from mds.models.compact.software import SoftwareCompactView
+from mds.models.fairscape_base import *
+from mds.utilities.operation_status import OperationStatus
 
 
 class User(FairscapeBaseModel, extra=Extra.allow):
     context = {"@vocab": "https://schema.org/", "evi": "https://w3id.org/EVI#"}
     type = "Person"
-    email: EmailStr  # requires installation of module email-validator
+    email: str
     password: str
-    organizations: Optional[list[OrganizationCompactView]] = []
-    projects: Optional[list[ProjectCompactView]] = []
-    datasets: Optional[list[DatasetCompactView]] = []
-    software: Optional[list[SoftwareCompactView]] = [] 
-    computations: Optional[list[ComputationCompactView]] = []
+    organizations: Optional[List[OrganizationCompactView]] = []
+    # projects: Optional[List[ProjectCompactView]] = []
+    # datasets: Optional[List[DatasetCompactView]] = []
+    software: Optional[List[SoftwareCompactView]] = []
+    # computations: Optional[List[ComputationCompactView]] = []
 
+    validate_email = validator('email', allow_reuse=True)(validate_email)
 
-    def create(self, MongoCollection: pymongo.collection.Collection) -> OperationStatus: 
-
-        # TODO hash the given password with the salt
-
-
+    def create(self, MongoCollection: pymongo.collection.Collection) -> OperationStatus:
         # creating a new user we must set their owned objects to none
-        self.projects = []
-        self.datasets = []
+        # self.projects = []
+        # self.datasets = []
         self.software = []
-        self.computations = []
+        # self.computations = []
 
-        return super().create(MongoCollection)
-
+        return super().create(MongoCollection, None)  # Does not work without bson positional parameter
 
     def read(self, MongoCollection: pymongo.collection.Collection) -> OperationStatus:
         return super().read(MongoCollection)
 
+    def update(self, MongoCollection: pymongo.collection.Collection) -> OperationStatus:
+        return super().update(MongoCollection)
 
     def delete(self, MongoCollection: pymongo.collection.Collection) -> OperationStatus:
-        #TODO make sure user doesn't have any owned resources
+        # TODO Make sure user doesn't have any owned resources
         return super().delete(MongoCollection)
 
 
-    def update(self, MongoCollection: pymongo.collection.Collection) -> OperationStatus: 
-        return super().update()
- 
-    
-    def addOrganization(self, MongoCollection: pymongo.collection.Collection, Organization: OrganizationCompactView):
-        return self.update_append(MongoCollection, "organizations", Organization)
-
-
-    def removeOrganization(self, MongoCollection: pymongo.collection.Collection, Organization: OrganizationCompactView):
-        return self.update_remove(MongoCollection, "organizations", Organization)
-
-
-    def addProject(self, MongoCollection: pymongo.collection.Collection, Project: ProjectCompactView):
-        return self.update_append(MongoCollection, "projects", Project)
-
-
-    def removeProject(self, MongoCollection: pymongo.collection.Collection, Project: ProjectCompactView):
-        return self.update_remove(MongoCollection, "projects", Project)
-
-
-    def addDataset(self, MongoCollection: pymongo.collection.Collection, Dataset: DatasetCompactView):
-        return self.update_append(MongoCollection, "datasets", Dataset)
-
-
-    def removeDataset(self, MongoCollection: pymongo.collection.Collection, Dataset: DatasetCompactView):
-        return self.update_remove(MongoCollection, "datasets", Dataset)
-
-
-    def addSoftware(self, MongoCollection: pymongo.collection.Collection, Software: SoftwareCompactView):
-        return self.update_append(MongoCollection, "software", Software)
-
-
-    def removeSoftware(self, MongoCollection: pymongo.collection.Collection, Software: SoftwareCompactView):
-        return self.update_remove(MongoCollection, "software", Software)
-
-
-    def addComputation(self, MongoCollection: pymongo.collection.Collection, Computation: ComputationCompactView):
-        return self.update_append(MongoCollection, "computations", Computation)
-
-
-    def removeComputation(self, MongoCollection: pymongo.collection.Collection, Computation: ComputationCompactView):
-        return self.update_remove(MongoCollection, "computations", Computation)
-
-
-def ListUsers(mongo_collection: pymongo.collection.Collection):
+def list_users(mongo_collection: pymongo.collection.Collection):
     cursor = mongo_collection.find(
-        filter = {"@type": "Person"},
-        projection = {"_id": False}
+        filter={"@type": "Person"},
+        projection={"_id": False}
     )
-    return [ {"@id": user.get("@id"), "name": user.get("name")} for user in cursor]
-
-
+    return [{"@id": user.get("@id"), "name": user.get("name")} for user in cursor]
