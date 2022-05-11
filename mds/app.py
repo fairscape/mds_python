@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 from mds.routers.user import router as UserRouter
 from mds.routers.group import router as GroupRouter
+from mds.routers.software import router as SoftwareRouter
+
 
 tags_metadata = [
     {
@@ -11,7 +13,10 @@ tags_metadata = [
         "name": "group",
         "description": "Operations with groups.",
     },
-
+    {
+        "name": "software",
+        "description": "Operations with software.",
+    }
 ]
 
 app = FastAPI(
@@ -35,7 +40,7 @@ app = FastAPI(
 
 app.include_router(UserRouter, tags=["user"])
 app.include_router(GroupRouter, tags=["group"])
-# app.include_router(SoftwareRouter, tags=["software"])
+app.include_router(SoftwareRouter, tags=["software"])
 # app.include_router(DatasetRouter, tags=["dataset"])
 # app.include_router(ComputationRouter, tags=["computation"])
 # app.include_router(ProjectRouter, tags=["project"])

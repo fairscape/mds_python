@@ -129,13 +129,11 @@ class Group(FairscapeBaseModel, extra=Extra.allow):
             pymongo.DeleteOne({"@id": self.id})
         )
 
-        print("bulk edit append: ", bulk_edit)
-
         # run the transaction
         try:
             bulk_edit_result = MongoCollection.bulk_write(bulk_edit)
         except pymongo.errors.BulkWriteError as bwe:
-            return OperationStatus(False, f"Create Organization Error: {bwe}", 500)
+            return OperationStatus(False, f"Delete Organization Error: {bwe}", 500)
 
         # check that the document was deleted
         if bulk_edit_result.deleted_count == 1:
