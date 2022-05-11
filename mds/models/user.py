@@ -4,6 +4,9 @@ from pydantic import Extra
 
 from mds.models.compact.organization import OrganizationCompactView
 from mds.models.compact.software import SoftwareCompactView
+from mds.models.compact.dataset import DatasetCompactView
+from mds.models.compact.computation import ComputationCompactView
+from mds.models.compact.project import ProjectCompactView
 from mds.models.fairscape_base import *
 from mds.utilities.operation_status import OperationStatus
 from mds.utilities.utils import validate_email
@@ -15,19 +18,19 @@ class User(FairscapeBaseModel, extra=Extra.allow):
     email: str
     password: str
     organizations: Optional[List[OrganizationCompactView]] = []
-    # projects: Optional[List[ProjectCompactView]] = []
-    # datasets: Optional[List[DatasetCompactView]] = []
+    projects: Optional[List[ProjectCompactView]] = []
+    datasets: Optional[List[DatasetCompactView]] = []
     software: Optional[List[SoftwareCompactView]] = []
-    # computations: Optional[List[ComputationCompactView]] = []
+    computations: Optional[List[ComputationCompactView]] = []
 
     validate_email = validator('email', allow_reuse=True)(validate_email)
 
     def create(self, MongoCollection: pymongo.collection.Collection) -> OperationStatus:
         # creating a new user we must set their owned objects to none
-        # self.projects = []
-        # self.datasets = []
+        self.projects = []
+        self.datasets = []
         self.software = []
-        # self.computations = []
+        self.computations = []
 
         return super().create(MongoCollection)
 

@@ -49,7 +49,7 @@ class Dataset(FairscapeBaseModel):
 
         # update operations for the owner user of the dataset
         add_dataset_update = {
-            "$push": {"dataset": SON([("@id", self.id), ("@type", "evi:Dataset"), ("name", self.name)])}
+            "$push": {"datasets": SON([("@id", self.id), ("@type", "evi:Dataset"), ("name", self.name)])}
         }
 
         dataset_bulk_write = [
@@ -99,7 +99,7 @@ class Dataset(FairscapeBaseModel):
 
         # create a bulk write operation
         # to remove a document from a list
-        pull_operation = {"$pull": {"dataset": {"@id": self.id}}}
+        pull_operation = {"$pull": {"datasets": {"@id": self.id}}}
 
         # for ever member, remove the dataset from their list of dataset
         # bulk_edit = [pymongo.UpdateOne({"@id": member.id}, pull_operation) for member in self.members]
