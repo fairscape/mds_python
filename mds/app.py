@@ -4,6 +4,8 @@ from mds.routers.group import router as GroupRouter
 from mds.routers.software import router as SoftwareRouter
 from mds.routers.dataset import router as DatasetRouter
 from mds.routers.computation import router as ComputationRouter
+from mds.routers.project import router as ProjectRouter
+from mds.routers.organization import router as OrganizationRouter
 
 
 tags_metadata = [
@@ -26,6 +28,14 @@ tags_metadata = [
     {
         "name": "computation",
         "description": "Operations with computation.",
+    },
+    {
+        "name": "project",
+        "description": "Operations with project.",
+    },
+    {
+        "name": "organization",
+        "description": "Operations with organization.",
     }
 
 ]
@@ -56,4 +66,5 @@ app.include_router(GroupRouter, tags=["group"])
 app.include_router(SoftwareRouter, tags=["software"])
 app.include_router(DatasetRouter, tags=["dataset"])
 app.include_router(ComputationRouter, tags=["computation"])
-#app.include_router(ProjectRouter, tags=["project"])
+app.include_router(ProjectRouter, tags=["project"])
+app.include_router(OrganizationRouter, tags=["organization"])
