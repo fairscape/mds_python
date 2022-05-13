@@ -7,6 +7,7 @@ from mds.models.compact.software import SoftwareCompactView
 from mds.models.compact.dataset import DatasetCompactView
 from mds.models.compact.computation import ComputationCompactView
 from mds.models.compact.project import ProjectCompactView
+from mds.models.compact.evidencegraph import EvidenceGraphCompactView
 from mds.models.fairscape_base import *
 from mds.utilities.operation_status import OperationStatus
 from mds.utilities.utils import validate_email
@@ -22,6 +23,7 @@ class User(FairscapeBaseModel, extra=Extra.allow):
     datasets: Optional[List[DatasetCompactView]] = []
     software: Optional[List[SoftwareCompactView]] = []
     computations: Optional[List[ComputationCompactView]] = []
+    evidencegraphs: Optional[List[EvidenceGraphCompactView]] = []
 
     validate_email = validator('email', allow_reuse=True)(validate_email)
 
@@ -31,6 +33,7 @@ class User(FairscapeBaseModel, extra=Extra.allow):
         self.datasets = []
         self.software = []
         self.computations = []
+        self.evidencegraphs = []
 
         return super().create(MongoCollection)
 

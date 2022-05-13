@@ -6,6 +6,7 @@ from mds.routers.dataset import router as DatasetRouter
 from mds.routers.computation import router as ComputationRouter
 from mds.routers.project import router as ProjectRouter
 from mds.routers.organization import router as OrganizationRouter
+from mds.routers.evidencegraph import router as EvidenceGraphRouter
 
 
 tags_metadata = [
@@ -36,6 +37,10 @@ tags_metadata = [
     {
         "name": "organization",
         "description": "Operations with organization.",
+    },
+    {
+        "name": "evidencegraph",
+        "description": "Operations with evidencegraph.",
     }
 
 ]
@@ -68,3 +73,4 @@ app.include_router(DatasetRouter, tags=["dataset"])
 app.include_router(ComputationRouter, tags=["computation"])
 app.include_router(ProjectRouter, tags=["project"])
 app.include_router(OrganizationRouter, tags=["organization"])
+app.include_router(EvidenceGraphRouter, tags=["evidencegraph"])
