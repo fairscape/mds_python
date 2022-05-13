@@ -144,11 +144,9 @@ class Group(FairscapeBaseModel, extra=Extra.allow):
     def add_user(self, MongoCollection: pymongo.collection.Collection, member_id) -> OperationStatus:
         # find the user
 
-        group_user = User(id=member_id)
-        print('group_user: ', group_user)
+        group_user = User.construct(id=member_id)
 
         user_read_status = group_user.read(MongoCollection)
-        print('user read status: ', user_read_status)
 
         if not user_read_status.success:
             return user_read_status

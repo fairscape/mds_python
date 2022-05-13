@@ -301,6 +301,6 @@ class FairscapeBaseModel(BaseModel):
 
         update_result = MongoCollection.update_one(
             {"@id": self.id},
-            {"$push": {Field: Item}}
+            {"$addToSet": {Field: Item}}
         )
         return OperationStatus(True, "", 200)
