@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Response
 
-from mds.database import mongo
+from mds.database import mongo 
 from mds.models.computation import Computation, list_computation
 
 router = APIRouter()
@@ -8,7 +8,7 @@ router = APIRouter()
 
 @router.post("/computation")
 def computation_create(computation: Computation, response: Response):
-    mongo_client = mongo.get_config()
+    mongo_client = mongo.GetConfig()
     mongo_db = mongo_client["test"]
     mongo_collection = mongo_db["testcol"]
 
@@ -25,7 +25,7 @@ def computation_create(computation: Computation, response: Response):
 
 @router.get("/computation")
 def computation_list(response: Response):
-    mongo_client = mongo.get_config()
+    mongo_client = mongo.GetConfig()
     mongo_db = mongo_client["test"]
     mongo_collection = mongo_db["testcol"]
 
@@ -38,7 +38,7 @@ def computation_list(response: Response):
 
 @router.get("/computation/ark:{NAAN}/{postfix}")
 def computation_get(NAAN: str, postfix: str, response: Response):
-    mongo_client = mongo.get_config()
+    mongo_client = mongo.GetConfig()
     mongo_db = mongo_client['test']
     mongo_collection = mongo_db['testcol']
 
@@ -59,7 +59,7 @@ def computation_get(NAAN: str, postfix: str, response: Response):
 
 @router.put("/computation")
 def computation_update(computation: Computation, response: Response):
-    mongo_client = mongo.get_config()
+    mongo_client = mongo.GetConfig()
     mongo_db = mongo_client['test']
     mongo_collection = mongo_db['testcol']
 
@@ -78,7 +78,7 @@ def computation_update(computation: Computation, response: Response):
 def computation_delete(NAAN: str, postfix: str):
     computation_id = f"ark:{NAAN}/{postfix}"
 
-    mongo_client = mongo.get_config()
+    mongo_client = mongo.GetConfig()
     mongo_db = mongo_client['test']
     mongo_collection = mongo_db['testcol']
 

@@ -11,11 +11,11 @@ class MongoConfig:
         self.database = database
 
     def connect(self) -> MongoClient:
-        connection_uri = f"mongodb://{quote_plus(self.user)}:" + f"{quote_plus(self.password)}@{self.host_uri}:{str(self.port)} "
+        connection_uri = f"mongodb://{quote_plus(self.user)}:{quote_plus(self.password)}@{self.host_uri}:{str(self.port)}"
         return MongoClient(connection_uri)
 
 
-def get_config():
+def GetConfig():
     return MongoConfig(
         host_uri="localhost",
         port=27017,

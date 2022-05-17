@@ -8,7 +8,7 @@ router = APIRouter()
 
 @router.post("/group")
 def group_create(group: Group, response: Response):
-    mongo_client = mongo.get_config()
+    mongo_client = mongo.GetConfig()
     mongo_db = mongo_client["test"]
     mongo_collection = mongo_db["testcol"]
 
@@ -25,7 +25,7 @@ def group_create(group: Group, response: Response):
 
 @router.get("/group")
 def group_list():
-    mongo_client = mongo.get_config()
+    mongo_client = mongo.GetConfig()
     mongo_db = mongo_client["test"]
     mongo_collection = mongo_db["testcol"]
 
@@ -38,7 +38,7 @@ def group_list():
 
 @router.get("/group/ark:{NAAN}/{postfix}")
 def group_get(NAAN: str, postfix: str, response: Response):
-    mongo_client = mongo.get_config()
+    mongo_client = mongo.GetConfig()
     mongo_db = mongo_client['test']
     mongo_collection = mongo_db['testcol']
 
@@ -59,7 +59,7 @@ def group_get(NAAN: str, postfix: str, response: Response):
 
 @router.put("/group")
 def group_update(group: Group, response: Response):
-    mongo_client = mongo.get_config()
+    mongo_client = mongo.GetConfig()
     mongo_db = mongo_client['test']
     mongo_collection = mongo_db['testcol']
 
@@ -78,7 +78,7 @@ def group_update(group: Group, response: Response):
 def group_delete(NAAN: str, postfix: str):
     group_id = f"ark:{NAAN}/{postfix}"
 
-    mongo_client = mongo.get_config()
+    mongo_client = mongo.GetConfig()
     mongo_db = mongo_client['test']
     mongo_collection = mongo_db['testcol']
 
@@ -99,7 +99,7 @@ def group_delete(NAAN: str, postfix: str):
 #
 @router.put("/group/ark:{NAAN}/{postfix}/addUser/")
 def group_add_user(group: Group, NAAN: str, postfix: str, response: Response):
-    mongo_client = mongo.get_config()
+    mongo_client = mongo.GetConfig()
     mongo_db = mongo_client['test']
     mongo_collection = mongo_db['testcol']
 

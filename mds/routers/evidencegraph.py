@@ -8,7 +8,7 @@ router = APIRouter()
 
 @router.post("/evidencegraph")
 def evidencegraph_create(evidencegraph: EvidenceGraph, response: Response):
-    mongo_client = mongo.get_config()
+    mongo_client = mongo.GetConfig()
     mongo_db = mongo_client["test"]
     mongo_collection = mongo_db["testcol"]
 
@@ -25,7 +25,7 @@ def evidencegraph_create(evidencegraph: EvidenceGraph, response: Response):
 
 @router.get("/evidencegraph")
 def evidencegraph_list(response: Response):
-    mongo_client = mongo.get_config()
+    mongo_client = mongo.GetConfig()
     mongo_db = mongo_client["test"]
     mongo_collection = mongo_db["testcol"]
 
@@ -38,7 +38,7 @@ def evidencegraph_list(response: Response):
 
 @router.get("/evidencegraph/ark:{NAAN}/{postfix}")
 def evidencegraph_get(NAAN: str, postfix: str, response: Response):
-    mongo_client = mongo.get_config()
+    mongo_client = mongo.GetConfig()
     mongo_db = mongo_client['test']
     mongo_collection = mongo_db['testcol']
 
@@ -59,7 +59,7 @@ def evidencegraph_get(NAAN: str, postfix: str, response: Response):
 
 @router.put("/evidencegraph")
 def evidencegraph_update(evidencegraph: EvidenceGraph, response: Response):
-    mongo_client = mongo.get_config()
+    mongo_client = mongo.GetConfig()
     mongo_db = mongo_client['test']
     mongo_collection = mongo_db['testcol']
 
@@ -78,7 +78,7 @@ def evidencegraph_update(evidencegraph: EvidenceGraph, response: Response):
 def evidencegraph_delete(NAAN: str, postfix: str):
     evidencegraph_id = f"ark:{NAAN}/{postfix}"
 
-    mongo_client = mongo.get_config()
+    mongo_client = mongo.GetConfig()
     mongo_db = mongo_client['test']
     mongo_collection = mongo_db['testcol']
 

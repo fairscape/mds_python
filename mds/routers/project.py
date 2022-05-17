@@ -8,7 +8,7 @@ router = APIRouter()
 
 @router.post("/project")
 def project_create(project: Project, response: Response):
-    mongo_client = mongo.get_config()
+    mongo_client = mongo.GetConfig()
     mongo_db = mongo_client["test"]
     mongo_collection = mongo_db["testcol"]
 
@@ -25,7 +25,7 @@ def project_create(project: Project, response: Response):
 
 @router.get("/project")
 def project_list(response: Response):
-    mongo_client = mongo.get_config()
+    mongo_client = mongo.GetConfig()
     mongo_db = mongo_client["test"]
     mongo_collection = mongo_db["testcol"]
 
@@ -38,7 +38,7 @@ def project_list(response: Response):
 
 @router.get("/project/ark:{NAAN}/{postfix}")
 def project_get(NAAN: str, postfix: str, response: Response):
-    mongo_client = mongo.get_config()
+    mongo_client = mongo.GetConfig()
     mongo_db = mongo_client['test']
     mongo_collection = mongo_db['testcol']
 
@@ -59,7 +59,7 @@ def project_get(NAAN: str, postfix: str, response: Response):
 
 @router.put("/project")
 def project_update(project: Project, response: Response):
-    mongo_client = mongo.get_config()
+    mongo_client = mongo.GetConfig()
     mongo_db = mongo_client['test']
     mongo_collection = mongo_db['testcol']
 
@@ -78,7 +78,7 @@ def project_update(project: Project, response: Response):
 def project_delete(NAAN: str, postfix: str):
     project_id = f"ark:{NAAN}/{postfix}"
 
-    mongo_client = mongo.get_config()
+    mongo_client = mongo.GetConfig()
     mongo_db = mongo_client['test']
     mongo_collection = mongo_db['testcol']
 

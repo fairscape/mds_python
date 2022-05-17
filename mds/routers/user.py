@@ -7,7 +7,7 @@ router = APIRouter()
 
 @router.post('/user', status_code=201)
 def user_create(user: User, response: Response):
-    mongo_client = mongo.get_config()
+    mongo_client = mongo.GetConfig()
     mongo_db = mongo_client['test']
     mongo_collection = mongo_db['testcol']
 
@@ -24,7 +24,7 @@ def user_create(user: User, response: Response):
 
 @router.get('/user')
 def user_list():
-    mongo_client = mongo.get_config()
+    mongo_client = mongo.GetConfig()
     mongo_db = mongo_client['test']
     mongo_collection = mongo_db['testcol']
 
@@ -37,7 +37,7 @@ def user_list():
 
 @router.get("/user/ark:{NAAN}/{postfix}")
 def user_get(NAAN: str, postfix: str, response: Response):
-    mongo_client = mongo.get_config()
+    mongo_client = mongo.GetConfig()
     mongo_db = mongo_client['test']
     mongo_collection = mongo_db['testcol']
 
@@ -58,7 +58,7 @@ def user_get(NAAN: str, postfix: str, response: Response):
 
 @router.put("/user")
 def user_update(user: User, response: Response):
-    mongo_client = mongo.get_config()
+    mongo_client = mongo.GetConfig()
     mongo_db = mongo_client["test"]
     mongo_collection = mongo_db["testcol"]
 
@@ -78,7 +78,7 @@ def user_update(user: User, response: Response):
 def user_delete(NAAN: str, postfix: str):
     user_id = f"ark:{NAAN}/{postfix}"
 
-    mongo_client = mongo.get_config()
+    mongo_client = mongo.GetConfig()
     mongo_db = mongo_client['test']
     mongo_collection = mongo_db['testcol']
 

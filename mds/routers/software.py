@@ -8,7 +8,7 @@ router = APIRouter()
 
 @router.post("/software")
 def software_create(software: Software, response: Response):
-    mongo_client = mongo.get_config()
+    mongo_client = mongo.GetConfig()
     mongo_db = mongo_client["test"]
     mongo_collection = mongo_db["testcol"]
 
@@ -25,7 +25,7 @@ def software_create(software: Software, response: Response):
 
 @router.get("/software")
 def software_list(response: Response):
-    mongo_client = mongo.get_config()
+    mongo_client = mongo.GetConfig()
     mongo_db = mongo_client["test"]
     mongo_collection = mongo_db["testcol"]
 
@@ -38,7 +38,7 @@ def software_list(response: Response):
 
 @router.get("/software/ark:{NAAN}/{postfix}")
 def software_get(NAAN: str, postfix: str, response: Response):
-    mongo_client = mongo.get_config()
+    mongo_client = mongo.GetConfig()
     mongo_db = mongo_client['test']
     mongo_collection = mongo_db['testcol']
 
@@ -59,7 +59,7 @@ def software_get(NAAN: str, postfix: str, response: Response):
 
 @router.put("/software")
 def software_update(software: Software, response: Response):
-    mongo_client = mongo.get_config()
+    mongo_client = mongo.GetConfig()
     mongo_db = mongo_client['test']
     mongo_collection = mongo_db['testcol']
 
@@ -78,7 +78,7 @@ def software_update(software: Software, response: Response):
 def software_delete(NAAN: str, postfix: str):
     software_id = f"ark:{NAAN}/{postfix}"
 
-    mongo_client = mongo.get_config()
+    mongo_client = mongo.GetConfig()
     mongo_db = mongo_client['test']
     mongo_collection = mongo_db['testcol']
 

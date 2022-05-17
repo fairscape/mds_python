@@ -8,7 +8,7 @@ router = APIRouter()
 
 @router.post("/dataset")
 def dataset_create(dataset: Dataset, response: Response):
-    mongo_client = mongo.get_config()
+    mongo_client = mongo.GetConfig()
     mongo_db = mongo_client["test"]
     mongo_collection = mongo_db["testcol"]
 
@@ -25,7 +25,7 @@ def dataset_create(dataset: Dataset, response: Response):
 
 @router.get("/dataset")
 def dataset_list(response: Response):
-    mongo_client = mongo.get_config()
+    mongo_client = mongo.GetConfig()
     mongo_db = mongo_client["test"]
     mongo_collection = mongo_db["testcol"]
 
@@ -38,7 +38,7 @@ def dataset_list(response: Response):
 
 @router.get("/dataset/ark:{NAAN}/{postfix}")
 def dataset_get(NAAN: str, postfix: str, response: Response):
-    mongo_client = mongo.get_config()
+    mongo_client = mongo.GetConfig()
     mongo_db = mongo_client['test']
     mongo_collection = mongo_db['testcol']
 
@@ -59,7 +59,7 @@ def dataset_get(NAAN: str, postfix: str, response: Response):
 
 @router.put("/dataset")
 def dataset_update(dataset: Dataset, response: Response):
-    mongo_client = mongo.get_config()
+    mongo_client = mongo.GetConfig()
     mongo_db = mongo_client['test']
     mongo_collection = mongo_db['testcol']
 
@@ -78,7 +78,7 @@ def dataset_update(dataset: Dataset, response: Response):
 def dataset_delete(NAAN: str, postfix: str):
     dataset_id = f"ark:{NAAN}/{postfix}"
 
-    mongo_client = mongo.get_config()
+    mongo_client = mongo.GetConfig()
     mongo_db = mongo_client['test']
     mongo_collection = mongo_db['testcol']
 
