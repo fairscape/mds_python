@@ -297,10 +297,35 @@ class FairscapeBaseModel(BaseModel):
         except Exception as e:
             return OperationStatus(False, f"Error: {str(e)}", 500)
 
+
     def update_append(self, MongoCollection, Field: str, Item) -> OperationStatus:
 
+        # TODO read update result output to determine success
         update_result = MongoCollection.update_one(
             {"@id": self.id},
             {"$addToSet": {Field: Item}}
         )
+
+        return OperationStatus(True, "", 200)
+
+
+    def update_remove(self, MongoCollection, field: str, item_id: str) -> OperationStatus:
+        """
+        update_remove
+
+        Updates a document removing an element from a list where the item matches a member on the field '@id'
+
+        Parameters
+        - self: FairscapeBaseClass
+        - MongoCollection
+        - Field: str
+        - Item
+        """
+
+        # TODO read update result output to determine success
+        update_result = MongoCollection.update_one(
+            {"@id": self.id},
+            {"$pull": {field:  {"@id": item_id} }}
+        )
+
         return OperationStatus(True, "", 200)

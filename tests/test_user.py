@@ -1,7 +1,7 @@
 import path
 import unittest
 from mds.models import *
-from mds import MongoConfig
+from mds.database.mongo import MongoConfig
 
 
 class TestUser(unittest.TestCase):
@@ -113,7 +113,6 @@ class TestUser(unittest.TestCase):
         )
 
         self.assertDictEqual(full_user.dict(by_alias=True), full_user_missing.dict(by_alias=True))
-
 
 
     def test_2_mongo_create(self):
