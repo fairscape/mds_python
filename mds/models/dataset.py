@@ -1,17 +1,22 @@
 from bson import SON
 from pydantic import Extra
+from typing import Optional, List
+import pymongo
+
 from mds.models.fairscape_base import *
 from mds.models.compact.user import UserCompactView
+from mds.models.compact.download import DownloadCompactView
+from mds.utilities.operation_status import OperationStatus
 
 
 class Dataset(FairscapeBaseModel):
     context = {"@vocab": "https://schema.org/", "evi": "https://w3id.org/EVI#"}
     type = "evi:Dataset"
     owner: UserCompactView
+    distribution: Optional[List[DownloadCompactView]]
 
     # includedInDataCatalog: ProjectCompactView
     # sourceOrganization: OrganizationCompactView
-    # distribution: str
     # author: str
     # dateCreated: datetime
     # dateModified: datetime

@@ -1,0 +1,1 @@
+MINIO_BUCKET = "test"

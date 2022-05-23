@@ -90,9 +90,10 @@ def group_delete(NAAN: str, postfix: str):
     mongo_db = mongo_client['test']
     mongo_collection = mongo_db['testcol']
 
-    group = Group.construct(id=group_id)
-    group.get(mongo_collection)
 
+    # TODO delete function should have FindOneAndDelete
+    group = Group.construct(id=group_id)
+    group.read(mongo_collection)
     delete_status = group.delete(mongo_collection)
 
     mongo_client.close()
