@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Response
+from fastapi import APIRouter, JSONResponse
 
 from mds.database import mongo
 from mds.models.dataset import Dataset, list_dataset
@@ -7,7 +7,7 @@ router = APIRouter()
 
 
 @router.post("/dataset")
-def dataset_create(dataset: Dataset, response: Response):
+def dataset_create(dataset: Dataset):
     mongo_client = mongo.GetConfig()
     mongo_db = mongo_client["test"]
     mongo_collection = mongo_db["testcol"]
@@ -17,14 +17,19 @@ def dataset_create(dataset: Dataset, response: Response):
     mongo_client.close()
 
     if create_status.success:
-        return {"created": {"@id": dataset.id, "@type": "evi:Dataset"}}
+        return JSONResponse(
+            status_code = 201,
+            content={"created": {"@id": dataset.id, "@type": "evi:Dataset"}}
+        )
     else:
-        response.status_code = create_status.status_code
-        return {"error": create_status.message}
+        return JSONResponse(
+            status_code = create_status.status_code,
+            content = {"error": create_status.message}
+        )
 
 
 @router.get("/dataset")
-def dataset_list(response: Response):
+def dataset_list():
     mongo_client = mongo.GetConfig()
     mongo_db = mongo_client["test"]
     mongo_collection = mongo_db["testcol"]
@@ -37,7 +42,7 @@ def dataset_list(response: Response):
 
 
 @router.get("/dataset/ark:{NAAN}/{postfix}")
-def dataset_get(NAAN: str, postfix: str, response: Response):
+def dataset_get(NAAN: str, postfix: str):
     mongo_client = mongo.GetConfig()
     mongo_db = mongo_client['test']
     mongo_collection = mongo_db['testcol']
@@ -53,12 +58,14 @@ def dataset_get(NAAN: str, postfix: str, response: Response):
     if read_status.success:
         return dataset
     else:
-        response.status_code = read_status.status_code
-        return {"error": read_status.message}
+        return JSONResponse(
+            status_code = read_status.status_code,
+            content= {"error": read_status.message}
+        )
 
 
 @router.put("/dataset")
-def dataset_update(dataset: Dataset, response: Response):
+def dataset_update(dataset: Dataset):
     mongo_client = mongo.GetConfig()
     mongo_db = mongo_client['test']
     mongo_collection = mongo_db['testcol']
@@ -68,10 +75,15 @@ def dataset_update(dataset: Dataset, response: Response):
     mongo_client.close()
 
     if update_status.success:
-        return {"updated": {"@id": dataset.id, "@type": "evi:Dataset"}}
+        return JSONResponse(
+            status_code = 200,
+            content= {"updated": {"@id": dataset.id, "@type": "evi:Dataset"}}
+        )
     else:
-        response.status_code = update_status.status_code
-        return {"error": update_status.message}
+        return JSONResponse(
+            status_code = update_status.status_code,
+            content= {"error": update_status.message}
+        )
 
 
 @router.delete("/dataset/ark:{NAAN}/{postfix}")
@@ -89,6 +101,13 @@ def dataset_delete(NAAN: str, postfix: str):
     mongo_client.close()
 
     if delete_status.success:
-        return {"deleted": {"@id": dataset_id}}
+        return JSONResponse(
+            status_code = 200,
+            content= {"deleted": {"@id": dataset_id}}
+        )
+
     else:
-        return {"error": f"{str(delete_status.message)}"}
+        return JSONResponse( 
+            status_code = delete_status.status_code,
+            content= {"error": f"{str(delete_status.message)}"}
+        )

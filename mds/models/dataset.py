@@ -5,7 +5,7 @@ import pymongo
 
 from mds.models.fairscape_base import *
 from mds.models.compact.user import UserCompactView
-from mds.models.compact.download import DownloadCompactView
+from mds.models.compact.download import DataDownloadCompactView
 from mds.utilities.operation_status import OperationStatus
 
 
@@ -13,7 +13,7 @@ class Dataset(FairscapeBaseModel):
     context = {"@vocab": "https://schema.org/", "evi": "https://w3id.org/EVI#"}
     type = "evi:Dataset"
     owner: UserCompactView
-    distribution: Optional[List[DownloadCompactView]]
+    distribution: Optional[List[DataDownloadCompactView]]
 
     # includedInDataCatalog: ProjectCompactView
     # sourceOrganization: OrganizationCompactView
