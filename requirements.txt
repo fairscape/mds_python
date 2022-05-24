@@ -2,3 +2,5 @@ fastapi
 uvicorn
 pymongo
 requests
+python-multipart
+minio
