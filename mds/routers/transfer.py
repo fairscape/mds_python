@@ -3,29 +3,27 @@ from fastapi.responses import JSONResponse, StreamingResponse
 
 from mds.database import mongo, minio
 from mds.models.dataset import Dataset
-from mds.models.download import DataDownload
+from mds.models.download import Download as DataDownload
 from mds.models.compact.user import UserCompactView
 
 
 router = APIRouter()
 
-@router.post("/dataset/ark:{NAAN}/{dataset_id}/datadownload/ark:{NAAN}/{download_id}/")
-async def data_download_create_metadata(NAAN: str, dataset_id: str, download_id: str,  data_download: DataDownload):
+@router.post("/datadownload")
+async def data_download_create_metadata(data_download: DataDownload):
 	"""
 	create metadata record for a file	
 	"""
 
-	# create a mongo_collection
-	dataset_id = f"ark:{NAAN}/{dataset_id}"
-	data_download_id = f"ark:{NAAN}/{download_id}"
 
-	data_download.id = data_download_id
-	data_download.encodesCreativeWork.id = dataset_id
+	mongo_client = mongo.GetConfig()
 
-	mongo_collection = mongo.GetConfig()
+	# TODO check that dataset is set
+	#dataset_id = f"ark:{NAAN}/{dataset_id}"
+	#data_download.encodesCreativeWork.id = dataset_id
 
 	# create metadata record for data download
-	create_metadata_status = data_download.create_metadata(mongo_collection)
+	create_metadata_status = data_download.create_metadata(mongo_client)
 
 	if create_metadata_status.success:
 		return JSONResponse(
@@ -46,17 +44,17 @@ async def data_download_create_metadata(NAAN: str, dataset_id: str, download_id:
 
 
 @router.post("/datadownload/ark:{NAAN}/{download_id}/upload")
-async def data_download_upload(NAAN: str, download_id: str, upload_file: UploadFile):
+async def data_download_upload(NAAN: str, download_id: str, file: UploadFile):
 
 	data_download = DataDownload.construct(id= f"ark:{NAAN}/{download_id}")
 
-	mongo_collection = mongo.GetConfig()
-	minio_client = minio.GetMinioConfig()
+	minio_client = minio.GetMinioConfig()	
+	mongo_client = mongo.GetConfig()
 
 
 	upload_status = data_download.create_upload(
-		Object = upload_file, 
-		MongoCollection = mongo_collection, 
+		Object = file, 
+		MongoClient = mongo_client, 
 		MinioClient = minio_client
 		)
 
@@ -88,7 +86,10 @@ async def data_download_read(NAAN: str, download_id: str, object: bool=False):
 	data_download = DataDownload.construct(id=data_download_id)
 
 	# get the connection to the databases
-	mongo_collection = mongo.GetConfig()
+	mongo_client = mongo.GetConfig()
+	mongo_db = mongo_client["test"]
+	mongo_collection = mongo_db["testcol"]
+
 	minio_client = minio.GetMinioConfig()
 
 	read_status = data_download.read_metadata(mongo_collection)
@@ -131,10 +132,18 @@ async def transfer_delete(NAAN: str, dataset_id: str, upload_id: str):
 	delete the data download, removing its content inside minio but leaving a record in mongo
 	"""
 
+	mongo_client = mongo.GetConfig()	
+	mongo_db = mongo_client["test"]
+	mongo_collection = mongo_db["testcol"]
+
 	return {"status": "in_progress"}
 
 
 @router.put("/datadownload/ark:{NAAN}/{download_id}")
 async def data_download_update(NAAN:str, download_id: str):
+
+	mongo_client = mongo.GetConfig()	
+	mongo_db = mongo_client["test"]
+	mongo_collection = mongo_db["testcol"]
 
 	return {"status": "in_progress"}

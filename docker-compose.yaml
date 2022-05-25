@@ -22,3 +22,11 @@ services:
       ME_CONFIG_MONGODB_ADMINUSERNAME: root
       ME_CONFIG_MONGODB_ADMINPASSWORD: example
       ME_CONFIG_MONGODB_URL: mongodb://root:example@mongo:27017/
+
+  minio:
+    image: minio/minio
+    restart: always
+    ports:
+      - 9001:9001
+      - 9000:9000
+    command: server /data --console-address ":9001"

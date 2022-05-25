@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Union
 from datetime import datetime
 from pydantic import Extra
 from bson import SON
@@ -9,8 +9,7 @@ from mds.models.dataset import Dataset
 from mds.models.compact.dataset import DatasetCompactView
 from mds.utilities.operation_status import OperationStatus
 
-from mds.database.config import MINIO_BUCKET
-from minio.error import ResponseError
+from mds.database.config import MINIO_BUCKET, MONGO_DATABASE, MONGO_COLLECTION
 
 
 class Download(FairscapeBaseModel, extra=Extra.allow):
@@ -19,85 +18,119 @@ class Download(FairscapeBaseModel, extra=Extra.allow):
 	encodingFormat: str
 	contentSize: Optional[str]
 	contentUrl: Optional[str]
-	encodesCreativeWork: Optional[DatasetCompactView]
+	encodesCreativeWork: Optional[Union[DatasetCompactView, str]]
 	sha256: Optional[str]
 	uploadDate: Optional[datetime]
 	version: Optional[str]
 	# status: str
 
 
-	def create_metadata(self, DatasetId: str, MongoCollection: pymongo.collection.Collection) -> OperationStatus:
+	def create_metadata(self, MongoClient: pymongo.MongoClient) -> OperationStatus:
 
 		if self.version == None:
 			# create versioning
 			self.version = "1.0"
 
-		# check that dataset exists
-		dataset = Dataset.construct(id=DatasetId)
-		dataset_read_status = dataset.read(MongoCollection)
+		# handle if encodesCreativeWork is string or dictionary
+		if type(self.encodesCreativeWork) == str:
+			if self.encodesCreativeWork == "":
+				return OperationStatus(False, "missing dataset", 400)
 
-		if dataset_read_status.status != True:
-			# TODO make a more informative error message
-			return dataset_read_status
+			dataset_id = self.encodesCreativeWork
 
-		# update the encodesCreativeWork property with a DatasetCompactView
-		self.encodesCreativeWork = DatasetCompactView(id=dataset.id, type="Dataset", name=dataset.name)
+		elif type(self.encodesCreativeWork) == dict:
+			dataset_id = self.encodesCreativeWork.get("@id")
 
-		create_download_bulk_write = [
-			# update the dataset containing this download
-			pymongo.UpdateOne(
+		# TODO test for different types of encodesCreativeWork	
+		else:
+			return OperationStatus(False, f"encodesCreativeWork {self.encodesCreativeWork} not valid", 400)
+
+
+		# preform all operations as a single transaction
+		with MongoClient.start_session(causal_consistency=True) as session:
+			mongo_database = MongoClient[MONGO_DATABASE]
+			mongo_collection = mongo_database[MONGO_COLLECTION]
+
+			dataset_metadata = mongo_collection.find_one({"@id": dataset_id}, session=session)
+			if dataset_metadata == None:
+				return OperationStatus(False, f"dataset {dataset_id} not found", 404)
+				
+			dataset = Dataset.construct(**dataset_metadata)
+
+			# update the encodesCreativeWork property with a DatasetCompactView
+			self.encodesCreativeWork = DatasetCompactView(
+				id=dataset_metadata.id, 
+				type="Dataset", 
+				name=dataset.name
+				)
+
+
+			# TODO test output of operations
+			# create metadata record in mongo
+			insert_result = mongo_collection.InsertOne(self.dict(by_alias=True))
+
+			# TODO check that update was successfull
+			# test update result	
+			update_result = mongo_collection.UpdateOne(
 				{"@id": dataset.id}, 
-				{"$push" : { 
+				{"$addToSet" : { 
 					"distribution": SON([("@id", self.id), ("@type", "DataDownload"), ("name", self.name)])}
 				}),
 
-			# create metadata record in mongo
-			pymongo.InsertOne(self.json(by_alias=True))
-		]
+		# TODO handle errors
+		#except Exception as bwe:
+		#	return OperationStatus(False, f"create download error: {bwe}", 500)
 
-		try:
-			bulk_write_result = MongoCollection.bulk_write(create_download_bulk_write)
-		except Exception as bwe:
-			return OperationStatus(False, f"create download error: {bwe}", 500)
-
-		if bulk_write_result.inserted_count != 1:
-			return OperationStatus(False, "create download error: {bulk_write_result.bulk_api_result}", 500)
+		#if bulk_write_result.inserted_count != 1:
+		#	return OperationStatus(False, "create download error: {bulk_write_result.bulk_api_result}", 500)
 
 		return OperationStatus(True, "", 201)
 
 
-	def create_upload(self, Object, MongoCollection: pymongo.collection.Collection, MinioClient) -> OperationStatus:
+	def create_upload(self, Object, MongoClient: pymongo.MongoClient, MinioClient) -> OperationStatus:
 		"""
 		uploads the file and ammends the dataDownload metadata and dataset metadata
 		"""
 
+		with MongoClient.start_session(causal_consistency=True) as session:
+			pass
+
+			# check that the data download metadata record exists
+			read_status = self.read(MongoCollection)
+
+			if read_status.success != True:
+				return read_status
+
 		# TODO change file upload path
+		# TODO check that self.encodesCreativeWork is non empty
 		upload_path = f"{self.encodesCreativeWork.name}/{self.name}"
-
-		# check that the data download metadata record exists
-		read_status = self.read(MongoCollection)
-
-		if read_status.success != True:
-			return read_status
-
+		
 		# TODO run sha256 as a background task
 		# create sha256 for object
-				
 		
 		# upload object to minio
 		try:
-			upload_operation = MinioClient(
+			upload_operation = MinioClient.put_object(
 				bucket_name = MINIO_BUCKET,
 				object_name = upload_path,
-				data=Object,
-				metadata={"@id": self.id, "name": self.name}
+				data=Object.file,
+				length=-1,
+				part_size=10*1024*1024,
+				#metadata={"@id": self.id, "name": self.name}
 				)
 
 			# TODO check output of upload operation more thoroughly
 			if upload_operation == None:
 				return OperationStatus(False, "minio error: upload failed", 500)
 
-		except ResponseError as minio_err:
+			# get the size of the file from the stats
+			result_stats = MinioClient.stat_object(
+				bucket_name = MINIO_BUCKET,
+				object_name = upload_path
+			)
+
+		# TODO handle minio errors
+		except Exception as minio_err:
 			return OperationStatus(False, f"minio error: {minio_err}", 500)
 
 
@@ -106,13 +139,12 @@ class Download(FairscapeBaseModel, extra=Extra.allow):
 			# update the download metadata 
 			pymongo.UpdateOne(
 				{"@id": self.id}, 
-				{
+				{ "$set": {
 					"contentUrl": upload_path,
-					"uploadDate": datetime.now(),
+					"uploadDate": str(result_stats.last_modified),
 					"version": self.version,
-					"contentSize": str(len(Object))
-				}
-				),
+					"contentSize": result_stats.size,
+				}}),
 
 			# update the dataset metadata
 			pymongo.UpdateOne(

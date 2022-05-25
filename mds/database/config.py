@@ -1,1 +1,3 @@
 MINIO_BUCKET = "test"
+MONGO_DATABASE = "test"
+MONGO_COLLECTION = "testcol"

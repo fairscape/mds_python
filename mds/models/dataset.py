@@ -13,7 +13,7 @@ class Dataset(FairscapeBaseModel):
     context = {"@vocab": "https://schema.org/", "evi": "https://w3id.org/EVI#"}
     type = "evi:Dataset"
     owner: UserCompactView
-    distribution: Optional[List[DataDownloadCompactView]]
+    distribution: Optional[List[DataDownloadCompactView]] = []
 
     # includedInDataCatalog: ProjectCompactView
     # sourceOrganization: OrganizationCompactView
