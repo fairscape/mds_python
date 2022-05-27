@@ -1,4 +1,5 @@
 import minio
+from mds.database.config import MINIO_USER, MINIO_PASS
 from minio.error import S3Error
 
 class MinioConfig():
@@ -19,6 +20,6 @@ class MinioConfig():
 def GetMinioConfig():
 	return MinioConfig(
 		"localhost:9000",
-		"minioadmin",
-		"minioadmin"
+		MINIO_USER,
+		MINIO_PASS,
 	).connect()
