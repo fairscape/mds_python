@@ -1,4 +1,5 @@
 import path
+import json
 from fastapi.testclient import TestClient
 from mds.app import app
 
@@ -158,8 +159,16 @@ def test_1_group_2_get():
 			],
 	}
 
+
+	returned_group = json.loads(get_group.json())
+
 	assert get_group.status_code == 200
-	assert get_group.json() == expected_group
+
+	for key in ["@id", "@type", "name", "owner"]:
+		assert returned_group.get(key) == expected_group.get(key)
+
+	# TODO check members key is equal
+	
 
 
 def test_1_group_3_update():

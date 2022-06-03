@@ -61,7 +61,7 @@ async def data_download_upload(NAAN: str, download_id: str, file: UploadFile):
 	if upload_status.success:
 		return JSONResponse(
 			status_code=201,
-			content= {"uploaded": {"@id": data_download.id, "@type": "DataDownload", "name": data_download.name}}
+			content= {"updated": {"@id": data_download.id, "@type": "DataDownload", "name": data_download.name}}
 			)
 	else:
 		return JSONResponse(
@@ -71,7 +71,7 @@ async def data_download_upload(NAAN: str, download_id: str, file: UploadFile):
 
 
 @router.get("/datadownload/ark:{NAAN}/{download_id}")
-async def data_download_read(NAAN: str, download_id: str, object: bool=False):
+async def data_download_read(NAAN: str, download_id: str):
 	"""
 	read the data download object
 
@@ -114,36 +114,109 @@ async def data_download_read(NAAN: str, download_id: str, object: bool=False):
 				})
 
 	# if the metadata is requested return the metadata
-	if object == False:
-		return JSONResponse(status_code=200, content=read_status.json(by_alias=True))
-
-	# if the object was requested  
-	else:
-
-		# get the upload file from minio and stream it back to the user
-		return StreamingResponse(data_download.read_object(minio_client), media_type="application/octet-stream")
+	return JSONResponse(
+		status_code=200, 
+		content=data_download.json(by_alias=True)
+		)
 
 
+@router.get("/datadownload/ark:{NAAN}/{download_id}/download")
+async def data_download_read(NAAN: str, download_id: str):
+
+	data_download_id = f"ark:{NAAN}/{download_id}"
+	data_download = DataDownload.construct(id=data_download_id)
+
+	# get the connection to the databases
+	mongo_client = mongo.GetConfig()
+	mongo_db = mongo_client["test"]
+	mongo_collection = mongo_db["testcol"]
+
+	minio_client = minio.GetMinioConfig()
+
+	read_status = data_download.read_metadata(mongo_collection)
+
+	if read_status.success != True:
+
+		if read_status.status_code == 404:
+			return JSONResponse(
+				status_code= 404, 
+				content = {
+					"@id": data_download.id, 
+					"error": "data download not found"
+					})
+
+		else:
+			return JSONResponse(
+				status_code = read_status.status_code,
+				content = {
+					"@id": data_download.id,
+					"error": read_status.message
+				})
+
+	# get the upload file from minio and stream it back to the user
+	return StreamingResponse(data_download.read_object(minio_client), media_type="application/octet-stream")
 
 
-@router.delete("/datadownload/ark:{NAAN}/{upload_id}")
-async def transfer_delete(NAAN: str, dataset_id: str, upload_id: str):
+
+
+@router.delete("/datadownload/ark:{NAAN}/{download_id}")
+async def transfer_delete(NAAN: str, download_id: str):
 	"""
 	delete the data download, removing its content inside minio but leaving a record in mongo
 	"""
-
+	minio_client = minio.GetMinioConfig()
 	mongo_client = mongo.GetConfig()	
 	mongo_db = mongo_client["test"]
 	mongo_collection = mongo_db["testcol"]
 
-	return {"status": "in_progress"}
+	data_download = DataDownload.construct(id=f"ark:{NAAN}/{download_id}")
+	delete_status = data_download.delete(mongo_collection, minio_client)
+
+	if delete_status.success != True:
+		return JSONResponse(
+			content= {
+				"@id": data_download.id,
+				"error": delete_status.message
+				},
+			status_code = delete_status.status_code
+			)
+
+	return JSONResponse(
+		status_code=200, 
+		content={
+			"deleted": {
+				"@id": data_download.id, 
+				"@type": "DataDownload", 
+				"name": data_download.name
+				}
+			}
+		)
 
 
 @router.put("/datadownload/ark:{NAAN}/{download_id}")
-async def data_download_update(NAAN:str, download_id: str):
+async def data_download_update(NAAN:str, download_id: str, data_download: DataDownload):
 
 	mongo_client = mongo.GetConfig()	
 	mongo_db = mongo_client["test"]
 	mongo_collection = mongo_db["testcol"]
 
-	return {"status": "in_progress"}
+	data_download.id = f"ark:{NAAN}/{download_id}"
+	update_status = data_download.update(mongo_collection)
+
+	if update_status.success != True:
+		return JSONResponse(
+			status_code = update_status.status_code,
+			content = {
+				"@id": data_download.id,
+				"error": update_status.message
+			})
+
+	return JSONResponse(
+		status_code = 200,
+		content = {
+			"updated": {
+				"@id": data_download.id, 
+				"@type": "DataDownload", 
+				"name": data_download.name
+				}
+		})

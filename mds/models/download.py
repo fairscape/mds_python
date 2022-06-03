@@ -68,15 +68,15 @@ class Download(FairscapeBaseModel, extra=Extra.allow):
 
 			# TODO test output of operations
 			# create metadata record in mongo
-			insert_result = mongo_collection.InsertOne(self.dict(by_alias=True))
+			insert_result = mongo_collection.insert_one(self.dict(by_alias=True), session=session)
 
 			# TODO check that update was successfull
 			# test update result	
-			update_result = mongo_collection.UpdateOne(
+			update_result = mongo_collection.update_one(
 				{"@id": dataset_metadata.get("id")}, 
 				{"$addToSet" : { 
 					"distribution": SON([("@id", self.id), ("@type", "DataDownload"), ("name", self.name)])}
-				}),
+				}, session=session),
 
 		# TODO handle errors
 		#except Exception as bwe:
@@ -151,7 +151,7 @@ class Download(FairscapeBaseModel, extra=Extra.allow):
 
 
 			# update the download metadata 
-			update_download_result = mongo_collection.UpdateOne(
+			update_download_result = mongo_collection.update_one(
 				{"@id": self.id}, 
 				{ "$set": {
 					"contentUrl": upload_path,
@@ -163,7 +163,7 @@ class Download(FairscapeBaseModel, extra=Extra.allow):
 				),
 
 			# update the dataset metadata
-			update_dataset_result = mongo_collection.UpdateOne(
+			update_dataset_result = mongo_collection.update_one(
 				{
 					"@id": dataset_id, 
 					"distribution": { "$elemMatch": {"@id": self.id}} 
@@ -173,10 +173,6 @@ class Download(FairscapeBaseModel, extra=Extra.allow):
 				)
 
 			# TODO check update results
-		
-		#except pymongo.errors.BulkWriteError as bwe:
-		#	return OperationStatus(False, f"mongo error: bulk write error {bwe}", 500)
-
 
 		return OperationStatus(True, "", 201)
 
@@ -214,7 +210,7 @@ class Download(FairscapeBaseModel, extra=Extra.allow):
 
 
 	def read_metadata(self, MongoCollection: pymongo.collection.Collection) -> OperationStatus:
-		return self.super(MongoCollection).read()
+		return self.read(MongoCollection)
 
 
 	def read_object(self, MinioClient):

@@ -1,6 +1,7 @@
 import path
 from fastapi.testclient import TestClient
 import unittest
+import json
 from mds.app import app
 from mds.database.mongo import GetConfig
 from mds.database.minio import GetMinioConfig
@@ -83,21 +84,40 @@ class TransferTest(unittest.TestCase):
 		print(response.json())
 		self.assertEqual(response.status_code, 201)
 
-"""
-	def test_0_datadownload_1_get_metadata(self):
+
+	def test_0_datadownload_2_get_metadata(self):
 		response = client.get(f"/datadownload/{test_data_download['@id']}")
 		self.assertEqual(response.status_code, 200)
 
-		download_metadata = response.json()
+		download_metadata = json.loads(response.json())
 
 		self.assertEqual(test_data_download["name"], download_metadata["name"])
-		self.assertEqual(test_data_download["encodesCreativeWork"], download_metadata["encodesCreativeWork"])
+		self.assertEqual(test_data_download["encodesCreativeWork"], download_metadata.get("encodesCreativeWork").get("@id"))
 
 
-	def test_0_datadownload_1_get_file(self):
-		response = client.get(f"/datadownload/{test_data_download['@id']}?object=1")
+	def test_0_datadownload_3_get_file(self):
+		response = client.get(f"/datadownload/{test_data_download['@id']}/download")
+
 		self.assertEqual(response.status_code, 200)
-"""
+		self.assertEqual(response.content, b'some,data,to,send\nanother,row,to,send\n')
+
+
+	#def test_0_datadownload_4_update(self):
+	#	data_download_update = {
+	#		"name": "New File Name"
+	#	}
+	#	response = client.put(f"/datadownload/{test_data_download['@id']}", json=data_download_update)
+
+#		response_json = json.loads(response.json())
+#
+#		self.assertEqual(response.status_code, 200)
+#		self.assertIsNotNone(response_json.get("updated"))
+
+
+	#def test_0_datadownload_5_delete(self):
+	#	response = client.delete(f"/datadownload/{test_data_download['@id']}")
+	#	self.assertEqual(response.status_code, 200)
+
 
 if __name__ == "__main__":
     unittest.main()

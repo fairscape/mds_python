@@ -19,7 +19,10 @@ async def group_create(group: Group):
     mongo_client.close()
 
     if create_status.success:
-        return {"created": {"@id": group.id, "@type": "Organization"}}
+        return JSONResponse(
+            status_code = 201,
+            content = {"created": {"@id": group.id, "@type": "Organization", "name": group.name}}
+        )
     else:
         return JSONResponse( 
             status_code = create_status.status_code, 
@@ -55,7 +58,8 @@ def group_get(NAAN: str, postfix: str):
     mongo_client.close()
 
     if read_status.success:
-        return group
+        return group.json(by_alias=True)
+        
     else:
         return JSONResponse( 
             status_code = read_status.status_code, 
@@ -63,8 +67,11 @@ def group_get(NAAN: str, postfix: str):
             )
 
 
-@router.put("/group")
-def group_update(group: Group, response: Response):
+@router.put("/group/ark:{NAAN}/{postfix}")
+def group_update(NAAN: str, postfix: str, group: Group, response: Response):
+
+    group_id = f"ark:{NAAN}/{postfix}"
+
     mongo_client = mongo.GetConfig()
     mongo_db = mongo_client['test']
     mongo_collection = mongo_db['testcol']
