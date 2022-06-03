@@ -10,7 +10,7 @@ class Software(FairscapeBaseModel):
     type = "evi:Software"
     owner: UserCompactView
     author: str
-    downloadUrl: str
+    distribution: str
     citation: str
     usedBy: List[ComputationCompactView]
 
