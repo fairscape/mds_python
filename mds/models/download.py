@@ -7,6 +7,7 @@ import pymongo
 from mds.models.fairscape_base import FairscapeBaseModel
 from mds.models.dataset import Dataset
 from mds.models.compact.dataset import DatasetCompactView
+from mds.models.compact.software import SoftwareCompactView
 from mds.utilities.operation_status import OperationStatus
 
 from mds.database.config import MINIO_BUCKET, MONGO_DATABASE, MONGO_COLLECTION
@@ -18,7 +19,7 @@ class Download(FairscapeBaseModel, extra=Extra.allow):
 	encodingFormat: str
 	contentSize: Optional[str]
 	contentUrl: Optional[str]
-	encodesCreativeWork: Union[DatasetCompactView, str]
+	encodesCreativeWork: Union[DatasetCompactView, SoftwareCompactView, str]
 	sha256: Optional[str]
 	uploadDate: Optional[datetime]
 	version: Optional[str]
@@ -59,11 +60,11 @@ class Download(FairscapeBaseModel, extra=Extra.allow):
 			#dataset = Dataset.construct(_fields_set= dataset_metadata.keys(), **dataset_metadata)
 
 			# update the encodesCreativeWork property with a DatasetCompactView
-			self.encodesCreativeWork = DatasetCompactView(
-				id=dataset_metadata.get("@id"), 
-				type="Dataset", 
-				name=dataset_metadata.get("name")
-				)
+			self.encodesCreativeWork = {
+				"id": dataset_metadata.get("@id"), 
+				"@type": dataset_metadata.get("@type"), 
+				"name": dataset_metadata.get("name")
+			}
 
 
 			# TODO test output of operations
