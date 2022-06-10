@@ -76,7 +76,7 @@ class Download(FairscapeBaseModel, extra=Extra.allow):
 			update_result = mongo_collection.update_one(
 				{"@id": dataset_metadata.get("id")}, 
 				{"$addToSet" : { 
-					"distribution": SON([("@id", self.id), ("@type", "DataDownload"), ("name", self.name)])}
+					"distribution": SON([("@id", self.id), ("@type", "DataDownload"), ("name", self.name), ("contentUrl", "")])}
 				}, session=session),
 
 		# TODO handle errors

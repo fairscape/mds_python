@@ -93,9 +93,15 @@ class TransferTest(unittest.TestCase):
 
 		self.assertEqual(test_data_download["name"], download_metadata["name"])
 		self.assertEqual(test_data_download["encodesCreativeWork"], download_metadata.get("encodesCreativeWork").get("@id"))
+                # TODO: check that 
+                # self.assertEqual("", download_meta.get("contentUrl"))
+
+        def test_0_datadownload_3_get_dataset(self):
+                pass
 
 
-	def test_0_datadownload_3_get_file(self):
+
+	def test_0_datadownload_4_get_file(self):
 		response = client.get(f"/datadownload/{test_data_download['@id']}/download")
 
 		self.assertEqual(response.status_code, 200)
