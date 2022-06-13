@@ -8,6 +8,7 @@ from mds.routers.project import router as ProjectRouter
 from mds.routers.organization import router as OrganizationRouter
 from mds.routers.evidencegraph import router as EvidenceGraphRouter
 from mds.routers.transfer import router as TransferRouter
+from mds.routers.compute import router as ComputeRouter
 
 
 tags_metadata = [
@@ -45,7 +46,11 @@ tags_metadata = [
     },
     {
         "name": "transfer",
-        "description": "Operations manipulating files within FAIRSCAPE"
+        "description": "Operations with Object Transfer.",
+    },
+    {
+        "name": "compute",
+        "description": "Operations with Performing Computation.",
     }
 
 ]
@@ -80,3 +85,6 @@ app.include_router(ProjectRouter, tags=["project"])
 app.include_router(OrganizationRouter, tags=["organization"])
 app.include_router(EvidenceGraphRouter, tags=["evidencegraph"])
 app.include_router(TransferRouter, tags=["transfer"])
+app.include_router(ComputeRouter, tags=["compute"])
+
+

@@ -3,11 +3,18 @@ from pydantic import Extra
 from typing import List, Union
 from datetime import datetime
 from mds.models.fairscape_base import *
+from mds.models.dataset import Dataset
 from mds.models.compact.user import UserCompactView
 from mds.models.compact.software import SoftwareCompactView
 from mds.models.compact.dataset import DatasetCompactView
 from mds.models.compact.organization import OrganizationCompactView
+from mds.utilities.funcs import *
+import requests
+import docker
+import time
+from mds.database.config import MINIO_BUCKET, MONGO_DATABASE, MONGO_COLLECTION
 
+root_url = "http://localhost:8000/"
 
 class Computation(FairscapeBaseModel):
     context = {"@vocab": "https://schema.org/", "evi": "https://w3id.org/EVI#"}
@@ -126,6 +133,139 @@ class Computation(FairscapeBaseModel):
             return OperationStatus(True, "", 200)
         else:
             return OperationStatus(False, f"{bulk_edit_result.bulk_api_result}", 500)
+
+    def run_custom_container(self, MongoClient: pymongo.MongoClient, compute_resources) -> OperationStatus:
+
+        dateCreated = datetime.fromtimestamp(time.time()).strftime("%A, %B %d, %Y %I:%M:%S")
+
+        dataset_ids = compute_resources["datasetID"]
+        script_id = compute_resources["scriptID"]
+
+        usedDatasets = []
+        usedSoftware = ""
+        dateCreated
+
+        # Locate and download the dataset(s)
+        if dataset_ids and isinstance(dataset_ids, list):
+            for dataset_id in dataset_ids:
+                r = requests.get(root_url + f"dataset/{dataset_id}")
+                dataset_download_id, dataset_file_location, dataset_file_name = get_distribution_attr(dataset_id, r)
+                print(dataset_download_id, dataset_file_location, dataset_file_name)
+
+                # Download the content of the dataset
+                data_download_dataset_download = requests.get(root_url + f"datadownload/{dataset_download_id}/download")
+                dataset_content = data_download_dataset_download.content
+                # print(dataset_content)
+
+                with open('/home/sadnan/compute-test/data/' + dataset_file_name, 'wb') as binary_data_file:
+                    binary_data_file.write(dataset_content)
+
+        if script_id:
+            r = requests.get(root_url + f"software/{script_id}")
+            script_download_id, script_file_location, script_file_name = get_distribution_attr(script_id, r)
+            print(script_download_id, script_file_location, script_file_name)
+
+            # Download the content of the script
+            data_download_software_read = requests.get(root_url + f"datadownload/{script_download_id}/download")
+            script_content = data_download_software_read.content
+            # print(script_content)
+
+            with open('/home/sadnan/compute-test/' + script_file_name, 'wb') as binary_data_file:
+                binary_data_file.write(script_content)
+
+        # select docker image
+        image_name = "python"
+        image_tag = "alpine"
+        IMAGE = f"{image_name}:{image_tag}"
+
+        # Volume mapping in the container
+        SOURCE_VOL = '/home/sadnan/compute-test'
+        MOUNT_VOL = '/cont/vol/script'
+
+        # script to run
+        SCRIPT_NAME = 'sum_script.py'
+
+        # command to run python script 'python3 /path/to/script/in/mounted/container/vol'
+        COMMAND = ['python', f'{MOUNT_VOL}/{SCRIPT_NAME}']
+
+        CONTAINER_NAME = "compute-service-custom-container"
+
+        client = docker.from_env()
+
+        container = client.containers.run(
+            image=IMAGE,
+            command=COMMAND,
+            auto_remove=True,
+            working_dir=MOUNT_VOL,
+            # any of the following three volumes mounting would work
+            # volumes={SOURCE_VOL: {'bind': MOUNT_VOL}} # as a dict
+            # volumes={SOURCE_VOL: {'bind': MOUNT_VOL, 'mode': 'rw'}} # as a dict
+            # volumes=[SOURCE_VOL + ':' + MOUNT_VOL] # as a list
+            volumes={SOURCE_VOL: {'bind': MOUNT_VOL, 'mode': 'rw'},
+                     '/home/sadnan/compute-test/data': {'bind': '/cont/vol/script/data', 'mode': 'rw'},
+                     '/home/sadnan/compute-test/outputs': {'bind': '/cont/vol/script/outputs', 'mode': 'rw'},
+                     }
+        )
+        # output = to_str(container).attach(stdout=True, stream=True, logs=True)
+        # for line in output:
+        #    print(to_str(line))
+
+        dateFinished = datetime.fromtimestamp(time.time()).strftime("%A, %B %d, %Y %I:%M:%S")
+        # self.dateFinished = dateFinished
+
+        # print("time lapsed: ", dateCreated, dateFinished)
+
+        if container.decode('utf-8') == b'':
+            return OperationStatus(False, f"error running the container", 400)
+
+        # print(container)
+
+        # update computation with metadata
+        with MongoClient.start_session(causal_consistency=True) as session:
+            mongo_database = MongoClient[MONGO_DATABASE]
+            mongo_collection = mongo_database[MONGO_COLLECTION]
+
+            for dataset_id in dataset_ids:
+                dataset_metadata = mongo_collection.find_one({"@id": dataset_id}, session=session)
+                if dataset_metadata == None:
+                    return OperationStatus(False, f"dataset {dataset_id} not found", 404)
+
+                dataset = Dataset.construct(**dataset_metadata)
+                # update the encodesCreativeWork property with a DatasetCompactView
+                dataset_compact = {
+                    "@id": dataset_metadata.get("@id"),
+                    "@type": dataset_metadata.get('@type'),
+                    "name": dataset_metadata.get('name')
+                }
+                usedDatasets.append(dataset_compact)
+
+            script_metadata = mongo_collection.find_one({"@id": script_id}, session=session)
+            if script_metadata == None:
+                return OperationStatus(False, f"script {script_id} not found", 404)
+
+            script = Dataset.construct(**dataset_metadata)
+            # update the encodesCreativeWork property with a DatasetCompactView
+            script_compact = {
+                "@id": script_metadata.get("@id"),
+                "@type": script_metadata.get('@type'),
+                "name": script_metadata.get('name')
+            }
+            usedSoftware = script_compact
+
+            # print(usedDatasets, usedSoftware, dateCreated, dateFinished)
+
+            update_computation_upon_execution = mongo_collection.update_one(
+                {"@id": self.id},
+                {"$set": {
+                    "dateCreated": dateCreated,
+                    "dateFinished": dateFinished,
+                    "usedSoftware": usedSoftware,
+                    "usedDataset": usedDatasets,
+                }},
+                session=session
+            ),
+
+        return OperationStatus(True, "", 201)
 
 
 def list_computation(mongo_collection: pymongo.collection.Collection):
