@@ -273,4 +273,7 @@ def list_computation(mongo_collection: pymongo.collection.Collection):
         filter={"@type": "evi:Computation"},
         projection={"_id": False}
     )
-    return [{"@id": computation.get("@id"), "name": computation.get("name")} for computation in cursor]
+    return {
+        "computations": [{"@id": computation.get("@id"), "@type": "evi:Computation", "name": computation.get("name")}
+                         for computation in cursor]}
+

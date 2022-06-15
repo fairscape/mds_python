@@ -2,15 +2,12 @@ import pymongo
 from fastapi import APIRouter, Response
 
 from mds.database import mongo
-from mds.models.dataset import Dataset
 from mds.models.computation import Computation, list_computation
 from mds.database.container_config import *
-from mds.database.computation_config import *
 from mds.database.config import *
 from datetime import datetime
 import time
 import docker
-import requests
 
 from mds.utilities.operation_status import OperationStatus
 from mds.utilities.funcs import *
@@ -18,8 +15,18 @@ from mds.utilities.funcs import *
 router = APIRouter()
 
 
-@router.post("/computation")
+@router.post("/computation",
+             summary="Create a computation",
+             response_description="The created computation")
 def computation_create(computation: Computation, response: Response):
+    """
+    Create a computation with the following properties:
+
+    - **@id**: a unique identifier
+    - **@type**: evi:Computation
+    - **name**: a name
+    - **owner**: an existing user in its compact form with @id, @type, name, and email
+    """
     mongo_client = mongo.GetConfig()
     mongo_db = mongo_client["test"]
     mongo_collection = mongo_db["testcol"]
@@ -29,13 +36,20 @@ def computation_create(computation: Computation, response: Response):
     mongo_client.close()
 
     if create_status.success:
-        return {"created": {"@id": computation.id, "@type": "evi:Computation"}}
+        return JSONResponse(
+            status_code=201,
+            content={"created": {"@id": computation.id, "@type": "evi:Computation"}}
+        )
     else:
-        response.status_code = create_status.status_code
-        return {"error": create_status.message}
+        return JSONResponse(
+            status_code=create_status.status_code,
+            content={"error": create_status.message}
+        )
 
 
-@router.get("/computation")
+@router.get("/computation",
+            summary="List all computations",
+            response_description="Retrieved list of computations")
 def computation_list(response: Response):
     mongo_client = mongo.GetConfig()
     mongo_db = mongo_client["test"]
@@ -48,8 +62,16 @@ def computation_list(response: Response):
     return computation
 
 
-@router.get("/computation/ark:{NAAN}/{postfix}")
+@router.get("/computation/ark:{NAAN}/{postfix}",
+            summary="Retrieve a computation",
+            response_description="The retrieved computation")
 def computation_get(NAAN: str, postfix: str, response: Response):
+    """
+    Retrieves a computation based on a given identifier:
+
+    - **NAAN**: Name Assigning Authority Number which uniquely identifies an organization e.g. 12345
+    - **postfix**: a unique string
+    """
     mongo_client = mongo.GetConfig()
     mongo_db = mongo_client['test']
     mongo_collection = mongo_db['testcol']
@@ -65,11 +87,13 @@ def computation_get(NAAN: str, postfix: str, response: Response):
     if read_status.success:
         return computation
     else:
-        response.status_code = read_status.status_code
-        return {"error": read_status.message}
+        return JSONResponse(status_code=read_status.status_code,
+                            content={"error": read_status.message})
 
 
-@router.put("/computation")
+@router.put("/computation",
+            summary="Update a computation",
+            response_description="The updated computation")
 def computation_update(computation: Computation, response: Response):
     mongo_client = mongo.GetConfig()
     mongo_db = mongo_client['test']
@@ -80,14 +104,27 @@ def computation_update(computation: Computation, response: Response):
     mongo_client.close()
 
     if update_status.success:
-        return {"updated": {"@id": computation.id, "@type": "evi:Computation"}}
+        return JSONResponse(
+            status_code=200,
+            content={"updated": {"@id": computation.id, "@type": "evi:Computation"}}
+        )
     else:
-        response.status_code = update_status.status_code
-        return {"error": update_status.message}
+        return JSONResponse(
+            status_code=update_status.status_code,
+            content={"error": update_status.message}
+        )
 
 
-@router.delete("/computation/ark:{NAAN}/{postfix}")
+@router.delete("/computation/ark:{NAAN}/{postfix}",
+               summary="Delete a computation",
+               response_description="The deleted computation")
 def computation_delete(NAAN: str, postfix: str):
+    """
+    Deletes a computation based on a given identifier:
+
+    - **NAAN**: Name Assigning Authority Number which uniquely identifies an organization e.g. 12345
+    - **postfix**: a unique string
+    """
     computation_id = f"ark:{NAAN}/{postfix}"
 
     mongo_client = mongo.GetConfig()
@@ -101,9 +138,15 @@ def computation_delete(NAAN: str, postfix: str):
     mongo_client.close()
 
     if delete_status.success:
-        return {"deleted": {"@id": computation_id}}
+        return JSONResponse(
+            status_code=200,
+            content={"deleted": {"@id": computation_id, "@type": "evi:Computation", "name": computation.name}}
+        )
     else:
-        return {"error": f"{str(delete_status.message)}"}
+        return JSONResponse(
+            status_code=delete_status.status_code,
+            content={"error": f"{str(delete_status.message)}"}
+        )
 
 
 def run_custom_container(self, MongoClient: pymongo.MongoClient, compute_resources) -> OperationStatus:
@@ -114,7 +157,6 @@ def run_custom_container(self, MongoClient: pymongo.MongoClient, compute_resourc
 
     usedDatasets = []
     usedSoftware = {}
-
 
     # Locate and download the dataset(s)
     if dataset_ids and isinstance(dataset_ids, list):
@@ -137,7 +179,6 @@ def run_custom_container(self, MongoClient: pymongo.MongoClient, compute_resourc
         # Download the content of the script
         data_download_software_read = requests.get(ROOT_URL + f"datadownload/{script_download_id}/download")
         script_content = data_download_software_read.content
-
 
         with open('/home/sadnan/compute-test/' + script_file_name, 'wb') as binary_data_file:
             binary_data_file.write(script_content)

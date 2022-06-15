@@ -9,10 +9,10 @@ class Software(FairscapeBaseModel):
     context = {"@vocab": "https://schema.org/", "evi": "https://w3id.org/EVI#"}
     type = "evi:Software"
     owner: UserCompactView
-    author: str
-    distribution: str
-    citation: str
-    usedBy: List[ComputationCompactView]
+    # author: str
+    # distribution: str
+    # citation: str
+    # usedBy: List[ComputationCompactView]
 
     class Config:
         extra = Extra.allow
@@ -28,7 +28,7 @@ class Software(FairscapeBaseModel):
     def create(self, MongoCollection: pymongo.collection.Collection) -> OperationStatus:
 
         # initialize empty list of computation for a software
-        self.usedBy = []
+        # self.usedBy = []
 
         # check that software does not already exist
         if MongoCollection.find_one({"@id": self.id}) is not None:
@@ -129,4 +129,6 @@ def list_software(mongo_collection: pymongo.collection.Collection):
         filter={"@type": "evi:Software"},
         projection={"_id": False}
     )
-    return [{"@id": software.get("@id"), "name": software.get("name")} for software in cursor]
+    return {
+        "software": [{"@id": software.get("@id"), "@type": "evi:Software", "name": software.get("name")} for software in
+                     cursor]}

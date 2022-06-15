@@ -128,4 +128,5 @@ def list_project(mongo_collection: pymongo.collection.Collection):
         filter={"@type": "Project"},
         projection={"_id": False}
     )
-    return [{"@id": project.get("@id"), "name": project.get("name")} for project in cursor]
+    return {"projects": [{"@id": project.get("@id"), "@type": "Project", "name": project.get("name")} for project in
+                         cursor]}
