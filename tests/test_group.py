@@ -1,8 +1,9 @@
 import unittest
 import json
 import path
+from mds.database.mongo import MongoConfig
 from mds.models import *
-from mds import MongoConfig
+from mds.models.compact import *
 
 
 class TestGroup(unittest.TestCase):

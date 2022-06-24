@@ -1,11 +1,13 @@
 import path
 import unittest
 from mds.models import *
-from mds import MongoConfig
+from mds.database.mongo import MongoConfig
 
 
 class TestSoftware(unittest.TestCase):
-    def test_software_initialization(self):
+
+
+    def test_0_software_initialization(self):
         owner_inst1 = UserCompactView(
             id="ark:99999/testowner1",
             name="test owner1",
@@ -22,6 +24,17 @@ class TestSoftware(unittest.TestCase):
             citation="doi://blabla"
         )
 
+    def test_1_create(self):
+        pass
+
+    def test_2_read(self):
+        pass
+
+    def test_3_update(self):
+        pass
+
+    def test_4_delete(self):
+        pass
 
 if __name__ == "__main__":
     unittest.main()

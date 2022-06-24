@@ -10,10 +10,8 @@ router = APIRouter()
 @router.post("/dataset")
 def dataset_create(dataset: Dataset):
     mongo_client = mongo.GetConfig()
-    mongo_db = mongo_client["test"]
-    mongo_collection = mongo_db["testcol"]
 
-    create_status = dataset.create(mongo_collection)
+    create_status = dataset.create(mongo_collection, mongo_client)
 
     mongo_client.close()
 

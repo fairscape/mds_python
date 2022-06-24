@@ -1,5 +1,7 @@
 import path
 import unittest
+
+from mds.models.compact import *
 from mds.models import *
 from mds.database.mongo import MongoConfig
 
@@ -156,7 +158,7 @@ class TestUser(unittest.TestCase):
         not_found = nonexistant_user.read(self.test_collection)
 
         self.assertFalse(not_found.success)
-        self.assertEqual(not_found.message, "no record found")
+        self.assertEqual(not_found.message, "No record found")
         self.assertEqual(not_found.status_code, 404)
 
 
@@ -168,193 +170,6 @@ class TestUser(unittest.TestCase):
         self.assertTrue(delete_status.success)
         self.assertEqual(delete_status.message, "")
         self.assertEqual(delete_status.status_code, 200)
-
-
-    def test_6a_user_project(self):
-        
-        test_user = User(**self.user_data)
-
-        create_status = test_user.create(self.test_collection)
-
-        self.assertTrue(create_status.success)
-        self.assertEqual(create_status.message, "")
-        self.assertEqual(create_status.status_code, 200)
-
-        # add a project to a user
-        proj = ProjectCompactView(id="ark:99999/test_proj", name="Test Project")
-
-        add = test_user.addProject(self.test_collection, proj)
-
-        self.assertTrue(add.success)
-        self.assertEqual(add.message, "")
-        self.assertEqual(add.status_code, 200)
-
-        # check that read updates the existance of the new project
-        read_status = test_user.read(self.test_collection)
-
-        self.assertTrue(read_status.success)
-        self.assertEqual(read_status.message, "")
-        self.assertEqual(read_status.status_code, 200)
-
-        # assert that the new project is in the user model
-        self.assertEqual(1, len(test_user.projects))
-
-        # remove the project from the user
-
-        remove_status = test_user.removeProject(self.test_collection, proj)
-
-        self.assertTrue(remove_status.success)
-        self.assertEqual(remove_status.message, "")
-        self.assertEqual(remove_status.status_code, 200)
-
-        #  check that the updated model has no projects 
-        updated_user = User.construct(id=test_user.id)
-
-        read_status = updated_user.read(self.test_collection)
-
-        self.assertTrue(read_status.success)
-        self.assertEqual(read_status.message, "")
-        self.assertEqual(read_status.status_code, 200)
-
-        self.assertEqual(0, len(updated_user.projects))
-
-
-    def test_6b_user_dataset(self):
-
-        dataset = DatasetCompactView(id="ark:99999/test_data", name="Test Dataset")
-
-        test_user = User(**self.user_data)
-        add = test_user.addDataset(self.test_collection, dataset)
-
-        self.assertTrue(add.success)
-        self.assertEqual(add.message, "")
-        self.assertEqual(add.status_code, 200)
-
-        # check that read updates the existance of the new project
-        read_status = test_user.read(self.test_collection)
-
-        self.assertTrue(read_status.success)
-        self.assertEqual(read_status.message, "")
-        self.assertEqual(read_status.status_code, 200)
-        self.assertEqual(1, len(test_user.datasets))
-
-
-        remove_status = test_user.removeDataset(self.test_collection, dataset)
-
-        self.assertTrue(remove_status.success)
-        self.assertEqual(remove_status.message, "")
-        self.assertEqual(remove_status.status_code, 200)
-
-
-        read_status = test_user.read(self.test_collection)
-
-        self.assertTrue(read_status.success)
-        self.assertEqual(read_status.message, "")
-        self.assertEqual(read_status.status_code, 200)
-        self.assertEqual(0, len(test_user.datasets))
-
-
-    def test_6c_user_computation(self):
-
-        computation = ComputationCompactView(id="ark:99999/test_comp", name="Test computation")
-
-        test_user = User(**self.user_data)
-        add = test_user.addComputation(self.test_collection, computation)
-
-        self.assertTrue(add.success)
-        self.assertEqual(add.message, "")
-        self.assertEqual(add.status_code, 200)
-
-        # check that read updates the existance of the new project
-        read_status = test_user.read(self.test_collection)
-
-        self.assertTrue(read_status.success)
-        self.assertEqual(read_status.message, "")
-        self.assertEqual(read_status.status_code, 200)
-        self.assertEqual(1, len(test_user.computations))
-
-
-        remove_status = test_user.removeComputation(self.test_collection, computation)
-
-        self.assertTrue(remove_status.success)
-        self.assertEqual(remove_status.message, "")
-        self.assertEqual(remove_status.status_code, 200)
-
-
-        read_status = test_user.read(self.test_collection)
-
-        self.assertTrue(read_status.success)
-        self.assertEqual(read_status.message, "")
-        self.assertEqual(read_status.status_code, 200)
-        self.assertEqual(0, len(test_user.computations))
-
-
-    def test_6d_user_software(self):
-        software = SoftwareCompactView(id="ark:99999/test_soft", name="Test Software")
-
-        test_user = User(**self.user_data)
-        add = test_user.addSoftware(self.test_collection, software)
-
-        self.assertTrue(add.success)
-        self.assertEqual(add.message, "")
-        self.assertEqual(add.status_code, 200)
-
-        # check that read updates the existance of the new project
-        read_status = test_user.read(self.test_collection)
-
-        self.assertTrue(read_status.success)
-        self.assertEqual(read_status.message, "")
-        self.assertEqual(read_status.status_code, 200)
-        self.assertEqual(1, len(test_user.software))
-
-
-        remove_status = test_user.removeSoftware(self.test_collection, software)
-
-        self.assertTrue(remove_status.success)
-        self.assertEqual(remove_status.message, "")
-        self.assertEqual(remove_status.status_code, 200)
-
-
-        read_status = test_user.read(self.test_collection)
-
-        self.assertTrue(read_status.success)
-        self.assertEqual(read_status.message, "")
-        self.assertEqual(read_status.status_code, 200)
-        self.assertEqual(0, len(test_user.software))
-
-
-    def test_6e_user_organization(self):
-        org = OrganizationCompactView(id="ark:99999/test_org", name="Test Org")
-
-        test_user = User(**self.user_data)
-        add = test_user.addOrganization(self.test_collection, org)
-
-        self.assertTrue(add.success)
-        self.assertEqual(add.message, "")
-        self.assertEqual(add.status_code, 200)
-
-        # check that read updates the existance of the new project
-        read_status = test_user.read(self.test_collection)
-
-        self.assertTrue(read_status.success)
-        self.assertEqual(read_status.message, "")
-        self.assertEqual(read_status.status_code, 200)
-        self.assertEqual(1, len(test_user.organizations))
-
-
-        remove_status = test_user.removeOrganization(self.test_collection, org)
-
-        self.assertTrue(remove_status.success)
-        self.assertEqual(remove_status.message, "")
-        self.assertEqual(remove_status.status_code, 200)
-
-
-        read_status = test_user.read(self.test_collection)
-
-        self.assertTrue(read_status.success)
-        self.assertEqual(read_status.message, "")
-        self.assertEqual(read_status.status_code, 200)
-        self.assertEqual(0, len(test_user.organizations))
 
   
     def tearDown(self) -> None:
