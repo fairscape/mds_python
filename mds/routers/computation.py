@@ -1,5 +1,5 @@
 import pymongo
-from fastapi import APIRouter, Response
+from fastapi import APIRouter, Response, BackgroundTasks
 
 from mds.database import mongo
 from mds.models.computation import Computation, list_computation
@@ -44,6 +44,26 @@ def computation_create(computation: Computation, response: Response):
         return JSONResponse(
             status_code=create_status.status_code,
             content={"error": create_status.message}
+        )
+
+@router.put("/computation/ark:{NAAN}/{postfix}/execute")
+def computation_execute(NAAN: str, postfix: str, background_tasks: BackgroundTasks):
+
+    mongo_client = mongo.GetConfig()
+    mongo_db = mongo_client['test']
+    mongo_collection = mongo_db['testcol']
+
+    computation_id = f"ark:{NAAN}/{postfix}"
+
+    computation = Computation.construct(id=computation_id)
+    
+    compute_status = computation.run_custom_container(mongo_client)
+
+    background_tasks.add_task(RegisterComputation, computation_id)
+    
+    return JSONResponse(
+            status_code=201,
+            content={"message": "launched container"}
         )
 
 

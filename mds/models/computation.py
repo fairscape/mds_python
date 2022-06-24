@@ -1,6 +1,6 @@
 from bson import SON
 from pydantic import Extra
-from typing import List, Union
+from typing import List, Union, Optional
 from datetime import datetime
 from mds.models.fairscape_base import *
 from mds.models.dataset import Dataset
@@ -13,6 +13,7 @@ import requests
 import docker
 import time
 from mds.database.config import MINIO_BUCKET, MONGO_DATABASE, MONGO_COLLECTION
+import pathlib
 
 root_url = "http://localhost:8000/"
 
@@ -25,8 +26,10 @@ class Computation(FairscapeBaseModel):
     # dateCreated: datetime
     # dateFinished: datetime
     # associatedWith: List[Union[OrganizationCompactView, UserCompactView]]
-    # usedSoftware: SoftwareCompactView
-    # usedDataset: DatasetCompactView
+    container: Optional[str]
+    usedSoftware:  str
+    usedDataset: str
+    containerId: Optional[str]
 
     class Config:
         extra = Extra.allow
@@ -134,17 +137,93 @@ class Computation(FairscapeBaseModel):
         else:
             return OperationStatus(False, f"{bulk_edit_result.bulk_api_result}", 500)
 
-    def run_custom_container(self, MongoClient: pymongo.MongoClient, compute_resources) -> OperationStatus:
+
+
+    def run_custom_container(self, MongoClient: pymongo.MongoClient) -> OperationStatus:
+
+        
+        read_status = self.read()
+        if read_status.success != True:
+            return read_status
 
         dateCreated = datetime.fromtimestamp(time.time()).strftime("%A, %B %d, %Y %I:%M:%S")
 
-        dataset_ids = compute_resources["datasetID"]
-        script_id = compute_resources["scriptID"]
+        dataset_ids = self.usedDataset
+        script_id = self.usedSoftware
 
-        usedDatasets = []
-        usedSoftware = ""
-        dateCreated
 
+        # find the locations of all the files
+        dataset_files = [] 
+        for dataset_guid in dataset_ids:
+            found_dataset = Dataset.construct(id=dataset_guid) 
+
+            if found_dataset.read(MongoClient).get("success") != True:
+                return OperationStatus(False, "", 400)
+
+            dataset_files.append(found_dataset.contentUrl)
+
+        # find the software contentUrl
+        software = Software.construct(id=self.usedSoftware)
+        if software.read(MongoClient).get("success") != True:
+            return OperationStatus(False, "", 400)
+
+        # create a temporary folder for the data to transfered to the job
+ 
+        # TODO create random_id for the job folder  
+        p = pathlib.Path("/tmp/job_id").mkdir(parents=True, exist_ok=True)
+
+        data_path = p + "/input/dataset"
+        software_path = p + "/input/software"
+
+        minio_client = GetMinioConfig()
+
+        for dataset_path in dataset_files:
+
+            download_path = data_path + pathlib.Path(dataset_path).name
+ 
+            # use minio to transfer all datasetfiles
+            download_object_metadata =minio_client.fget_object(
+                MINIO_BUCKET, 
+                dataset_path, 
+                download_path
+                )
+
+            # TODO determine minio download success            
+            # i.e. checking that the file is there and the same size
+    
+        # download the software to the temporary job folder 
+
+        software_download_path = software_path + pathlib.Path(software.contentUrl).name
+ 
+        # use minio to transfer all datasetfiles
+        software_object_metadata =minio_client.fget_object(
+            MINIO_BUCKET, 
+            software.contentUrl, 
+            software_download_path
+            )
+
+        # TODO determine software download success
+        
+
+        container = client.containers.run(
+            image=IMAGE,
+            command=COMMAND,
+            auto_remove=False,
+            working_dir=MOUNT_VOL,
+            # any of the following three volumes mounting would work
+            # volumes={SOURCE_VOL: {'bind': MOUNT_VOL}} # as a dict
+            # volumes={SOURCE_VOL: {'bind': MOUNT_VOL, 'mode': 'rw'}} # as a dict
+            # volumes=[SOURCE_VOL + ':' + MOUNT_VOL] # as a list
+            volumes={SOURCE_VOL: {'bind': MOUNT_VOL, 'mode': 'rw'},
+                     '/home/sadnan/compute-test/data': {'bind': '/cont/vol/script/data', 'mode': 'rw'},
+                     '/home/sadnan/compute-test/outputs': {'bind': '/cont/vol/script/outputs', 'mode': 'rw'},
+                     }
+        )
+       
+        self.containerId = container.id
+        
+
+    def _run_container(self):
         # Locate and download the dataset(s)
         if dataset_ids and isinstance(dataset_ids, list):
             for dataset_id in dataset_ids:
@@ -277,3 +356,9 @@ def list_computation(mongo_collection: pymongo.collection.Collection):
         "computations": [{"@id": computation.get("@id"), "@type": "evi:Computation", "name": computation.get("name")}
                          for computation in cursor]}
 
+def RegisterComputation(computation_id: str):
+    """
+    Given a computation ID first await the success or failure of the container in the ongoing computation.
+    If successfull register all datasets in the output folder for the supplied computation, 
+    and append the computation metadata with status of the containers execution and logs if applicable
+    """
