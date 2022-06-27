@@ -45,15 +45,6 @@ class User(FairscapeBaseModel, extra=Extra.allow):
 
     def delete(self, MongoCollection: pymongo.collection.Collection) -> OperationStatus:
         # TODO Make sure user doesn't have any owned resources
-
-        read_status = self.read(MongoCollection)
-
-        if not read_status.success:
-            if read_status.status_code == 404:
-                return OperationStatus(False, "user not found", 404)
-            else:
-                return read_status
-
         return super().delete(MongoCollection)
 
 
@@ -62,4 +53,4 @@ def list_users(mongo_collection: pymongo.collection.Collection):
         filter={"@type": "Person"},
         projection={"_id": False}
     )
-    return {"users": [{"@id": user.get("@id"), "@type": "Person", "name": user.get("name")} for user in cursor]}
+    return {"users":  [{"@id": user.get("@id"), "@type": "Person", "name": user.get("name")} for user in cursor] }
