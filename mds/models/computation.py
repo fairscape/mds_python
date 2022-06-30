@@ -21,28 +21,19 @@ class Computation(FairscapeBaseModel):
     context = {"@vocab": "https://schema.org/", "evi": "https://w3id.org/EVI#"}
     type = "evi:Computation"
     owner: UserCompactView
-
-    # author: str
-    # dateCreated: datetime
-    # dateFinished: datetime
-    # associatedWith: List[Union[OrganizationCompactView, UserCompactView]]
-    container: Optional[str]
-    usedSoftware:  str
-    usedDataset: str
+    author: UserCompactView
+    dateCreated: datetime
+    dateFinished: datetime
+    associatedWith: List[Union[OrganizationCompactView, UserCompactView]]
+    container: str
+    usedSoftware:  Union[str, SoftwareCompactView]
+    usedDataset: Union[List[Union[str, DatasetCompactView]], str, DatasetCompactView]
     containerId: Optional[str]
 
     class Config:
         extra = Extra.allow
 
     def create(self, MongoCollection: pymongo.collection.Collection) -> OperationStatus:
-
-        # TODO initialize attributes of computation
-        # self.author = ""
-        # self.dateCreated = ""
-        # self.dateFinished = ""
-        # self.associatedWith = []
-        # self.usedSoftware = ""
-        # self.usedDataset = ""
 
         # check that computation does not already exist
         if MongoCollection.find_one({"@id": self.id}) is not None:
@@ -51,6 +42,10 @@ class Computation(FairscapeBaseModel):
         # check that owner exists
         if MongoCollection.find_one({"@id": self.owner.id}) is None:
             return OperationStatus(False, "owner does not exist", 404)
+
+        # check that software exists
+
+        # check that datasets exist
 
         # embeded bson documents to enable Mongo queries
         computation_dict = self.dict(by_alias=True)

@@ -1,8 +1,10 @@
 from bson import SON
 from pydantic import Extra
+from typing import Optional, List
 from mds.models.fairscape_base import *
 from mds.models.compact.user import UserCompactView
 from mds.models.compact.computation import ComputationCompactView
+from mds.models.compact.download import DataDownloadCompactView
 
 
 class Software(FairscapeBaseModel):
@@ -10,9 +12,9 @@ class Software(FairscapeBaseModel):
     type = "evi:Software"
     owner: UserCompactView
     # author: str
-    # distribution: str
     # citation: str
-    # usedBy: List[ComputationCompactView]
+    distribution: Optional[List[DataDownloadCompactView]] = []
+    usedBy: Optional[List[ComputationCompactView]] = []
 
     class Config:
         extra = Extra.allow
