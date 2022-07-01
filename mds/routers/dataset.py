@@ -21,7 +21,7 @@ def dataset_create(dataset: Dataset):
     """
     mongo_client = mongo.GetConfig()
 
-    create_status = dataset.create(mongo_collection, mongo_client)
+    create_status = dataset.create(mongo_client)
 
     mongo_client.close()
 

@@ -190,7 +190,7 @@ class Group(FairscapeBaseModel, extra=Extra.allow):
 
         return OperationStatus(True, "", 200)
 
-def list_group(mongo_collection: pymongo.collection.Collection):
+def list_groups(mongo_collection: pymongo.collection.Collection):
     cursor = mongo_collection.find(
         filter={"@type": "Organization"},
         projection={"_id": False}

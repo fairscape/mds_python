@@ -39,7 +39,7 @@ class FairscapeBaseModel(BaseModel):
 
     _validate_guid = validator('id', allow_reuse=True)(validate_ark)
 
-    def create(self, MongoCollection: pymongo.collection.Collection, bson = None) -> OperationStatus:
+    def create(self, MongoCollection: pymongo.collection.Collection, bson=None) -> OperationStatus:
         """Persist instance of model in mongo
 
         This is the superclass method for create operations in fairscape.
