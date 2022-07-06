@@ -66,7 +66,7 @@ def computation_execute(NAAN: str, postfix: str, background_tasks: BackgroundTas
             content={"message": compute_status.message}
         )
 
-    background_tasks.add_task(RegisterComputation, computation_id)
+    background_tasks.add_task(RegisterComputation, computation)
     
     return JSONResponse(
             status_code=201,

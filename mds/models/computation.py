@@ -2,24 +2,27 @@ from bson import SON
 from pydantic import Extra
 from typing import List, Union, Optional
 from datetime import datetime
-
+from pathlib import Path
 from mds.database import mongo
 from mds.models.fairscape_base import *
 from mds.models.dataset import Dataset
+from mds.models.download import Download as DataDownload
 from mds.models.software import Software
 from mds.models.compact.user import UserCompactView
 from mds.models.compact.software import SoftwareCompactView
 from mds.models.compact.dataset import DatasetCompactView
 from mds.models.compact.organization import OrganizationCompactView
 from mds.utilities.funcs import *
+from mds.utilities.utils import *
 import requests
 import docker
 import time
-
+import uuid
+import pathlib
+import shutil
 from mds.database.config import MINIO_BUCKET, MONGO_DATABASE, MONGO_COLLECTION
 from mds.database.minio import *
 from mds.database.container_config import *
-import pathlib
 
 root_url = "http://localhost:8000/"
 
@@ -34,7 +37,7 @@ class Computation(FairscapeBaseModel):
     # dateFinished: datetime
     # associatedWith: List[Union[OrganizationCompactView, UserCompactView]]
     container: Optional[str]
-    usedSoftware:  str
+    usedSoftware: str
     usedDataset: str
     containerId: Optional[str]
 
@@ -144,8 +147,6 @@ class Computation(FairscapeBaseModel):
         else:
             return OperationStatus(False, f"{bulk_edit_result.bulk_api_result}", 500)
 
-
-
     def run_custom_container(self, MongoClient: pymongo.MongoClient) -> OperationStatus:
 
         mongo_db = MongoClient['test']
@@ -221,7 +222,7 @@ class Computation(FairscapeBaseModel):
         #     )
 
         # TODO determine software download success
-        
+
         client = docker.from_env()
         container = client.containers.run(
             image=self.container,
@@ -268,6 +269,7 @@ class Computation(FairscapeBaseModel):
             return OperationStatus(False, f"error updating container id", 500)
 
         return OperationStatus(True, "", 201)
+
 
 # def _run_container(self):
 #         dataset_ids = []
@@ -404,7 +406,8 @@ def list_computation(mongo_collection: pymongo.collection.Collection):
         "computations": [{"@id": computation.get("@id"), "@type": "evi:Computation", "name": computation.get("name")}
                          for computation in cursor]}
 
-def RegisterComputation(computation_id: str):
+
+def RegisterComputation(computation: Computation):
     """
     Given a computation ID first await the success or failure of the container in the ongoing computation.
     If successfull register all datasets in the output folder for the supplied computation, 
@@ -412,27 +415,19 @@ def RegisterComputation(computation_id: str):
     """
 
     mongo_client = mongo.GetConfig()
-    mongo_db = mongo_client['test']
-    mongo_collection = mongo_db['testcol']
+    mongo_db = mongo_client[MONGO_DATABASE]
+    mongo_collection = mongo_db[MONGO_COLLECTION]
 
-    computation = Computation.construct(id=computation_id)
-
-    read_status = computation.read(mongo_collection)
-
-    if read_status.success != True:
-        return JSONResponse(status_code=read_status.status_code,
-                            content={"error": read_status.message})
+    minio_client = GetMinioConfig()
 
     if computation.containerId == "":
-        return JSONResponse(
-            status_code=400,
-            content={"error": "containerId does not exist"}
-        )
+        write_container_log(f"error: containerId does not exist")
 
     client = docker.from_env()
 
-    # stores the container details  in a dict
+    # stores the container state  in a dict
     container_state = {}
+
     # keeps track of the 'Running = True/False' state
     is_container_running = True
 
@@ -442,11 +437,10 @@ def RegisterComputation(computation_id: str):
             container_state = container.attrs["State"]
             is_container_running = container_state["Running"]
         except docker.errors.NotFound as nfe:
-            return JSONResponse(
-                status_code=500,
-                content={"error": f"unable to retrieve container with {computation.containerId} : {nfe}"}
-            )
+            write_container_log(f"error: unable to retrieve container with {computation.containerId} : {nfe}")
+
         print(container_state)
+        write_container_log(json.dumps(container_state))
         # delay 1 sec
         time.sleep(1)
 
@@ -457,41 +451,87 @@ def RegisterComputation(computation_id: str):
 
     # container exited gracefully
     if status == "exited" and exit_code == 0:
+        generates = []
+        # get all output files
+        for output_file in Path(COMPUTATION_OUTPUT_DIR).rglob('*'):
+            if output_file.is_file():
+                print(output_file.name)
+                file_parent = output_file.parent
+                file_name = output_file.name
+                file_name_prefix = output_file.stem
+                file_extension = ''.join(output_file.suffixes)  # includes .tar.gz
+                dataset = Dataset(**{
+                    "@id": f"ark:99999/{str(uuid.uuid4())}",
+                    "@type": "evi:Dataset",
+                    # TODO find the best way to represent name as it represents the directory in MINio
+                    "name": f"output-{file_name_prefix}",
+                    "owner": computation.owner,
+                    "generatedBy": computation.id
+                })
+
+                create_status = dataset.create(mongo_client)
+
+                if create_status.success:
+                    generates.append({"@id": dataset.id, "@type": dataset.type, "name": dataset.name})
+
+                data_download = DataDownload(**{
+                    "@id": f"ark:99999/{str(uuid.uuid4())}",
+                    "@type": "DataDownload",
+                    "name": file_name,
+                    "encodingFormat": file_extension,
+                    "encodesCreativeWork": dataset.id
+                })
+
+                create_status = data_download.create_metadata(mongo_client)
+                print(create_status)
+
+                # with open(output_file, "rb") as output_file_object:
+                #     upload_status = data_download.register(output_file_object, mongo_collection, minio_client)
+                #     if upload_status.success != True:
+                #         return JSONResponse(
+                #             status_code=500,
+                #             content={"error": f"unable to upload object: {output_file}"}
+                #         )
+
         # Update computation with info from the custom container
         session = mongo_client.start_session(causal_consistency=True)
 
         mongo_database = mongo_client[MONGO_DATABASE]
         mongo_collection = mongo_database[MONGO_COLLECTION]
 
+        container = client.containers.get(container_id=computation.containerId)
+        logs = container.logs()
+        print(logs)
+
         # update computation with the container-start and end time
         update_computation_result = mongo_collection.update_one(
             {"@id": computation.id},
             {"$set": {
                 "dateCreated": date_created,
-                "dateFinished": date_finished
+                "dateFinished": date_finished,
+                "generates": generates,
+                "logs": to_str(logs)
             }},
             session=session
         )
 
         if update_computation_result.matched_count != 1 and update_computation_result.modified_count != 1:
-            return JSONResponse(
-                status_code=500,
-                content={"error": "unable to update container id"}
-            )
+            write_container_log(f"error: unable to update container id")
 
     else:
-        return JSONResponse(
-            status_code=500,
-            content={"error": "container exited unexpectedly"}
-        )
+        write_container_log(f"error: container exited unexpectedly")
 
+    # remove the container
+    container.remove()
+    write_container_log(f"message: container {computation.containerId} removed successfully")
 
-
-
-
-
-
-
-
-
+    # clean up files
+    dir_to_clean = pathlib.Path(COMPUTATION_OUTPUT_DIR)
+    write_container_log(f"message: cleaning output directory: {dir_to_clean}")
+    if dir_to_clean.exists() and dir_to_clean.is_dir():
+        shutil.rmtree(dir_to_clean)
+        write_container_log(f"message: output directory: {dir_to_clean} removed successfully")
+    else:
+        write_container_log(f"message: error removing output directory: {dir_to_clean}")
+    print('Run Custom Container: All done')
 
