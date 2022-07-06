@@ -21,13 +21,13 @@ class Computation(FairscapeBaseModel):
     context = {"@vocab": "https://schema.org/", "evi": "https://w3id.org/EVI#"}
     type = "evi:Computation"
     owner: UserCompactView
-    author: UserCompactView
-    dateCreated: datetime
-    dateFinished: datetime
-    associatedWith: List[Union[OrganizationCompactView, UserCompactView]]
+#    author: UserCompactView
+    dateCreated: Optional[datetime]
+    dateFinished: Optional[datetime]
+    associatedWith: Optional[List[Union[OrganizationCompactView, UserCompactView]]] = []
     container: str
     usedSoftware:  Union[str, SoftwareCompactView]
-    usedDataset: Union[List[Union[str, DatasetCompactView]], str, DatasetCompactView]
+    usedDataset: Union[ str, DatasetCompactView] # ,List[Union[str, DatasetCompactView]]]
     containerId: Optional[str]
 
     class Config:
@@ -41,11 +41,23 @@ class Computation(FairscapeBaseModel):
 
         # check that owner exists
         if MongoCollection.find_one({"@id": self.owner.id}) is None:
-            return OperationStatus(False, "owner does not exist", 404)
+            return OperationStatus(False, f"owner {self.owner.id} does not exist", 404)
 
         # check that software exists
+        if type(self.usedSoftware) == str:
+            software_id = self.usedSoftware
+        else:
+            software_id = self.usedSoftware.id
+        if MongoCollection.find_one({"@id": software_id}) is None:
+            return OperationStatus(False, f"software {software_id} does not exist", 404)
 
         # check that datasets exist
+        if type(self.usedDataset) == str:
+            dataset_id = self.usedDataset
+        else:
+            dataset_id = self.usedDataset.id
+        if MongoCollection.find_one({"@id": dataset_id}) is None:
+            return OperationStatus(False, f"dataset {dataset_id} does not exist", 404)
 
         # embeded bson documents to enable Mongo queries
         computation_dict = self.dict(by_alias=True)
@@ -134,17 +146,16 @@ class Computation(FairscapeBaseModel):
 
 
 
-    def run_custom_container(self, MongoClient: pymongo.MongoClient) -> OperationStatus:
+    def run_custom_container(self, mongo_collection: pymongo.collection.Collection) -> OperationStatus:
+ 
+        self.dateCreated = datetime.fromtimestamp(time.time()).strftime("%A, %B %d, %Y %I:%M:%S")
 
-        
-        read_status = self.read()
-        if read_status.success != True:
-            return read_status
+        dataset_ids = self.usedDataset.id
+        script_id = self.usedSoftware.id
 
-        dateCreated = datetime.fromtimestamp(time.time()).strftime("%A, %B %d, %Y %I:%M:%S")
+        # lookup the dataset contentUrl
 
-        dataset_ids = self.usedDataset
-        script_id = self.usedSoftware
+        # lookup the software contentUrl
 
 
         # find the locations of all the files
@@ -351,9 +362,53 @@ def list_computation(mongo_collection: pymongo.collection.Collection):
         "computations": [{"@id": computation.get("@id"), "@type": "evi:Computation", "name": computation.get("name")}
                          for computation in cursor]}
 
-def RegisterComputation(computation_id: str):
+def RegisterComputation(computation: Computation):
     """
     Given a computation ID first await the success or failure of the container in the ongoing computation.
     If successfull register all datasets in the output folder for the supplied computation, 
     and append the computation metadata with status of the containers execution and logs if applicable
     """
+
+    def gen_id():
+        random_stuff = "hello" 
+        return f"ark:99999/{random_stuff}"
+
+    for output_file in pathlib.path("/tmp/job-id/output"):
+
+        filename = str(output_file.filename)
+        dataset = Dataset(**{
+            "@id": gen_id(),
+            "name": "output {filename}",
+            "@type": "Dataset",
+            "owner": computation.owner,    
+            "generatedBy": computation.id
+        })
+
+        dataset.create(mongo_collection)
+
+        data_download = DataDownload(**{
+            "@id": gen_id(),
+            "@type": "DataDownload",
+            "name": f"output {filename}"
+            "encodesCreativeWork": dataset.id
+        })
+
+        with open(output_file, "rb") as output_file_object:
+        
+            upload_status = data_download.register(output_file_object, mongo_collection, minio_client)
+
+            if upload_status.success != True:
+                # TODO Log an error
+                pass
+
+    # Get the logs and update the compuation metadata
+    logs = docker.logs(computation.containerId)
+    mongo_collection.update_one({"@id": computation.id}, {"$set": {"container.logs": logs}})
+
+    # Clean up the container
+    docker.rm(computation.containerId)
+
+    # clean up the temporary files
+    pathlib.rm("/tmp/job-id")
+
+    pass
