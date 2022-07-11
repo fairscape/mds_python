@@ -2,20 +2,30 @@ from bson import SON
 from pydantic import Extra
 from typing import List, Union, Optional
 from datetime import datetime
+from pathlib import Path
+from mds.database import mongo
 from mds.models.fairscape_base import *
 from mds.models.dataset import Dataset
+from mds.models.download import Download as DataDownload
+from mds.models.software import Software
 from mds.models.compact.user import UserCompactView
 from mds.models.compact.software import SoftwareCompactView
 from mds.models.compact.dataset import DatasetCompactView
 from mds.models.compact.organization import OrganizationCompactView
 from mds.utilities.funcs import *
+from mds.utilities.utils import *
 import requests
 import docker
 import time
-from mds.database.config import MINIO_BUCKET, MONGO_DATABASE, MONGO_COLLECTION
+import uuid
 import pathlib
+import shutil
+from mds.database.config import MINIO_BUCKET, MONGO_DATABASE, MONGO_COLLECTION
+from mds.database.minio import *
+from mds.database.container_config import *
 
 root_url = "http://localhost:8000/"
+
 
 class Computation(FairscapeBaseModel):
     context = {"@vocab": "https://schema.org/", "evi": "https://w3id.org/EVI#"}
@@ -36,6 +46,14 @@ class Computation(FairscapeBaseModel):
 
     def create(self, MongoCollection: pymongo.collection.Collection) -> OperationStatus:
 
+        # TODO initialize attributes of computation
+        # self.author = ""
+        # self.dateCreated = ""
+        # self.dateFinished = ""
+        # self.associatedWith = []
+        # self.usedSoftware = ""
+        # self.usedDataset = ""
+
         # check that computation does not already exist
         if MongoCollection.find_one({"@id": self.id}) is not None:
             return OperationStatus(False, "computation already exists", 400)
@@ -43,7 +61,7 @@ class Computation(FairscapeBaseModel):
         # check that owner exists
         if MongoCollection.find_one({"@id": self.owner.id}) is None:
             return OperationStatus(False, f"owner {self.owner.id} does not exist", 404)
-
+            
         # check that software exists
         if type(self.usedSoftware) == str:
             software_id = self.usedSoftware
@@ -144,8 +162,6 @@ class Computation(FairscapeBaseModel):
             return OperationStatus(True, "", 200)
         else:
             return OperationStatus(False, f"{bulk_edit_result.bulk_api_result}", 500)
-
-
 
     def run_custom_container(self, mongo_collection: pymongo.collection.Collection, minio_client) -> OperationStatus:
         """
@@ -278,99 +294,161 @@ class Computation(FairscapeBaseModel):
             with open('/home/sadnan/compute-test/' + script_file_name, 'wb') as binary_data_file:
                 binary_data_file.write(script_content)
 
-        # select docker image
-        image_name = "python"
-        image_tag = "alpine"
-        IMAGE = f"{image_name}:{image_tag}"
 
-        # Volume mapping in the container
-        SOURCE_VOL = '/home/sadnan/compute-test'
-        MOUNT_VOL = '/cont/vol/script'
+        #
+        # TODO Ensure successful launch of the container, exception handling
+        #
 
-        # script to run
-        SCRIPT_NAME = 'sum_script.py'
+        if container.id is None:
+            return OperationStatus(False, f"error retrieving container id from launched container", 404)
 
-        # command to run python script 'python3 /path/to/script/in/mounted/container/vol'
-        COMMAND = ['python', f'{MOUNT_VOL}/{SCRIPT_NAME}']
+        # assign long-form container id
+        self.containerId = container.id
 
-        CONTAINER_NAME = "compute-service-custom-container"
+        # Update computation with info from the custom container
+        session = MongoClient.start_session(causal_consistency=True)
+        mongo_database = MongoClient[MONGO_DATABASE]
+        mongo_collection = mongo_database[MONGO_COLLECTION]
 
-        client = docker.from_env()
-
-        container = client.containers.run(
-            image=IMAGE,
-            command=COMMAND,
-            auto_remove=True,
-            working_dir=MOUNT_VOL,
-            # any of the following three volumes mounting would work
-            # volumes={SOURCE_VOL: {'bind': MOUNT_VOL}} # as a dict
-            # volumes={SOURCE_VOL: {'bind': MOUNT_VOL, 'mode': 'rw'}} # as a dict
-            # volumes=[SOURCE_VOL + ':' + MOUNT_VOL] # as a list
-            volumes={SOURCE_VOL: {'bind': MOUNT_VOL, 'mode': 'rw'},
-                     '/home/sadnan/compute-test/data': {'bind': '/cont/vol/script/data', 'mode': 'rw'},
-                     '/home/sadnan/compute-test/outputs': {'bind': '/cont/vol/script/outputs', 'mode': 'rw'},
-                     }
+        # update computation with the container id
+        update_computation_result = mongo_collection.update_one(
+            {"@id": self.id},
+            {"$set": {
+                "containerId": self.containerId
+            }},
+            session=session
         )
-        # output = to_str(container).attach(stdout=True, stream=True, logs=True)
-        # for line in output:
-        #    print(to_str(line))
 
-        dateFinished = datetime.fromtimestamp(time.time()).strftime("%A, %B %d, %Y %I:%M:%S")
-        # self.dateFinished = dateFinished
-
-        # print("time lapsed: ", dateCreated, dateFinished)
-
-        if container.decode('utf-8') == b'':
-            return OperationStatus(False, f"error running the container", 400)
-
-        # print(container)
-
-        # update computation with metadata
-        with MongoClient.start_session(causal_consistency=True) as session:
-            mongo_database = MongoClient[MONGO_DATABASE]
-            mongo_collection = mongo_database[MONGO_COLLECTION]
-
-            for dataset_id in dataset_ids:
-                dataset_metadata = mongo_collection.find_one({"@id": dataset_id}, session=session)
-                if dataset_metadata == None:
-                    return OperationStatus(False, f"dataset {dataset_id} not found", 404)
-
-                dataset = Dataset.construct(**dataset_metadata)
-                # update the encodesCreativeWork property with a DatasetCompactView
-                dataset_compact = {
-                    "@id": dataset_metadata.get("@id"),
-                    "@type": dataset_metadata.get('@type'),
-                    "name": dataset_metadata.get('name')
-                }
-                usedDatasets.append(dataset_compact)
-
-            script_metadata = mongo_collection.find_one({"@id": script_id}, session=session)
-            if script_metadata == None:
-                return OperationStatus(False, f"script {script_id} not found", 404)
-
-            script = Dataset.construct(**dataset_metadata)
-            # update the encodesCreativeWork property with a DatasetCompactView
-            script_compact = {
-                "@id": script_metadata.get("@id"),
-                "@type": script_metadata.get('@type'),
-                "name": script_metadata.get('name')
-            }
-            usedSoftware = script_compact
-
-            # print(usedDatasets, usedSoftware, dateCreated, dateFinished)
-
-            update_computation_upon_execution = mongo_collection.update_one(
-                {"@id": self.id},
-                {"$set": {
-                    "dateCreated": dateCreated,
-                    "dateFinished": dateFinished,
-                    "usedSoftware": usedSoftware,
-                    "usedDataset": usedDatasets,
-                }},
-                session=session
-            ),
+        if update_computation_result.matched_count != 1 and update_computation_result.modified_count != 1:
+            return OperationStatus(False, f"error updating container id", 500)
 
         return OperationStatus(True, "", 201)
+
+
+# def _run_container(self):
+#         dataset_ids = []
+#         script_id = ""
+#         # Locate and download the dataset(s)
+#         if dataset_ids and isinstance(dataset_ids, list):
+#             for dataset_id in dataset_ids:
+#                 r = requests.get(root_url + f"dataset/{dataset_id}")
+#                 dataset_download_id, dataset_file_location, dataset_file_name = get_distribution_attr(dataset_id, r)
+#                 print(dataset_download_id, dataset_file_location, dataset_file_name)
+#
+#                 # Download the content of the dataset
+#                 data_download_dataset_download = requests.get(root_url + f"datadownload/{dataset_download_id}/download")
+#                 dataset_content = data_download_dataset_download.content
+#                 # print(dataset_content)
+#
+#                 with open('/home/sadnan/compute-test/data/' + dataset_file_name, 'wb') as binary_data_file:
+#                     binary_data_file.write(dataset_content)
+#
+#         if script_id:
+#             r = requests.get(root_url + f"software/{script_id}")
+#             script_download_id, script_file_location, script_file_name = get_distribution_attr(script_id, r)
+#             print(script_download_id, script_file_location, script_file_name)
+#
+#             # Download the content of the script
+#             data_download_software_read = requests.get(root_url + f"datadownload/{script_download_id}/download")
+#             script_content = data_download_software_read.content
+#             # print(script_content)
+#
+#             with open('/home/sadnan/compute-test/' + script_file_name, 'wb') as binary_data_file:
+#                 binary_data_file.write(script_content)
+#
+#         # select docker image
+#         image_name = "python"
+#         image_tag = "alpine"
+#         IMAGE = f"{image_name}:{image_tag}"
+#
+#         # Volume mapping in the container
+#         SOURCE_VOL = '/home/sadnan/compute-test'
+#         MOUNT_VOL = '/cont/vol/script'
+#
+#         # script to run
+#         SCRIPT_NAME = 'sum_script.py'
+#
+#         # command to run python script 'python3 /path/to/script/in/mounted/container/vol'
+#         COMMAND = ['python', f'{MOUNT_VOL}/{SCRIPT_NAME}']
+#
+#         CONTAINER_NAME = "compute-service-custom-container"
+#
+#         client = docker.from_env()
+#
+#         container = client.containers.run(
+#             image=IMAGE,
+#             command=COMMAND,
+#             auto_remove=True,
+#             working_dir=MOUNT_VOL,
+#             # any of the following three volumes mounting would work
+#             # volumes={SOURCE_VOL: {'bind': MOUNT_VOL}} # as a dict
+#             # volumes={SOURCE_VOL: {'bind': MOUNT_VOL, 'mode': 'rw'}} # as a dict
+#             # volumes=[SOURCE_VOL + ':' + MOUNT_VOL] # as a list
+#             volumes={SOURCE_VOL: {'bind': MOUNT_VOL, 'mode': 'rw'},
+#                      '/home/sadnan/compute-test/data': {'bind': '/cont/vol/script/data', 'mode': 'rw'},
+#                      '/home/sadnan/compute-test/outputs': {'bind': '/cont/vol/script/outputs', 'mode': 'rw'},
+#                      }
+#         )
+#         # output = to_str(container).attach(stdout=True, stream=True, logs=True)
+#         # for line in output:
+#         #    print(to_str(line))
+#
+#         dateFinished = datetime.fromtimestamp(time.time()).strftime("%A, %B %d, %Y %I:%M:%S")
+#         # self.dateFinished = dateFinished
+#
+#         # print("time lapsed: ", dateCreated, dateFinished)
+#
+#         if container.decode('utf-8') == b'':
+#             return OperationStatus(False, f"error running the container", 400)
+#
+#         # print(container)
+#
+#         # update computation with metadata
+#         with MongoClient.start_session(causal_consistency=True) as session:
+#             mongo_database = MongoClient[MONGO_DATABASE]
+#             mongo_collection = mongo_database[MONGO_COLLECTION]
+#
+#             for dataset_id in dataset_ids:
+#                 dataset_metadata = mongo_collection.find_one({"@id": dataset_id}, session=session)
+#                 if dataset_metadata == None:
+#                     return OperationStatus(False, f"dataset {dataset_id} not found", 404)
+#
+#                 dataset = Dataset.construct(**dataset_metadata)
+#                 # update the encodesCreativeWork property with a DatasetCompactView
+#                 dataset_compact = {
+#                     "@id": dataset_metadata.get("@id"),
+#                     "@type": dataset_metadata.get('@type'),
+#                     "name": dataset_metadata.get('name')
+#                 }
+#                 usedDatasets.append(dataset_compact)
+#
+#             script_metadata = mongo_collection.find_one({"@id": script_id}, session=session)
+#             if script_metadata == None:
+#                 return OperationStatus(False, f"script {script_id} not found", 404)
+#
+#             script = Dataset.construct(**dataset_metadata)
+#             # update the encodesCreativeWork property with a DatasetCompactView
+#             script_compact = {
+#                 "@id": script_metadata.get("@id"),
+#                 "@type": script_metadata.get('@type'),
+#                 "name": script_metadata.get('name')
+#             }
+#             usedSoftware = script_compact
+#
+#             # print(usedDatasets, usedSoftware, dateCreated, dateFinished)
+#
+#             update_computation_upon_execution = mongo_collection.update_one(
+#                 {"@id": self.id},
+#                 {"$set": {
+#                     "dateCreated": dateCreated,
+#                     "dateFinished": dateFinished,
+#                     "usedSoftware": usedSoftware,
+#                     "usedDataset": usedDatasets,
+#                 }},
+#                 session=session
+#             ),
+#
+#         return OperationStatus(True, "", 201)
 
 
 def list_computation(mongo_collection: pymongo.collection.Collection):
@@ -382,53 +460,131 @@ def list_computation(mongo_collection: pymongo.collection.Collection):
         "computations": [{"@id": computation.get("@id"), "@type": "evi:Computation", "name": computation.get("name")}
                          for computation in cursor]}
 
+
 def RegisterComputation(computation: Computation):
     """
     Given a computation ID first await the success or failure of the container in the ongoing computation.
     If successfull register all datasets in the output folder for the supplied computation, 
     and append the computation metadata with status of the containers execution and logs if applicable
     """
+    
+    mongo_client = mongo.GetConfig()
+    mongo_db = mongo_client[MONGO_DATABASE]
+    mongo_collection = mongo_db[MONGO_COLLECTION]
 
-    def gen_id():
-        random_stuff = "hello" 
-        return f"ark:99999/{random_stuff}"
+    minio_client = GetMinioConfig()
 
-    for output_file in pathlib.path("/tmp/job-id/output"):
+    if computation.containerId == "":
+        write_container_log(f"error: containerId does not exist")
 
-        filename = str(output_file.filename)
-        dataset = Dataset(**{
-            "@id": gen_id(),
-            "name": "output {filename}",
-            "@type": "Dataset",
-            "owner": computation.owner,    
-            "generatedBy": computation.id
-        })
+    client = docker.from_env()
 
-        dataset.create(mongo_collection)
+    # stores the container state  in a dict
+    container_state = {}
 
-        data_download = DataDownload(**{
-            "@id": gen_id(),
-            "@type": "DataDownload",
-            "name": f"output {filename}",
-            "encodesCreativeWork": dataset.id
-        })
+    # keeps track of the 'Running = True/False' state
+    is_container_running = True
 
-        with open(output_file, "rb") as output_file_object:
-        
-            upload_status = data_download.register(output_file_object, mongo_collection, minio_client)
+    while is_container_running:
+        try:
+            container = client.containers.get(container_id=computation.containerId)
+            container_state = container.attrs["State"]
+            is_container_running = container_state["Running"]
+        except docker.errors.NotFound as nfe:
+            write_container_log(f"error: unable to retrieve container with {computation.containerId} : {nfe}")
 
-            if upload_status.success != True:
-                # TODO Log an error
-                pass
+        print(container_state)
+        write_container_log(json.dumps(container_state))
+        # delay 1 sec
+        time.sleep(1)
 
-    # Get the logs and update the compuation metadata
-    logs = docker.logs(computation.containerId)
-    mongo_collection.update_one({"@id": computation.id}, {"$set": {"container.logs": logs}})
+    status = container_state["Status"]
+    exit_code = container_state["ExitCode"]
+    date_created = container_state["StartedAt"]
+    date_finished = container_state["FinishedAt"]
 
-    # Clean up the container
-    docker.rm(computation.containerId)
+    # container exited gracefully
+    if status == "exited" and exit_code == 0:
+        generates = []
+        # get all output files
+        for output_file in Path(COMPUTATION_OUTPUT_DIR).rglob('*'):
+            if output_file.is_file():
+                print(output_file.name)
+                file_parent = output_file.parent
+                file_name = output_file.name
+                file_name_prefix = output_file.stem
+                file_extension = ''.join(output_file.suffixes)  # includes .tar.gz
+                dataset = Dataset(**{
+                    "@id": f"ark:99999/{str(uuid.uuid4())}",
+                    "@type": "evi:Dataset",
+                    # TODO find the best way to represent name as it represents the directory in MINio
+                    "name": f"output-{file_name_prefix}",
+                    "owner": computation.owner,
+                    "generatedBy": computation.id
+                })
 
-    # clean up the temporary files
-    pathlib.rm("/tmp/job-id")
+                create_status = dataset.create(mongo_client)
 
-    pass
+                if create_status.success:
+                    generates.append({"@id": dataset.id, "@type": dataset.type, "name": dataset.name})
+
+                data_download = DataDownload(**{
+                    "@id": f"ark:99999/{str(uuid.uuid4())}",
+                    "@type": "DataDownload",
+                    "name": file_name,
+                    "encodingFormat": file_extension,
+                    "encodesCreativeWork": dataset.id
+                })
+
+                create_status = data_download.create_metadata(mongo_client)
+                print(create_status)
+
+                # with open(output_file, "rb") as output_file_object:
+                #     upload_status = data_download.register(output_file_object, mongo_collection, minio_client)
+                #     if upload_status.success != True:
+                #         return JSONResponse(
+                #             status_code=500,
+                #             content={"error": f"unable to upload object: {output_file}"}
+                #         )
+
+        # Update computation with info from the custom container
+        session = mongo_client.start_session(causal_consistency=True)
+
+        mongo_database = mongo_client[MONGO_DATABASE]
+        mongo_collection = mongo_database[MONGO_COLLECTION]
+
+        container = client.containers.get(container_id=computation.containerId)
+        logs = container.logs()
+        print(logs)
+
+        # update computation with the container-start and end time
+        update_computation_result = mongo_collection.update_one(
+            {"@id": computation.id},
+            {"$set": {
+                "dateCreated": date_created,
+                "dateFinished": date_finished,
+                "generates": generates,
+                "logs": to_str(logs)
+            }},
+            session=session
+        )
+
+        if update_computation_result.matched_count != 1 and update_computation_result.modified_count != 1:
+            write_container_log(f"error: unable to update container id")
+
+    else:
+        write_container_log(f"error: container exited unexpectedly")
+
+    # remove the container
+    container.remove()
+    write_container_log(f"message: container {computation.containerId} removed successfully")
+
+    # clean up files
+    dir_to_clean = pathlib.Path(COMPUTATION_OUTPUT_DIR)
+    write_container_log(f"message: cleaning output directory: {dir_to_clean}")
+    if dir_to_clean.exists() and dir_to_clean.is_dir():
+        shutil.rmtree(dir_to_clean)
+        write_container_log(f"message: output directory: {dir_to_clean} removed successfully")
+    else:
+        write_container_log(f"message: error removing output directory: {dir_to_clean}")
+    print('Run Custom Container: All done')

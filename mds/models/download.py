@@ -9,33 +9,27 @@ from mds.models.dataset import Dataset
 from mds.models.compact.dataset import DatasetCompactView
 from mds.models.compact.software import SoftwareCompactView
 from mds.utilities.operation_status import OperationStatus
+from fastapi.encoders import jsonable_encoder
 
 from mds.database.config import MINIO_BUCKET, MONGO_DATABASE, MONGO_COLLECTION
 
 
 class Download(FairscapeBaseModel, extra=Extra.allow):
-	context = {"@vocab": "https://schema.org/", "evi": "https://w3id/EVI#"}
-	type = "DataDownload"
-	encodingFormat: str
-	contentSize: Optional[str]
-	contentUrl: Optional[str]
-	encodesCreativeWork: Union[DatasetCompactView, SoftwareCompactView, str]
-	sha256: Optional[str]
-	uploadDate: Optional[datetime]
-	version: Optional[str]
-	# status: str
+    context = {"@vocab": "https://schema.org/", "evi": "https://w3id/EVI#"}
+    type = "DataDownload"
+    encodingFormat: str
+    contentSize: Optional[str]
+    contentUrl: Optional[str]
+    encodesCreativeWork: Union[DatasetCompactView, SoftwareCompactView, str]
+    sha256: Optional[str]
+    uploadDate: Optional[datetime]
+    version: Optional[str]
+    # status: str
 
-
-	def create_metadata(self, MongoClient: pymongo.MongoClient) -> OperationStatus:
-
-		if self.version == None:
-			# create versioning
-			self.version = "1.0"
-
-		# handle if encodesCreativeWork is string or dictionary
-		if type(self.encodesCreativeWork) == str:
-			if self.encodesCreativeWork == "":
-				return OperationStatus(False, "missing dataset", 400)
+  def register(self, Object, MongoClient, MinioClient) -> OperationStatus:
+        """
+        """
+        
 
 			dataset_id = self.encodesCreativeWork
 
@@ -143,20 +137,19 @@ class Download(FairscapeBaseModel, extra=Extra.allow):
 				metadata={"identifier": self.id, "name": self.name}
 				)
 
-			# TODO check output of upload operation more thoroughly
-			if upload_operation == None:
-				return OperationStatus(False, "minio error: upload failed", 500)
+
+        elif type(self.encodesCreativeWork) == dict:
+            dataset_id = self.encodesCreativeWork.get("@id")
 
 			# get the size of the file from the stats
 			result_stats = MinioClient.stat_object(
 				bucket_name = MINIO_BUCKET,
 				object_name = self.contentUrl 
 			)
-
-		# TODO handle minio errors
-		except Exception as minio_err:
-			return OperationStatus(False, f"minio error: {minio_err}", 500)
-
+        # preform all operations as a single transaction
+        session = MongoClient.start_session(causal_consistency=True)
+        mongo_database = MongoClient[MONGO_DATABASE]
+        mongo_collection = mongo_database[MONGO_COLLECTION]
 
 		# update the download metadata 
 		update_download_result = mongo_collection.update_one(
@@ -176,7 +169,13 @@ class Download(FairscapeBaseModel, extra=Extra.allow):
 			{"$set": {"distribution.$.contentUrl": self.contentUrl}}
 			)
 
-		# TODO check update results
+
+        # update the encodesCreativeWork property with a DatasetCompactView
+        self.encodesCreativeWork = {
+                        "id": dataset_metadata.get("@id"),
+                        "@type": dataset_metadata.get("@type"),
+                        "name": dataset_metadata.get("name")
+        }
 
             dataset_id = self.encodesCreativeWork
 
@@ -192,6 +191,7 @@ class Download(FairscapeBaseModel, extra=Extra.allow):
         session = MongoClient.start_session(causal_consistency=True)
         mongo_database = MongoClient[MONGO_DATABASE]
         mongo_collection = mongo_database[MONGO_COLLECTION]
+
 
         dataset_metadata = mongo_collection.find_one({"@id": dataset_id}, session=session)
         if dataset_metadata == None:
@@ -305,6 +305,108 @@ class Download(FairscapeBaseModel, extra=Extra.allow):
                     }},
                     session = session
                     ),
+
+            # update the dataset metadata
+            update_dataset_result = mongo_collection.update_one(
+                    {
+                            "@id": dataset_id,
+                            "distribution": { "$elemMatch": {"@id": self.id}}
+                            },
+                    {"$set": {"distribution.$.contentUrl": upload_path}},
+                    session = session
+                    )
+
+            # TODO check update results
+
+        return OperationStatus(True, "", 201)
+
+
+    def delete(self, MongoCollection: pymongo.collection.Collection, MinioClient) -> OperationStatus:
+        """
+        removes the contentUrl property from the object, and deletes the file from minio
+        """
+
+        # get metadata record
+        read_status = self.super(MongoCollection).read()
+
+        if read_status.success != True:
+            return read_status
+
+
+        bulk_update = [
+                # TODO: update the metadata for the dataset record, i.e. status property for deleted versions
+                # update the metadata for the download record
+                pymongo.UpdateOne({"@id": self.id}, {"contentUrl": ""})
+        ]
+
+        # run the bulk update
+        try:
+            bulk_write_result = MongoCollection.bulk_write(bulk_update)
+        except pymongo.errors.BulkWriteError as bwe:
+            return OperationStatus(False, f"mongo error: bulk write error {bwe}", 500)
+
+        # remove the object from minio
+        delete_object = MinioClient.remove_object(MINIO_BUCKET, self.contentUrl)
+
+        # TODO: determine when minio client fails to remove an object and handle those cases
+
+        return OperationStatus(True, "", 200)
+
+
+    def read_metadata(self, MongoCollection: pymongo.collection.Collection) -> OperationStatus:
+        return self.read(MongoCollection)
+
+
+    def read_object(self, MinioClient):
+        """
+        reads the object and returns a file reader from the minio client
+        """
+
+        # lookup the url
+        if self.contentUrl == "":
+            return OperationStatus(False, "download has no contentUrl", 404)
+
+        with MinioClient.get_object(MINIO_BUCKET, self.contentUrl) as minio_object:
+            yield from minio_object
+
+            # upload object to minio
+            try:
+                upload_operation = MinioClient.put_object(
+                        bucket_name = MINIO_BUCKET,
+                        object_name = upload_path,
+                        data=Object.file,
+                        length=-1,
+                        part_size=10*1024*1024,
+                        #metadata={"@id": self.id, "name": self.name}
+                        )
+
+                # TODO check output of upload operation more thoroughly
+                if upload_operation == None:
+                    return OperationStatus(False, "minio error: upload failed", 500)
+
+                # get the size of the file from the stats
+                result_stats = MinioClient.stat_object(
+                        bucket_name = MINIO_BUCKET,
+                        object_name = upload_path
+                )
+
+
+            # TODO handle minio errors
+            except Exception as minio_err:
+                return OperationStatus(False, f"minio error: {minio_err}", 500)
+
+
+            # update the download metadata
+            update_download_result = mongo_collection.update_one(
+                    {"@id": self.id},
+                    { "$set": {
+                            "contentUrl": upload_path,
+                            "uploadDate": str(result_stats.last_modified),
+                            "version": version,
+                            "contentSize": result_stats.size,
+                    }},
+                    session = session
+                    )
 
             # update the dataset metadata
             update_dataset_result = mongo_collection.update_one(

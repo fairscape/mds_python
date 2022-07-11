@@ -1,4 +1,5 @@
 import re
+from pathlib import Path
 
 
 def validate_ark(guid: str) -> str:
@@ -57,3 +58,15 @@ def validate_email(email_str: str) -> str:
         raise ValueError(f"email syntax error: {email_str}")
 
     return email_str
+
+
+def get_file_list(directory):
+    all_files = Path(r'{directory}').glob("**/*")
+    file_list = [file for file in all_files if file.is_file()]
+    return file_list
+
+
+def write_container_log(message: str):
+    with open("custom-container-log.txt", mode="a") as container_log_file:
+        # content = f"notification for {email}: {message}"
+        container_log_file.write(message + '\n')

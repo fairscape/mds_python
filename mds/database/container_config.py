@@ -19,3 +19,6 @@ SCRIPT_NAME = 'sum_script.py'
 COMMAND = ['python', f'{MOUNT_VOL}/{SCRIPT_NAME}']
 
 CONTAINER_NAME = "compute-service-custom-container"
+
+# To temporarily store the files resulting from the computation
+COMPUTATION_OUTPUT_DIR = "/home/sadnan/job-id/outputs"

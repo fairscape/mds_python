@@ -9,7 +9,6 @@ import json
 from mds.utilities.funcs import parse_request
 
 
-
 router = APIRouter()
 
 
