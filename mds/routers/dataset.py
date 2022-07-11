@@ -7,8 +7,18 @@ from mds.models.dataset import Dataset, list_dataset
 router = APIRouter()
 
 
-@router.post("/dataset")
+@router.post("/dataset",
+             summary="Create a dataset",
+             response_description="The created dataset")
 def dataset_create(dataset: Dataset):
+    """
+    Create a dataset with the following properties:
+
+    - **@id**: a unique identifier
+    - **@type**: evi:Dataset
+    - **name**: a name
+    - **owner**: an existing user in its compact form with @id, @type, name, and email
+    """
     mongo_client = mongo.GetConfig()
 
     create_status = dataset.create(mongo_collection, mongo_client)
@@ -17,17 +27,19 @@ def dataset_create(dataset: Dataset):
 
     if create_status.success:
         return JSONResponse(
-            status_code = 201,
+            status_code=201,
             content={"created": {"@id": dataset.id, "@type": "evi:Dataset"}}
         )
     else:
         return JSONResponse(
-            status_code = create_status.status_code,
-            content = {"error": create_status.message}
+            status_code=create_status.status_code,
+            content={"error": create_status.message}
         )
 
 
-@router.get("/dataset")
+@router.get("/dataset",
+            summary="List all datasets",
+            response_description="Retrieved list of datasets")
 def dataset_list():
     mongo_client = mongo.GetConfig()
     mongo_db = mongo_client["test"]
@@ -40,8 +52,16 @@ def dataset_list():
     return dataset
 
 
-@router.get("/dataset/ark:{NAAN}/{postfix}")
+@router.get("/dataset/ark:{NAAN}/{postfix}",
+            summary="Retrieve a dataset",
+            response_description="The retrieved dataset")
 def dataset_get(NAAN: str, postfix: str):
+    """
+    Retrieves a dataset based on a given identifier:
+
+    - **NAAN**: Name Assigning Authority Number which uniquely identifies an organization e.g. 12345
+    - **postfix**: a unique string
+    """
     mongo_client = mongo.GetConfig()
     mongo_db = mongo_client['test']
     mongo_collection = mongo_db['testcol']
@@ -58,12 +78,14 @@ def dataset_get(NAAN: str, postfix: str):
         return dataset
     else:
         return JSONResponse(
-            status_code = read_status.status_code,
-            content= {"error": read_status.message}
+            status_code=read_status.status_code,
+            content={"error": read_status.message}
         )
 
 
-@router.put("/dataset")
+@router.put("/dataset",
+            summary="Update a dataset",
+            response_description="The updated dataset")
 def dataset_update(dataset: Dataset):
     mongo_client = mongo.GetConfig()
     mongo_db = mongo_client['test']
@@ -75,18 +97,26 @@ def dataset_update(dataset: Dataset):
 
     if update_status.success:
         return JSONResponse(
-            status_code = 200,
-            content= {"updated": {"@id": dataset.id, "@type": "evi:Dataset"}}
+            status_code=200,
+            content={"updated": {"@id": dataset.id, "@type": "evi:Dataset"}}
         )
     else:
         return JSONResponse(
-            status_code = update_status.status_code,
-            content= {"error": update_status.message}
+            status_code=update_status.status_code,
+            content={"error": update_status.message}
         )
 
 
-@router.delete("/dataset/ark:{NAAN}/{postfix}")
+@router.delete("/dataset/ark:{NAAN}/{postfix}",
+               summary="Delete a dataset",
+               response_description="The deleted dataset")
 def dataset_delete(NAAN: str, postfix: str):
+    """
+    Deletes a dataset based on a given identifier:
+
+    - **NAAN**: Name Assigning Authority Number which uniquely identifies an organization e.g. 12345
+    - **postfix**: a unique string
+    """
     dataset_id = f"ark:{NAAN}/{postfix}"
 
     mongo_client = mongo.GetConfig()
@@ -101,12 +131,12 @@ def dataset_delete(NAAN: str, postfix: str):
 
     if delete_status.success:
         return JSONResponse(
-            status_code = 200,
-            content= {"deleted": {"@id": dataset_id}}
+            status_code=200,
+            content={"deleted": {"@id": dataset_id, "@type": "evi:Dataset", "name": dataset.name}}
         )
 
     else:
-        return JSONResponse( 
-            status_code = delete_status.status_code,
-            content= {"error": f"{str(delete_status.message)}"}
+        return JSONResponse(
+            status_code=delete_status.status_code,
+            content={"error": f"{str(delete_status.message)}"}
         )

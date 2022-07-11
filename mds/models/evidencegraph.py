@@ -121,4 +121,6 @@ def list_evidencegraph(mongo_collection: pymongo.collection.Collection):
         filter={"@type": "evi:EvidenceGraph"},
         projection={"_id": False}
     )
-    return [{"@id": evidencegraph.get("@id"), "name": evidencegraph.get("name")} for evidencegraph in cursor]
+    return {"evidencegraphs": [
+        {"@id": evidencegraph.get("@id"), "@type": "evi:EvidenceGraph", "name": evidencegraph.get("name")} for
+        evidencegraph in cursor]}

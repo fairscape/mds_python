@@ -195,7 +195,7 @@ def list_group(mongo_collection: pymongo.collection.Collection):
         filter={"@type": "Organization"},
         projection={"_id": False}
     )
-    return [{"@id": group.get("@id"), "name": group.get("name")} for group in cursor]
+    return {"groups":  [{"@id": group.get("@id"), "@type": "Organization", "name": group.get("name")} for group in cursor] }
 
 
 

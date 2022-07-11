@@ -121,4 +121,6 @@ def list_organization(mongo_collection: pymongo.collection.Collection):
         filter={"@type": "Organization"},
         projection={"_id": False}
     )
-    return [{"@id": organization.get("@id"), "name": organization.get("name")} for organization in cursor]
+    return {
+        "organizations": [{"@id": organization.get("@id"), "@type": "Organization", "name": organization.get("name")}
+                          for organization in cursor]}
