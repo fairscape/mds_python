@@ -26,6 +26,7 @@ class Computation(FairscapeBaseModel):
     dateFinished: Optional[datetime]
     associatedWith: Optional[List[Union[OrganizationCompactView, UserCompactView]]] = []
     container: str
+    command: Optional[str]
     usedSoftware:  Union[str, SoftwareCompactView]
     usedDataset: Union[ str, DatasetCompactView] # ,List[Union[str, DatasetCompactView]]]
     containerId: Optional[str]
@@ -146,88 +147,107 @@ class Computation(FairscapeBaseModel):
 
 
 
-    def run_custom_container(self, mongo_collection: pymongo.collection.Collection) -> OperationStatus:
+    def run_custom_container(self, mongo_collection: pymongo.collection.Collection, minio_client) -> OperationStatus:
+        """
+        run_custom_container creates a local computation and evidence graph record for computations
+
+        """
  
-        self.dateCreated = datetime.fromtimestamp(time.time()).strftime("%A, %B %d, %Y %I:%M:%S")
+        # add usedBy property to all datatsets and the software
+        used_by_ids = [dataset.id for dataset in self.usedDataset]
+        used_by_ids.append(self.usedSoftware.id)
 
-        dataset_ids = self.usedDataset.id
-        script_id = self.usedSoftware.id
+        update_many_result = mongo_collection.update_many(
+            {"@id": used_by_ids}, 
+            {"$push": {
+                "usedBy": {
+                    "@id": self.id, 
+                    "@type": self.type,
+                    "name": self.name
+                    }
+                }})
 
-        # lookup the dataset contentUrl
+        if update_many_result.modifiedCount != len(used_by_ids):
+            return OperationStatus(False, "", 500)
 
-        # lookup the software contentUrl
+
+        dataset_path = [dataset.distribution[0].contentUrl for dataset in self.usedDataset]
+        script_path = self.usedSoftware.distribution[0].contentUrl
+
+        # create a temporary landing folder for the output
+        job_path = pathlib.Path(f"/tmp/{self.name}")
+        input_directory  = job_path / "input"
+        software_directory = input_directory / "software"
+        data_directory = input_directory / "data"
+        output_directory = job_path / "output"
+
+        software_directory.mkdir(parents=True)
+        data_directory.mkdir(parents=True)
+        output_directory.mkdir(parents=True)
 
 
-        # find the locations of all the files
-        dataset_files = [] 
-        for dataset_guid in dataset_ids:
-            found_dataset = Dataset.construct(id=dataset_guid) 
+        # download script
+        script_filename = software_directory / pathlib.Path(script_path).name        
 
-            if found_dataset.read(MongoClient).get("success") != True:
-                return OperationStatus(False, "", 400)
-
-            dataset_files.append(found_dataset.contentUrl)
-
-        # find the software contentUrl
-        software = Software.construct(id=self.usedSoftware)
-        if software.read(MongoClient).get("success") != True:
-            return OperationStatus(False, "", 400)
-
-        # create a temporary folder for the data to transfered to the job
- 
-        # TODO create random_id for the job folder  
-        p = pathlib.Path("/tmp/job_id").mkdir(parents=True, exist_ok=True)
-
-        data_path = p + "/input/dataset"
-        software_path = p + "/input/software"
-
-        minio_client = GetMinioConfig()
-
-        for dataset_path in dataset_files:
-
-            download_path = data_path + pathlib.Path(dataset_path).name
- 
-            # use minio to transfer all datasetfiles
-            download_object_metadata =minio_client.fget_object(
-                MINIO_BUCKET, 
-                dataset_path, 
-                download_path
+        def get_minio_object(path, filename):
+            try:
+                get_software = minio_client.fget_object(
+                    MINIO_BUCKET, path, filename
                 )
 
-            # TODO determine minio download success            
-            # i.e. checking that the file is there and the same size
-    
-        # download the software to the temporary job folder 
+                return None
 
-        software_download_path = software_path + pathlib.Path(software.contentUrl).name
- 
-        # use minio to transfer all datasetfiles
-        software_object_metadata =minio_client.fget_object(
-            MINIO_BUCKET, 
-            software.contentUrl, 
-            software_download_path
-            )
+            except Exception as e:
+                return OperationStatus(False, f"minio downloading error {str(e)}", 500)
 
-        # TODO determine software download success
-        
+        # download script
+        script_download_status = get_minio_object(script_path, str(script_filename))
 
-        container = client.containers.run(
-            image=IMAGE,
-            command=COMMAND,
-            auto_remove=False,
-            working_dir=MOUNT_VOL,
-            # any of the following three volumes mounting would work
-            # volumes={SOURCE_VOL: {'bind': MOUNT_VOL}} # as a dict
-            # volumes={SOURCE_VOL: {'bind': MOUNT_VOL, 'mode': 'rw'}} # as a dict
-            # volumes=[SOURCE_VOL + ':' + MOUNT_VOL] # as a list
-            volumes={SOURCE_VOL: {'bind': MOUNT_VOL, 'mode': 'rw'},
-                     '/home/sadnan/compute-test/data': {'bind': '/cont/vol/script/data', 'mode': 'rw'},
-                     '/home/sadnan/compute-test/outputs': {'bind': '/cont/vol/script/outputs', 'mode': 'rw'},
-                     }
-        )
-       
+        if script_download_status != None:
+            return script_download_status
+
+
+        # download all dataset files
+        for dataset in dataset_path:
+            dataset_filename = data_directory / pathlib.Path(dataset).name
+
+            dataset_download_status = get_minio_object(dataset, str(dataset_filename))
+
+            if dataset_download_status != None:
+                return dataset_download_status
+
+        # setup the container
+        docker_client = docker.from_env()
+
+        try: 
+            container = docker_client.containers.create(
+                image = self.container, 
+                command = self.command,
+                auto_remove = False,
+                volumes={
+                    str(job_path): {'bind': '/mnt/', 'mode': 'rw'},
+                }
+                )
+        except Exception as e:
+            return OperationStatus(False, f"error creating docker container {str(e)}", 500) 
+
+
+        # update metadata with container id
         self.containerId = container.id
-        
+        self.dateCreated = datetime.fromtimestamp(time.time()).strftime("%A, %B %d, %Y %I:%M:%S")
+
+        update_metadata_results = mongo_collection.update_one({"@id": self.id}, {"$set": {"containerId": self.containerId, "dateCreated": self.dateCreated}})
+        if update_metadata_results.modifiedCount != 1:
+            return OperationStatus(False, "Failed to update mongo metadata", 500)
+
+        try:
+            container.start()
+            return OperationStatus(True, "", 201)
+
+        except Exception as e:
+            return OperationStatus(False, f"error starting container: {str(e)}", 500)
+
+         
 
     def _run_container(self):
         # Locate and download the dataset(s)
@@ -389,7 +409,7 @@ def RegisterComputation(computation: Computation):
         data_download = DataDownload(**{
             "@id": gen_id(),
             "@type": "DataDownload",
-            "name": f"output {filename}"
+            "name": f"output {filename}",
             "encodesCreativeWork": dataset.id
         })
 
