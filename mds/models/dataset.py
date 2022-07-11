@@ -137,4 +137,5 @@ def list_dataset(mongo_collection: pymongo.collection.Collection):
         filter={"@type": "evi:Dataset"},
         projection={"_id": False}
     )
-    return [{"@id": dataset.get("@id"), "name": dataset.get("name")} for dataset in cursor]
+    return {"datasets": [{"@id": dataset.get("@id"), "@type": "evi:Dataset", "name": dataset.get("name")} for dataset in
+                         cursor]}
