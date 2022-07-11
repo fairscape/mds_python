@@ -1,88 +1,110 @@
 from bson import SON
 from pydantic import Extra
-from typing import Optional, List
+from typing import Optional, List, Union
+from datetime import datetime
 import pymongo
 
 from mds.models.fairscape_base import *
-from mds.models.compact.user import UserCompactView
-from mds.models.compact.download import DataDownloadCompactView
+from mds.models.compact import *
 from mds.utilities.operation_status import OperationStatus
-
+from mds.database.config import MONGO_DATABASE, MONGO_COLLECTION
 
 class Dataset(FairscapeBaseModel):
     context = {"@vocab": "https://schema.org/", "evi": "https://w3id.org/EVI#"}
     type = "evi:Dataset"
-    owner: UserCompactView
+    owner: Union[UserCompactView, str]
     distribution: Optional[List[DataDownloadCompactView]] = []
-
-    # includedInDataCatalog: ProjectCompactView
-    # sourceOrganization: OrganizationCompactView
-    # author: str
-    # dateCreated: datetime
-    # dateModified: datetime
-    # activity: List[Activity]
-    # acl: str
+    includedInDataCatalog: Optional[ProjectCompactView] = None
+    sourceOrganization: Optional[OrganizationCompactView] = None
+    author: Optional[Union[str, UserCompactView]] = ""
+    dateCreated: Optional[datetime]
+    dateModified: Optional[datetime]
+    activity: Optional[List[ComputationCompactView]] = []
+    acl: Optional[dict]
 
     class Config:
         extra = Extra.allow
 
-    def create(self, MongoCollection: pymongo.collection.Collection) -> OperationStatus:
+    def create(self, MongoClient: pymongo.MongoClient) -> OperationStatus:
 
         # TODO initialize attributes of dataset
-        # self.includedInDataCatalog = ""
-        # self.sourceOrganization = ""
-        # self.distribution = ""
-        # self.author = ""
+        self.distribution = []
         # self.dateCreated = ""
         # self.dateModified = ""
         # self.activity = []
-        # self.acl = ""
+        # self.acl = "" 
+
+        MongoDatabase = MongoClient[MONGO_DATABASE]
+        MongoCollection = MongoDatabase[MONGO_COLLECTION]
+
+        # start a single session
+        session = MongoClient.start_session()
 
         # check that dataset does not already exist
-        if MongoCollection.find_one({"@id": self.id}) is not None:
+        if MongoCollection.find_one({"@id": self.id}, session=session) is not None:
+            session.end_session()
             return OperationStatus(False, "dataset already exists", 400)
 
+        if type(self.owner) == str:
+            owner_id = self.owner
+        else:
+            owner_id = self.owner.id
+
         # check that owner exists
-        if MongoCollection.find_one({"@id": self.owner.id}) is None:
+        if MongoCollection.find_one({"@id": owner_id}, session=session) is None:
+            session.end_session()
             return OperationStatus(False, "owner does not exist", 404)
 
         # embeded bson documents to enable Mongo queries
         dataset_dict = self.dict(by_alias=True)
 
         # embeded bson document for owner
-        dataset_dict["owner"] = SON([(key, value) for key, value in dataset_dict["owner"].items()])
+        dataset_dict["owner"] = SON([
+            (key, value) for key, value in dataset_dict["owner"].items()
+            ])
+
 
         # update operations for the owner user of the dataset
         add_dataset_update = {
             "$push": {"datasets": SON([("@id", self.id), ("@type", "evi:Dataset"), ("name", self.name)])}
         }
 
-        dataset_bulk_write = [
-            pymongo.InsertOne(dataset_dict),
-            # update owner model to have listed the dataset
-            pymongo.UpdateOne({"@id": self.owner.id}, add_dataset_update)
-        ]
+        undo = []
 
-        # perform the bulk write
-        try:
-            bulk_write_result = MongoCollection.bulk_write(dataset_bulk_write)
-        except pymongo.errors.BulkWriteError as bwe:
-            return OperationStatus(False, f"error performing bulk write operations: {bwe}", 500)
+        # use a session and transaction to enable rollbacks on errors 
+        insert_result = MongoCollection.insert_one(
+            dataset_dict, session=session)
 
-        # check that one document was created
-        if bulk_write_result.inserted_count != 1:
-            return OperationStatus(False, f"create dataset error: {bulk_write_result.bulk_api_result}", 500)
 
+        # check the insert one results
+        if insert_result.inserted_id is None:
+            return OperationStatus(False, f"error inserting document: {str(dataset_dict)}", 500)
+
+        # update owner model to have listed the dataset
+        update_result = MongoCollection.update_one(
+            {"@id": self.owner.id}, 
+            add_dataset_update, 
+            session=session
+            )
+
+        # check that the update operation succeeded
+        if update_result.modified_count != 1:
+            MongoCollection.delete_one({"@id": self.id})
+            return OperationStatus(False, f"error updating user on dataset create", 500)
+ 
         return OperationStatus(True, "", 201)
+
 
     def read(self, MongoCollection: pymongo.collection.Collection) -> OperationStatus:
         return super().read(MongoCollection)
 
-    def update(self, MongoCollection: pymongo.collection.Collection) -> OperationStatus:
+
+    def update(self, MongoClient) -> OperationStatus:
         # TODO e.g. when dataset is updated, it should be reflected in its owners profile
         return super().update(MongoCollection)
 
-    def delete(self, MongoCollection: pymongo.collection.Collection) -> OperationStatus:
+
+    def delete(self, MongoClient: pymongo.MongoClient) -> OperationStatus:
         """Delete the dataset. Update each user who is an owner of the dataset.
 
         Args:
@@ -91,6 +113,10 @@ class Dataset(FairscapeBaseModel):
         Returns:
             OperationStatus: _description_
         """
+
+        MongoDatabase = MongoClient[MONGO_DATABASE]
+        MongoCollection = MongoDatabase[MONGO_COLLECTION]
+        session = MongoClient.start_session()
 
         # check that record exists
         # also, if successfull, will unpack the data we need to build the update operation
@@ -102,34 +128,67 @@ class Dataset(FairscapeBaseModel):
             else:
                 return read_status
 
+
         # create a bulk write operation
         # to remove a document from a list
         pull_operation = {"$pull": {"datasets": {"@id": self.id}}}
 
-        # for ever member, remove the dataset from their list of dataset
-        # bulk_edit = [pymongo.UpdateOne({"@id": member.id}, pull_operation) for member in self.members]
+        with session.start_transaction() as transaction:
 
-        # operations to modify the owner
-        bulk_edit = [
-            pymongo.UpdateOne({"@id": self.owner.id}, pull_operation)
-        ]
 
-        # operations to delete the dataset document
-        bulk_edit.append(
-            pymongo.DeleteOne({"@id": self.id})
-        )
+            #  update the owner to remove the dataset
+            update_owner = MongoCollection.update_one(
+                {"@id": self.owner.id}, pull_operation, session=session)
 
-        # run the transaction
-        try:
-            bulk_edit_result = MongoCollection.bulk_write(bulk_edit)
-        except pymongo.errors.BulkWriteError as bwe:
-            return OperationStatus(False, f"Delete Dataset Error: {bwe}", 500)
+            if update_owner.modified_count != 1:
+                # cancel transaction
+                session.abort_transaction()
+                return OperationStatus(False, "", 500)
 
-        # check that the document was deleted
-        if bulk_edit_result.deleted_count == 1:
-            return OperationStatus(True, "", 200)
-        else:
-            return OperationStatus(False, f"{bulk_edit_result.bulk_api_result}", 500)
+            # update the project to remove the dataset
+            if self.includedInDataCatalog is not None:
+                update_project = MongoCollection.update_one(
+                    {"@id": self.includedInDataCatalog}, 
+                    pull_operation, 
+                    session=session
+                    )
+
+                if update_project.modified_count != 1:
+                    # cancel transaction
+                    session.abort_transaction()
+                    return OperationStatus(False, "", 500)
+
+            # update the organization to remove the dataset
+            if self.sourceOrganization is not None:
+                update_organization = MongoCollection.update_one(
+                    {"@id": self.sourceOrganization},
+                    pull_operation, 
+                    session=session
+                    )
+
+                if update_organization.modified_count != 1:
+                    # cancel transaction
+                    session.abort_transaction()
+                    return OperationStatus(False, "", 500)
+
+            # TODO delete all distributions 
+            if len(self.distribution) != 0:
+                pass
+            
+
+            # delete the distribution
+            delete_dataset = pymongo.delete_one({"@id": self.id})
+            
+            if delete_dataset.deleted_count != 1:
+
+                # cancel transaction
+                session.abort_transaction()
+                return OperationStatus(False, "", 500)
+
+            session.commit_transaction()
+
+
+        return OperationStatus(True, "", 200)
 
 
 def list_dataset(mongo_collection: pymongo.collection.Collection):

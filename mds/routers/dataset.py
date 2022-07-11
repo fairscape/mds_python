@@ -20,10 +20,8 @@ def dataset_create(dataset: Dataset):
     - **owner**: an existing user in its compact form with @id, @type, name, and email
     """
     mongo_client = mongo.GetConfig()
-    mongo_db = mongo_client["test"]
-    mongo_collection = mongo_db["testcol"]
 
-    create_status = dataset.create(mongo_collection)
+    create_status = dataset.create(mongo_collection, mongo_client)
 
     mongo_client.close()
 
