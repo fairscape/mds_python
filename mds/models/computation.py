@@ -31,14 +31,14 @@ class Computation(FairscapeBaseModel):
     context = {"@vocab": "https://schema.org/", "evi": "https://w3id.org/EVI#"}
     type = "evi:Computation"
     owner: UserCompactView
-
-    # author: str
-    # dateCreated: datetime
-    # dateFinished: datetime
-    # associatedWith: List[Union[OrganizationCompactView, UserCompactView]]
-    container: Optional[str]
-    usedSoftware: str
-    usedDataset: str
+#    author: UserCompactView
+    dateCreated: Optional[datetime]
+    dateFinished: Optional[datetime]
+    associatedWith: Optional[List[Union[OrganizationCompactView, UserCompactView]]] = []
+    container: str
+    command: Optional[str]
+    usedSoftware:  Union[str, SoftwareCompactView]
+    usedDataset: Union[ str, DatasetCompactView] # ,List[Union[str, DatasetCompactView]]]
     containerId: Optional[str]
 
     class Config:
@@ -60,7 +60,23 @@ class Computation(FairscapeBaseModel):
 
         # check that owner exists
         if MongoCollection.find_one({"@id": self.owner.id}) is None:
-            return OperationStatus(False, "owner does not exist", 404)
+            return OperationStatus(False, f"owner {self.owner.id} does not exist", 404)
+            
+        # check that software exists
+        if type(self.usedSoftware) == str:
+            software_id = self.usedSoftware
+        else:
+            software_id = self.usedSoftware.id
+        if MongoCollection.find_one({"@id": software_id}) is None:
+            return OperationStatus(False, f"software {software_id} does not exist", 404)
+
+        # check that datasets exist
+        if type(self.usedDataset) == str:
+            dataset_id = self.usedDataset
+        else:
+            dataset_id = self.usedDataset.id
+        if MongoCollection.find_one({"@id": dataset_id}) is None:
+            return OperationStatus(False, f"dataset {dataset_id} does not exist", 404)
 
         # embeded bson documents to enable Mongo queries
         computation_dict = self.dict(by_alias=True)
@@ -147,99 +163,137 @@ class Computation(FairscapeBaseModel):
         else:
             return OperationStatus(False, f"{bulk_edit_result.bulk_api_result}", 500)
 
-    def run_custom_container(self, MongoClient: pymongo.MongoClient) -> OperationStatus:
+    def run_custom_container(self, mongo_collection: pymongo.collection.Collection, minio_client) -> OperationStatus:
+        """
+        run_custom_container creates a local computation and evidence graph record for computations
 
-        mongo_db = MongoClient['test']
-        mongo_collection = mongo_db['testcol']
+        """
+ 
+        # add usedBy property to all datatsets and the software
+        used_by_ids = [dataset.id for dataset in self.usedDataset]
+        used_by_ids.append(self.usedSoftware.id)
 
-        read_status = self.read(mongo_collection)
-        if read_status.success != True:
-            return read_status
+        update_many_result = mongo_collection.update_many(
+            {"@id": used_by_ids}, 
+            {"$push": {
+                "usedBy": {
+                    "@id": self.id, 
+                    "@type": self.type,
+                    "name": self.name
+                    }
+                }})
 
-        # dateCreated = datetime.fromtimestamp(time.time()).strftime("%A, %B %d, %Y %I:%M:%S")
-        #
-        # dataset_ids = self.usedDataset
-        # script_id = self.usedSoftware
-        # container_image = self.container
-        #
-        # # find the locations of all the files
-        # dataset_files = []
-        # if isinstance(dataset_ids, list):
-        #     for dataset_guid in dataset_ids:
-        #         found_dataset = Dataset.construct(id=dataset_guid)
-        #
-        #         if found_dataset.read(mongo_collection).success != True:
-        #             return OperationStatus(False, "", 400)
-        #         print(found_dataset)
-        #         dataset_files.append(found_dataset.distribution["contentUrl"])
-        # else:
-        #     dataset_guid = dataset_ids
-        #     found_dataset = Dataset.construct(id=dataset_guid)
-        #
-        #     if found_dataset.read(mongo_collection).success != True:
-        #         return OperationStatus(False, "", 400)
-        #     print("outside", found_dataset)
-        #     dataset_files.append(found_dataset.distribution["contentUrl"])
-        # # find the software contentUrl
-        # software = Software.construct(id=self.usedSoftware)
-        # if software.read(mongo_collection).success != True:
-        #     return OperationStatus(False, "", 400)
-        #
-        # # create a temporary folder for the data to transfered to the job
-        #
-        # # TODO create random_id for the job folder
-        # p = pathlib.Path("/tmp/job_id").mkdir(parents=True, exist_ok=True)
-        #
-        # data_path = p + "/input/dataset"
-        # software_path = p + "/input/software"
-        # print(data_path, software_path)
-        #
-        # minio_client = GetMinioConfig()
-        #
-        # for dataset_path in dataset_files:
-        #
-        #     download_path = data_path + pathlib.Path(dataset_path).name
-        #
-        #     # use minio to transfer all datasetfiles
-        #     download_object_metadata =minio_client.fget_object(
-        #         MINIO_BUCKET,
-        #         dataset_path,
-        #         download_path
-        #         )
-        #
-        #     # TODO determine minio download success
-        #     # i.e. checking that the file is there and the same size
-        #
-        # # download the software to the temporary job folder
-        #
-        # software_download_path = software_path + pathlib.Path(software.contentUrl).name
-        #
-        # # use minio to transfer all datasetfiles
-        # software_object_metadata =minio_client.fget_object(
-        #     MINIO_BUCKET,
-        #     software.contentUrl,
-        #     software_download_path
-        #     )
+        if update_many_result.modifiedCount != len(used_by_ids):
+            return OperationStatus(False, "", 500)
 
-        # TODO determine software download success
 
-        client = docker.from_env()
-        container = client.containers.run(
-            image=self.container,
-            command=COMMAND,
-            auto_remove=False,
-            # detach=True required to get the Container object with attributes
-            detach=True,
-            working_dir=MOUNT_VOL,
-            # any of the following three volumes mounting would work
-            # volumes={SOURCE_VOL: {'bind': MOUNT_VOL}} # as a dict
-            # volumes={SOURCE_VOL: {'bind': MOUNT_VOL, 'mode': 'rw'}} # as a dict
-            # volumes=[SOURCE_VOL + ':' + MOUNT_VOL] # as a list
-            volumes={SOURCE_VOL: {'bind': MOUNT_VOL, 'mode': 'rw'},
-                     DATA_VOL: {'bind': MOUNT_DATA_VOL, 'mode': 'rw'},
-                     OUTPUT_VOL: {'bind': MOUNT_OUTPUT_VOL, 'mode': 'rw'},
-                     }
-        )
+        dataset_path = [dataset.distribution[0].contentUrl for dataset in self.usedDataset]
+        script_path = self.usedSoftware.distribution[0].contentUrl
+
+        # create a temporary landing folder for the output
+        job_path = pathlib.Path(f"/tmp/{self.name}")
+        input_directory  = job_path / "input"
+        software_directory = input_directory / "software"
+        data_directory = input_directory / "data"
+        output_directory = job_path / "output"
+
+        software_directory.mkdir(parents=True)
+        data_directory.mkdir(parents=True)
+        output_directory.mkdir(parents=True)
+
+
+        # download script
+        script_filename = software_directory / pathlib.Path(script_path).name        
+
+        def get_minio_object(path, filename):
+            try:
+                get_software = minio_client.fget_object(
+                    MINIO_BUCKET, path, filename
+                )
+
+                return None
+
+            except Exception as e:
+                return OperationStatus(False, f"minio downloading error {str(e)}", 500)
+
+        # download script
+        script_download_status = get_minio_object(script_path, str(script_filename))
+
+        if script_download_status != None:
+            return script_download_status
+
+
+        # download all dataset files
+        for dataset in dataset_path:
+            dataset_filename = data_directory / pathlib.Path(dataset).name
+
+            dataset_download_status = get_minio_object(dataset, str(dataset_filename))
+
+            if dataset_download_status != None:
+                return dataset_download_status
+
+        # setup the container
+        docker_client = docker.from_env()
+
+        try: 
+            container = docker_client.containers.create(
+                image = self.container, 
+                command = self.command,
+                auto_remove = False,
+                volumes={
+                    str(job_path): {'bind': '/mnt/', 'mode': 'rw'},
+                }
+                )
+        except Exception as e:
+            return OperationStatus(False, f"error creating docker container {str(e)}", 500) 
+
+
+        # update metadata with container id
+        self.containerId = container.id
+        self.dateCreated = datetime.fromtimestamp(time.time()).strftime("%A, %B %d, %Y %I:%M:%S")
+
+        update_metadata_results = mongo_collection.update_one({"@id": self.id}, {"$set": {"containerId": self.containerId, "dateCreated": self.dateCreated}})
+        if update_metadata_results.modifiedCount != 1:
+            return OperationStatus(False, "Failed to update mongo metadata", 500)
+
+        try:
+            container.start()
+            return OperationStatus(True, "", 201)
+
+        except Exception as e:
+            return OperationStatus(False, f"error starting container: {str(e)}", 500)
+
+         
+
+    def _run_container(self):
+        # Locate and download the dataset(s)
+        if dataset_ids and isinstance(dataset_ids, list):
+            for dataset_id in dataset_ids:
+                r = requests.get(root_url + f"dataset/{dataset_id}")
+                dataset_download_id, dataset_file_location, dataset_file_name = get_distribution_attr(dataset_id, r)
+                print(dataset_download_id, dataset_file_location, dataset_file_name)
+
+                # Download the content of the dataset
+                data_download_dataset_download = requests.get(root_url + f"datadownload/{dataset_download_id}/download")
+                dataset_content = data_download_dataset_download.content
+                # print(dataset_content)
+
+                with open('/home/sadnan/compute-test/data/' + dataset_file_name, 'wb') as binary_data_file:
+                    binary_data_file.write(dataset_content)
+
+        if script_id:
+            r = requests.get(root_url + f"software/{script_id}")
+            script_download_id, script_file_location, script_file_name = get_distribution_attr(script_id, r)
+            print(script_download_id, script_file_location, script_file_name)
+
+            # Download the content of the script
+            data_download_software_read = requests.get(root_url + f"datadownload/{script_download_id}/download")
+            script_content = data_download_software_read.content
+            # print(script_content)
+
+            with open('/home/sadnan/compute-test/' + script_file_name, 'wb') as binary_data_file:
+                binary_data_file.write(script_content)
+
 
         #
         # TODO Ensure successful launch of the container, exception handling
@@ -413,7 +467,7 @@ def RegisterComputation(computation: Computation):
     If successfull register all datasets in the output folder for the supplied computation, 
     and append the computation metadata with status of the containers execution and logs if applicable
     """
-
+    
     mongo_client = mongo.GetConfig()
     mongo_db = mongo_client[MONGO_DATABASE]
     mongo_collection = mongo_db[MONGO_COLLECTION]
@@ -534,4 +588,3 @@ def RegisterComputation(computation: Computation):
     else:
         write_container_log(f"message: error removing output directory: {dir_to_clean}")
     print('Run Custom Container: All done')
-

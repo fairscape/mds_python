@@ -98,8 +98,8 @@ class Dataset(FairscapeBaseModel):
     def read(self, MongoCollection: pymongo.collection.Collection) -> OperationStatus:
         return super().read(MongoCollection)
 
-
     def update(self, MongoCollection: pymongo.collection.Collection) -> OperationStatus:
+
         # TODO e.g. when dataset is updated, it should be reflected in its owners profile
         return super().update(MongoCollection)
 
