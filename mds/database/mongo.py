@@ -1,5 +1,6 @@
 from pymongo import MongoClient
 from urllib.parse import quote_plus
+from mds.database.config import MONGO_URI, MONGO_USER, MONGO_PASS
 
 
 class MongoConfig:
@@ -17,8 +18,8 @@ class MongoConfig:
 
 def GetConfig():
     return MongoConfig(
-        host_uri="localhost",
+        host_uri= MONGO_URI,
         port=27017,
-        user="root",
-        password="example"
+        user=MONGO_USER,
+        password=MONGO_PASS
     ).connect()

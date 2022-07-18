@@ -26,209 +26,92 @@ class Download(FairscapeBaseModel, extra=Extra.allow):
     version: Optional[str]
     # status: str
 
-  def register(self, Object, MongoClient, MinioClient) -> OperationStatus:
+    def register(self, Object, mongo_collection: pymongo.collection.Collection, MinioClient) -> OperationStatus:
         """
+        uploads the file and ammends the dataDownload metadata and dataset metadata
         """
-        
 
-			dataset_id = self.encodesCreativeWork
+        # check that the data download doesn't already exist
+        if mongo_collection.find_one({"@id": self.id}) != None:
+            return OperationStatus(False, f"dataDownload {self.id} already exists", 404)
 
-		elif type(self.encodesCreativeWork) == dict:
-			dataset_id = self.encodesCreativeWork.get("@id")
+        # obtain creative work @id
+        if type(self.encodesCreativeWork) == str:
+            creative_work_id = self.encodesCreativeWork
 
-		# TODO test for different types of encodesCreativeWork	
-		else:
-			return OperationStatus(False, f"encodesCreativeWork {self.encodesCreativeWork} not valid", 400)
+        if type(self.encodesCreativeWork) == dict:
+            creative_work_id = self.encodesCreativeWork.id
 
+        # Get the creative work
+        creative_work = mongo_collection.find_one({"@id": creative_work_id})
+        if creative_work is None:
+            return OperationStatus(False, f"creative work {creative_work_id} not found", 404)
 
-		# preform all operations as a single transaction
-		with MongoClient.start_session(causal_consistency=True) as session:
-			mongo_database = MongoClient[MONGO_DATABASE]
-			mongo_collection = mongo_database[MONGO_COLLECTION]
-
-			dataset_metadata = mongo_collection.find_one({"@id": dataset_id}, session=session)
-			if dataset_metadata == None:
-				return OperationStatus(False, f"dataset {dataset_id} not found", 404)
-
-			# Construct not working	
-			#dataset = Dataset.construct(_fields_set= dataset_metadata.keys(), **dataset_metadata)
-
-			# update the encodesCreativeWork property with a DatasetCompactView
-			self.encodesCreativeWork = {
-				"id": dataset_metadata.get("@id"), 
-				"@type": dataset_metadata.get("@type"), 
-				"name": dataset_metadata.get("name")
-			}
-
-
-			# TODO test output of operations
-			# create metadata record in mongo
-			insert_result = mongo_collection.insert_one(self.dict(by_alias=True), session=session)
-
-			# TODO check that update was successfull
-			# test update result	
-			update_result = mongo_collection.update_one(
-				{"@id": dataset_metadata.get("id")}, 
-				{"$addToSet" : { 
-					"distribution": SON([("@id", self.id), ("@type", "DataDownload"), ("name", self.name), ("contentUrl", "")])}
-				}, session=session),
-
-		# TODO handle errors
-		#except Exception as bwe:
-		#	return OperationStatus(False, f"create download error: {bwe}", 500)
-
-		#if bulk_write_result.inserted_count != 1:
-		#	return OperationStatus(False, "create download error: {bulk_write_result.bulk_api_result}", 500)
-
-		return OperationStatus(True, "", 201)
-
-
-	def register(self, Object, mongo_collection: pymongo.collection.Collection, MinioClient) -> OperationStatus:
-		"""
-		uploads the file and ammends the dataDownload metadata and dataset metadata
-		"""
-
-		# check that the data download doesn't already exist
-		if mongo_collection.find_one({"@id": self.id}) != None:
-			return OperationStatus(False, f"dataDownload {self.id} already exists", 404)
-
-		# obtain creative work @id 
-		if type(self.encodesCreativeWork) == str:
-			creative_work_id = self.encodesCreativeWork
-
-		if type(self.encodesCreativeWork) == dict:
-			creative_work_id = self.encodesCreativeWork.id
-
-		# Get the creative work 
-		creative_work = mongo_collection.find_one({"@id": creative_work_id})
-		if creative_work is None:
-			return OperationStatus(False, f"creative work {creative_work_id} not found", 404)	
-
-		# update format of creative work	
-		self.encodesCreativeWork = {
-			"id": creative_work.get("@id"), 
-			"@type": creative_work.get("@type"), 
-			"name": creative_work.get("name")
-		}
-
-		self.contentUrl = f"{creative_work.get('name')}/{self.name}"
-
-		# TODO check success of operation
-		insert_result = mongo_collection.insert_one(self.dict(by_alias=True))
-
-		# TODO check success of operation	
-		update_result = mongo_collection.update_one(
-			{"@id": creative_work.get("@id")}, 
-			{"$addToSet" : { 
-				"distribution": SON([("@id", self.id), ("@type", "DataDownload"), ("name", self.name), ("contentUrl", "")])}
-			})
-		
-		# TODO run sha256 as a background task
-		# create sha256 for object
-		
-		# upload object to minio
-		try:
-			upload_operation = MinioClient.put_object(
-				bucket_name = MINIO_BUCKET,
-				object_name = self.contentUrl,
-				data=Object,
-				length=-1,
-				part_size=10*1024*1024,
-				metadata={"identifier": self.id, "name": self.name}
-				)
-
-
-        elif type(self.encodesCreativeWork) == dict:
-            dataset_id = self.encodesCreativeWork.get("@id")
-
-			# get the size of the file from the stats
-			result_stats = MinioClient.stat_object(
-				bucket_name = MINIO_BUCKET,
-				object_name = self.contentUrl 
-			)
-        # preform all operations as a single transaction
-        session = MongoClient.start_session(causal_consistency=True)
-        mongo_database = MongoClient[MONGO_DATABASE]
-        mongo_collection = mongo_database[MONGO_COLLECTION]
-
-		# update the download metadata 
-		update_download_result = mongo_collection.update_one(
-			{"@id": self.id}, 
-			{ "$set": {
-				"uploadDate": str(result_stats.last_modified),
-				"contentSize": result_stats.size,
-			}}	
-			)
-
-		# update the dataset metadata
-		update_dataset_result = mongo_collection.update_one(
-			{
-				"@id": creative_work.get("@id"), 
-				"distribution": { "$elemMatch": {"@id": self.id}} 
-				}, 
-			{"$set": {"distribution.$.contentUrl": self.contentUrl}}
-			)
-
-
-        # update the encodesCreativeWork property with a DatasetCompactView
+        # update format of creative work
         self.encodesCreativeWork = {
-                        "id": dataset_metadata.get("@id"),
-                        "@type": dataset_metadata.get("@type"),
-                        "name": dataset_metadata.get("name")
+                "id": creative_work.get("@id"),
+                "@type": creative_work.get("@type"),
+                "name": creative_work.get("name")
         }
 
-            dataset_id = self.encodesCreativeWork
+        self.contentUrl = f"{creative_work.get('name')}/{self.name}"
 
-        elif type(self.encodesCreativeWork) == dict:
-            dataset_id = self.encodesCreativeWork.get("@id")
+        # TODO check success of operation
+        insert_result = mongo_collection.insert_one(self.dict(by_alias=True))
 
-        # TODO test for different types of encodesCreativeWork
-        else:
-            return OperationStatus(False, f"encodesCreativeWork {self.encodesCreativeWork} not valid", 400)
-
-
-        # preform all operations as a single transaction
-        session = MongoClient.start_session(causal_consistency=True)
-        mongo_database = MongoClient[MONGO_DATABASE]
-        mongo_collection = mongo_database[MONGO_COLLECTION]
-
-
-        dataset_metadata = mongo_collection.find_one({"@id": dataset_id}, session=session)
-        if dataset_metadata == None:
-            return OperationStatus(False, f"dataset {dataset_id} not found", 404)
-
-        # Construct not working
-        #dataset = Dataset.construct(_fields_set= dataset_metadata.keys(), **dataset_metadata)
-
-        # update the encodesCreativeWork property with a DatasetCompactView
-        self.encodesCreativeWork = {
-                        "id": dataset_metadata.get("@id"),
-                        "@type": dataset_metadata.get("@type"),
-                        "name": dataset_metadata.get("name")
-        }
-
-
-        # TODO test output of operations
-        # create metadata record in mongo
-        insert_result = mongo_collection.insert_one(self.dict(by_alias=True), session=session)
-
-
-        # TODO check that update was successfull
-        # test update result
+        # TODO check success of operation
         update_result = mongo_collection.update_one(
-                {"@id": dataset_metadata.get("id")},
+                {"@id": creative_work.get("@id")},
                 {"$addToSet" : {
                         "distribution": SON([("@id", self.id), ("@type", "DataDownload"), ("name", self.name), ("contentUrl", "")])}
-                }, session=session),
+                })
 
-        # TODO handle errors
-        #except Exception as bwe:
-        #       return OperationStatus(False, f"create download error: {bwe}", 500)
+        # TODO run sha256 as a background task
+        # create sha256 for object
 
-        #if bulk_write_result.inserted_count != 1:
-        #       return OperationStatus(False, "create download error: {bulk_write_result.bulk_api_result}", 500)
+        # upload object to minio
+        try:
+            upload_operation = MinioClient.put_object(
+                    bucket_name = MINIO_BUCKET,
+                    object_name = self.contentUrl,
+                    data=Object,
+                    length=-1,
+                    part_size=10*1024*1024,
+                    metadata={"identifier": self.id, "name": self.name}
+                    )
+
+            # get the size of the file from the stats
+            result_stats = MinioClient.stat_object(
+                    bucket_name = MINIO_BUCKET,
+                    object_name = self.contentUrl
+            )
+
+            # update the download metadata
+            update_download_result = mongo_collection.update_one(
+                    {"@id": self.id},
+                    { "$set": {
+                            "uploadDate": str(result_stats.last_modified),
+                            "contentSize": result_stats.size,
+                    }}
+                    )
+
+            # update the dataset metadata
+            update_dataset_result = mongo_collection.update_one(
+                    {
+                            "@id": creative_work.get("@id"),
+                            "distribution": { "$elemMatch": {"@id": self.id}}
+                            },
+                    {"$set": {"distribution.$.contentUrl": self.contentUrl}}
+                    )
+        except Exception as e:
+            return OperationStatus(False, f"exception uploading: {str(e)}", 500)
+
 
         return OperationStatus(True, "", 201)
+
+
+
+
 
 
 
