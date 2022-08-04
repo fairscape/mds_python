@@ -54,3 +54,29 @@ def list_users(mongo_collection: pymongo.collection.Collection):
         projection={"_id": False}
     )
     return {"users":  [{"@id": user.get("@id"), "@type": "Person", "name": user.get("name")} for user in cursor] }
+
+
+def FindUserAuth(mongo_collection: pymongo.collection.Collection, email: str, password: str) -> User:
+    """ lookup a user by credentials"""
+    auth_user = mongo_collection.find_one({
+        "@type": "Person", 
+        "email": email,
+        "password": password
+        })
+    
+    if auth_user == None:
+        raise UserNotFound(email, password)
+    else:
+        return User(**auth_user)
+
+
+class UserNotFound(Exception):
+    """ raised when credentials """
+
+    def __init__(self, email, password, message="user not found"):
+
+        self.email = email
+        self.password = password
+        self.message = f"User Not Found\temail: {email} password: {password}"
+
+        super().__init__(self.message)

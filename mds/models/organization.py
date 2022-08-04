@@ -1,8 +1,9 @@
 from bson import SON
 from pydantic import Extra
-from typing import List, Union
+from typing import List, Union, Optional
 from mds.models.fairscape_base import *
 from mds.models.compact.user import UserCompactView
+from mds.models.compact.project import ProjectCompactView
 
 
 # from mds.models.compact.project import ProjectCompactView
@@ -10,9 +11,9 @@ from mds.models.compact.user import UserCompactView
 class Organization(FairscapeBaseModel):
     context = {"@vocab": "https://schema.org/", "evi": "https://w3id.org/EVI#"}
     type = "Organization"
-    owner: UserCompactView
-
-    # projects: List[ProjectCompactView]
+    owner: Optional[UserCompactView]
+    members: Optional[List[UserCompactView]]
+    projects: Optional[List[ProjectCompactView]]
 
     class Config:
         extra = Extra.allow
