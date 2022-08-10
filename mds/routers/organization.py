@@ -2,7 +2,7 @@ from fastapi import APIRouter, Response, Header
 from fastapi.responses import JSONResponse
 from mds.database import mongo, casbin
 from mds.models.organization import Organization, list_organization
-from mds.models.user import FindUserAuth, UserNotFound
+from mds.models.auth import ParseAuthHeader, UserNotFound, TokenError
 from mds.models.compact.user import UserCompactView
 
 import base64
@@ -13,7 +13,10 @@ router = APIRouter()
 @router.post("/organization",
              summary="Create a organization",
              response_description="The created organization")
-def organization_create(organization: Organization, response: Response, Authorization: str | None = Header(default=None)):
+def organization_create(
+    organization: Organization, 
+    Authorization: str | None = Header(default=None)
+    ):
     """
     Create an organization with the following properties:
 
@@ -29,15 +32,17 @@ def organization_create(organization: Organization, response: Response, Authoriz
     mongo_db = mongo_client["test"]
     mongo_collection = mongo_db["testcol"]
 
-    authz_header = Authorization.strip("Basic ")
-    email, password = str(base64.b64decode(authz_header), 'utf-8').split(":")
-
     try:
-        calling_user = FindUserAuth(mongo_collection, email, password)
+        calling_user = ParseAuthHeader(mongo_collection, Authorization)
     except UserNotFound:
         return JSONResponse(
             status_code=401,
             content={"error": "user not found"}
+        )
+    except TokenError as token_error:
+        return JSONResponse(
+            status_code=401,
+            content={"error": "session not active", "message": token_error.message}
         )
 
     # set the calling user as the owner
@@ -91,7 +96,6 @@ def organization_list(response: Response):
 def organization_get(
     NAAN: str, 
     postfix: str, 
-    response: Response, 
     Authorization: str | None = Header(default=None)):
     """
     Retrieves an organization based on a given identifier:
@@ -107,16 +111,20 @@ def organization_get(
     mongo_db = mongo_client['test']
     mongo_collection = mongo_db['testcol']
 
-    authz_header = Authorization.strip("Basic ")
-    email, password = str(base64.b64decode(authz_header), 'utf-8').split(":")
-
+    # decode the credentials and find the user
     try:
-        calling_user = FindUserAuth(mongo_collection, email, password)
+        calling_user = ParseAuthHeader(mongo_collection, Authorization)
     except UserNotFound:
         return JSONResponse(
             status_code=401,
             content={"error": "user not found"}
         )
+    except TokenError as token_error:
+        return JSONResponse(
+            status_code=401,
+            content={"error": "session not active", "message": token_error.message}
+        )
+
 
     if enforcer.enforce(calling_user.id, "read", organization_id) != True:
         return JSONResponse(
@@ -143,8 +151,8 @@ def organization_get(
             response_description="The updated organization")
 def organization_update(
     organization: Organization, 
-    response: Response,
-    Authorization: str | None = Header(default=None)):
+    Authorization: str | None = Header(default=None)
+    ):
 
     enforcer = casbin.GetEnforcer()
 
@@ -153,16 +161,20 @@ def organization_update(
     mongo_collection = mongo_db['testcol']
 
 
-    authz_header = Authorization.strip("Basic ")
-    email, password = str(base64.b64decode(authz_header), 'utf-8').split(":")
-
+    # decode the credentials and find the user
     try:
-        calling_user = FindUserAuth(mongo_collection, email, password)
+        calling_user = ParseAuthHeader(mongo_collection, Authorization)
     except UserNotFound:
         return JSONResponse(
             status_code=401,
             content={"error": "user not found"}
         )
+    except TokenError as token_error:
+        return JSONResponse(
+            status_code=401,
+            content={"error": "session not active", "message": token_error.message}
+        )
+
 
     if enforcer.enforce(calling_user.id, "update", organization.id) != True:
         return JSONResponse(
@@ -207,15 +219,18 @@ def organization_delete(
     mongo_collection = mongo_db['testcol']
 
 
-    authz_header = Authorization.strip("Basic ")
-    email, password = str(base64.b64decode(authz_header), 'utf-8').split(":")
-
+    # decode the credentials and find the user
     try:
-        calling_user = FindUserAuth(mongo_collection, email, password)
+        calling_user = ParseAuthHeader(mongo_collection, Authorization)
     except UserNotFound:
         return JSONResponse(
             status_code=401,
             content={"error": "user not found"}
+        )
+    except TokenError as token_error:
+        return JSONResponse(
+            status_code=401,
+            content={"error": "session not active", "message": token_error.message}
         )
 
     if enforcer.enforce(calling_user.id, "delete", organization_id) != True:

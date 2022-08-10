@@ -42,6 +42,10 @@ async def data_download_create_metadata(data_download: DataDownload):
         )
 
 
+@router.post("/register")
+async def register_download():
+    pass
+
 @router.post("/datadownload/ark:{NAAN}/{download_id}/upload")
 async def data_download_upload(NAAN: str, download_id: str, file: UploadFile):
     data_download = DataDownload.construct(id=f"ark:{NAAN}/{download_id}")
