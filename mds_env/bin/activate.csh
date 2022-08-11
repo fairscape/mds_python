@@ -8,7 +8,7 @@ alias deactivate 'test $?_OLD_VIRTUAL_PATH != 0 && setenv PATH "$_OLD_VIRTUAL_PA
 # Unset irrelevant variables.
 deactivate nondestructive
 
-setenv VIRTUAL_ENV "/home/max/uva/mds_python/mds_env"
+setenv VIRTUAL_ENV "/home/sadnan/PycharmProjects/mds_python/mds_env"
 
 set _OLD_VIRTUAL_PATH="$PATH"
 setenv PATH "$VIRTUAL_ENV/bin:$PATH"
@@ -22,7 +22,7 @@ if (! "$?VIRTUAL_ENV_DISABLE_PROMPT") then
     else
         if (`basename "VIRTUAL_ENV"` == "__") then
             # special case for Aspen magic directories
-            # see https://aspen.io/
+            # see http://www.zetadev.com/software/aspen/
             set env_name = `basename \`dirname "$VIRTUAL_ENV"\``
         else
             set env_name = `basename "$VIRTUAL_ENV"`

@@ -1,3 +1,4 @@
+from typing import Union
 from fastapi import APIRouter, Response, Header
 from fastapi.responses import JSONResponse
 from mds.database import mongo, casbin
@@ -13,7 +14,7 @@ router = APIRouter()
             )
 def project_create(
     project: Project, 
-    Authorization: str | None = Header(default=None)
+    Authorization: Union[str, None] = Header(default=None)
     ):
     """
     Create a project with the following properties:
@@ -56,7 +57,7 @@ def project_create(
                 "error": "User Missing Permission",
                 "message": "user does not have permission to create project in this organization",
                 "permission": {
-                    "sub": user.id,
+                    "sub": calling_user.id,
                     "pred": "createProject",
                     "obj": org_id
                     }
@@ -70,13 +71,13 @@ def project_create(
     if create_status.success:
 
         # add policies to casbin for owner user to mongo
-        enforcer.add_policy(user.id, "read", project.id)
-        enforcer.add_policy(user.id, "update", project.id)
-        enforcer.add_policy(user.id, "delete", project.id)
-        enforcer.add_policy(user.id, "createDataset", project.id)
-        enforcer.add_policy(user.id, "createSoftware", project.id)
-        enforcer.add_policy(user.id, "createComputation", project.id)
-        enforcer.add_policy(user.id, "manage", project.id)
+        enforcer.add_policy(calling_user.id, "read", project.id)
+        enforcer.add_policy(calling_user.id, "update", project.id)
+        enforcer.add_policy(calling_user.id, "delete", project.id)
+        enforcer.add_policy(calling_user.id, "createDataset", project.id)
+        enforcer.add_policy(calling_user.id, "createSoftware", project.id)
+        enforcer.add_policy(calling_user.id, "createComputation", project.id)
+        enforcer.add_policy(calling_user.id, "manage", project.id)
         enforcer.save_policy()
 
         return JSONResponse(
@@ -111,7 +112,7 @@ def project_list(response: Response):
 def project_get(
     NAAN: str, 
     postfix: str, 
-    Authorization: str | None = Header(default=None)
+    Authorization: Union[str, None] = Header(default=None)
     ):
     """
     Retrieves a project based on a given identifier:
@@ -168,7 +169,7 @@ def project_get(
             response_description="The updated project")
 def project_update(
     project: Project, 
-    Authorization: str | None = Header(default=None)
+    Authorization: Union[str, None] = Header(default=None)
     ):
     mongo_client = mongo.GetConfig()
     mongo_db = mongo_client['test']
@@ -220,7 +221,7 @@ def project_update(
 def project_delete(
     NAAN: str, 
     postfix: str,
-    Authorization: str | None = Header(default=None)
+    Authorization: Union[str, None] = Header(default=None)
     ):
     """
     Deletes a project based on a given identifier:
@@ -252,7 +253,7 @@ def project_delete(
         )
 
     # enforce permissions on the project
-    if enforcer.Enforce(user.id, "delete", project.id) != True:
+    if enforcer.Enforce(user.id, "delete", project_id) != True:
         return JSONResponse(
             status_code=401,
             content={"error": "user lacks permission to delete project"}

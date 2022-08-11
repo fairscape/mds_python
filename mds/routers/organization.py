@@ -1,3 +1,4 @@
+from typing import Union
 from fastapi import APIRouter, Response, Header
 from fastapi.responses import JSONResponse
 from mds.database import mongo, casbin
@@ -15,7 +16,7 @@ router = APIRouter()
              response_description="The created organization")
 def organization_create(
     organization: Organization, 
-    Authorization: str | None = Header(default=None)
+    Authorization: Union[str, None] = Header(default=None)
     ):
     """
     Create an organization with the following properties:
@@ -96,7 +97,7 @@ def organization_list(response: Response):
 def organization_get(
     NAAN: str, 
     postfix: str, 
-    Authorization: str | None = Header(default=None)):
+    Authorization: Union[str, None] = Header(default=None)):
     """
     Retrieves an organization based on a given identifier:
 
@@ -151,7 +152,7 @@ def organization_get(
             response_description="The updated organization")
 def organization_update(
     organization: Organization, 
-    Authorization: str | None = Header(default=None)
+    Authorization: Union[str, None] = Header(default=None)
     ):
 
     enforcer = casbin.GetEnforcer()
@@ -203,7 +204,7 @@ def organization_update(
 def organization_delete(
     NAAN: str, 
     postfix: str,
-    Authorization: str | None = Header(default=None)):
+    Authorization: Union[str, None] = Header(default=None)):
     """
     Deletes an organization based on a given identifier:
 
