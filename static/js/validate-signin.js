@@ -44,10 +44,77 @@ $(function () {
         */
 
         // Enable the line below to submit form with custom Ajax request
-        submitHandler: signinFormSubmitAjax
+        // submitHandler: signinFormSubmitAjax
+        submitHandler: signinFormSubmit
 
     });
 
+    function signinFormSubmit() {
+        var form= $("#form-signin");
+
+        // Using the core $.ajax() method
+        $.ajax({
+
+            // The URL for the request
+            url: "/login",
+
+            // The data to send (will be converted to a query string)
+            /*
+            data: JSON.stringify({
+                'email': email.value.trim(),
+                'password': password.value.trim()
+            }),
+            */
+            data: form.serialize(),
+
+            // Whether this is a POST or GET request
+            type: "POST",
+
+            // The type of data we expect back
+            dataType: "json",
+        })
+            // Code to run if the request succeeds (is done);
+            // The response is passed to the function
+            .done(function (response, textStatus, xhr) {
+                console.log(response.session);
+                console.log(textStatus);
+                console.log(xhr);
+
+                if (textStatus === "success") {
+                    $("#signinSubmit").html("<img src='../../static/gif/Ajax-loader.gif' width='15'> &nbsp; Signing In");
+                    setTimeout('window.location.href = "/page/home"', 4000);
+                }
+                else {
+                    $("#info").fadeIn(1000, function () {
+                        $("#info").html("<div class='alert alert-danger'>" + response.content + "</div>");
+                        $("#signinSubmit").html("Sign In")
+                    });
+                }
+            })
+            // Code to run if the request fails; the raw request and
+            // status codes are passed to the function
+            .fail(function (xhr, status, errorThrown) {
+                alert("Sorry, there was a problem!");
+                console.log("Error: " + errorThrown);
+                console.log("Status: " + status);
+                console.dir(xhr);
+                if (xhr.status === 401 || xhr.statusText === "Unauthorized") {
+                    console.log(xhr.responseText);
+                    console.log(xhr.responseJSON['error']);
+                    $("#info").fadeIn(1000, function () {
+                        $("#info").html("<div class='alert alert-danger'>" + xhr.responseJSON['error'] + "</div>");
+                        $("#signinSubmit").html("Sign In")
+                    });
+                }
+            })
+            // Code to run regardless of success or failure;
+            .always(function (xhr, status) {
+                alert("The request is complete!");
+            });
+    }
+
+
+    /*
     function signinFormSubmitAjax() {
         // serialize does not work
         // var data = $("#form-signin").serialize();
@@ -82,5 +149,6 @@ $(function () {
         });
 
     }
+    */
 
 });

@@ -99,7 +99,7 @@ $(function () {
                 $("#signupSubmit").html("Sending...")
             },
             success: function (response) {
-                if (response.success == true) {
+                if (response.success === true) {
                     $("#signupSubmit").html("<img src='../../static/gif/Ajax-loader.gif' width='15'> &nbsp; Signing Up");
                     setTimeout('window.location.href = "/page/home"', 4000);
                 }

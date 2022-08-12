@@ -108,8 +108,8 @@ app.include_router(ComputeRouter, tags=["compute"])
 
 # Routes for Web pages
 app.include_router(WebIndexRouter, tags=["webindex"])
-app.include_router(WebSigninRouter, tags=["websignin"])
-app.include_router(WebSignupRouter, tags=["websignup"])
+#app.include_router(WebSigninRouter, tags=["websignin"])
+#app.include_router(WebSignupRouter, tags=["websignup"])
 app.include_router(WebHomeRouter, tags=["webhome"])
 app.include_router(AuthHandlerRouter, tags=["webauth"])
 
