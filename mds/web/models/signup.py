@@ -24,9 +24,7 @@ class SignupForm(BaseModel):
     # must match with name="password2" in the signup html form
     password2: str
 
-
     @classmethod
-    def as_form(cls, firstName: str = Form(...), lastName: str = Form(...), email: str = Form(...), password1: str = Form(...), password2: str = Form(...)):
+    def as_form(cls, firstName: str = Form(...), lastName: str = Form(...), email: str = Form(...),
+                password1: str = Form(...), password2: str = Form(...)):
         return cls(firstName=firstName, lastName=lastName, email=email, password1=password1, password2=password2)
-
-

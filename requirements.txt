@@ -6,5 +6,6 @@ minio
 python-multipart
 docker
 jinja2
+casbin
 casbin_pymongo_adapter
-jwt
+PyJWT
