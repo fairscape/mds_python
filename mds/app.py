@@ -18,7 +18,7 @@ from mds.web.routers.index import router as WebIndexRouter
 from mds.web.routers.signin import router as WebSigninRouter
 from mds.web.routers.signup import router as WebSignupRouter
 from mds.web.routers.home import router as WebHomeRouter
-
+from mds.routers.auth import router as AuthHandlerRouter
 
 tags_metadata = [
     {
@@ -111,6 +111,7 @@ app.include_router(WebIndexRouter, tags=["webindex"])
 app.include_router(WebSigninRouter, tags=["websignin"])
 app.include_router(WebSignupRouter, tags=["websignup"])
 app.include_router(WebHomeRouter, tags=["webhome"])
+app.include_router(AuthHandlerRouter, tags=["webauth"])
 
 @app.get("/page/{page_name}",
         response_class=HTMLResponse)
