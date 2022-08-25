@@ -12,7 +12,7 @@ from mds.database.config import MONGO_DATABASE, MONGO_COLLECTION
 class Dataset(FairscapeBaseModel):
     context = {"@vocab": "https://schema.org/", "evi": "https://w3id.org/EVI#"}
     type = "evi:Dataset"
-    owner: Union[UserCompactView, str]
+    owner: UserCompactView
     distribution: Optional[List[DataDownloadCompactView]] = []
     includedInDataCatalog: Optional[ProjectCompactView] = None
     sourceOrganization: Optional[OrganizationCompactView] = None
@@ -32,7 +32,6 @@ class Dataset(FairscapeBaseModel):
         # self.dateCreated = ""
         # self.dateModified = ""
         # self.activity = []
-        # self.acl = "" 
 
         MongoDatabase = MongoClient[MONGO_DATABASE]
         MongoCollection = MongoDatabase[MONGO_COLLECTION]
@@ -45,13 +44,10 @@ class Dataset(FairscapeBaseModel):
             session.end_session()
             return OperationStatus(False, "dataset already exists", 400)
 
-        if type(self.owner) == str:
-            owner_id = self.owner
-        else:
-            owner_id = self.owner.id
+        print(self.owner.id)
 
         # check that owner exists
-        if MongoCollection.find_one({"@id": owner_id}, session=session) is None:
+        if MongoCollection.find_one({"@id": self.owner.id}, session=session) is None:
             session.end_session()
             return OperationStatus(False, "owner does not exist", 404)
 

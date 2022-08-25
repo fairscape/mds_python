@@ -10,12 +10,14 @@ RUN pip install -r requirements.txt
 
 FROM builder as fairscape
 
-RUN addgroup --system fair && adduser --system --group fair
-USER fair
+#RUN addgroup --system fair && adduser --system --group fair
+#USER fair
 
 WORKDIR mds
 
 COPY mds mds/mds
+COPY static static
+COPY templates templates
 COPY main.py mds/main.py
 
 CMD ["python3", "mds/main.py"]

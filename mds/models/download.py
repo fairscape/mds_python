@@ -26,7 +26,7 @@ class Download(FairscapeBaseModel, extra=Extra.allow):
     version: Optional[str]
     # status: str
 
-    def register(self, Object, mongo_collection: pymongo.collection.Collection, MinioClient) -> OperationStatus:
+    def register(self, mongo_collection: pymongo.collection.Collection, MinioClient, Object) -> OperationStatus:
         """
         uploads the file and ammends the dataDownload metadata and dataset metadata
         """
@@ -38,8 +38,7 @@ class Download(FairscapeBaseModel, extra=Extra.allow):
         # obtain creative work @id
         if type(self.encodesCreativeWork) == str:
             creative_work_id = self.encodesCreativeWork
-
-        if type(self.encodesCreativeWork) == dict:
+        else:
             creative_work_id = self.encodesCreativeWork.id
 
         # Get the creative work
@@ -104,15 +103,13 @@ class Download(FairscapeBaseModel, extra=Extra.allow):
                     {"$set": {"distribution.$.contentUrl": self.contentUrl}}
                     )
         except Exception as e:
+
+            
+
             return OperationStatus(False, f"exception uploading: {str(e)}", 500)
 
 
         return OperationStatus(True, "", 201)
-
-
-
-
-
 
 
     def create_upload(self, Object, MongoClient: pymongo.MongoClient, MinioClient) -> OperationStatus:
@@ -174,6 +171,9 @@ class Download(FairscapeBaseModel, extra=Extra.allow):
 
             # TODO handle minio errors
             except Exception as minio_err:
+
+                mongo_collection.delete_one({"@id": self.id})
+                mongo_collection.update_one({"$pull": {"distribution": {"@id": self.id}}})
                 return OperationStatus(False, f"minio error: {minio_err}", 500)
 
 
@@ -353,8 +353,6 @@ class Download(FairscapeBaseModel, extra=Extra.allow):
 
         with MinioClient.get_object(MINIO_BUCKET, self.contentUrl) as minio_object:
             yield from minio_object
-
-
 
 
     def update_new_version(self, object, MongoCollection: pymongo.collection.Collection, MinioClient):

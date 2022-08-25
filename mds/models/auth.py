@@ -3,7 +3,7 @@ import pymongo
 from mds.utilities.operation_status import OperationStatus
 from mds.models.user import User
 import base64
-from datetime import datetime, timezone, timedelta
+import datetime
 import jwt
 
 JWT_SECRET = "test jwt"
@@ -14,16 +14,18 @@ class Session(BaseModel):
 	Data Model for persisting Session Records of User Logins
 	'''
 
+    #jti: str
     sub: str
     name: str
-    iat: int
-    exp: int
+    iat: datetime.datetime
+    exp: datetime.datetime 
     iss: str = "fairscape"
     aud: str = "fairscape"
 
     def register(self, MongoCollection) -> OperationStatus:
+
         # if there exists a session that isn't expired
-        current_utc_timestamp = int(datetime.now().replace(tzinfo=timezone.utc).timestamp())
+        current_utc_timestamp = datetime.datetime.now().timestamp()
         query_session = MongoCollection.find_one({
             "sub": self.sub,
             "exp": {"$gt": current_utc_timestamp}
@@ -39,21 +41,20 @@ class Session(BaseModel):
         return OperationStatus(True, "", 200)
 
     def refresh(self, MongoCollection) -> OperationStatus:
-        current_utc_timestamp = int(datetime.now().replace(tzinfo=timezone.utc).timestamp())
-        expiration_datetime = datetime.now() + timedelta(hours=1)
-        expiration_utc_timestamp = int(
-            expiration_datetime.replace(
-                tzinfo=timezone.utc
-            ).timestamp()
-        )
 
-        self.iat = current_utc_timestamp
-        self.exp = expiration_utc_timestamp
+        now_datetime = datetime.datetime.now(tzinfo=datetime.timezone.utc)
+        expiration_datetime = now_datetime + datetime.timedelta(hours=1)
+
+        current_utc_timestamp = now_datetime.timestamp()
+        expiration_utc_timestamp = expiration_datetime.timestamp()
 
         update_result = MongoCollection.update_one(
             {"sub": self.sub, "exp": self.exp, "iat": self.iat},
             {"iat": current_utc_timestamp, "exp": expiration_utc_timestamp}
         )
+
+        self.iat = current_utc_timestamp
+        self.exp = expiration_utc_timestamp
 
         return OperationStatus(True, "", 200)
 
@@ -119,18 +120,14 @@ def LoginUserBasic(
     user_model = User(**auth_user)
 
     # create a session for the user
-    current_utc_timestamp = int(
-        datetime.now().replace(
-            tzinfo=timezone.utc
-        ).timestamp()
-    )
+    now_datetime = datetime.datetime.now(
+            tz=datetime.timezone.utc
+        )
+    current_utc_timestamp = now_datetime.timestamp()
+    
 
-    expiration_datetime = datetime.now() + timedelta(hours=1)
-    expiration_utc_timestamp = int(
-        expiration_datetime.replace(
-            tzinfo=timezone.utc
-        ).timestamp()
-    )
+    expiration_datetime = now_datetime + datetime.timedelta(hours=1)
+    expiration_utc_timestamp = expiration_datetime.timestamp()
 
     sess = Session(
         aud="fairscape",
@@ -210,3 +207,4 @@ def ParseAuthHeader(
 
     else:
         raise TokenError(AuthHeader)
+

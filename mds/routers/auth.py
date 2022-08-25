@@ -6,12 +6,11 @@ import mds.models.auth as auth
 
 router = APIRouter()
 
-
 @router.post(
     "/login",
     summary="Log a User in Returning a JWT Token in the response"
 )
-def login(email: str = Form(), password: str = Form()):
+def login(email: str, password: str):
     # set up database connetion
     mongo_client = mongo.GetConfig()
     mongo_db = mongo_client["test"]
@@ -127,3 +126,31 @@ def revoke(
         status_code=200,
         content={"status": "token revoked"}
     )
+
+@router.post("/oauth/login")
+def globus_login():
+    return {"status": "not implemented"}
+
+
+@router.post("/oauth/logout")
+def globus_login():
+    return {"status": "not implemented"}
+
+
+async def CheckTokenMiddleware(request, call_next):
+    """
+    Middleware for checking for the presence of session credentials in authentication
+
+    """
+
+    # check if the session is in the cookie
+    session_cookie = request.cookies.get('fairscape-session')
+
+    # check if the session is in the auth header
+    session_header = request.headers.get('Authorization')
+
+    request.headers.get("Accept")
+
+
+    response = await call_next(request)
+    return response

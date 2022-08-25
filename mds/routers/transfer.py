@@ -3,35 +3,31 @@ from fastapi.responses import JSONResponse, StreamingResponse
 
 from mds.database import mongo, minio
 from mds.models.dataset import Dataset
-from mds.models.download import Download as DataDownload
+from mds.models.download import Download
 from mds.models.compact.user import UserCompactView
 
 router = APIRouter()
 
 
-@router.post("/datadownload")
-async def data_download_create_metadata(data_download: DataDownload):
+@router.post("/download")
+async def data_download_create_metadata(download: Download):
     """
 	create metadata record for a file	
 	"""
 
     mongo_client = mongo.GetConfig()
 
-    # TODO check that dataset is set
-    # dataset_id = f"ark:{NAAN}/{dataset_id}"
-    # data_download.encodesCreativeWork.id = dataset_id
-
     # create metadata record for data download
-    create_metadata_status = data_download.create_metadata(mongo_client)
+    create_metadata_status = download.create_metadata(mongo_client)
 
     if create_metadata_status.success:
         return JSONResponse(
             status_code=201,
             content={
                 "created": {
-                    "@id": data_download.id,
+                    "@id": download.id,
                     "@type": "DataDownload",
-                    "name": data_download.name
+                    "name": download.name
                 }
             }
         )
@@ -43,12 +39,41 @@ async def data_download_create_metadata(data_download: DataDownload):
 
 
 @router.post("/register")
-async def register_download():
-    pass
+async def register_download(download: Download, file: UploadFile):
+
+    mongo_client = mongo.GetConfig()
+    minio_client = minio.GetMinioConfig()
+    mongo_db = mongo_client["test"]
+    mongo_collection = mongo_db["testcol"]
+
+
+    registration_status = download.register(
+        mongo_collection, 
+        minio_client, 
+        file
+        )
+
+    if registration_status.success:
+        return JSONResponse(
+            status_code=201,
+            content={
+                "created": {
+                    "@id": download.id,
+                    "@type": "Download",
+                    "name": download.name
+                }
+            }
+        )
+    else:
+        return JSONResponse(
+            status_code=registration_status.status_code,
+            content={"error": registration_status.message}
+        )
+
 
 @router.post("/datadownload/ark:{NAAN}/{download_id}/upload")
 async def data_download_upload(NAAN: str, download_id: str, file: UploadFile):
-    data_download = DataDownload.construct(id=f"ark:{NAAN}/{download_id}")
+    data_download = Download.construct(id=f"ark:{NAAN}/{download_id}")
 
     minio_client = minio.GetMinioConfig()
     mongo_client = mongo.GetConfig()
@@ -192,7 +217,7 @@ async def transfer_delete(NAAN: str, download_id: str):
 
 
 @router.put("/datadownload/ark:{NAAN}/{download_id}")
-async def data_download_update(NAAN: str, download_id: str, data_download: DataDownload):
+async def data_download_update(NAAN: str, download_id: str, data_download: Download):
     mongo_client = mongo.GetConfig()
     mongo_db = mongo_client["test"]
     mongo_collection = mongo_db["testcol"]
