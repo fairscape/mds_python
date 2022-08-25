@@ -50,7 +50,7 @@ def project_create(
     # they are creating a project for
     org_id = project.memberOf.id
 
-    if enforcer.Enforce(calling_user.id, "createProject", org_id) != True:
+    if enforcer.enforce(calling_user.id, "createProject", org_id) != True:
         return JSONResponse(
             status_code=401,
             content={
@@ -145,7 +145,7 @@ def project_get(
         )
     
 
-    if enforcer.Enforce(user.id, "read", project_id) != True:
+    if enforcer.enforce(user.id, "read", project_id) != True:
         return JSONResponse(
             status_code=401,
             content={}
@@ -193,7 +193,7 @@ def project_update(
         )
 
     # enforce permissions on the project
-    if enforcer.Enforce(user.id, "update", project.id) != True:
+    if enforcer.enforce(user.id, "update", project.id) != True:
         return JSONResponse(
             status_code=401,
             content={"error": "user lacks permission to update project"}
@@ -253,7 +253,7 @@ def project_delete(
         )
 
     # enforce permissions on the project
-    if enforcer.Enforce(user.id, "delete", project_id) != True:
+    if enforcer.enforce(user.id, "delete", project_id) != True:
         return JSONResponse(
             status_code=401,
             content={"error": "user lacks permission to delete project"}
