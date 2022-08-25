@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Form, Request
 from fastapi.responses import JSONResponse
 from mds.database import mongo, casbin
+from mds.database.config import MONGO_DATABASE, MONGO_COLLECTION
 from mds.models.project import Project, list_project
 import mds.models.auth as auth
 
@@ -146,11 +147,34 @@ async def CheckTokenMiddleware(request, call_next):
     # check if the session is in the cookie
     session_cookie = request.cookies.get('fairscape-session')
 
-    # check if the session is in the auth header
-    session_header = request.headers.get('Authorization')
+    if session_cookie is None:
+        # check if the session is in the auth header
+        session_header = request.headers.get('Authorization')
+        Authorization = session_header
+    else:
+        Authorization = session_cookie
 
-    request.headers.get("Accept")
+    mongo_client = mongo.GetConfig()
+    mongo_db = mongo_client[MONGO_DATABASE]
+    mongo_collection = mongo_client[MONGO_COLLECTION]
 
+    # parse the credentials
+    try:
+        calling_user = auth.ParseAuthHeader(mongo_collection, Authorization)
+    except auth.UserNotFound:
+        return JSONResponse(
+            status_code=401,
+            content={"error": "user not found"}
+        )
+    except auth.TokenError as token_error:
+        return JSONResponse(
+            status_code=401,
+            content={"error": "session not active", "message": token_error.message}
+        )
+
+
+    
+    # request.headers.get("Accept")
 
     response = await call_next(request)
     return response

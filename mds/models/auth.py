@@ -20,7 +20,6 @@ class Session(BaseModel):
     iat: datetime.datetime
     exp: datetime.datetime 
     iss: str = "fairscape"
-    aud: str = "fairscape"
 
     def register(self, MongoCollection) -> OperationStatus:
 
@@ -130,7 +129,6 @@ def LoginUserBasic(
     expiration_utc_timestamp = expiration_datetime.timestamp()
 
     sess = Session(
-        aud="fairscape",
         name=user_model.name,
         sub=user_model.email,
         iat=current_utc_timestamp,
@@ -144,7 +142,7 @@ def LoginUserBasic(
 
 def ParseSession(EncodedSession: str) -> Session:
     if "Bearer " in EncodedSession:
-        raw_session = EncodedSession.strip("Bearer ")
+        raw_session = EncodedSession.strip("Bearer").strip()
     else:
         raw_session = EncodedSession
 
@@ -157,8 +155,8 @@ def ParseSession(EncodedSession: str) -> Session:
 
 
 def DecodeBearerAuth(MongoCollection, AuthHeader: str) -> User:
-    stripped_header = AuthHeader.strip("Bearer ")
-    session_values = jwt.decode(stripped_header, JWT_SECRET)
+    stripped_header = AuthHeader.strip("Bearer").strip()
+    session_values = jwt.decode(stripped_header, JWT_SECRET, algorithms=["HS256"])
     sess = Session(**session_values)
 
     user_values = MongoCollection.find_one({"email": sess.sub})
@@ -175,7 +173,7 @@ def DecodeBasicAuth(
 ) -> User:
     """ lookup a user by credentials"""
 
-    stripped_header = AuthHeader.strip("Basic ")
+    stripped_header = AuthHeader.strip("Basic").strip()
     email, password = str(base64.b64decode(stripped_header), 'utf-8').split(":")
 
     auth_user = MongoCollection.find_one({

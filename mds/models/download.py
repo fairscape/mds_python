@@ -102,10 +102,10 @@ class Download(FairscapeBaseModel, extra=Extra.allow):
                             },
                     {"$set": {"distribution.$.contentUrl": self.contentUrl}}
                     )
+
+
         except Exception as e:
-
-            
-
+ 
             return OperationStatus(False, f"exception uploading: {str(e)}", 500)
 
 

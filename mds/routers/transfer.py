@@ -15,27 +15,29 @@ async def data_download_create_metadata(download: Download):
 	create metadata record for a file	
 	"""
 
-    mongo_client = mongo.GetConfig()
+    #mongo_client = mongo.GetConfig()
 
     # create metadata record for data download
-    create_metadata_status = download.create_metadata(mongo_client)
+    # create_metadata_status = download.create_metadata(mongo_client)
 
-    if create_metadata_status.success:
-        return JSONResponse(
-            status_code=201,
-            content={
-                "created": {
-                    "@id": download.id,
-                    "@type": "DataDownload",
-                    "name": download.name
-                }
-            }
-        )
-    else:
-        return JSONResponse(
-            status_code=create_metadata_status.status_code,
-            content={"error": create_metadata_status.message}
-        )
+    #if create_metadata_status.success:
+    #    return JSONResponse(
+    #        status_code=201,
+    #        content={
+    #            "created": {
+    #                "@id": download.id,
+    #                "@type": "DataDownload",
+    #                "name": download.name
+    #            }
+    #        }
+    #    )
+    #else:
+    #    return JSONResponse(
+    #        status_code=create_metadata_status.status_code,
+    #        content={"error": create_metadata_status.message}
+    #    )
+
+    pass
 
 
 @router.post("/register")

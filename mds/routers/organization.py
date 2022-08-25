@@ -33,19 +33,7 @@ def organization_create(
     mongo_db = mongo_client["test"]
     mongo_collection = mongo_db["testcol"]
 
-    try:
-        calling_user = ParseAuthHeader(mongo_collection, Authorization)
-    except UserNotFound:
-        return JSONResponse(
-            status_code=401,
-            content={"error": "user not found"}
-        )
-    except TokenError as token_error:
-        return JSONResponse(
-            status_code=401,
-            content={"error": "session not active", "message": token_error.message}
-        )
-
+  
     # set the calling user as the owner
     organization.owner = UserCompactView(
         id=calling_user.id,
