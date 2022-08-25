@@ -59,7 +59,8 @@ class Project(FairscapeBaseModel):
         project_bulk_write = [
             pymongo.InsertOne(project_dict),
             # update owner model to have listed the project
-            pymongo.UpdateOne({"@id": self.owner.id}, add_project_update)
+            pymongo.UpdateOne({"@id": self.owner.id}, add_project_update),
+            pymongo.UpdateOne({"@id": self.memberOf.id}, add_project_update)
         ]
 
         # perform the bulk write
