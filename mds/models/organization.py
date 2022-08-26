@@ -11,9 +11,9 @@ from mds.models.compact.project import ProjectCompactView
 class Organization(FairscapeBaseModel):
     context = {"@vocab": "https://schema.org/", "evi": "https://w3id.org/EVI#"}
     type = "Organization"
-    owner: Optional[UserCompactView]
-    members: Optional[List[UserCompactView]]
-    projects: Optional[List[ProjectCompactView]]
+    owner: Optional[UserCompactView] = []
+    members: Optional[List[UserCompactView]] = []
+    projects: Optional[List[ProjectCompactView]] = []
 
     class Config:
         extra = Extra.allow

@@ -26,6 +26,46 @@ class Download(FairscapeBaseModel, extra=Extra.allow):
     version: Optional[str]
     # status: str
 
+    def create_metadata(self, mongo_collection: pymongo.collection.Collection):
+
+
+        # check that the data download doesn't already exist
+        if mongo_collection.find_one({"@id": self.id}) != None:
+            return OperationStatus(False, f"dataDownload {self.id} already exists", 404)
+
+        # obtain creative work @id
+        if type(self.encodesCreativeWork) == str:
+            creative_work_id = self.encodesCreativeWork
+        else:
+            creative_work_id = self.encodesCreativeWork.id
+
+        # Get the creative work
+        creative_work = mongo_collection.find_one({"@id": creative_work_id})
+        if creative_work is None:
+            return OperationStatus(False, f"creative work {creative_work_id} not found", 404)
+
+        # update format of creative work
+        self.encodesCreativeWork = {
+                "id": creative_work.get("@id"),
+                "@type": creative_work.get("@type"),
+                "name": creative_work.get("name")
+        }
+
+        self.contentUrl = f"{creative_work.get('name')}/{self.name}"
+
+        # TODO check success of operation
+        insert_result = mongo_collection.insert_one(self.dict(by_alias=True))
+
+        # TODO check success of operation
+        update_result = mongo_collection.update_one(
+                {"@id": creative_work.get("@id")},
+                {"$addToSet" : {
+                        "distribution": SON([("@id", self.id), ("@type", "DataDownload"), ("name", self.name), ("contentUrl", "")])}
+                })
+
+        return OperationStatus(True, "", 201)
+
+
     def register(self, mongo_collection: pymongo.collection.Collection, MinioClient, Object) -> OperationStatus:
         """
         uploads the file and ammends the dataDownload metadata and dataset metadata
@@ -73,7 +113,7 @@ class Download(FairscapeBaseModel, extra=Extra.allow):
             upload_operation = MinioClient.put_object(
                     bucket_name = MINIO_BUCKET,
                     object_name = self.contentUrl,
-                    data=Object,
+                    data=Object.file,
                     length=-1,
                     part_size=10*1024*1024,
                     metadata={"identifier": self.id, "name": self.name}
@@ -104,8 +144,7 @@ class Download(FairscapeBaseModel, extra=Extra.allow):
                     )
 
 
-        except Exception as e:
- 
+        except Exception as e: 
             return OperationStatus(False, f"exception uploading: {str(e)}", 500)
 
 

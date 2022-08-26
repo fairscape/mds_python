@@ -1,6 +1,7 @@
-from fastapi import APIRouter, Response, UploadFile
+from fastapi import APIRouter, Response, UploadFile, Form, File
 from fastapi.responses import JSONResponse, StreamingResponse
 
+import json
 from mds.database import mongo, minio
 from mds.models.dataset import Dataset
 from mds.models.download import Download
@@ -15,33 +16,35 @@ async def data_download_create_metadata(download: Download):
 	create metadata record for a file	
 	"""
 
-    #mongo_client = mongo.GetConfig()
+    mongo_client = mongo.GetConfig()
 
     # create metadata record for data download
-    # create_metadata_status = download.create_metadata(mongo_client)
+    create_metadata_status = download.create_metadata(mongo_client)
 
-    #if create_metadata_status.success:
-    #    return JSONResponse(
-    #        status_code=201,
-    #        content={
-    #            "created": {
-    #                "@id": download.id,
-    #                "@type": "DataDownload",
-    #                "name": download.name
-    #            }
-    #        }
-    #    )
-    #else:
-    #    return JSONResponse(
-    #        status_code=create_metadata_status.status_code,
-    #        content={"error": create_metadata_status.message}
-    #    )
-
-    pass
+    if create_metadata_status.success:
+        return JSONResponse(
+            status_code=201,
+            content={
+                "created": {
+                    "@id": download.id,
+                    "@type": "DataDownload",
+                    "name": download.name
+                }
+            }
+        )
+    else:
+        return JSONResponse(
+            status_code=create_metadata_status.status_code,
+            content={"error": create_metadata_status.message}
+        )
 
 
 @router.post("/register")
-async def register_download(download: Download, file: UploadFile):
+def register_download(download = Form(...), file: UploadFile = File(...)):
+
+    # parse the download string from the 
+    dl = Download(**json.loads(download))
+
 
     mongo_client = mongo.GetConfig()
     minio_client = minio.GetMinioConfig()
@@ -49,7 +52,7 @@ async def register_download(download: Download, file: UploadFile):
     mongo_collection = mongo_db["testcol"]
 
 
-    registration_status = download.register(
+    registration_status = dl.register(
         mongo_collection, 
         minio_client, 
         file
@@ -60,9 +63,9 @@ async def register_download(download: Download, file: UploadFile):
             status_code=201,
             content={
                 "created": {
-                    "@id": download.id,
+                    "@id": dl.id,
                     "@type": "Download",
-                    "name": download.name
+                    "name": dl.name
                 }
             }
         )
