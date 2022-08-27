@@ -8,4 +8,5 @@ docker
 jinja2
 casbin
 casbin_pymongo_adapter
-PyJWT
+pyjwt
+requests-toolbelt

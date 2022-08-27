@@ -67,7 +67,7 @@ class Session(BaseModel):
         return OperationStatus(True, "", 200)
 
     def encode(self) -> str:
-        return jwt.encode(self.dict(), JWT_SECRET)
+        return jwt .encode(self.dict(), JWT_SECRET, algorithm="HS256")
 
 
 class UserNotFound(Exception):
