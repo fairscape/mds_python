@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
@@ -93,6 +93,14 @@ async def get_root(request: Request):
         "request": request
     }
     return templates.TemplateResponse("/page/index.html", context=context)
+
+@app.get('/healthz')
+async def healthcheck():
+
+    return JSONResponse(
+        status=200,
+        content={"status": "server is healthy"}
+    )
 
 # Routes for the API
 app.include_router(UserRouter, tags=["user"])
