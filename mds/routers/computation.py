@@ -1,7 +1,7 @@
 import pymongo
 from fastapi import APIRouter, Response, BackgroundTasks
 
-from mds.database import mongo
+from mds.database import mongo, minio
 from mds.models.computation import Computation, list_computation, RegisterComputation
 from mds.database.container_config import *
 from mds.database.config import *
@@ -53,6 +53,7 @@ def computation_execute(NAAN: str, postfix: str, background_tasks: BackgroundTas
     mongo_client = mongo.GetConfig()
     mongo_db = mongo_client['test']
     mongo_collection = mongo_db['testcol']
+    minio_client = minio.GetMinioConfig()
 
     computation_id = f"ark:{NAAN}/{postfix}"
 
