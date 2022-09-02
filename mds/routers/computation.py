@@ -58,8 +58,20 @@ def computation_execute(NAAN: str, postfix: str, background_tasks: BackgroundTas
     computation_id = f"ark:{NAAN}/{postfix}"
 
     computation = Computation.construct(id=computation_id)
-    
-    compute_status = computation.run_custom_container(mongo_client)
+
+    read_status = computation.read(mongo_collection)
+    # mongo_client.close()
+
+    #if read_status.success:
+    #    return computation
+    #else:
+    #    return JSONResponse(status_code=read_status.status_code,
+    #                        content={"error": read_status.message})
+
+
+    print(computation)
+
+    compute_status = computation.run_custom_container(mongo_collection, minio_client)
 
     if compute_status.success != True:
         return JSONResponse(

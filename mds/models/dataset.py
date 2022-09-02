@@ -44,7 +44,7 @@ class Dataset(FairscapeBaseModel):
             session.end_session()
             return OperationStatus(False, "dataset already exists", 400)
 
-        print(self.owner.id)
+
 
         # check that owner exists
         if MongoCollection.find_one({"@id": self.owner.id}, session=session) is None:

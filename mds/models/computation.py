@@ -31,14 +31,14 @@ class Computation(FairscapeBaseModel):
     context = {"@vocab": "https://schema.org/", "evi": "https://w3id.org/EVI#"}
     type = "evi:Computation"
     owner: UserCompactView
-#    author: UserCompactView
+    #    author: UserCompactView
     dateCreated: Optional[datetime]
     dateFinished: Optional[datetime]
     associatedWith: Optional[List[Union[OrganizationCompactView, UserCompactView]]] = []
     container: str
     command: Optional[str]
-    usedSoftware:  Union[str, SoftwareCompactView]
-    usedDataset: Union[ str, DatasetCompactView] # ,List[Union[str, DatasetCompactView]]]
+    usedSoftware: Union[str, SoftwareCompactView]
+    usedDataset: Union[str, DatasetCompactView]  # ,List[Union[str, DatasetCompactView]]]
     containerId: Optional[str]
 
     class Config:
@@ -61,7 +61,7 @@ class Computation(FairscapeBaseModel):
         # check that owner exists
         if MongoCollection.find_one({"@id": self.owner.id}) is None:
             return OperationStatus(False, f"owner {self.owner.id} does not exist", 404)
-            
+
         # check that software exists
         if type(self.usedSoftware) == str:
             software_id = self.usedSoftware
@@ -168,31 +168,55 @@ class Computation(FairscapeBaseModel):
         run_custom_container creates a local computation and evidence graph record for computations
 
         """
- 
+        #print(self.usedSoftware)
+        #print(self.usedDataset)
+
+        used_by_ids = []
+        # for usedDataset in self.usedDataset:
+        #    dataset = Dataset.construct(id=usedDataset)
+        #    dataset.read(mongo_collection)
+        #    used_by_ids.append(dataset.id)
+        if type(self.usedSoftware) == str:
+            software_id = self.usedSoftware
+        else:
+            software_id = self.usedSoftware.id
+
+        found_software = Software.construct(id=software_id)
+        read_software = found_software.read(mongo_collection)
+        used_by_ids.append(software_id)
+
+        if type(self.usedDataset) == str:
+            dataset_id = self.usedDataset
+        else:
+            dataset_id = self.usedDataset.id
+
+        found_dataset = Dataset.construct(id=dataset_id)
+        read_dataset = found_dataset.read(mongo_collection)
+        used_by_ids.append(self.usedDataset)
+
+        print(used_by_ids)
         # add usedBy property to all datatsets and the software
-        used_by_ids = [dataset.id for dataset in self.usedDataset]
-        used_by_ids.append(self.usedSoftware.id)
+        # used_by_ids = [dataset.id for dataset in self.usedDataset]
 
         update_many_result = mongo_collection.update_many(
-            {"@id": used_by_ids}, 
+            {"@id": {"$in": used_by_ids}},
             {"$push": {
-                "usedBy": {
-                    "@id": self.id, 
+                "evi:usedBy": {
+                    "@id": self.id,
                     "@type": self.type,
                     "name": self.name
-                    }
-                }})
-
-        if update_many_result.modifiedCount != len(used_by_ids):
+                }
+            }})
+        print(update_many_result.modified_count)
+        if update_many_result.modified_count != len(used_by_ids):
             return OperationStatus(False, "", 500)
-
 
         dataset_path = [dataset.distribution[0].contentUrl for dataset in self.usedDataset]
         script_path = self.usedSoftware.distribution[0].contentUrl
 
         # create a temporary landing folder for the output
         job_path = pathlib.Path(f"/tmp/{self.name}")
-        input_directory  = job_path / "input"
+        input_directory = job_path / "input"
         software_directory = input_directory / "software"
         data_directory = input_directory / "data"
         output_directory = job_path / "output"
@@ -201,9 +225,8 @@ class Computation(FairscapeBaseModel):
         data_directory.mkdir(parents=True)
         output_directory.mkdir(parents=True)
 
-
         # download script
-        script_filename = software_directory / pathlib.Path(script_path).name        
+        script_filename = software_directory / pathlib.Path(script_path).name
 
         def get_minio_object(path, filename):
             try:
@@ -222,7 +245,6 @@ class Computation(FairscapeBaseModel):
         if script_download_status != None:
             return script_download_status
 
-
         # download all dataset files
         for dataset in dataset_path:
             dataset_filename = data_directory / pathlib.Path(dataset).name
@@ -235,24 +257,24 @@ class Computation(FairscapeBaseModel):
         # setup the container
         docker_client = docker.from_env()
 
-        try: 
+        try:
             container = docker_client.containers.create(
-                image = self.container, 
-                command = self.command,
-                auto_remove = False,
+                image=self.container,
+                command=self.command,
+                auto_remove=False,
                 volumes={
                     str(job_path): {'bind': '/mnt/', 'mode': 'rw'},
                 }
-                )
+            )
         except Exception as e:
-            return OperationStatus(False, f"error creating docker container {str(e)}", 500) 
+            return OperationStatus(False, f"error creating docker container {str(e)}", 500)
 
-
-        # update metadata with container id
+            # update metadata with container id
         self.containerId = container.id
         self.dateCreated = datetime.fromtimestamp(time.time()).strftime("%A, %B %d, %Y %I:%M:%S")
 
-        update_metadata_results = mongo_collection.update_one({"@id": self.id}, {"$set": {"containerId": self.containerId, "dateCreated": self.dateCreated}})
+        update_metadata_results = mongo_collection.update_one({"@id": self.id}, {
+            "$set": {"containerId": self.containerId, "dateCreated": self.dateCreated}})
         if update_metadata_results.modifiedCount != 1:
             return OperationStatus(False, "Failed to update mongo metadata", 500)
 
@@ -262,8 +284,6 @@ class Computation(FairscapeBaseModel):
 
         except Exception as e:
             return OperationStatus(False, f"error starting container: {str(e)}", 500)
-
-         
 
     def _run_container(self):
         # Locate and download the dataset(s)
@@ -293,7 +313,6 @@ class Computation(FairscapeBaseModel):
 
             with open('/home/sadnan/compute-test/' + script_file_name, 'wb') as binary_data_file:
                 binary_data_file.write(script_content)
-
 
         #
         # TODO Ensure successful launch of the container, exception handling
@@ -467,7 +486,7 @@ def RegisterComputation(computation: Computation):
     If successfull register all datasets in the output folder for the supplied computation, 
     and append the computation metadata with status of the containers execution and logs if applicable
     """
-    
+
     mongo_client = mongo.GetConfig()
     mongo_db = mongo_client[MONGO_DATABASE]
     mongo_collection = mongo_db[MONGO_COLLECTION]
