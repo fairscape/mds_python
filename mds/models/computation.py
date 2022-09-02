@@ -218,10 +218,10 @@ class Computation(FairscapeBaseModel):
 
         # script_path = self.usedSoftware.distribution[0].contentUrl
         # script_path = found_software.distribution[0].contentUrl
-        print(script_path)
+
         #dataset_path = [dataset.distribution[0].contentUrl for dataset in self.usedDataset]
         # dataset_path = [dataset.distribution[0].contentUrl for dataset in self.usedDataset]
-        print(dataset_path)
+
 
         # create a temporary landing folder for the output
         job_path = pathlib.Path(f"/tmp/{self.name}")
@@ -565,7 +565,6 @@ def RegisterComputation(computation: Computation):
                 })
 
                 create_status = data_download.create_metadata(mongo_client)
-                print(create_status)
 
                 # with open(output_file, "rb") as output_file_object:
                 #     upload_status = data_download.register(output_file_object, mongo_collection, minio_client)
