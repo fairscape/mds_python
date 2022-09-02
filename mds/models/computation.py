@@ -280,11 +280,11 @@ class Computation(FairscapeBaseModel):
 
             # update metadata with container id
         self.containerId = container.id
-        self.dateCreated = datetime.fromtimestamp(time.time()).strftime("%A, %B %d, %Y %I:%M:%S")
+        # self.dateCreated = datetime.fromtimestamp(time.time()).strftime("%A, %B %d, %Y %I:%M:%S")
 
         update_metadata_results = mongo_collection.update_one({"@id": self.id}, {
             "$set": {"containerId": self.containerId, "dateCreated": self.dateCreated}})
-        if update_metadata_results.modifiedCount != 1:
+        if update_metadata_results.modified_count != 1:
             return OperationStatus(False, "Failed to update mongo metadata", 500)
 
         try:
@@ -294,63 +294,63 @@ class Computation(FairscapeBaseModel):
         except Exception as e:
             return OperationStatus(False, f"error starting container: {str(e)}", 500)
 
-    def _run_container(self):
-        # Locate and download the dataset(s)
-        if dataset_ids and isinstance(dataset_ids, list):
-            for dataset_id in dataset_ids:
-                r = requests.get(root_url + f"dataset/{dataset_id}")
-                dataset_download_id, dataset_file_location, dataset_file_name = get_distribution_attr(dataset_id, r)
-                print(dataset_download_id, dataset_file_location, dataset_file_name)
-
-                # Download the content of the dataset
-                data_download_dataset_download = requests.get(root_url + f"datadownload/{dataset_download_id}/download")
-                dataset_content = data_download_dataset_download.content
-                # print(dataset_content)
-
-                with open('/home/sadnan/compute-test/data/' + dataset_file_name, 'wb') as binary_data_file:
-                    binary_data_file.write(dataset_content)
-
-        if script_id:
-            r = requests.get(root_url + f"software/{script_id}")
-            script_download_id, script_file_location, script_file_name = get_distribution_attr(script_id, r)
-            print(script_download_id, script_file_location, script_file_name)
-
-            # Download the content of the script
-            data_download_software_read = requests.get(root_url + f"datadownload/{script_download_id}/download")
-            script_content = data_download_software_read.content
-            # print(script_content)
-
-            with open('/home/sadnan/compute-test/' + script_file_name, 'wb') as binary_data_file:
-                binary_data_file.write(script_content)
-
-        #
-        # TODO Ensure successful launch of the container, exception handling
-        #
-
-        if container.id is None:
-            return OperationStatus(False, f"error retrieving container id from launched container", 404)
-
-        # assign long-form container id
-        self.containerId = container.id
-
-        # Update computation with info from the custom container
-        session = MongoClient.start_session(causal_consistency=True)
-        mongo_database = MongoClient[MONGO_DATABASE]
-        mongo_collection = mongo_database[MONGO_COLLECTION]
-
-        # update computation with the container id
-        update_computation_result = mongo_collection.update_one(
-            {"@id": self.id},
-            {"$set": {
-                "containerId": self.containerId
-            }},
-            session=session
-        )
-
-        if update_computation_result.matched_count != 1 and update_computation_result.modified_count != 1:
-            return OperationStatus(False, f"error updating container id", 500)
-
-        return OperationStatus(True, "", 201)
+    # def _run_container(self):
+    #     # Locate and download the dataset(s)
+    #     if dataset_ids and isinstance(dataset_ids, list):
+    #         for dataset_id in dataset_ids:
+    #             r = requests.get(root_url + f"dataset/{dataset_id}")
+    #             dataset_download_id, dataset_file_location, dataset_file_name = get_distribution_attr(dataset_id, r)
+    #             print(dataset_download_id, dataset_file_location, dataset_file_name)
+    #
+    #             # Download the content of the dataset
+    #             data_download_dataset_download = requests.get(root_url + f"datadownload/{dataset_download_id}/download")
+    #             dataset_content = data_download_dataset_download.content
+    #             # print(dataset_content)
+    #
+    #             with open('/home/sadnan/compute-test/data/' + dataset_file_name, 'wb') as binary_data_file:
+    #                 binary_data_file.write(dataset_content)
+    #
+    #     if script_id:
+    #         r = requests.get(root_url + f"software/{script_id}")
+    #         script_download_id, script_file_location, script_file_name = get_distribution_attr(script_id, r)
+    #         print(script_download_id, script_file_location, script_file_name)
+    #
+    #         # Download the content of the script
+    #         data_download_software_read = requests.get(root_url + f"datadownload/{script_download_id}/download")
+    #         script_content = data_download_software_read.content
+    #         # print(script_content)
+    #
+    #         with open('/home/sadnan/compute-test/' + script_file_name, 'wb') as binary_data_file:
+    #             binary_data_file.write(script_content)
+    #
+    #     #
+    #     # TODO Ensure successful launch of the container, exception handling
+    #     #
+    #
+    #     if container.id is None:
+    #         return OperationStatus(False, f"error retrieving container id from launched container", 404)
+    #
+    #     # assign long-form container id
+    #     self.containerId = container.id
+    #
+    #     # Update computation with info from the custom container
+    #     session = MongoClient.start_session(causal_consistency=True)
+    #     mongo_database = MongoClient[MONGO_DATABASE]
+    #     mongo_collection = mongo_database[MONGO_COLLECTION]
+    #
+    #     # update computation with the container id
+    #     update_computation_result = mongo_collection.update_one(
+    #         {"@id": self.id},
+    #         {"$set": {
+    #             "containerId": self.containerId
+    #         }},
+    #         session=session
+    #     )
+    #
+    #     if update_computation_result.matched_count != 1 and update_computation_result.modified_count != 1:
+    #         return OperationStatus(False, f"error updating container id", 500)
+    #
+    #     return OperationStatus(True, "", 201)
 
 
 # def _run_container(self):
