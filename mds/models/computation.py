@@ -38,7 +38,7 @@ class Computation(FairscapeBaseModel):
     container: str
     command: Optional[str]
     usedSoftware: Union[str, SoftwareCompactView]
-    usedDataset: Union[str, DatasetCompactView]  # ,List[Union[str, DatasetCompactView]]]
+    usedDataset: List[Union[str, DatasetCompactView]]  # ,List[Union[str, DatasetCompactView]]]
     containerId: Optional[str]
 
     class Config:
@@ -70,13 +70,14 @@ class Computation(FairscapeBaseModel):
         if MongoCollection.find_one({"@id": software_id}) is None:
             return OperationStatus(False, f"software {software_id} does not exist", 404)
 
+        for dataset in self.usedDataset:
         # check that datasets exist
-        if type(self.usedDataset) == str:
-            dataset_id = self.usedDataset
-        else:
-            dataset_id = self.usedDataset.id
-        if MongoCollection.find_one({"@id": dataset_id}) is None:
-            return OperationStatus(False, f"dataset {dataset_id} does not exist", 404)
+            if type(dataset) == str:
+                dataset_id = dataset
+            else:
+                dataset_id = dataset.id
+            if MongoCollection.find_one({"@id": dataset_id}) is None:
+                return OperationStatus(False, f"dataset {dataset_id} does not exist", 404)
 
         # embeded bson documents to enable Mongo queries
         computation_dict = self.dict(by_alias=True)
@@ -183,18 +184,22 @@ class Computation(FairscapeBaseModel):
 
         found_software = Software.construct(id=software_id)
         read_software = found_software.read(mongo_collection)
+        script_path = found_software.distribution[0].contentUrl
         used_by_ids.append(software_id)
 
-        if type(self.usedDataset) == str:
-            dataset_id = self.usedDataset
-        else:
-            dataset_id = self.usedDataset.id
+        dataset_path = []
+        for dataset in self.usedDataset:
+            if type(dataset) == str:
+                dataset_id = dataset
+            else:
+                dataset_id = dataset.id
 
-        found_dataset = Dataset.construct(id=dataset_id)
-        read_dataset = found_dataset.read(mongo_collection)
-        used_by_ids.append(self.usedDataset)
+            found_dataset = Dataset.construct(id=dataset_id)
+            read_dataset = found_dataset.read(mongo_collection)
+            dataset_path.append(found_dataset.distribution[0].contentUrl)
+            used_by_ids.append(dataset_id)
 
-        print(used_by_ids)
+
         # add usedBy property to all datatsets and the software
         # used_by_ids = [dataset.id for dataset in self.usedDataset]
 
@@ -207,12 +212,16 @@ class Computation(FairscapeBaseModel):
                     "name": self.name
                 }
             }})
-        print(update_many_result.modified_count)
+
         if update_many_result.modified_count != len(used_by_ids):
             return OperationStatus(False, "", 500)
 
-        dataset_path = [dataset.distribution[0].contentUrl for dataset in self.usedDataset]
-        script_path = self.usedSoftware.distribution[0].contentUrl
+        # script_path = self.usedSoftware.distribution[0].contentUrl
+        # script_path = found_software.distribution[0].contentUrl
+        print(script_path)
+        #dataset_path = [dataset.distribution[0].contentUrl for dataset in self.usedDataset]
+        # dataset_path = [dataset.distribution[0].contentUrl for dataset in self.usedDataset]
+        print(dataset_path)
 
         # create a temporary landing folder for the output
         job_path = pathlib.Path(f"/tmp/{self.name}")
