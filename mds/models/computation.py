@@ -71,7 +71,7 @@ class Computation(FairscapeBaseModel):
             return OperationStatus(False, f"software {software_id} does not exist", 404)
 
         for dataset in self.usedDataset:
-        # check that datasets exist
+            # check that datasets exist
             if type(dataset) == str:
                 dataset_id = dataset
             else:
@@ -169,8 +169,8 @@ class Computation(FairscapeBaseModel):
         run_custom_container creates a local computation and evidence graph record for computations
 
         """
-        #print(self.usedSoftware)
-        #print(self.usedDataset)
+        # print(self.usedSoftware)
+        # print(self.usedDataset)
 
         used_by_ids = []
         # for usedDataset in self.usedDataset:
@@ -199,7 +199,6 @@ class Computation(FairscapeBaseModel):
             dataset_path.append(found_dataset.distribution[0].contentUrl)
             used_by_ids.append(dataset_id)
 
-
         # add usedBy property to all datatsets and the software
         # used_by_ids = [dataset.id for dataset in self.usedDataset]
 
@@ -219,9 +218,8 @@ class Computation(FairscapeBaseModel):
         # script_path = self.usedSoftware.distribution[0].contentUrl
         # script_path = found_software.distribution[0].contentUrl
 
-        #dataset_path = [dataset.distribution[0].contentUrl for dataset in self.usedDataset]
         # dataset_path = [dataset.distribution[0].contentUrl for dataset in self.usedDataset]
-
+        # dataset_path = [dataset.distribution[0].contentUrl for dataset in self.usedDataset]
 
         # create a temporary landing folder for the output
         job_path = pathlib.Path(f"/tmp/{self.name}")
@@ -531,11 +529,14 @@ def RegisterComputation(computation: Computation):
     date_created = container_state["StartedAt"]
     date_finished = container_state["FinishedAt"]
 
+    job_path = pathlib.Path(f"/tmp/{computation.name}")
+    output_directory = job_path / "output"
+
     # container exited gracefully
     if status == "exited" and exit_code == 0:
         generates = []
         # get all output files
-        for output_file in Path(COMPUTATION_OUTPUT_DIR).rglob('*'):
+        for output_file in Path(output_directory).rglob('*'):
             if output_file.is_file():
                 print(output_file.name)
                 file_parent = output_file.parent
@@ -564,7 +565,7 @@ def RegisterComputation(computation: Computation):
                     "encodesCreativeWork": dataset.id
                 })
 
-                create_status = data_download.create_metadata(mongo_client)
+                create_status = data_download.create_metadata(mongo_collection)
 
                 # with open(output_file, "rb") as output_file_object:
                 #     upload_status = data_download.register(output_file_object, mongo_collection, minio_client)
@@ -607,11 +608,11 @@ def RegisterComputation(computation: Computation):
     write_container_log(f"message: container {computation.containerId} removed successfully")
 
     # clean up files
-    dir_to_clean = pathlib.Path(COMPUTATION_OUTPUT_DIR)
-    write_container_log(f"message: cleaning output directory: {dir_to_clean}")
-    if dir_to_clean.exists() and dir_to_clean.is_dir():
-        shutil.rmtree(dir_to_clean)
-        write_container_log(f"message: output directory: {dir_to_clean} removed successfully")
-    else:
-        write_container_log(f"message: error removing output directory: {dir_to_clean}")
-    print('Run Custom Container: All done')
+    # dir_to_clean = pathlib.Path(COMPUTATION_OUTPUT_DIR)
+    # write_container_log(f"message: cleaning output directory: {dir_to_clean}")
+    # if dir_to_clean.exists() and dir_to_clean.is_dir():
+    #    shutil.rmtree(dir_to_clean)
+    #    write_container_log(f"message: output directory: {dir_to_clean} removed successfully")
+    # else:
+    #    write_container_log(f"message: error removing output directory: {dir_to_clean}")
+    # print('Run Custom Container: All done')
