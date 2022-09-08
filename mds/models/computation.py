@@ -607,12 +607,12 @@ def RegisterComputation(computation: Computation):
     container.remove()
     write_container_log(f"message: container {computation.containerId} removed successfully")
 
-    # clean up files
-    # dir_to_clean = pathlib.Path(COMPUTATION_OUTPUT_DIR)
-    # write_container_log(f"message: cleaning output directory: {dir_to_clean}")
-    # if dir_to_clean.exists() and dir_to_clean.is_dir():
-    #    shutil.rmtree(dir_to_clean)
-    #    write_container_log(f"message: output directory: {dir_to_clean} removed successfully")
-    # else:
-    #    write_container_log(f"message: error removing output directory: {dir_to_clean}")
-    # print('Run Custom Container: All done')
+    # clean up directories and files
+    dir_to_clean = pathlib.Path(job_path)
+    write_container_log(f"message: cleaning compute job directory: {dir_to_clean}")
+    if dir_to_clean.exists() and dir_to_clean.is_dir():
+       shutil.rmtree(dir_to_clean)
+       write_container_log(f"message: compute job directory: {dir_to_clean} removed successfully")
+    else:
+       write_container_log(f"message: error removing compute job directory: {dir_to_clean}")
+    print('Run Custom Container: All done')
