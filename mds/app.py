@@ -1,4 +1,5 @@
-from fastapi import FastAPI, Request, JSONResponse
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
@@ -96,9 +97,8 @@ async def get_root(request: Request):
 
 @app.get('/healthz')
 async def healthcheck():
-
     return JSONResponse(
-        status=200,
+        status_code=200,
         content={"status": "server is healthy"}
     )
 
