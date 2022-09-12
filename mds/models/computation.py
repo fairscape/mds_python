@@ -565,15 +565,16 @@ def RegisterComputation(computation: Computation):
                     "encodesCreativeWork": dataset.id
                 })
 
-                create_status = data_download.create_metadata(mongo_collection)
+                #create_status = data_download.create_metadata(mongo_collection)
 
-                # with open(output_file, "rb") as output_file_object:
-                #     upload_status = data_download.register(output_file_object, mongo_collection, minio_client)
-                #     if upload_status.success != True:
-                #         return JSONResponse(
-                #             status_code=500,
-                #             content={"error": f"unable to upload object: {output_file}"}
-                #         )
+                with open(output_file, "rb") as output_file_object:
+                    upload_status = data_download.register(mongo_collection, minio_client, output_file_object)
+                    if upload_status.success != True:
+                        print('could not upload file file', output_file_object.name, upload_status.message)
+                        return JSONResponse(
+                            status_code=500,
+                            content={"error": f"unable to upload object: {output_file}"}
+                        )
 
         # Update computation with info from the custom container
         session = mongo_client.start_session(causal_consistency=True)
