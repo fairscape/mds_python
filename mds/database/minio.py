@@ -13,13 +13,12 @@ class MinioConfig():
 		return minio.Minio(
 			self.hostname, 
 			access_key= self.access_key, 
-			secret_key= self.secret_key,
-			secure= self.secure
+			secret_key= self.secret_key
 			)
 
 def GetMinioConfig():
 	return MinioConfig(
-		f"{MINIO_URI}:9000",
+		MINIO_URI,
 		MINIO_USER,
 		MINIO_PASS,
 	).connect()
