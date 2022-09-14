@@ -55,7 +55,7 @@ def register_download(download = Form(...), file: UploadFile = File(...)):
     registration_status = dl.register(
         mongo_collection, 
         minio_client, 
-        file
+        file.file
         )
 
     if registration_status.success:
