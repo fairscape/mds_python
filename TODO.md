@@ -8,9 +8,23 @@
 Run a single process
 ```bash
 # register input datasets
-DATASET_ID=`fairscape register dataset \
-	--name "Music Test" \
-	--author "orchid.org/0000-0000-0000-0000"
+
+USER_ID= `fairscape register user ...`
+
+# adds token to .fairscape folder for future requests
+# ~/.fairscape/.token
+# fairscape login 
+
+ORG_ID=`fairscape register organization ...`
+PROJ_ID=`faircape register project --isPartOf $ORG_ID ...`
+
+
+
+
+DATASET_ID= `fairscape register dataset \
+   --name "Music Test" \
+   --author "orchid.org/0000-0000-0000-0000"
+   --file ~/myfile.csv
 	...`
 
 
