@@ -2,6 +2,8 @@ import pymongo
 from fastapi import APIRouter, Response, BackgroundTasks
 
 from mds.database import mongo, minio
+from mds.database.config import MONGO_DATABASE, MONGO_COLLECTION
+
 from mds.models.computation import Computation, list_computation, RegisterComputation
 from mds.database.container_config import *
 from mds.database.config import *
@@ -28,8 +30,8 @@ def computation_create(computation: Computation, response: Response):
     - **owner**: an existing user in its compact form with @id, @type, name, and email
     """
     mongo_client = mongo.GetConfig()
-    mongo_db = mongo_client["test"]
-    mongo_collection = mongo_db["testcol"]
+    mongo_db = mongo_client[MONGO_DATABASE]
+    mongo_collection = mongo_db[MONGO_COLLECTION]
 
     create_status = computation.create(mongo_collection)
 
@@ -51,8 +53,8 @@ def computation_create(computation: Computation, response: Response):
 def computation_execute(NAAN: str, postfix: str, background_tasks: BackgroundTasks):
 
     mongo_client = mongo.GetConfig()
-    mongo_db = mongo_client['test']
-    mongo_collection = mongo_db['testcol']
+    mongo_db = mongo_client[MONGO_DATABASE]
+    mongo_collection = mongo_db[MONGO_COLLECTION]
     minio_client = minio.GetMinioConfig()
 
     computation_id = f"ark:{NAAN}/{postfix}"
@@ -90,8 +92,8 @@ def computation_execute(NAAN: str, postfix: str, background_tasks: BackgroundTas
             response_description="Retrieved list of computations")
 def computation_list(response: Response):
     mongo_client = mongo.GetConfig()
-    mongo_db = mongo_client["test"]
-    mongo_collection = mongo_db["testcol"]
+    mongo_db = mongo_client[MONGO_DATABASE]
+    mongo_collection = mongo_db[MONGO_COLLECTION]
 
     computation = list_computation(mongo_collection)
 
@@ -111,8 +113,8 @@ def computation_get(NAAN: str, postfix: str, response: Response):
     - **postfix**: a unique string
     """
     mongo_client = mongo.GetConfig()
-    mongo_db = mongo_client['test']
-    mongo_collection = mongo_db['testcol']
+    mongo_db = mongo_client[MONGO_DATABASE]
+    mongo_collection = mongo_db[MONGO_COLLECTION]
 
     computation_id = f"ark:{NAAN}/{postfix}"
 
@@ -134,8 +136,8 @@ def computation_get(NAAN: str, postfix: str, response: Response):
             response_description="The updated computation")
 def computation_update(computation: Computation, response: Response):
     mongo_client = mongo.GetConfig()
-    mongo_db = mongo_client['test']
-    mongo_collection = mongo_db['testcol']
+    mongo_db = mongo_client[MONGO_DATABASE]
+    mongo_collection = mongo_db[MONGO_COLLECTION]
 
     update_status = computation.update(mongo_collection)
 
@@ -166,8 +168,8 @@ def computation_delete(NAAN: str, postfix: str):
     computation_id = f"ark:{NAAN}/{postfix}"
 
     mongo_client = mongo.GetConfig()
-    mongo_db = mongo_client['test']
-    mongo_collection = mongo_db['testcol']
+    mongo_db = mongo_client[MONGO_DATABASE]
+    mongo_collection = mongo_db[MONGO_COLLECTION]
 
     computation = Computation.construct(id=computation_id)
 

@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse
+from mds.database.config import MONGO_DATABASE, MONGO_COLLECTION
 
 from mds.database import mongo
 from mds.models.dataset import Dataset, list_dataset
@@ -41,8 +42,8 @@ def dataset_create(dataset: Dataset):
             response_description="Retrieved list of datasets")
 def dataset_list():
     mongo_client = mongo.GetConfig()
-    mongo_db = mongo_client["test"]
-    mongo_collection = mongo_db["testcol"]
+    mongo_db = mongo_client[MONGO_DATABASE]
+    mongo_collection = mongo_db[MONGO_COLLECTION]
 
     dataset = list_dataset(mongo_collection)
 
@@ -62,8 +63,8 @@ def dataset_get(NAAN: str, postfix: str):
     - **postfix**: a unique string
     """
     mongo_client = mongo.GetConfig()
-    mongo_db = mongo_client['test']
-    mongo_collection = mongo_db['testcol']
+    mongo_db = mongo_client[MONGO_DATABASE]
+    mongo_collection = mongo_db[MONGO_COLLECTION]
 
     dataset_id = f"ark:{NAAN}/{postfix}"
 
@@ -87,8 +88,8 @@ def dataset_get(NAAN: str, postfix: str):
             response_description="The updated dataset")
 def dataset_update(dataset: Dataset):
     mongo_client = mongo.GetConfig()
-    mongo_db = mongo_client['test']
-    mongo_collection = mongo_db['testcol']
+    mongo_db = mongo_client[MONGO_DATABASE]
+    mongo_collection = mongo_db[MONGO_COLLECTION]
 
     update_status = dataset.update(mongo_collection)
 
@@ -119,8 +120,8 @@ def dataset_delete(NAAN: str, postfix: str):
     dataset_id = f"ark:{NAAN}/{postfix}"
 
     mongo_client = mongo.GetConfig()
-    mongo_db = mongo_client['test']
-    mongo_collection = mongo_db['testcol']
+    mongo_db = mongo_client[MONGO_DATABASE]
+    mongo_collection = mongo_db[MONGO_COLLECTION]
 
     dataset = Dataset.construct(id=dataset_id)
 

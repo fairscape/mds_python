@@ -5,6 +5,7 @@ from mds.database import mongo, casbin
 from mds.models.organization import Organization, list_organization
 from mds.models.auth import ParseAuthHeader, UserNotFound, TokenError
 from mds.models.compact.user import UserCompactView
+from mds.database.config import MONGO_DATABASE, MONGO_COLLECTION
 
 import base64
 
@@ -27,11 +28,10 @@ def organization_create(
     - **owner**: an existing user in its compact form with @id, @type, name, and email
     """
     
-    enforcer = casbin.GetEnforcer()
-
     mongo_client = mongo.GetConfig()
-    mongo_db = mongo_client["test"]
-    mongo_collection = mongo_db["testcol"]
+    mongo_db = mongo_client[MONGO_DATABASE]
+    mongo_collection = mongo_db[MONGO_COLLECTION]
+    #enforcer = casbin.GetEnforcer()
 
     try:
         calling_user = ParseAuthHeader(mongo_collection, Authorization)
@@ -52,18 +52,10 @@ def organization_create(
         name=calling_user.name,
         email=calling_user.email)
 
-    create_status = organization.create(mongo_collection)
+    create_status = organization.create(mongo_client)
     mongo_client.close()
 
     if create_status.success:
-
-        # casbin add policies for ownership to mongo 
-        enforcer.add_policy(calling_user.id, "read", organization.id)
-        enforcer.add_policy(calling_user.id, "update", organization.id)
-        enforcer.add_policy(calling_user.id, "delete", organization.id)
-        enforcer.add_policy(calling_user.id, "createProject", organization.id)
-        enforcer.add_policy(calling_user.id, "manage", organization.id)
-        enforcer.save_policy()
 
         return JSONResponse(
             status_code=201,
@@ -81,11 +73,7 @@ def organization_create(
             response_description="Retrieved list of organizations")
 def organization_list(response: Response):
     mongo_client = mongo.GetConfig()
-    mongo_db = mongo_client["test"]
-    mongo_collection = mongo_db["testcol"]
-
-    organization = list_organization(mongo_collection)
-
+    organization = list_organization(mongo_client)
     mongo_client.close()
 
     return organization
@@ -106,11 +94,11 @@ def organization_get(
     """
     organization_id = f"ark:{NAAN}/{postfix}"
 
-    enforcer = casbin.GetEnforcer()
-
     mongo_client = mongo.GetConfig()
-    mongo_db = mongo_client['test']
-    mongo_collection = mongo_db['testcol']
+    mongo_db = mongo_client[MONGO_DATABASE]
+    mongo_collection = mongo_db[MONGO_COLLECTION]
+    
+    #enforcer = casbin.GetEnforcer()
 
     # decode the credentials and find the user
     try:
@@ -127,24 +115,17 @@ def organization_get(
         )
 
 
-    if enforcer.enforce(calling_user.id, "read", organization_id) != True:
-        return JSONResponse(
-            status_code=401,
-            content={
-                "@id": organization_id,
-                "error": "access not granted for read organization"
-                }
-        )
-
     organization = Organization.construct(id=organization_id)
-    read_status = organization.read(mongo_collection)
+    read_status = organization.read(mongo_client)
     mongo_client.close()
 
     if read_status.success:
         return organization
     else:
-        return JSONResponse(status_code=read_status.status_code,
-                            content={"error": read_status.message})
+        return JSONResponse(
+            status_code=read_status.status_code,
+            content={"error": read_status.message}
+            )
 
 
 @router.put("/organization",
@@ -155,12 +136,11 @@ def organization_update(
     Authorization: Union[str, None] = Header(default=None)
     ):
 
-    enforcer = casbin.GetEnforcer()
+    #enforcer = casbin.GetEnforcer()
 
     mongo_client = mongo.GetConfig()
-    mongo_db = mongo_client['test']
-    mongo_collection = mongo_db['testcol']
-
+    mongo_db = mongo_client[MONGO_DATABASE]
+    mongo_collection = mongo_db[MONGO_COLLECTION]
 
     # decode the credentials and find the user
     try:
@@ -176,14 +156,7 @@ def organization_update(
             content={"error": "session not active", "message": token_error.message}
         )
 
-
-    if enforcer.enforce(calling_user.id, "update", organization.id) != True:
-        return JSONResponse(
-            status_code=401,
-            content={"error": "user not permitted to update organization"}
-        )
-
-    update_status = organization.update(mongo_collection)
+    update_status = organization.update(mongo_client)
     mongo_client.close()
 
     if update_status.success:
@@ -213,11 +186,11 @@ def organization_delete(
     """
     organization_id = f"ark:{NAAN}/{postfix}"
 
-    enforcer = casbin.GetEnforcer()
+    #enforcer = casbin.GetEnforcer()
 
     mongo_client = mongo.GetConfig()
-    mongo_db = mongo_client['test']
-    mongo_collection = mongo_db['testcol']
+    mongo_db = mongo_client[MONGO_DATABASE]
+    mongo_collection = mongo_db[MONGO_COLLECTION]
 
 
     # decode the credentials and find the user
@@ -234,21 +207,18 @@ def organization_delete(
             content={"error": "session not active", "message": token_error.message}
         )
 
-    if enforcer.enforce(calling_user.id, "delete", organization_id) != True:
-        return JSONResponse(
-            status_code=401,
-            content={"error": "user not permitted to delete organization"}
-        )
 
     organization = Organization.construct(id=organization_id)
-    delete_status = organization.delete(mongo_collection)
-
+    delete_status = organization.delete(mongo_client)
     mongo_client.close()
 
     if delete_status.success:
         return JSONResponse(
             status_code=200,
-            content={"deleted": {"@id": organization_id, "@type": "Organization", "name": organization.name}}
+            content={"deleted": {
+                "@id": organization_id, 
+                "@type": "Organization", 
+                "name": organization.name}}
         )
     else:
         return JSONResponse(

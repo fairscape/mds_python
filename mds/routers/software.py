@@ -2,7 +2,7 @@ from fastapi import APIRouter, Response
 from fastapi.responses import JSONResponse
 from mds.database import mongo
 from mds.models.software import Software, list_software
-
+from mds.database.config import MONGO_DATABASE, MONGO_COLLECTION
 router = APIRouter()
 
 
@@ -64,8 +64,8 @@ def software_get(NAAN: str, postfix: str, response: Response):
     - **postfix**: a unique string
     """
     mongo_client = mongo.GetConfig()
-    mongo_db = mongo_client['test']
-    mongo_collection = mongo_db['testcol']
+    mongo_db = mongo_client[MONGO_DATABASE]
+    mongo_collection = mongo_db[MONGO_COLLECTION]
 
     software_id = f"ark:{NAAN}/{postfix}"
 
@@ -87,8 +87,8 @@ def software_get(NAAN: str, postfix: str, response: Response):
             response_description="The updated software")
 def software_update(software: Software, response: Response):
     mongo_client = mongo.GetConfig()
-    mongo_db = mongo_client['test']
-    mongo_collection = mongo_db['testcol']
+    mongo_db = mongo_client[MONGO_DATABASE]
+    mongo_collection = mongo_db[MONGO_COLLECTION]
 
     update_status = software.update(mongo_collection)
 
@@ -119,8 +119,8 @@ def software_delete(NAAN: str, postfix: str):
     software_id = f"ark:{NAAN}/{postfix}"
 
     mongo_client = mongo.GetConfig()
-    mongo_db = mongo_client['test']
-    mongo_collection = mongo_db['testcol']
+    mongo_db = mongo_client[MONGO_DATABASE]
+    mongo_collection = mongo_db[MONGO_COLLECTION]
 
     software = Software.construct(id=software_id)
 

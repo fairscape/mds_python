@@ -3,6 +3,7 @@ import casbin
 from urllib.parse import quote_plus
 from mds.database.config import MONGO_URI, MONGO_USER, MONGO_PASS, MONGO_DATABASE
 
+# TODO create class for enforcer and specific adapters
 
 def GetEnforcer() -> casbin.Enforcer:
 	""" return the casbin enforcer """

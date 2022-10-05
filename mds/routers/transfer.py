@@ -3,6 +3,7 @@ from fastapi.responses import JSONResponse, StreamingResponse
 
 import json
 from mds.database import mongo, minio
+from mds.database.config import MONGO_DATABASE, MONGO_COLLECTION
 from mds.models.dataset import Dataset
 from mds.models.download import Download
 from mds.models.compact.user import UserCompactView
@@ -48,15 +49,15 @@ def register_download(download = Form(...), file: UploadFile = File(...)):
 
     mongo_client = mongo.GetConfig()
     minio_client = minio.GetMinioConfig()
-    mongo_db = mongo_client["test"]
-    mongo_collection = mongo_db["testcol"]
 
 
     registration_status = dl.register(
-        mongo_collection, 
+        mongo_client, 
         minio_client, 
         file.file
         )
+
+    mongo_client.close()
 
     if registration_status.success:
         return JSONResponse(
@@ -104,13 +105,13 @@ async def data_download_upload(NAAN: str, download_id: str, file: UploadFile):
 @router.get("/datadownload/ark:{NAAN}/{download_id}")
 async def data_download_read(NAAN: str, download_id: str):
     """
-	read the data download object
+	read the data download metadata 
 
 	To resolve the metadata
 	GET /datadownload/ark:99999/ex-upload
 
 	To resolve to the file	
-	GET /datadownload/ark:99999/ex-upload?object=1
+	GET /datadownload/ark:99999/ex-upload/download
 	"""
 
     data_download_id = f"ark:{NAAN}/{download_id}"
@@ -118,12 +119,7 @@ async def data_download_read(NAAN: str, download_id: str):
 
     # get the connection to the databases
     mongo_client = mongo.GetConfig()
-    mongo_db = mongo_client["test"]
-    mongo_collection = mongo_db["testcol"]
-
-    minio_client = minio.GetMinioConfig()
-
-    read_status = data_download.read_metadata(mongo_collection)
+    read_status = data_download.read_metadata(mongo_client)
 
     # if the metadata wasn't found successfully handle errors
     if read_status.success != True:
@@ -158,12 +154,9 @@ async def data_download_read(NAAN: str, download_id: str):
 
     # get the connection to the databases
     mongo_client = mongo.GetConfig()
-    mongo_db = mongo_client["test"]
-    mongo_collection = mongo_db["testcol"]
-
     minio_client = minio.GetMinioConfig()
 
-    read_status = data_download.read_metadata(mongo_collection)
+    read_status = data_download.read_metadata(mongo_client)
 
     if read_status.success != True:
 
@@ -194,11 +187,9 @@ async def transfer_delete(NAAN: str, download_id: str):
 	"""
     minio_client = minio.GetMinioConfig()
     mongo_client = mongo.GetConfig()
-    mongo_db = mongo_client["test"]
-    mongo_collection = mongo_db["testcol"]
 
     data_download = DataDownload.construct(id=f"ark:{NAAN}/{download_id}")
-    delete_status = data_download.delete(mongo_collection, minio_client)
+    delete_status = data_download.delete(mongo_client, minio_client)
 
     if delete_status.success != True:
         return JSONResponse(
@@ -224,11 +215,9 @@ async def transfer_delete(NAAN: str, download_id: str):
 @router.put("/datadownload/ark:{NAAN}/{download_id}")
 async def data_download_update(NAAN: str, download_id: str, data_download: Download):
     mongo_client = mongo.GetConfig()
-    mongo_db = mongo_client["test"]
-    mongo_collection = mongo_db["testcol"]
 
     data_download.id = f"ark:{NAAN}/{download_id}"
-    update_status = data_download.update(mongo_collection)
+    update_status = data_download.update(mongo_client)
 
     if update_status.success != True:
         return JSONResponse(

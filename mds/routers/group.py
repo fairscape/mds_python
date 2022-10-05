@@ -2,6 +2,8 @@ from fastapi import APIRouter, Response
 from fastapi.responses import JSONResponse
 
 from mds.database import mongo
+from mds.database.config import MONGO_DATABASE, MONGO_COLLECTION
+
 from mds.models.group import Group, list_groups
 from mds.models.compact.user import UserCompactView
 
@@ -21,8 +23,8 @@ async def group_create(group: Group):
     - **owner**: an existing user in its compact form with @id, @type, name, and email
     """
     mongo_client = mongo.GetConfig()
-    mongo_db = mongo_client["test"]
-    mongo_collection = mongo_db["testcol"]
+    mongo_db = mongo_client[MONGO_DATABASE]
+    mongo_collection = mongo_db[MONGO_COLLECTION]
 
     create_status = group.create(mongo_collection)
 
@@ -45,8 +47,8 @@ async def group_create(group: Group):
             response_description="Retrieved list of groups")
 def group_list():
     mongo_client = mongo.GetConfig()
-    mongo_db = mongo_client["test"]
-    mongo_collection = mongo_db["testcol"]
+    mongo_db = mongo_client[MONGO_DATABASE]
+    mongo_collection = mongo_db[MONGO_COLLECTION]
 
     groups = list_groups(mongo_collection)
 
@@ -66,8 +68,8 @@ def group_get(NAAN: str, postfix: str):
     - **postfix**: a unique string
     """
     mongo_client = mongo.GetConfig()
-    mongo_db = mongo_client['test']
-    mongo_collection = mongo_db['testcol']
+    mongo_db = mongo_client[MONGO_DATABASE]
+    mongo_collection = mongo_db[MONGO_COLLECTION]
 
     group_id = f"ark:{NAAN}/{postfix}"
 
@@ -92,8 +94,8 @@ def group_get(NAAN: str, postfix: str):
             response_description="The updated group")
 def group_update(group: Group):
     mongo_client = mongo.GetConfig()
-    mongo_db = mongo_client['test']
-    mongo_collection = mongo_db['testcol']
+    mongo_db = mongo_client[MONGO_DATABASE]
+    mongo_collection = mongo_db[MONGO_COLLECTION]
 
     update_status = group.update(mongo_collection)
 
@@ -124,8 +126,8 @@ def group_delete(NAAN: str, postfix: str):
     group_id = f"ark:{NAAN}/{postfix}"
 
     mongo_client = mongo.GetConfig()
-    mongo_db = mongo_client['test']
-    mongo_collection = mongo_db['testcol']
+    mongo_db = mongo_client[MONGO_DATABASE]
+    mongo_collection = mongo_db[MONGO_COLLECTION]
 
     # TODO delete function should have FindOneAndDelete
     group = Group.construct(id=group_id)
@@ -157,8 +159,8 @@ def group_add_user(NAAN: str, postfix: str, user: UserCompactView):
     - **postfix**: a unique string
     """
     mongo_client = mongo.GetConfig()
-    mongo_db = mongo_client['test']
-    mongo_collection = mongo_db['testcol']
+    mongo_db = mongo_client[MONGO_DATABASE]
+    mongo_collection = mongo_db[MONGO_COLLECTION]
 
     group_id = f"ark:{NAAN}/{postfix}"
     group = Group.construct(id=group_id)
@@ -191,8 +193,8 @@ def group_remove_user(NAAN: str, postfix: str, user: UserCompactView):
     - **postfix**: a unique string
     """
     mongo_client = mongo.GetConfig()
-    mongo_db = mongo_client['test']
-    mongo_collection = mongo_db['testcol']
+    mongo_db = mongo_client[MONGO_DATABASE]
+    mongo_collection = mongo_db[MONGO_COLLECTION]
 
     group_id = f"ark:{NAAN}/{postfix}"
     group = Group.construct(id=group_id)

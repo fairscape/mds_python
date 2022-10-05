@@ -2,7 +2,7 @@ from fastapi import APIRouter, Response
 from fastapi.responses import JSONResponse
 from mds.database import mongo
 from mds.models.evidencegraph import EvidenceGraph, list_evidencegraph
-
+from mds.database.config import MONGO_DATABASE, MONGO_COLLECTION
 router = APIRouter()
 
 
@@ -19,8 +19,8 @@ def evidencegraph_create(evidencegraph: EvidenceGraph, response: Response):
     - **owner**: an existing user in its compact form with @id, @type, name, and email
     """
     mongo_client = mongo.GetConfig()
-    mongo_db = mongo_client["test"]
-    mongo_collection = mongo_db["testcol"]
+    mongo_db = mongo_client[MONGO_DATABASE]
+    mongo_collection = mongo_db[MONGO_COLLECTION]
 
     create_status = evidencegraph.create(mongo_collection)
 
@@ -43,8 +43,8 @@ def evidencegraph_create(evidencegraph: EvidenceGraph, response: Response):
             response_description="Retrieved list of evidencegraphs")
 def evidencegraph_list(response: Response):
     mongo_client = mongo.GetConfig()
-    mongo_db = mongo_client["test"]
-    mongo_collection = mongo_db["testcol"]
+    mongo_db = mongo_client[MONGO_DATABASE]
+    mongo_collection = mongo_db[MONGO_COLLECTION]
 
     evidencegraph = list_evidencegraph(mongo_collection)
 
@@ -64,8 +64,8 @@ def evidencegraph_get(NAAN: str, postfix: str, response: Response):
     - **postfix**: a unique string
     """
     mongo_client = mongo.GetConfig()
-    mongo_db = mongo_client['test']
-    mongo_collection = mongo_db['testcol']
+    mongo_db = mongo_client[MONGO_DATABASE]
+    mongo_collection = mongo_db[MONGO_COLLECTION]
 
     evidencegraph_id = f"ark:{NAAN}/{postfix}"
 
@@ -87,8 +87,8 @@ def evidencegraph_get(NAAN: str, postfix: str, response: Response):
             response_description="The updated evidencegraph")
 def evidencegraph_update(evidencegraph: EvidenceGraph, response: Response):
     mongo_client = mongo.GetConfig()
-    mongo_db = mongo_client['test']
-    mongo_collection = mongo_db['testcol']
+    mongo_db = mongo_client[MONGO_DATABASE]
+    mongo_collection = mongo_db[MONGO_COLLECTION]
 
     update_status = evidencegraph.update(mongo_collection)
 
@@ -119,8 +119,8 @@ def evidencegraph_delete(NAAN: str, postfix: str):
     evidencegraph_id = f"ark:{NAAN}/{postfix}"
 
     mongo_client = mongo.GetConfig()
-    mongo_db = mongo_client['test']
-    mongo_collection = mongo_db['testcol']
+    mongo_db = mongo_client[MONGO_DATABASE]
+    mongo_collection = mongo_db[MONGO_COLLECTION]
 
     evidencegraph = EvidenceGraph.construct(id=evidencegraph_id)
 

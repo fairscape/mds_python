@@ -4,6 +4,7 @@ from fastapi.responses import JSONResponse
 from mds.database import mongo, casbin
 from mds.models.project import Project, list_project
 from mds.models.auth import ParseAuthHeader, UserNotFound, TokenError
+from mds.database.config import MONGO_DATABASE, MONGO_COLLECTION
 
 router = APIRouter()
 
@@ -26,11 +27,11 @@ def project_create(
     """
 
     mongo_client = mongo.GetConfig()
-    mongo_db = mongo_client["test"]
-    mongo_collection = mongo_db["testcol"]
+    mongo_db = mongo_client[MONGO_DATABASE]
+    mongo_collection = mongo_db[MONGO_COLLECTION]
 
-    enforcer = casbin.GetEnforcer()
-    enforcer.load_policy()
+    #enforcer = casbin.GetEnforcer()
+    #enforcer.load_policy()
 
     # decode the credentials and find the user
     try:
@@ -48,37 +49,36 @@ def project_create(
 
     # check that user has permissions on the Organization
     # they are creating a project for
-    org_id = project.memberOf.id
+    #org_id = project.memberOf.id
 
-    if enforcer.enforce(calling_user.id, "createProject", org_id) != True:
-        return JSONResponse(
-            status_code=401,
-            content={
-                "error": "User Missing Permission",
-                "message": "user does not have permission to create project in this organization",
-                "permission": {
-                    "sub": calling_user.id,
-                    "pred": "createProject",
-                    "obj": org_id
-                    }
-                }
-        )
-
-  
+    #if enforcer.enforce(calling_user.id, "createProject", org_id) != True:
+    #    return JSONResponse(
+    #        status_code=401,
+    #        content={
+    #            "error": "User Missing Permission",
+    #            "message": "user does not have permission to create project in this organization",
+    #            "permission": {
+    #                "sub": calling_user.id,
+    #                "pred": "createProject",
+    #                "obj": org_id
+    #                }
+    #            }
+    #    )
+ 
     create_status = project.create(mongo_collection)
     mongo_client.close()
 
     if create_status.success:
 
         # add policies to casbin for owner user to mongo
-        enforcer.add_policy(calling_user.id, "read", project.id)
-        enforcer.add_policy(calling_user.id, "update", project.id)
-        enforcer.add_policy(calling_user.id, "delete", project.id)
-        enforcer.add_policy(calling_user.id, "createDataset", project.id)
-        enforcer.add_policy(calling_user.id, "createSoftware", project.id)
-        enforcer.add_policy(calling_user.id, "createComputation", project.id)
-        enforcer.add_policy(calling_user.id, "manage", project.id)
-        enforcer.save_policy()
+        #enforcer.add_policy(calling_user.id, "read", project.id)
+        #enforcer.add_policy(calling_user.id, "update", project.id)
+        #enforcer.add_policy(calling_user.id, "delete", project.id)
+        #enforcer.add_policy(calling_user.id, "createDataset", project.id)
+        #enforcer.add_policy(calling_user.id, "createSoftware", project.id)
+        #enforcer.add_policy(calling_user.id, "createComputation", project.id)
+        #enforcer.add_policy(calling_user.id, "manage", project.id)
+        #enforcer.save_policy()
 
         return JSONResponse(
             status_code=201,
@@ -95,9 +95,10 @@ def project_create(
             summary="List all projects",
             response_description="Retrieved list of projects")
 def project_list(response: Response):
+    
     mongo_client = mongo.GetConfig()
-    mongo_db = mongo_client["test"]
-    mongo_collection = mongo_db["testcol"]
+    mongo_db = mongo_client[MONGO_DATABASE]
+    mongo_collection = mongo_db[MONGO_COLLECTION]
 
     project = list_project(mongo_collection)
 
@@ -124,8 +125,8 @@ def project_get(
     project_id = f"ark:{NAAN}/{postfix}"
 
     mongo_client = mongo.GetConfig()
-    mongo_db = mongo_client['test']
-    mongo_collection = mongo_db['testcol']
+    mongo_db = mongo_client[MONGO_DATABASE]
+    mongo_collection = mongo_db[MONGO_COLLECTION]
 
     enforcer = casbin.GetEnforcer()
     enforcer.load_policy()
@@ -172,8 +173,8 @@ def project_update(
     Authorization: Union[str, None] = Header(default=None)
     ):
     mongo_client = mongo.GetConfig()
-    mongo_db = mongo_client['test']
-    mongo_collection = mongo_db['testcol']
+    mongo_db = mongo_client[MONGO_DATABASE]
+    mongo_collection = mongo_db[MONGO_COLLECTION]
 
     enforcer = casbin.GetEnforcer()
     enforcer.load_policy()
@@ -232,8 +233,8 @@ def project_delete(
     project_id = f"ark:{NAAN}/{postfix}"
 
     mongo_client = mongo.GetConfig()
-    mongo_db = mongo_client['test']
-    mongo_collection = mongo_db['testcol']
+    mongo_db = mongo_client[MONGO_DATABASE]
+    mongo_collection = mongo_db[MONGO_COLLECTION]
 
     enforcer = casbin.GetEnforcer()
     enforcer.load_policy()

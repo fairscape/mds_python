@@ -7,7 +7,7 @@ from mds.models.computation import Computation
 from mds.models.software import Software
 import json
 from mds.utilities.funcs import parse_request
-
+from mds.database.config import MONGO_DATABASE, MONGO_COLLECTION
 
 router = APIRouter()
 
@@ -22,8 +22,8 @@ def run_computation(NAAN: str, computation_id: str, body: dict):
 
     # get the connection to the databases
     mongo_client = mongo.GetConfig()
-    mongo_db = mongo_client["test"]
-    mongo_collection = mongo_db["testcol"]
+    mongo_db = mongo_client[MONGO_DATABASE]
+    mongo_collection = mongo_db[MONGO_COLLECTION]
 
     minio_client = minio.GetMinioConfig()
 

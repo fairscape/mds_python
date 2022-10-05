@@ -24,10 +24,13 @@ class Download(FairscapeBaseModel, extra=Extra.allow):
     sha256: Optional[str]
     uploadDate: Optional[datetime]
     version: Optional[str]
-
     # status: str
 
-    def create_metadata(self, mongo_collection: pymongo.collection.Collection):
+
+    def create_metadata(self, MongoClient: pymongo.MongoClient) -> OperationStatus: 
+
+        mongo_database = MongoClient[MONGO_DATABASE]
+        mongo_collection = mongo_database[MONGO_COLLECTION]
 
         # check that the data download doesn't already exist
         if mongo_collection.find_one({"@id": self.id}) != None:
@@ -66,10 +69,14 @@ class Download(FairscapeBaseModel, extra=Extra.allow):
 
         return OperationStatus(True, "", 201)
 
-    def register(self, mongo_collection: pymongo.collection.Collection, MinioClient, Object) -> OperationStatus:
+
+    def register(self, MongoClient: pymongo.MongoClient, MinioClient, Object) -> OperationStatus:
         """
         uploads the file and ammends the dataDownload metadata and dataset metadata
         """
+
+        mongo_database = MongoClient[MONGO_DATABASE]
+        mongo_collection = mongo_database[MONGO_COLLECTION]
 
         # check that the data download doesn't already exist
         if mongo_collection.find_one({"@id": self.id}) != None:
@@ -149,6 +156,7 @@ class Download(FairscapeBaseModel, extra=Extra.allow):
             return OperationStatus(False, f"exception uploading: {str(e)}", 500)
 
         return OperationStatus(True, "", 201)
+
 
     def create_upload(self, Object, MongoClient: pymongo.MongoClient, MinioClient) -> OperationStatus:
         """
@@ -239,13 +247,17 @@ class Download(FairscapeBaseModel, extra=Extra.allow):
 
         return OperationStatus(True, "", 201)
 
-    def delete(self, MongoCollection: pymongo.collection.Collection, MinioClient) -> OperationStatus:
+
+    def delete(self, MongoClient: pymongo.MongoClient, MinioClient) -> OperationStatus:
         """
         removes the contentUrl property from the object, and deletes the file from minio
         """
 
+        mongo_database = MongoClient[MONGO_DATABASE]
+        mongo_collection = mongo_database[MONGO_COLLECTION]
+
         # get metadata record
-        read_status = self.super(MongoCollection).read()
+        read_status = self.super(mongo_collection).read()
 
         if read_status.success != True:
             return read_status
@@ -258,7 +270,7 @@ class Download(FairscapeBaseModel, extra=Extra.allow):
 
         # run the bulk update
         try:
-            bulk_write_result = MongoCollection.bulk_write(bulk_update)
+            bulk_write_result = mongo_collection.bulk_write(bulk_update)
         except pymongo.errors.BulkWriteError as bwe:
             return OperationStatus(False, f"mongo error: bulk write error {bwe}", 500)
 
@@ -269,8 +281,13 @@ class Download(FairscapeBaseModel, extra=Extra.allow):
 
         return OperationStatus(True, "", 200)
 
-    def read_metadata(self, MongoCollection: pymongo.collection.Collection) -> OperationStatus:
-        return self.read(MongoCollection)
+
+    def read_metadata(self, MongoClient: pymongo.MongoClient) -> OperationStatus:
+
+        mongo_db = MongoClient[MONGO_DATABASE]
+        mongo_collection = mongo_db[MONGO_COLLECTION]
+        return self.read(mongo_collection)
+
 
     def read_object(self, MinioClient):
         """
@@ -284,102 +301,6 @@ class Download(FairscapeBaseModel, extra=Extra.allow):
         with MinioClient.get_object(MINIO_BUCKET, self.contentUrl) as minio_object:
             yield from minio_object
 
-            # upload object to minio
-            try:
-                upload_operation = MinioClient.put_object(
-                    bucket_name=MINIO_BUCKET,
-                    object_name=upload_path,
-                    data=Object.file,
-                    length=-1,
-                    part_size=10 * 1024 * 1024,
-                    # metadata={"@id": self.id, "name": self.name}
-                )
-
-                # TODO check output of upload operation more thoroughly
-                if upload_operation == None:
-                    return OperationStatus(False, "minio error: upload failed", 500)
-
-                # get the size of the file from the stats
-                result_stats = MinioClient.stat_object(
-                    bucket_name=MINIO_BUCKET,
-                    object_name=upload_path
-                )
-
-
-            # TODO handle minio errors
-            except Exception as minio_err:
-                return OperationStatus(False, f"minio error: {minio_err}", 500)
-
-            # update the download metadata
-            update_download_result = mongo_collection.update_one(
-                {"@id": self.id},
-                {"$set": {
-                    "contentUrl": upload_path,
-                    "uploadDate": str(result_stats.last_modified),
-                    "version": version,
-                    "contentSize": result_stats.size,
-                }},
-                session=session
-            )
-
-            # update the dataset metadata
-            update_dataset_result = mongo_collection.update_one(
-                {
-                    "@id": dataset_id,
-                    "distribution": {"$elemMatch": {"@id": self.id}}
-                },
-                {"$set": {"distribution.$.contentUrl": upload_path}},
-                session=session
-            )
-
-            # TODO check update results
-
-        return OperationStatus(True, "", 201)
-
-    def delete(self, MongoCollection: pymongo.collection.Collection, MinioClient) -> OperationStatus:
-        """
-        removes the contentUrl property from the object, and deletes the file from minio
-        """
-
-        # get metadata record
-        read_status = self.super(MongoCollection).read()
-
-        if read_status.success != True:
-            return read_status
-
-        bulk_update = [
-            # TODO: update the metadata for the dataset record, i.e. status property for deleted versions
-            # update the metadata for the download record
-            pymongo.UpdateOne({"@id": self.id}, {"contentUrl": ""})
-        ]
-
-        # run the bulk update
-        try:
-            bulk_write_result = MongoCollection.bulk_write(bulk_update)
-        except pymongo.errors.BulkWriteError as bwe:
-            return OperationStatus(False, f"mongo error: bulk write error {bwe}", 500)
-
-        # remove the object from minio
-        delete_object = MinioClient.remove_object(MINIO_BUCKET, self.contentUrl)
-
-        # TODO: determine when minio client fails to remove an object and handle those cases
-
-        return OperationStatus(True, "", 200)
-
-    def read_metadata(self, MongoCollection: pymongo.collection.Collection) -> OperationStatus:
-        return self.read(MongoCollection)
-
-    def read_object(self, MinioClient):
-        """
-        reads the object and returns a file reader from the minio client
-        """
-
-        # lookup the url
-        if self.contentUrl == "":
-            return OperationStatus(False, "download has no contentUrl", 404)
-
-        with MinioClient.get_object(MINIO_BUCKET, self.contentUrl) as minio_object:
-            yield from minio_object
 
     def update_new_version(self, object, MongoCollection: pymongo.collection.Collection, MinioClient):
         pass

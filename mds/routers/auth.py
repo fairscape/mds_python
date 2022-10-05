@@ -14,8 +14,8 @@ router = APIRouter()
 def login(email: str, password: str):
     # set up database connetion
     mongo_client = mongo.GetConfig()
-    mongo_db = mongo_client["test"]
-    mongo_collection = mongo_db["testcol"]
+    mongo_db = mongo_client[MONGO_DATABASE]
+    mongo_collection = mongo_db[MONGO_COLLECTION]
 
     try:
         session = auth.LoginUserBasic(mongo_collection, email, password)
@@ -50,8 +50,8 @@ def refresh(
 ):
     # set up database connetion
     mongo_client = mongo.GetConfig()
-    mongo_db = mongo_client["test"]
-    mongo_collection = mongo_db["testcol"]
+    mongo_db = mongo_client[MONGO_DATABASE]
+    mongo_collection = mongo_db[MONGO_COLLECTION]
 
     # check if the session is in the cookie
     session_cookie = request.cookies.get('fairscape-session')
@@ -101,8 +101,8 @@ def revoke(
 ):
     # set up database connetion
     mongo_client = mongo.GetConfig()
-    mongo_db = mongo_client["test"]
-    mongo_collection = mongo_db["testcol"]
+    mongo_db = mongo_client[MONGO_DATABASE]
+    mongo_collection = mongo_db[MONGO_COLLECTION]
 
     # check if the session is in the cookie
     session_cookie = request.cookies.get('fairscape-session')
