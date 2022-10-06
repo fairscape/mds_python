@@ -166,7 +166,7 @@ class Organization(FairscapeBaseModel):
             return OperationStatus(False, f"{bulk_edit_result.bulk_api_result}", 500)
 
 
-def list_organization(MongoClient: pymongo.Client):
+def list_organization(MongoClient: pymongo.MongoClient):
 
     mongo_db = MongoClient[MONGO_DATABASE]
     mongo_collection = mongo_db[MONGO_COLLECTION]
