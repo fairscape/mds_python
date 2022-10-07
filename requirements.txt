@@ -7,6 +7,6 @@ python-multipart
 docker
 jinja2
 casbin
-casbin_pymongo_adapter
+casbin_sqlalchemy_adapter
 pyjwt
 requests-toolbelt
