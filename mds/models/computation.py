@@ -31,14 +31,14 @@ class Computation(FairscapeBaseModel):
     context = {"@vocab": "https://schema.org/", "evi": "https://w3id.org/EVI#"}
     type = "evi:Computation"
     owner: UserCompactView
-#    author: UserCompactView
+    #    author: UserCompactView
     dateCreated: Optional[datetime]
     dateFinished: Optional[datetime]
     associatedWith: Optional[List[Union[OrganizationCompactView, UserCompactView]]] = []
     container: str
     command: Optional[str]
-    usedSoftware:  Union[str, SoftwareCompactView]
-    usedDataset: Union[ str, DatasetCompactView] # ,List[Union[str, DatasetCompactView]]]
+    usedSoftware: Union[str, SoftwareCompactView]
+    usedDataset: List[Union[str, DatasetCompactView]]  # ,List[Union[str, DatasetCompactView]]]
     containerId: Optional[str]
 
     class Config:
@@ -61,7 +61,7 @@ class Computation(FairscapeBaseModel):
         # check that owner exists
         if MongoCollection.find_one({"@id": self.owner.id}) is None:
             return OperationStatus(False, f"owner {self.owner.id} does not exist", 404)
-            
+
         # check that software exists
         if type(self.usedSoftware) == str:
             software_id = self.usedSoftware
@@ -70,13 +70,14 @@ class Computation(FairscapeBaseModel):
         if MongoCollection.find_one({"@id": software_id}) is None:
             return OperationStatus(False, f"software {software_id} does not exist", 404)
 
-        # check that datasets exist
-        if type(self.usedDataset) == str:
-            dataset_id = self.usedDataset
-        else:
-            dataset_id = self.usedDataset.id
-        if MongoCollection.find_one({"@id": dataset_id}) is None:
-            return OperationStatus(False, f"dataset {dataset_id} does not exist", 404)
+        for dataset in self.usedDataset:
+            # check that datasets exist
+            if type(dataset) == str:
+                dataset_id = dataset
+            else:
+                dataset_id = dataset.id
+            if MongoCollection.find_one({"@id": dataset_id}) is None:
+                return OperationStatus(False, f"dataset {dataset_id} does not exist", 404)
 
         # embeded bson documents to enable Mongo queries
         computation_dict = self.dict(by_alias=True)
@@ -168,31 +169,61 @@ class Computation(FairscapeBaseModel):
         run_custom_container creates a local computation and evidence graph record for computations
 
         """
- 
+        # print(self.usedSoftware)
+        # print(self.usedDataset)
+
+        used_by_ids = []
+        # for usedDataset in self.usedDataset:
+        #    dataset = Dataset.construct(id=usedDataset)
+        #    dataset.read(mongo_collection)
+        #    used_by_ids.append(dataset.id)
+        if type(self.usedSoftware) == str:
+            software_id = self.usedSoftware
+        else:
+            software_id = self.usedSoftware.id
+
+        found_software = Software.construct(id=software_id)
+        read_software = found_software.read(mongo_collection)
+        script_path = found_software.distribution[0].contentUrl
+        used_by_ids.append(software_id)
+
+        dataset_path = []
+        for dataset in self.usedDataset:
+            if type(dataset) == str:
+                dataset_id = dataset
+            else:
+                dataset_id = dataset.id
+
+            found_dataset = Dataset.construct(id=dataset_id)
+            read_dataset = found_dataset.read(mongo_collection)
+            dataset_path.append(found_dataset.distribution[0].contentUrl)
+            used_by_ids.append(dataset_id)
+
         # add usedBy property to all datatsets and the software
-        used_by_ids = [dataset.id for dataset in self.usedDataset]
-        used_by_ids.append(self.usedSoftware.id)
+        # used_by_ids = [dataset.id for dataset in self.usedDataset]
 
         update_many_result = mongo_collection.update_many(
-            {"@id": used_by_ids}, 
+            {"@id": {"$in": used_by_ids}},
             {"$push": {
-                "usedBy": {
-                    "@id": self.id, 
+                "evi:usedBy": {
+                    "@id": self.id,
                     "@type": self.type,
                     "name": self.name
-                    }
-                }})
+                }
+            }})
 
-        if update_many_result.modifiedCount != len(used_by_ids):
+        if update_many_result.modified_count != len(used_by_ids):
             return OperationStatus(False, "", 500)
 
+        # script_path = self.usedSoftware.distribution[0].contentUrl
+        # script_path = found_software.distribution[0].contentUrl
 
-        dataset_path = [dataset.distribution[0].contentUrl for dataset in self.usedDataset]
-        script_path = self.usedSoftware.distribution[0].contentUrl
+        # dataset_path = [dataset.distribution[0].contentUrl for dataset in self.usedDataset]
+        # dataset_path = [dataset.distribution[0].contentUrl for dataset in self.usedDataset]
 
         # create a temporary landing folder for the output
         job_path = pathlib.Path(f"/tmp/{self.name}")
-        input_directory  = job_path / "input"
+        input_directory = job_path / "input"
         software_directory = input_directory / "software"
         data_directory = input_directory / "data"
         output_directory = job_path / "output"
@@ -201,9 +232,8 @@ class Computation(FairscapeBaseModel):
         data_directory.mkdir(parents=True)
         output_directory.mkdir(parents=True)
 
-
         # download script
-        script_filename = software_directory / pathlib.Path(script_path).name        
+        script_filename = software_directory / pathlib.Path(script_path).name
 
         def get_minio_object(path, filename):
             try:
@@ -222,7 +252,6 @@ class Computation(FairscapeBaseModel):
         if script_download_status != None:
             return script_download_status
 
-
         # download all dataset files
         for dataset in dataset_path:
             dataset_filename = data_directory / pathlib.Path(dataset).name
@@ -235,25 +264,25 @@ class Computation(FairscapeBaseModel):
         # setup the container
         docker_client = docker.from_env()
 
-        try: 
+        try:
             container = docker_client.containers.create(
-                image = self.container, 
-                command = self.command,
-                auto_remove = False,
+                image=self.container,
+                command=self.command,
+                auto_remove=False,
                 volumes={
                     str(job_path): {'bind': '/mnt/', 'mode': 'rw'},
                 }
-                )
+            )
         except Exception as e:
-            return OperationStatus(False, f"error creating docker container {str(e)}", 500) 
+            return OperationStatus(False, f"error creating docker container {str(e)}", 500)
 
-
-        # update metadata with container id
+            # update metadata with container id
         self.containerId = container.id
-        self.dateCreated = datetime.fromtimestamp(time.time()).strftime("%A, %B %d, %Y %I:%M:%S")
+        # self.dateCreated = datetime.fromtimestamp(time.time()).strftime("%A, %B %d, %Y %I:%M:%S")
 
-        update_metadata_results = mongo_collection.update_one({"@id": self.id}, {"$set": {"containerId": self.containerId, "dateCreated": self.dateCreated}})
-        if update_metadata_results.modifiedCount != 1:
+        update_metadata_results = mongo_collection.update_one({"@id": self.id}, {
+            "$set": {"containerId": self.containerId, "dateCreated": self.dateCreated}})
+        if update_metadata_results.modified_count != 1:
             return OperationStatus(False, "Failed to update mongo metadata", 500)
 
         try:
@@ -263,66 +292,63 @@ class Computation(FairscapeBaseModel):
         except Exception as e:
             return OperationStatus(False, f"error starting container: {str(e)}", 500)
 
-         
-
-    def _run_container(self):
-        # Locate and download the dataset(s)
-        if dataset_ids and isinstance(dataset_ids, list):
-            for dataset_id in dataset_ids:
-                r = requests.get(root_url + f"dataset/{dataset_id}")
-                dataset_download_id, dataset_file_location, dataset_file_name = get_distribution_attr(dataset_id, r)
-                print(dataset_download_id, dataset_file_location, dataset_file_name)
-
-                # Download the content of the dataset
-                data_download_dataset_download = requests.get(root_url + f"datadownload/{dataset_download_id}/download")
-                dataset_content = data_download_dataset_download.content
-                # print(dataset_content)
-
-                with open('/home/sadnan/compute-test/data/' + dataset_file_name, 'wb') as binary_data_file:
-                    binary_data_file.write(dataset_content)
-
-        if script_id:
-            r = requests.get(root_url + f"software/{script_id}")
-            script_download_id, script_file_location, script_file_name = get_distribution_attr(script_id, r)
-            print(script_download_id, script_file_location, script_file_name)
-
-            # Download the content of the script
-            data_download_software_read = requests.get(root_url + f"datadownload/{script_download_id}/download")
-            script_content = data_download_software_read.content
-            # print(script_content)
-
-            with open('/home/sadnan/compute-test/' + script_file_name, 'wb') as binary_data_file:
-                binary_data_file.write(script_content)
-
-
-        #
-        # TODO Ensure successful launch of the container, exception handling
-        #
-
-        if container.id is None:
-            return OperationStatus(False, f"error retrieving container id from launched container", 404)
-
-        # assign long-form container id
-        self.containerId = container.id
-
-        # Update computation with info from the custom container
-        session = MongoClient.start_session(causal_consistency=True)
-        mongo_database = MongoClient[MONGO_DATABASE]
-        mongo_collection = mongo_database[MONGO_COLLECTION]
-
-        # update computation with the container id
-        update_computation_result = mongo_collection.update_one(
-            {"@id": self.id},
-            {"$set": {
-                "containerId": self.containerId
-            }},
-            session=session
-        )
-
-        if update_computation_result.matched_count != 1 and update_computation_result.modified_count != 1:
-            return OperationStatus(False, f"error updating container id", 500)
-
-        return OperationStatus(True, "", 201)
+    # def _run_container(self):
+    #     # Locate and download the dataset(s)
+    #     if dataset_ids and isinstance(dataset_ids, list):
+    #         for dataset_id in dataset_ids:
+    #             r = requests.get(root_url + f"dataset/{dataset_id}")
+    #             dataset_download_id, dataset_file_location, dataset_file_name = get_distribution_attr(dataset_id, r)
+    #             print(dataset_download_id, dataset_file_location, dataset_file_name)
+    #
+    #             # Download the content of the dataset
+    #             data_download_dataset_download = requests.get(root_url + f"datadownload/{dataset_download_id}/download")
+    #             dataset_content = data_download_dataset_download.content
+    #             # print(dataset_content)
+    #
+    #             with open('/home/sadnan/compute-test/data/' + dataset_file_name, 'wb') as binary_data_file:
+    #                 binary_data_file.write(dataset_content)
+    #
+    #     if script_id:
+    #         r = requests.get(root_url + f"software/{script_id}")
+    #         script_download_id, script_file_location, script_file_name = get_distribution_attr(script_id, r)
+    #         print(script_download_id, script_file_location, script_file_name)
+    #
+    #         # Download the content of the script
+    #         data_download_software_read = requests.get(root_url + f"datadownload/{script_download_id}/download")
+    #         script_content = data_download_software_read.content
+    #         # print(script_content)
+    #
+    #         with open('/home/sadnan/compute-test/' + script_file_name, 'wb') as binary_data_file:
+    #             binary_data_file.write(script_content)
+    #
+    #     #
+    #     # TODO Ensure successful launch of the container, exception handling
+    #     #
+    #
+    #     if container.id is None:
+    #         return OperationStatus(False, f"error retrieving container id from launched container", 404)
+    #
+    #     # assign long-form container id
+    #     self.containerId = container.id
+    #
+    #     # Update computation with info from the custom container
+    #     session = MongoClient.start_session(causal_consistency=True)
+    #     mongo_database = MongoClient[MONGO_DATABASE]
+    #     mongo_collection = mongo_database[MONGO_COLLECTION]
+    #
+    #     # update computation with the container id
+    #     update_computation_result = mongo_collection.update_one(
+    #         {"@id": self.id},
+    #         {"$set": {
+    #             "containerId": self.containerId
+    #         }},
+    #         session=session
+    #     )
+    #
+    #     if update_computation_result.matched_count != 1 and update_computation_result.modified_count != 1:
+    #         return OperationStatus(False, f"error updating container id", 500)
+    #
+    #     return OperationStatus(True, "", 201)
 
 
 # def _run_container(self):
@@ -467,7 +493,7 @@ def RegisterComputation(computation: Computation):
     If successfull register all datasets in the output folder for the supplied computation, 
     and append the computation metadata with status of the containers execution and logs if applicable
     """
-    
+
     mongo_client = mongo.GetConfig()
     mongo_db = mongo_client[MONGO_DATABASE]
     mongo_collection = mongo_db[MONGO_COLLECTION]
@@ -503,11 +529,14 @@ def RegisterComputation(computation: Computation):
     date_created = container_state["StartedAt"]
     date_finished = container_state["FinishedAt"]
 
+    job_path = pathlib.Path(f"/tmp/{computation.name}")
+    output_directory = job_path / "output"
+
     # container exited gracefully
     if status == "exited" and exit_code == 0:
         generates = []
         # get all output files
-        for output_file in Path(COMPUTATION_OUTPUT_DIR).rglob('*'):
+        for output_file in Path(output_directory).rglob('*'):
             if output_file.is_file():
                 print(output_file.name)
                 file_parent = output_file.parent
@@ -536,16 +565,16 @@ def RegisterComputation(computation: Computation):
                     "encodesCreativeWork": dataset.id
                 })
 
-                create_status = data_download.create_metadata(mongo_client)
-                print(create_status)
+                #create_status = data_download.create_metadata(mongo_collection)
 
-                # with open(output_file, "rb") as output_file_object:
-                #     upload_status = data_download.register(output_file_object, mongo_collection, minio_client)
-                #     if upload_status.success != True:
-                #         return JSONResponse(
-                #             status_code=500,
-                #             content={"error": f"unable to upload object: {output_file}"}
-                #         )
+                with open(output_file, "rb") as output_file_object:
+                    upload_status = data_download.register(mongo_collection, minio_client, output_file_object)
+                    if upload_status.success != True:
+                        print('could not upload file file', output_file_object.name, upload_status.message)
+                        return JSONResponse(
+                            status_code=500,
+                            content={"error": f"unable to upload object: {output_file}"}
+                        )
 
         # Update computation with info from the custom container
         session = mongo_client.start_session(causal_consistency=True)
@@ -579,12 +608,12 @@ def RegisterComputation(computation: Computation):
     container.remove()
     write_container_log(f"message: container {computation.containerId} removed successfully")
 
-    # clean up files
-    dir_to_clean = pathlib.Path(COMPUTATION_OUTPUT_DIR)
-    write_container_log(f"message: cleaning output directory: {dir_to_clean}")
+    # clean up directories and files
+    dir_to_clean = pathlib.Path(job_path)
+    write_container_log(f"message: cleaning compute job directory: {dir_to_clean}")
     if dir_to_clean.exists() and dir_to_clean.is_dir():
-        shutil.rmtree(dir_to_clean)
-        write_container_log(f"message: output directory: {dir_to_clean} removed successfully")
+       shutil.rmtree(dir_to_clean)
+       write_container_log(f"message: compute job directory: {dir_to_clean} removed successfully")
     else:
-        write_container_log(f"message: error removing output directory: {dir_to_clean}")
+       write_container_log(f"message: error removing compute job directory: {dir_to_clean}")
     print('Run Custom Container: All done')

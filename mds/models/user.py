@@ -54,3 +54,4 @@ def list_users(mongo_collection: pymongo.collection.Collection):
         projection={"_id": False}
     )
     return {"users":  [{"@id": user.get("@id"), "@type": "Person", "name": user.get("name")} for user in cursor] }
+

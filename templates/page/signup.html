@@ -1,0 +1,101 @@
+{% extends "/layout/default.html" %}
+
+{% block title%}Home{% endblock %}
+
+{% block head %}
+{{ super() }}
+<!-- signup form custom style -->
+<link href="{{ url_for('static', path='/css/signup.css')}}" rel="stylesheet">
+{% endblock %}
+
+
+{% block inner_body %}
+
+{% block main_content %}
+
+<section class="vh-100" style="background-color: hwb(219 31% 1%);">
+    <div class="container py-5 h-100">
+        <div class="row d-flex justify-content-center align-items-center h-100">
+            <div class="col-12 col-md-8 col-lg-6 col-xl-5">
+                <div class="card shadow-2-strong" style="border-radius: 1rem;">
+                    <div class="card-title text-center border-bottom">
+                        <h2 class="p-3">Sign Up</h2>
+                    </div>
+                    <div class="card-body p-5">
+                        <!-- information passed from backend via validation through ajax -->
+                        <div id="info"></div>
+                        {# message block from backend jinja2 #}
+                        {% if message: %}
+                        <div class="alert alert-danger text-center">
+                            {{ message or ' ' }}
+                        </div>
+                        {% endif %}
+                        {# message block from backend jinja2 #}
+                        <form class="form" id="form-signup" method="post" action="/page/signup" autocomplete="off">
+                            <!-- Name -->
+                            <div class="mb-4">
+                                <div class="row">
+                                    <!-- First Name -->
+                                    <div class="col form-group">
+                                        <label for="firstName" class="form-label visually-hidden">First Name</label>
+                                        <input type="text" name="firstName" class="form-control form-control-lg"
+                                            id="firstName" placeholder="First Name">
+                                    </div>
+
+                                    <!-- Last Name -->
+                                    <div class="col form-group">
+                                        <label for="lastName" class="form-label visually-hidden">Last Name</label>
+                                        <input type="text" name="lastName" class="form-control form-control-lg"
+                                            id="lastName" placeholder="Last Name">
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Email address -->
+                            <div class="mb-4 form-group">
+                                <label for="email" class="form-label visually-hidden">Email address</label>
+                                <input type="email" name="email" class="form-control form-control-lg" id="email"
+                                    placeholder="Email Address">
+                            </div>
+                            <!-- Originial Password -->
+                            <div class="mb-4 form-group">
+                                <label for="password1" class="form-label visually-hidden">Password</label>
+                                <input type="password" name="password1" class="form-control form-control-lg"
+                                    id="password1" placeholder="Password">
+                            </div>
+                            <!-- Confirm Password -->
+                            <div class="mb-4 form-group">
+                                <label for="password2" class="form-label visually-hidden">Confirm Password</label>
+                                <input type="password" name="password2" class="form-control form-control-lg"
+                                    id="password2" placeholder="Confirm Password">
+                            </div>
+                            <!-- Signup submit -->
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary" id="signupSubmit">Submit</button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="card-footer">
+
+                        <!-- Redirect page -->
+                        <p class="mt-5 mb-3 text-muted text-center">Already have an account? <a class="text-info"
+                                href="/page/signin">Sign In</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+{% endblock %}
+
+{% block scripts %}
+
+{{ super() }}
+
+<script src="{{ url_for('static', path='/js/validate-signup.js')}}"></script>
+
+{% endblock %}
+
+
+{% endblock %}

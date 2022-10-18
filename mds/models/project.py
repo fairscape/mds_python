@@ -1,21 +1,25 @@
 from bson import SON
 from pydantic import Extra
-from typing import List, Union
+from typing import List, Union, Optional
 from mds.models.fairscape_base import *
 from mds.models.compact.user import UserCompactView
 from mds.models.compact.computation import ComputationCompactView
+from mds.models.compact.dataset import DatasetCompactView
+from mds.models.compact.software import SoftwareCompactView
+from mds.models.compact.evidencegraph import EvidenceGraphCompactView
+from mds.models.compact.organization import OrganizationCompactView
 
 
 class Project(FairscapeBaseModel):
     context = {"@vocab": "https://schema.org/", "evi": "https://w3id.org/EVI#"}
     type = "Project"
     owner: UserCompactView
-
-    # datasets: List[DatasetCompactView]
-    # computations: List[ComputationCompactView]
-    # software: List[SoftwareCompactView]
-    # evidencegraphs: List[EvidenceGraphCompactView]
-    # acl
+    members: List[UserCompactView] = []
+    memberOf: OrganizationCompactView
+    datasets: Optional[List[DatasetCompactView]]
+    computations: Optional[List[ComputationCompactView]]
+    software: Optional[List[SoftwareCompactView]]
+    evidencegraphs: Optional[List[EvidenceGraphCompactView]]
 
     class Config:
         extra = Extra.allow
@@ -37,6 +41,10 @@ class Project(FairscapeBaseModel):
         if MongoCollection.find_one({"@id": self.owner.id}) is None:
             return OperationStatus(False, "owner does not exist", 404)
 
+
+        if MongoCollection.find_one({"@id": self.memberOf.id}) is None:
+            return OperationStatus(False, "Organization does not exist", 404)
+
         # embeded bson documents to enable Mongo queries
         project_dict = self.dict(by_alias=True)
 
@@ -51,7 +59,8 @@ class Project(FairscapeBaseModel):
         project_bulk_write = [
             pymongo.InsertOne(project_dict),
             # update owner model to have listed the project
-            pymongo.UpdateOne({"@id": self.owner.id}, add_project_update)
+            pymongo.UpdateOne({"@id": self.owner.id}, add_project_update),
+            pymongo.UpdateOne({"@id": self.memberOf.id}, add_project_update)
         ]
 
         # perform the bulk write

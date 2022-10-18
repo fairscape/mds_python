@@ -1,0 +1,46 @@
+{% extends "/layout/default.html" %}
+
+{% block title%}Welcome{% endblock %}
+
+{% block head %}
+{{ super() }}
+    <!-- sticky header custom style -->
+    <link href="{{ url_for('static', path='/css/sticky-header.css')}}" rel="stylesheet">
+    <!-- sticky footer custom style -->
+    <link href="{{ url_for('static', path='/css/sticky-footer.css')}}" rel="stylesheet">
+{% endblock %}
+
+
+{% block inner_body %}
+
+{% block header_content %}
+{% include 'include/header.html' %}
+{% endblock %}
+
+
+{% block main_content %}
+{% include 'include/content.html' %}
+{% endblock %}
+
+
+{% block footer_content %}
+{% include 'include/footer.html' %}
+{% endblock %}
+
+{% block scripts %}
+
+{{ super() }}
+
+<script src="{{ url_for('static', path='/js/validate-signin.js')}}"></script>
+<script type="text/javascript">
+    document.getElementById("signinButton").onclick = function () {
+        location.href = "page/signin";
+    };
+    document.getElementById("signupButton").onclick = function () {
+        location.href = "page/signup";
+    };
+</script>
+
+{% endblock %}
+
+{% endblock %}

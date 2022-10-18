@@ -2,6 +2,7 @@ from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 from mds.models.user import User, list_users
 from mds.database import mongo
+from mds.database.config import MONGO_DATABASE, MONGO_COLLECTION
 
 router = APIRouter()
 
@@ -20,8 +21,8 @@ async def user_create(user: User):
     - **password**: a password
     """
     mongo_client = mongo.GetConfig()
-    mongo_db = mongo_client['test']
-    mongo_collection = mongo_db['testcol']
+    mongo_db = mongo_client[MONGO_DATABASE]
+    mongo_collection = mongo_db[MONGO_COLLECTION]
 
     create_status = user.create(mongo_collection)
 
@@ -44,8 +45,8 @@ async def user_create(user: User):
             response_description="Retrieved list of users")
 async def user_list():
     mongo_client = mongo.GetConfig()
-    mongo_db = mongo_client['test']
-    mongo_collection = mongo_db['testcol']
+    mongo_db = mongo_client[MONGO_DATABASE]
+    mongo_collection = mongo_db[MONGO_COLLECTION]
 
     users = list_users(mongo_collection)
 
@@ -65,8 +66,8 @@ async def user_get(NAAN: str, postfix: str):
     - **postfix**: a unique string
     """
     mongo_client = mongo.GetConfig()
-    mongo_db = mongo_client['test']
-    mongo_collection = mongo_db['testcol']
+    mongo_db = mongo_client[MONGO_DATABASE]
+    mongo_collection = mongo_db[MONGO_COLLECTION]
 
     user_id = f"ark:{NAAN}/{postfix}"
 
@@ -87,8 +88,8 @@ async def user_get(NAAN: str, postfix: str):
             response_description="The updated user")
 async def user_update(user: User):
     mongo_client = mongo.GetConfig()
-    mongo_db = mongo_client["test"]
-    mongo_collection = mongo_db["testcol"]
+    mongo_db = mongo_client[MONGO_DATABASE]
+    mongo_collection = mongo_db[MONGO_COLLECTION]
 
     update_status = user.update(mongo_collection)
 
@@ -120,8 +121,8 @@ async def user_delete(NAAN: str, postfix: str):
     user_id = f"ark:{NAAN}/{postfix}"
 
     mongo_client = mongo.GetConfig()
-    mongo_db = mongo_client['test']
-    mongo_collection = mongo_db['testcol']
+    mongo_db = mongo_client[MONGO_DATABASE]
+    mongo_collection = mongo_db[MONGO_COLLECTION]
 
     user = User.construct(id=user_id)
 
