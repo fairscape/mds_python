@@ -197,6 +197,9 @@ def ParseAuthHeader(
 	the credentials or raise a UserNotFound exception 
 	"""
 
+    if AuthHeader is None:
+        raise TokenError(AuthHeader)
+
     if "Basic " in AuthHeader:
         return DecodeBasicAuth(MongoCollection, AuthHeader)
 

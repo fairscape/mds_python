@@ -8,5 +8,6 @@ docker
 jinja2
 casbin
 casbin_sqlalchemy_adapter
+kubernetes
 pyjwt
 requests-toolbelt
