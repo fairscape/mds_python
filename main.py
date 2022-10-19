@@ -5,14 +5,6 @@ from mds.database.minio import GetMinioConfig
 
 # TODO make sure configuration is valid, if not create configured minio bucket and mongo database
 
-# create the minio bucket
-minio_client = GetMinioConfig()
-MINIO_BUCKET = environ.get("MINIO_BUCKET", "test")
-
-found = minio_client.bucket_exists(MINIO_BUCKET)
-if not found:
-    minio_client.make_bucket(MINIO_BUCKET)
-
 
 if __name__ == '__main__':
 
