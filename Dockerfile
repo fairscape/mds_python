@@ -1,7 +1,5 @@
 FROM python:3.9-slim as builder
 
-WORKDIR /mds
-
 RUN apt-get update && \
     apt-get install -y --no-install-recommends gcc
 
@@ -13,11 +11,11 @@ FROM builder as fairscape
 #RUN addgroup --system fair && adduser --system --group fair
 #USER fair
 
-WORKDIR mds
-
-COPY mds mds/mds
-COPY static static
-COPY templates templates
+COPY mds /mds/mds
+COPY static /mds/static
+COPY templates /mds/templates
 COPY main.py mds/main.py
 
-CMD ["python3", "mds/main.py"]
+WORKDIR /mds
+
+CMD ["python3", "main.py"]
