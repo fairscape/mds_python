@@ -1,17 +1,6 @@
 from pymongo import MongoClient
-from urllib.parse import quote_plus
-from mds.database.config import MONGO_URI, MONGO_USER, MONGO_PASS, MONGO_DATABASE, MONGO_PORT
-from os import environ
+from mds.database.config import MONGO_CONNECTION_STRING
 
-
-MONGO_CONNECTION_STRING = environ.get("MONGO_CONNECTION_STRING")
-
-if MONGO_CONNECTION_STRING is None:
-    
-    if environ.get("MONGO_USER") is None:
-        MONGO_CONNECTION_STRING = "mongodb://root:example@localhost:27017"
-    else:
-        MONGO_CONNECTION_STRING = f"mongodb://{quote_plus(MONGO_USER)}:{quote_plus(MONGO_PASS)}@{MONGO_URI}:{str(MONGO_PORT)}/{MONGO_DATABASE}"
 
 
 class MongoConfig:
