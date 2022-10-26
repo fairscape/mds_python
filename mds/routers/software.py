@@ -19,8 +19,8 @@ def software_create(software: Software, response: Response):
     - **owner**: an existing user in its compact form with @id, @type, name, and email
     """
     mongo_client = mongo.GetConfig()
-    mongo_db = mongo_client["test"]
-    mongo_collection = mongo_db["testcol"]
+    mongo_db = mongo_client[MONGO_DATABASE]
+    mongo_collection = mongo_db[MONGO_COLLECTION]
 
     create_status = software.create(mongo_collection)
 
@@ -43,8 +43,8 @@ def software_create(software: Software, response: Response):
             response_description="Retrieved list of software")
 def software_list(response: Response):
     mongo_client = mongo.GetConfig()
-    mongo_db = mongo_client["test"]
-    mongo_collection = mongo_db["testcol"]
+    mongo_db = mongo_client[MONGO_DATABASE]
+    mongo_collection = mongo_db[MONGO_COLLECTION]
 
     software = list_software(mongo_collection)
 
