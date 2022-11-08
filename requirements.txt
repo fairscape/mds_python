@@ -11,3 +11,4 @@ casbin_sqlalchemy_adapter
 kubernetes
 pyjwt
 requests-toolbelt
+celery[redis]
