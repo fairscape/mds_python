@@ -7,13 +7,11 @@ from pydantic import Extra
 from datetime import datetime
 from mds.database import mongo, minio
 from mds.database.config import MONGO_DATABASE, MONGO_COLLECTION
-import os
-
 
 from time import sleep
 from kubernetes import client, config, watch
-from celery import Celery
 from celery.utils.log import get_task_logger
+from mds.celery import workflow
 
 
 # setup client configuration
@@ -21,14 +19,6 @@ config.load_incluster_config()
 v1 = client.CoreV1Api()
 batch = client.BatchV1Api()
 
-# setup Celery configuration
-redis_service_port = os.environ.get("REDIS_SERVICE_PORT")
-
-workflow = Celery(
-    'fairscape', 
-    broker=f"redis://{redis_service_port.strip('tcp://')}/0",
-    backend=f"redis://{redis_service_port.strip('tcp://')}/1"
-)
 
 task_logger = get_task_logger(__name__)
 
