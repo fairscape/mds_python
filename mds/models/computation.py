@@ -14,6 +14,8 @@ from mds.models.compact.dataset import DatasetCompactView
 from mds.models.compact.organization import OrganizationCompactView
 from mds.utilities.funcs import *
 from mds.utilities.utils import *
+
+from pydantic import BaseModel
 import requests
 import docker
 import time
@@ -24,7 +26,20 @@ from mds.database.config import MINIO_BUCKET, MONGO_DATABASE, MONGO_COLLECTION
 from mds.database.minio import *
 from mds.database.container_config import *
 
+from mds.compute.kubernetes.job import download_job, run_job, register_job
+
 root_url = "http://localhost:8000/"
+
+
+class ResourceTuple(BaseModel):
+    requests: str
+    limits: str
+
+class JobRequirements(BaseModel):
+    storage: ResourceTuple
+    cpu: ResourceTuple
+    mem: ResourceTuple
+
 
 
 class Computation(FairscapeBaseModel):
@@ -36,10 +51,11 @@ class Computation(FairscapeBaseModel):
     dateFinished: Optional[datetime]
     associatedWith: Optional[List[Union[OrganizationCompactView, UserCompactView]]] = []
     container: str
-    command: Optional[str]
+    command: Optional[Union[str,List[str]]]
     usedSoftware: Union[str, SoftwareCompactView]
     usedDataset: List[Union[str, DatasetCompactView]]  # ,List[Union[str, DatasetCompactView]]]
     containerId: Optional[str]
+    requirements: Optional[JobRequirements]
 
     class Config:
         extra = Extra.allow
@@ -111,9 +127,11 @@ class Computation(FairscapeBaseModel):
     def read(self, MongoCollection: pymongo.collection.Collection) -> OperationStatus:
         return super().read(MongoCollection)
 
+
     def update(self, MongoCollection: pymongo.collection.Collection) -> OperationStatus:
         # TODO e.g. when computation is updated, it should be reflected in its owners profile
         return super().update(MongoCollection)
+
 
     def delete(self, MongoCollection: pymongo.collection.Collection) -> OperationStatus:
         """Delete the computation. Update each user who is an owner of the computation.
@@ -163,6 +181,12 @@ class Computation(FairscapeBaseModel):
             return OperationStatus(True, "", 200)
         else:
             return OperationStatus(False, f"{bulk_edit_result.bulk_api_result}", 500)
+
+
+    def execute_kubernetes(self):
+        chain = download_job(self.id) | run_job(self.id) | register_job(self.id)
+        chain()
+
 
     def run_custom_container(self, mongo_collection: pymongo.collection.Collection, minio_client) -> OperationStatus:
         """

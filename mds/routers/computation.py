@@ -50,41 +50,29 @@ def computation_create(computation: Computation, response: Response):
         )
 
 
-@router.put("/computation/ark:{NAAN}/{postfix}/execute")
-def computation_execute(NAAN: str, postfix: str, background_tasks: BackgroundTasks):
+@router.put("/computation/execute/ark:{NAAN}/{postfix}")
+def computation_execute(NAAN: str, postfix: str):
 
     mongo_client = mongo.GetConfig()
     mongo_db = mongo_client[MONGO_DATABASE]
     mongo_collection = mongo_db[MONGO_COLLECTION]
-    minio_client = minio.GetMinioConfig()
-
     computation_id = f"ark:{NAAN}/{postfix}"
 
     computation = Computation.construct(id=computation_id)
-
     read_status = computation.read(mongo_collection)
-    # mongo_client.close()
-
-    #if read_status.success:
-    #    return computation
-    #else:
-    #    return JSONResponse(status_code=read_status.status_code,
-    #                        content={"error": read_status.message})
-
-
-    compute_status = computation.run_custom_container(mongo_collection, minio_client)
-
-    if compute_status.success != True:
-        return JSONResponse(
-            status_code=compute_status.status_code,
-            content={"message": compute_status.message}
-        )
-
-    background_tasks.add_task(RegisterComputation, computation)
     
+    if read_status.success != True: 
+        mongo_client.close()
+        return JSONResponse(
+            status_code=read_status.status_code,
+            content={"error": read_status.message}
+            )
+
+    res = computation.execute_kubernetes()
+ 
     return JSONResponse(
             status_code=201,
-            content={"message": "launched container"}
+            content={"message": "launched kubernetes job"}
         )
 
 
