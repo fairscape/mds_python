@@ -11,7 +11,7 @@ from mds.database.config import MONGO_DATABASE, MONGO_COLLECTION
 from time import sleep
 from kubernetes import client, config, watch
 from celery.utils.log import get_task_logger
-from mds.celery import workflow
+from mds.compute.celery import workflow
 
 
 # setup client configuration
