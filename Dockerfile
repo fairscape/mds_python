@@ -14,8 +14,10 @@ FROM builder as fairscape
 COPY mds /mds/mds
 COPY static /mds/static
 COPY templates /mds/templates
-COPY main.py mds/main.py
+COPY main.py /mds/main.py
 
 WORKDIR /mds
+
+RUN export PYTHONPATH=$PYTHONPATH:/mds
 
 CMD ["python3", "main.py"]

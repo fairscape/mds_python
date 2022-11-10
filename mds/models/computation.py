@@ -26,8 +26,6 @@ from mds.database.config import MINIO_BUCKET, MONGO_DATABASE, MONGO_COLLECTION
 from mds.database.minio import *
 from mds.database.container_config import *
 
-from mds.compute.kubernetes.job import download_job, run_job, register_job
-
 root_url = "http://localhost:8000/"
 
 
@@ -181,11 +179,6 @@ class Computation(FairscapeBaseModel):
             return OperationStatus(True, "", 200)
         else:
             return OperationStatus(False, f"{bulk_edit_result.bulk_api_result}", 500)
-
-
-    def execute_kubernetes(self):
-        chain = download_job(self.id) | run_job(self.id) | register_job(self.id)
-        chain()
 
 
     def run_custom_container(self, mongo_collection: pymongo.collection.Collection, minio_client) -> OperationStatus:

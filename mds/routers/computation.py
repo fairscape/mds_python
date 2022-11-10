@@ -4,6 +4,7 @@ from fastapi import APIRouter, Response, BackgroundTasks
 from mds.database import mongo, minio
 from mds.database.config import MONGO_DATABASE, MONGO_COLLECTION
 
+from mds.compute import create_job
 from mds.models.computation import Computation, list_computation, RegisterComputation
 from mds.database.container_config import *
 from mds.database.config import *
@@ -68,7 +69,7 @@ def computation_execute(NAAN: str, postfix: str):
             content={"error": read_status.message}
             )
 
-    res = computation.execute_kubernetes()
+    res = create_job(computation_id)
  
     return JSONResponse(
             status_code=201,
