@@ -54,6 +54,7 @@ class Computation(FairscapeBaseModel):
     usedDataset: List[Union[str, DatasetCompactView]]  # ,List[Union[str, DatasetCompactView]]]
     containerId: Optional[str]
     requirements: Optional[JobRequirements]
+    generated: Optional[Union[str, List[str]]]
 
     class Config:
         extra = Extra.allow

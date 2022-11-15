@@ -8,6 +8,10 @@ from mds.models.fairscape_base import FairscapeBaseModel
 from mds.models.dataset import Dataset
 from mds.models.compact.dataset import DatasetCompactView
 from mds.models.compact.software import SoftwareCompactView
+from mds.models.compact.project import ProjectCompactView
+from mds.models.compact.organization import OrganizationCompactView
+from mds.models.compact.user import UserCompactView 
+
 from mds.utilities.operation_status import OperationStatus
 from fastapi.encoders import jsonable_encoder
 
@@ -18,13 +22,15 @@ class Download(FairscapeBaseModel, extra=Extra.allow):
     context = {"@vocab": "https://schema.org/", "evi": "https://w3id/EVI#"}
     type = "DataDownload"
     encodingFormat: str
+    owner: UserCompactView
     contentSize: Optional[str]
     contentUrl: Optional[str]
     encodesCreativeWork: Union[DatasetCompactView, SoftwareCompactView, str]
     sha256: Optional[str]
     uploadDate: Optional[datetime]
     version: Optional[str]
-    # status: str
+    sourceOrganization: Optional[OrganizationCompactView] = None
+    includedInDataCatalog: Optional[ProjectCompactView] = None
 
 
     def create_metadata(self, MongoClient: pymongo.MongoClient) -> OperationStatus: 
@@ -100,7 +106,10 @@ class Download(FairscapeBaseModel, extra=Extra.allow):
             "name": creative_work.get("name")
         }
 
-        self.contentUrl = f"{creative_work.get('name')}/{self.name}"
+        # TODO format the contentUrl
+        prefix, org, proj, creative_work_id, identifier  =self.id.split("/")
+
+        self.contentUrl = f"{org}/{proj}/{creative_work_id}/{self.name}"
 
         # TODO check success of operation
         insert_result = mongo_collection.insert_one(self.dict(by_alias=True))
@@ -124,7 +133,7 @@ class Download(FairscapeBaseModel, extra=Extra.allow):
                 data=Object,
                 length=-1,
                 part_size=10 * 1024 * 1024,
-                metadata={"identifier": self.id, "name": self.name}
+                #metadata={"identifier": self.id, "name": self.name}
             )
 
             # get the size of the file from the stats

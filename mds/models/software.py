@@ -5,6 +5,8 @@ from mds.models.fairscape_base import *
 from mds.models.compact.user import UserCompactView
 from mds.models.compact.computation import ComputationCompactView
 from mds.models.compact.download import DataDownloadCompactView
+from mds.models.compact.project import ProjectCompactView
+from mds.models.compact.organization import OrganizationCompactView
 
 
 class Software(FairscapeBaseModel):
@@ -15,6 +17,9 @@ class Software(FairscapeBaseModel):
     # citation: str
     distribution: Optional[List[DataDownloadCompactView]] = []
     usedBy: Optional[List[ComputationCompactView]] = []
+    sourceOrganization: Optional[OrganizationCompactView] = None
+    includedInDataCatalog: Optional[ProjectCompactView] = None
+
 
     class Config:
         extra = Extra.allow
