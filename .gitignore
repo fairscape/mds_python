@@ -1,6 +1,9 @@
 # sqlite casbin permissions
 casbin.db
 
+# music source code
+tests/music_pipeline/MuSIC/*
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
