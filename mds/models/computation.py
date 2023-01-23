@@ -39,11 +39,11 @@ class JobRequirements(BaseModel):
     mem: ResourceTuple
 
 
-
 class Computation(FairscapeBaseModel):
     context = {"@vocab": "https://schema.org/", "evi": "https://w3id.org/EVI#"}
     type = "evi:Computation"
     owner: UserCompactView
+    #author: Union[str, UserCompactView]
     #    author: UserCompactView
     dateCreated: Optional[datetime]
     dateFinished: Optional[datetime]
