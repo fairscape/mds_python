@@ -4,6 +4,11 @@ version: '3.1'
 
 services:
 
+  mds:
+    build: .
+    ports:
+    - 8080:8080
+
   mongo:
     image: mongo
     restart: always
