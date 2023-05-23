@@ -5,6 +5,7 @@ from pydantic import Extra
 from mds.models.compact.organization import OrganizationCompactView
 from mds.models.compact.software import SoftwareCompactView
 from mds.models.compact.dataset import DatasetCompactView
+from mds.models.compact.rocrate import ROCrateCompactView
 from mds.models.compact.computation import ComputationCompactView
 from mds.models.compact.project import ProjectCompactView
 from mds.models.compact.evidencegraph import EvidenceGraphCompactView
@@ -21,6 +22,7 @@ class User(FairscapeBaseModel, extra=Extra.allow):
     organizations: Optional[List[OrganizationCompactView]] = []
     projects: Optional[List[ProjectCompactView]] = []
     datasets: Optional[List[DatasetCompactView]] = []
+    rocrates: Optional[List[ROCrateCompactView]] = []
     software: Optional[List[SoftwareCompactView]] = []
     computations: Optional[List[ComputationCompactView]] = []
     evidencegraphs: Optional[List[EvidenceGraphCompactView]] = []
@@ -31,6 +33,7 @@ class User(FairscapeBaseModel, extra=Extra.allow):
         # creating a new user we must set their owned objects to none
         self.projects = []
         self.datasets = []
+        self.rocrates = []
         self.software = []
         self.computations = []
         self.evidencegraphs = []
