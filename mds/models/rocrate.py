@@ -1,199 +1,160 @@
+from zipfile import ZipFile
+import zipfile
 from bson import SON
-from pydantic import Extra
-from typing import Optional, List, Union
+from pydantic import (
+    BaseModel,
+    constr,
+    AnyUrl
+)
+import io
+from io import BytesIO
+import boto3
+from botocore.client import Config
+
+from typing import Optional, Union, Dict, List
 from datetime import datetime
 import pymongo
 
 from mds.models.fairscape_base import *
 from mds.models.compact import *
+
+from mds.fairscape_models.datasetcontainer import DatasetContainer
+from mds.fairscape_models.dataset import Dataset
+from mds.fairscape_models.software import Software
+from mds.fairscape_models.computation import Computation
+
 from mds.utilities.operation_status import OperationStatus
-from mds.database.config import MONGO_DATABASE, MONGO_COLLECTION
+
+from mds.database.config import MINIO_BUCKET
 
 
-class ROCrate(FairscapeBaseModel):
-    context = {"@vocab": "https://schema.org/", "evi": "https://w3id.org/EVI#"}
-    type = "evi:ROCrate"
-    owner: UserCompactView
-    distribution: Optional[List[DataDownloadCompactView]] = []
-    includedInDataCatalog: Optional[ProjectCompactView] = None
-    sourceOrganization: Optional[OrganizationCompactView] = None
-    author: Optional[Union[str, UserCompactView]] = ""
-    dateCreated: Optional[datetime]
-    dateModified: Optional[datetime]
-    activity: Optional[List[ComputationCompactView]] = []    
-    acl: Optional[dict]
-    # graph: str
+class ROCrate(BaseModel):
+    guid: str
+    context: Union[str, Dict[str,str]] = {
+                "@vocab": "https://schema.org/",
+                "evi": "https://w3id.org/EVI#"
+            }
+    metadataType: str = "https://w3id.org/EVI#ROCrate"
+    name: constr(max_length=64)
+    metadataGraph: List[Union[Dataset, Software, Computation, DatasetContainer]]
 
     class Config:
-        extra = Extra.allow
-
-    def create(self, MongoClient: pymongo.MongoClient) -> OperationStatus:
-
-        # TODO initialize attributes of ROCrate
-        self.distribution = []
-        # self.dateCreated = ""
-        # self.dateModified = ""
-        # self.activity = []
-
-        MongoDatabase = MongoClient[MONGO_DATABASE]
-        MongoCollection = MongoDatabase[MONGO_COLLECTION]
-
-        # start a single session
-        session = MongoClient.start_session()
-
-        # check that rocrate does not already exist
-        if MongoCollection.find_one({"@id": self.id}, session=session) is not None:
-            session.end_session()
-            return OperationStatus(False, "rocrate already exists", 400)
-
-
-
-        # check that owner exists
-        if MongoCollection.find_one({"@id": self.owner.id}, session=session) is None:
-            session.end_session()
-            return OperationStatus(False, "owner does not exist", 404)
-
-        # embeded bson documents to enable Mongo queries
-        rocrate_dict = self.dict(by_alias=True)
-
-        # embeded bson document for owner
-        rocrate_dict["owner"] = SON([
-            (key, value) for key, value in rocrate_dict["owner"].items()
-            ])
-
-
-        # update operations for the owner user of the rocrate
-        add_rocrate_update = {
-            "$push": {"rocrates": SON([("@id", self.id), ("@type", "evi:ROCrate"), ("name", self.name)])}
+        allow_population_by_field_name = True
+        validate_assignment = True    
+        fields={
+            "context": {
+                "title": "context",
+                "alias": "@context"
+            },
+            "guid": {
+                "title": "guid",
+                "alias": "@id"
+            },
+            "metadataType": {
+                "title": "metadataType",
+                "alias": "@type"
+            },
+            "name": {
+                "title": "name"
+            },
+            "metadataGraph": {
+                "title": "metadataGraph",
+                "alias": "@graph"
+            }
         }
 
-        undo = []
-
-        # use a session and transaction to enable rollbacks on errors 
-        insert_result = MongoCollection.insert_one(
-            rocrate_dict, session=session)
-
-
-        # check the insert one results
-        if insert_result.inserted_id is None:
-            return OperationStatus(False, f"error inserting document: {str(rocrate_dict)}", 500)
-
-        # update owner model to have listed the rocrate
-        update_result = MongoCollection.update_one(
-            {"@id": self.owner.id}, 
-            add_rocrate_update, 
-            session=session
-            )
-
-        # check that the update operation succeeded
-        if update_result.modified_count != 1:
-            MongoCollection.delete_one({"@id": self.id})
-            return OperationStatus(False, f"error updating user on rocrate create", 500)
- 
-        return OperationStatus(True, "", 201)
     
-
-    def read(self, MongoCollection: pymongo.collection.Collection) -> OperationStatus:
-        return super().read(MongoCollection)
-
-    def update(self, MongoCollection: pymongo.collection.Collection) -> OperationStatus:
-
-        # TODO e.g. when rocrate is updated, it should be reflected in its owners profile
-        return super().update(MongoCollection)
+    #_validate_guid = validator('id', allow_reuse=True)(validate_ark)
 
 
-    def delete(self, MongoClient: pymongo.MongoClient) -> OperationStatus:
-        """Delete the rocrate. Update each user who is an owner of the rocrate.
-
-        Args:
-            MongoCollection (pymongo.collection.Collection): _description_
-
-        Returns:
-            OperationStatus: _description_
+    
+    
+    def rocrate_transfer(self, MinioClient, Object) -> OperationStatus:
+        """
+        uploads the file and ammends the dataDownload metadata and dataset metadata
         """
 
-        MongoDatabase = MongoClient[MONGO_DATABASE]
-        MongoCollection = MongoDatabase[MONGO_COLLECTION]
-        session = MongoClient.start_session()
 
-        # check that record exists
-        # also, if successfull, will unpack the data we need to build the update operation
-        read_status = self.read(MongoCollection)
+        # TODO format the contentUrl
+        # prefix, org, proj, creative_work_id, identifier  =self.id.split("/")
+        prefix, org, proj, creative_work_id  =self.guid.split("/")
 
-        if not read_status.success:
-            if read_status.status_code == 404:
-                return OperationStatus(False, "rocrate not found", 404)
-            else:
-                return read_status
+        
+        
+        contentUrl = f"{org}/{proj}/{creative_work_id}/{self.name}"
+
+        
 
 
-        # create a bulk write operation
-        # to remove a document from a list
-        pull_operation = {"$pull": {"rocrates": {"@id": self.id}}}
 
-        with session.start_transaction() as transaction:
+        datasets = list(filter(
+            lambda x: x.metadataType == "https://w3id.org/EVI#Dataset", self.metadataGraph
+        ))
+        
+                    
+        print("datasets: ", datasets)
+
+        for i in datasets:
+            print(i.contentUrl)
 
 
-            #  update the owner to remove the rocrate
-            update_owner = MongoCollection.update_one(
-                {"@id": self.owner.id}, pull_operation, session=session)
+        
+        
 
-            if update_owner.modified_count != 1:
-                # cancel transaction
-                session.abort_transaction()
-                return OperationStatus(False, "", 500)
 
-            # update the project to remove the rocrate
-            if self.includedInDataCatalog is not None:
-                update_project = MongoCollection.update_one(
-                    {"@id": self.includedInDataCatalog}, 
-                    pull_operation, 
-                    session=session
-                    )
 
-                if update_project.modified_count != 1:
-                    # cancel transaction
-                    session.abort_transaction()
-                    return OperationStatus(False, "", 500)
 
-            # update the organization to remove the rocrate
-            if self.sourceOrganization is not None:
-                update_organization = MongoCollection.update_one(
-                    {"@id": self.sourceOrganization},
-                    pull_operation, 
-                    session=session
-                    )
+        
+        # TODO run sha256 as a background task
+        # create sha256 for object
 
-                if update_organization.modified_count != 1:
-                    # cancel transaction
-                    session.abort_transaction()
-                    return OperationStatus(False, "", 500)
+        # upload object to minio
+        try:
+            upload_operation = MinioClient.put_object(
+                bucket_name=MINIO_BUCKET,
+                object_name=contentUrl,
+                data=Object,
+                length=-1,
+                part_size=10 * 1024 * 1024,
+                #metadata={"identifier": self.id, "name": self.name}
+            )
 
-            # TODO delete all distributions 
-            if len(self.distribution) != 0:
-                pass
+            # get the size of the file from the stats
+            result_stats = MinioClient.stat_object(
+                bucket_name=MINIO_BUCKET,
+                object_name=contentUrl
+            )
+
             
+        #except Exception as e:
+        #    return OperationStatus(False, f"exception uploading: {str(e)}", 500)
 
-            # delete the distribution
-            delete_rocrate = pymongo.delete_one({"@id": self.id})
-            
-            if delete_rocrate.deleted_count != 1:
+        #return OperationStatus(True, "", 201)
+    
 
-                # cancel transaction
-                session.abort_transaction()
-                return OperationStatus(False, "", 500)
+        #try:
+            # Initialize Minio clients
+            src_client = boto3.client('s3', endpoint_url='http://localhost:9000', aws_access_key_id='testroot', aws_secret_access_key='testroot', verify=False)
+            dst_client = boto3.client('s3', endpoint_url='http://localhost:9000', aws_access_key_id='testroot', aws_secret_access_key='testroot', verify=False)
 
-            session.commit_transaction()
+            # Define source and destination buckets and key paths
+            src_bucket = MINIO_BUCKET
+            dst_bucket = 'uncompressed'
+            zip_key = contentUrl
 
+            # Download zip file from source bucket
+            zip_obj = src_client.get_object(Bucket=src_bucket, Key=zip_key)
+            zip_content = io.BytesIO(zip_obj['Body'].read())
 
-        return OperationStatus(True, "", 200)
+            # Unzip and upload each file to destination bucket
+            zipfile_obj = zipfile.ZipFile(zip_content)
+            for file in zipfile_obj.namelist():                
+                file_content = zipfile_obj.read(file)
+                dst_client.put_object(Bucket=dst_bucket, Key=file, Body=file_content)
+ 
+        except Exception as e:
+            return OperationStatus(False, f"exception uploading: {str(e)}", 500)
 
+        return OperationStatus(True, "", 201)
+   
 
-
-def list_rocrate(mongo_collection: pymongo.collection.Collection):
-    cursor = mongo_collection.find(
-        filter={"@type": "evi:ROCrate"},
-        projection={"_id": False}
-    )
-    return {"rocrates": [{"@id": rocrate.get("@id"), "@type": "evi:ROCrate", "name": rocrate.get("name")} for rocrate in
-                                cursor]}
