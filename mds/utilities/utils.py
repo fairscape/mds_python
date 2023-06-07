@@ -1,5 +1,7 @@
 import re
 from pathlib import Path
+from zipfile import ZipFile
+import json
 
 
 def validate_ark(guid: str) -> str:
@@ -70,3 +72,26 @@ def write_container_log(message: str):
     with open("custom-container-log.txt", mode="a") as container_log_file:
         # content = f"notification for {email}: {message}"
         container_log_file.write(message + '\n')
+
+
+def get_file_from_zip(target_file: str, archive: ZipFile):
+    """Return contents of the target file from a zip file
+
+    Args:
+        target_file (str): the file to extract
+        archive (ZipFile): zipped (.zip) file
+    """
+    
+    # Open the zip file for reading
+    with ZipFile(archive, 'r') as zip_file:
+        # list all files in the archive
+        file_list = zip_file.namelist()
+
+        for file in file_list:
+            if file.endswith(target_file):
+                print(file)
+                # TODO: read contents of the target file 
+                #with zip_file.open(file, 'r') as json_file:
+                    #data_read = json_file.read()
+                    #target_file_data = json.loads(data_read.decode("utf-8"))             
+                
