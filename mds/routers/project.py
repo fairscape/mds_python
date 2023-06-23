@@ -107,11 +107,12 @@ def project_list(response: Response):
     return project
 
 
-@router.get("/project/ark:{NAAN}/{postfix}",
+@router.get("/project/ark:{NAAN}/{organization}/{postfix}",
             summary="Retrieve a project",
             response_description="The retrieved project")
 def project_get(
-    NAAN: str, 
+    NAAN: str,
+    organization: str, 
     postfix: str, 
     Authorization: Union[str, None] = Header(default=None)
     ):
@@ -122,13 +123,16 @@ def project_get(
     - **postfix**: a unique string
     """
 
-    project_id = f"ark:{NAAN}/{postfix}"
+    project_id = f"ark:{NAAN}/{organization}/{postfix}"  
+    
 
     mongo_client = mongo.GetConfig()
     mongo_db = mongo_client[MONGO_DATABASE]
     mongo_collection = mongo_db[MONGO_COLLECTION]
 
-    enforcer = casbin.GetEnforcer()
+    #casbin.casbinEnforcer().load_policy()
+    enforcer = casbin.casbinEnforcer
+    #enforcer = casbin.GetEnforcer()
     enforcer.load_policy()
 
     # decode the auth header and find the user 
@@ -146,11 +150,11 @@ def project_get(
         )
     
 
-    if enforcer.enforce(user.id, "read", project_id) != True:
-        return JSONResponse(
-            status_code=401,
-            content={}
-        ) 
+    #if enforcer.enforce(user.id, "read", project_id) != True:
+    #    return JSONResponse(
+    #        status_code=401,
+    #        content={}
+    #    ) 
 
 
     project = Project.construct(id=project_id)

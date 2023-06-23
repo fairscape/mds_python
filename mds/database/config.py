@@ -20,5 +20,6 @@ if MONGO_CONNECTION_STRING is None:
 
 MINIO_URI = os.environ.get("MINIO_URI", "localhost:9000")
 MINIO_BUCKET = os.environ.get("MINIO_BUCKET", "test")
+MINIO_ROCRATE_BUCKET = os.environ.get("MINIO_ROCRATE_BUCKET", "crate-contents")
 MINIO_USER = os.environ.get("MINIO_ACCESS_KEY", "testroot")
 MINIO_PASS = os.environ.get("MINIO_SECRET_KEY" ,"testroot")

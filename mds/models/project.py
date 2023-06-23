@@ -8,6 +8,7 @@ from mds.models.compact.dataset import DatasetCompactView
 from mds.models.compact.software import SoftwareCompactView
 from mds.models.compact.evidencegraph import EvidenceGraphCompactView
 from mds.models.compact.organization import OrganizationCompactView
+from mds.models.compact.rocrate import ROCrateCompactView
 
 
 class Project(FairscapeBaseModel):
@@ -20,6 +21,7 @@ class Project(FairscapeBaseModel):
     computations: Optional[List[ComputationCompactView]]
     software: Optional[List[SoftwareCompactView]]
     evidencegraphs: Optional[List[EvidenceGraphCompactView]]
+    rocrates: Optional[List[ROCrateCompactView]]
 
     class Config:
         extra = Extra.allow
