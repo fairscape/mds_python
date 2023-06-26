@@ -1,4 +1,5 @@
 from typing import Optional, Union, Dict, List
+from mds.fairscape_models.base import FairscapeBaseModel
 from pydantic import (
     BaseModel,
     constr,
@@ -7,13 +8,7 @@ from pydantic import (
 
 from datetime import datetime
 
-class Dataset(BaseModel):
-    guid: str
-    context: Union[str, Dict[str,str]] = {
-                "@vocab": "https://schema.org/",
-                "evi": "https://w3id.org/EVI#"
-            }    
-    name: constr(max_length=64)
+class Dataset(FairscapeBaseModel):
     metadataType: str = "https://w3id.org/EVI#Dataset"
     author: constr(max_length=64)
     datePublished: str
@@ -29,22 +24,7 @@ class Dataset(BaseModel):
     contentUrl: Optional[str]
 
     class Config:
-        fields={
-            "context": {
-                "title": "context",
-                "alias": "@context"
-            },
-            "guid": {
-                "title": "guid",
-                "alias": "@id"
-            },
-            "metadataType": {
-                "title": "metadataType",
-                "alias": "@type"
-            },
-            "name": {
-                "title": "name"
-            },
+        fields={            
             "fileFormat": {
                 "title": "fileFormat",
                 "alias": "format"

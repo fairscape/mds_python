@@ -41,7 +41,9 @@ def upload(file: UploadFile = File(...)):
                 )
 
     crate = ROCrate(**json.loads(rocrate_metadata))
-                     
+    #print(crate)
+    #print(crate.dict(by_alias=True))
+
     crate.validate_rocrate_objects(mongo_client, minio_client, file.file)
                     
                 
@@ -100,7 +102,7 @@ def rocrate_download(
     # get the connection to the databases
     minio_client = minio.GetMinioConfig()
 
-    # read_status = rocrate.read(mongo_client)
+    #read_status = rocrate.read(mongo_client)
 
     projection={'_id': False}
     
@@ -134,7 +136,9 @@ def rocrate_download(
                             })
 
                         with minio_client.get_object(bucket, obj_path) as minio_object:
-                            return StreamingResponse(minio_object, media_type="application/zip")
+                            return StreamingResponse(minio_object,
+                                                     media_type="application/x-zip-compressed", 
+                                                     headers = { "Content-Disposition": f"attachment; filename=rocrate.zip"})
     except Exception as e:
         #return {"message": e.messaage}
         return JSONResponse(
@@ -145,7 +149,7 @@ def rocrate_download(
                 })
 
 
-    crate_model = crate_metadata
+    #crate_model = crate_metadata
 
     """ if read_status.success != True:
 

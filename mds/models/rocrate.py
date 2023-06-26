@@ -1,4 +1,5 @@
 from zipfile import ZipFile
+from mds.fairscape_models.base import FairscapeBaseModel
 import zipfile
 from bson import SON
 from pydantic import (
@@ -17,8 +18,6 @@ from typing import Optional, Union, Dict, List
 from datetime import datetime
 import pymongo
 
-from mds.models.fairscape_base import *
-from mds.models.compact import *
 
 from mds.fairscape_models.datasetcontainer import DatasetContainer
 from mds.fairscape_models.dataset import Dataset
@@ -34,12 +33,7 @@ from mds.database.config import MINIO_BUCKET, MINIO_ROCRATE_BUCKET, MONGO_DATABA
     
 
 
-class ROCrate(BaseModel):
-    guid: str
-    context: Union[str, Dict[str,str]] = {
-                "@vocab": "https://schema.org/",
-                "evi": "https://w3id.org/EVI#"
-            }
+class ROCrate(FairscapeBaseModel):    
     metadataType: str = "Dataset"
     name: constr(max_length=64)
     metadataGraph: List[Union[Dataset, Software, Computation, DatasetContainer]]
@@ -49,21 +43,10 @@ class ROCrate(BaseModel):
     class Config:
         allow_population_by_field_name = True
         validate_assignment = True    
-        fields={
-            "context": {
-                "title": "context",
-                "alias": "@context"
-            },
-            "guid": {
-                "title": "guid",
-                "alias": "@id"
-            },
+        fields={                        
             "metadataType": {
                 "title": "metadataType",
                 "alias": "@type"
-            },
-            "name": {
-                "title": "name"
             },
             "metadataGraph": {
                 "title": "metadataGraph",
@@ -83,7 +66,7 @@ class ROCrate(BaseModel):
         # check that the rocrate doesn't already exist
         #if mongo_collection.find_one({"@id": self.guid}) != None:
         #    return OperationStatus(False, f"ROCrate {self.guid} already exists", 404)
-        
+        print(self)
         prefix, org, proj, creative_work_id = self.guid.split("/")
         
         compressed_object_path = f"{org}/{proj}/{creative_work_id}/{self.name}"
@@ -135,6 +118,11 @@ class ROCrate(BaseModel):
         # insert the metadata onto the mongo metadata store
         insert_result = mongo_collection.insert_one(self.dict(by_alias=True))
 
+        # TODO: insert distribution instead of update
+        # self['distribution'] = {}
+
+
+
         update_result = mongo_collection.update_one(
             {"@id": self.guid},
             {"$addToSet": {
@@ -167,7 +155,7 @@ class ROCrate(BaseModel):
                 projection={'_id': False}
             )
             print("SELF: ", self)
-            #print("QUERY: ", query)
+            print("QUERY: ", query)
             if query:
                 crate = ROCrate(**query)
                 print(crate.name)
