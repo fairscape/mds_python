@@ -230,8 +230,6 @@ class ROCrate(FairscapeBaseModel):
             return OperationStatus(False, f"Error: {str(e)}", 500)
 
 
-
-
 def unzip_and_upload(MinioClient, Object) -> OperationStatus:
     """Accepts zipped ROCrate, unzip and upload onto MinIO.
 
@@ -283,7 +281,7 @@ def remove_unzipped_crate(MinioClient, Object) -> OperationStatus:
 
 
 
-def get_metadata_from_crate(minio_client, Object, crate_file_name):
+def get_metadata_from_crate(minio_client, crate_file_name):
     """Extract metadata from the unzipped ROCrate onto MinIO
 
     Args:
@@ -295,13 +293,24 @@ def get_metadata_from_crate(minio_client, Object, crate_file_name):
         _type_: content from the crate_file_name
     """
     
-    with zipfile.ZipFile(Object, "r") as zip_ref: 
+    # List all objects in the bucket
+    objects = minio_client.list_objects(MINIO_ROCRATE_BUCKET, recursive=True)
+
+    # Iterate through the objects and print their names
+    for obj in objects:
+        #print("Object name: ", obj.object_name)
+        if obj.object_name.endswith(crate_file_name): 
+                content = minio_client.get_object(MINIO_ROCRATE_BUCKET, obj.object_name).read()
+                #print(content)
+                return content
+
+    """ with zipfile.ZipFile(Object, "r") as zip_ref: 
         file_names = zip_ref.namelist() 
             
         for file_name in file_names: 
             if file_name.endswith(crate_file_name): 
                 return minio_client.get_object(MINIO_ROCRATE_BUCKET, file_name).read()
-            
+     """        
 
 
 def list_rocrates(MongoClient: pymongo.MongoClient):

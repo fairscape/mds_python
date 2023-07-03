@@ -17,14 +17,14 @@ router = APIRouter()
 
 
 @router.post("/rocrate/upload",
-             summary="Uncompress and upload ROCrate to the object store",
+             summary="Unzip the ROCrate and upload to object store",
              response_description="The transferred rocrate")
 def upload(file: UploadFile = File(...)):
     
     mongo_client = mongo.GetConfig()
     minio_client = minio.GetMinioConfig()    
     
-    # Upload the unzipped crate
+    # Unzip the ROCrate and upload to MinIO
     upload_status = unzip_and_upload(         
         minio_client, 
         file.file 
@@ -41,7 +41,7 @@ def upload(file: UploadFile = File(...)):
     RO_CRATE_METADATA_FILE_NAME = 'ro-crate-metadata.json'
     
     # Get metadata from the unzipped crate
-    rocrate_metadata = get_metadata_from_crate(minio_client, file.file, RO_CRATE_METADATA_FILE_NAME)
+    rocrate_metadata = get_metadata_from_crate(minio_client, RO_CRATE_METADATA_FILE_NAME)
     
     if not rocrate_metadata:
         return JSONResponse(
