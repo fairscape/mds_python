@@ -12,3 +12,4 @@ kubernetes
 pyjwt
 requests-toolbelt
 celery[redis]
+boto3

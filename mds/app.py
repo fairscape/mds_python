@@ -8,6 +8,7 @@ from mds.routers.user import router as UserRouter
 from mds.routers.group import router as GroupRouter
 from mds.routers.software import router as SoftwareRouter
 from mds.routers.dataset import router as DatasetRouter
+from mds.routers.rocrate import router as ROCrateRouter
 from mds.routers.computation import router as ComputationRouter
 from mds.routers.project import router as ProjectRouter
 from mds.routers.organization import router as OrganizationRouter
@@ -37,6 +38,10 @@ tags_metadata = [
     {
         "name": "dataset",
         "description": "Operations with dataset.",
+    },
+    {
+        "name": "rocrate",
+        "description": "Operations with rocrate.",
     },
     {
         "name": "computation",
@@ -109,6 +114,7 @@ app.include_router(UserRouter, tags=["user"])
 app.include_router(GroupRouter, tags=["group"])
 app.include_router(SoftwareRouter, tags=["software"])
 app.include_router(DatasetRouter, tags=["dataset"])
+app.include_router(ROCrateRouter, tags=["rocrate"])
 app.include_router(ComputationRouter, tags=["computation"])
 app.include_router(ProjectRouter, tags=["project"])
 app.include_router(OrganizationRouter, tags=["organization"])
