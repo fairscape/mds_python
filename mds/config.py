@@ -3,25 +3,77 @@ from pydantic import (
     BaseSettings,
     BaseModel
 )
-from pathlib import Path
-
+from typing import (
+    Optional
+)
+import os
+import pathlib
 from urllib.parse import quote_plus
 from pymongo import MongoClient
 import minio
+from functools import lru_cache
+
+import casbin
+import casbin_sqlalchemy_adapter
+
+
+@lru_cache()
+def get_mongo():
+    return MongoConfig(
+        host= os.environ.get("MONGO_HOST", "localhost"),
+        port= os.environ.get("MONGO_PORT", "27017"),
+        user= os.environ.get("MONGO_ACCESS_KEY", "root"),
+        password= os.environ.get("MONGO_SECRET_KEY", "rootpass"),
+        db= os.environ.get("MONGO_DATABASE", "fairscape"),
+        collection= os.environ.get("MONGO_COLLECTION", "mds")
+    )
+
+
+@lru_cache()
+def get_minio():
+    return MinioConfig(
+        uri= os.environ.get("MINIO_URI"),
+        user= os.environ.get("MINIO_BUCKET"),
+        password= os.environ.get("MINIO_ACCESS_KEY"),
+        default_bucket= os.environ.get("MINIO_SECRET_KEY"), 
+        secure= bool(os.environ.get("MINIO_SECURE", False)),
+    )
+
+
+@lru_cache()
+def get_casbin():
+    return CasbinConfig(
+        policy_path= pathlib.Path(
+            os.environ.get("CASBIN_POLICY", "casbin_policy.db")
+        ),
+        model_path= pathlib.Path(
+            os.environ.get("CASBIN_MODEL", "./tests/restful_casbin.conf")
+        )
+    )
+ 
+
+
+#MongoDep = Annotated[pymongo.MongoClient, Depends(common_parameters)]
+#CasbinDep = Annotated[casbin.Enforcer, Depends(get_casbin)]
+#MinioDep = Annotated[minio.MinioClient, Depends(get_minio)]
 
 
 class MongoConfig(BaseModel):
-    host: str 
-    port: str 
-    user: str 
-    password: str 
-    db: str 
-    collection: str 
+    host: Optional[str] = "localhost"
+    port: Optional[str] = "27017"
+    user: Optional[str] = "user"
+    password: Optional[str] = "pass"
+    db: Optional[str] = "fairscape"
+    collection: Optional[str] = "mds"
 
-    def CreateClient(self) -> MongoClient:
+    class Config:
+        validate_assignment=True
 
-        connection_string = f"mongodb://{quote_plus(self.user)}:" +
-            f"{quote_plus(self.password)}@{self.host}:{self.port}/{self.db}"
+
+    def CreateClient(self):
+
+        #connection_string = f"mongodb://{quote_plus(self.user)}:{quote_plus(self.password)}@{self.host}:{self.port}/{self.db}"
+        connection_string = f"mongodb://{quote_plus(self.user)}:{quote_plus(self.password)}@{self.host}:{self.port}"
         return MongoClient(connection_string)
 
 
@@ -46,14 +98,16 @@ class ComputeBackendEnum(str, Enum):
     kubernetes = "kubernetes"
 
 
-class K8sComputeConfig(BaseModel):
-    redis: RedisConfig
-
 class RedisConfig(BaseModel):
     port: int
     uri: str
     broker_url: Optional[str]
     result_backend: Optional[str]
+
+
+class K8sComputeConfig(BaseModel):
+    redis: RedisConfig
+
 
 
 class DockerConfig(BaseModel):
@@ -65,14 +119,16 @@ class CasbinAdapterEnum(str, Enum):
     """
     sqlite = "sqlite"
 
+
 class CasbinConfig(BaseModel):
-    config_path: Path
-    policy_path: Path 
+    model_path: pathlib.Path
+    policy_path: pathlib.Path 
     #backend: CasbinAdapterEnum
 
-    def CreateClient(self)
+    def CreateClient(self):
         adapter = casbin_sqlalchemy_adapter.Adapter(f'sqlite:///{self.policy_path}')
-        casbinEnforcer = casbin.Enforcer('./mds/database/default_model.conf', adapter)
+        casbinEnforcer = casbin.Enforcer(str(self.model_path), adapter)
+        return casbinEnforcer
 
 
 class FairscapeConfig(BaseSettings):
@@ -97,4 +153,5 @@ class FairscapeConfig(BaseSettings):
         app.conf.result_backend = self.compute.redis.result_backend
 
         return celery_app
+
 
