@@ -90,8 +90,6 @@ def user_list():
 
     users = list_users(mongo_collection)
 
-    mongo_client.close()
-
     return users
 
 
@@ -105,9 +103,9 @@ async def user_get(NAAN: str, postfix: str):
     - **NAAN**: Name Assigning Authority Number which uniquely identifies an organization e.g. 12345
     - **postfix**: a unique string
     """
-    mongo_client = mongo.GetConfig()
-    mongo_db = mongo_client[MONGO_DATABASE]
-    mongo_collection = mongo_db[MONGO_COLLECTION]
+
+    mongo_db = mongo_client[mongo_config.db]
+    mongo_collection = mongo_db[mongo_config.collection]
 
     user_id = f"ark:{NAAN}/{postfix}"
 
@@ -115,25 +113,25 @@ async def user_get(NAAN: str, postfix: str):
 
     read_status = user.read(mongo_collection)
 
-    mongo_client.close()
-
     if read_status.success:
         return user
     else:
-        return JSONResponse(status_code=read_status.status_code, content={"error": read_status.message})
+        return JSONResponse(
+            status_code=read_status.status_code, 
+            content={
+                "error": read_status.message
+            }
+        )
 
 
 @router.put("/user",
             summary="Update a user",
             response_description="The updated user")
-async def user_update(user: User):
-    mongo_client = mongo.GetConfig()
-    mongo_db = mongo_client[MONGO_DATABASE]
-    mongo_collection = mongo_db[MONGO_COLLECTION]
+def user_update(user: User):
+    mongo_db = mongo_client[mongo_config.db]
+    mongo_collection = mongo_db[mongo_config.collection]
 
     update_status = user.update(mongo_collection)
-
-    mongo_client.close()
 
     if update_status.success:
         return JSONResponse(
@@ -151,7 +149,7 @@ async def user_update(user: User):
 @router.delete("/user/ark:{NAAN}/{postfix}",
                summary="Delete a user",
                response_description="The deleted user")
-async def user_delete(NAAN: str, postfix: str):
+def user_delete(NAAN: str, postfix: str):
     """
     Deletes a user based on a given identifier:
 
@@ -160,22 +158,23 @@ async def user_delete(NAAN: str, postfix: str):
     """
     user_id = f"ark:{NAAN}/{postfix}"
 
-    mongo_client = mongo.GetConfig()
-    mongo_db = mongo_client[MONGO_DATABASE]
-    mongo_collection = mongo_db[MONGO_COLLECTION]
+    mongo_db = mongo_client[mongo_config.db]
+    mongo_collection = mongo_db[mongo_config.collection]
 
     user = User.construct(id=user_id)
 
-    # TODO deal with status errors
-
     delete_status = user.delete(mongo_collection)
-
-    mongo_client.close()
 
     if delete_status.success:
         return JSONResponse(
             status_code=200,
-            content={"deleted": {"@id": user_id, "@type": "Person", "name": user.name}}
+            content={
+                "deleted": {
+                    "@id": user_id, 
+                    "@type": "Person", 
+                    "name": user.name
+                }
+            }
         )
     else:
         return JSONResponse(
