@@ -7,10 +7,6 @@ from fastapi import (
 from fastapi.responses import JSONResponse
 from mds.models.user import User, list_users
 from mds.database import mongo
-from mds.database.config import (
-    MONGO_DATABASE, 
-    MONGO_COLLECTION
-)
 from mds.config import (
     get_minio,
     get_casbin,
