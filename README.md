@@ -1,43 +1,5 @@
 # Python Metadata Service
 
-## TODO
+The Metadata Service (MDS) of the FAIRSCAPE application, is the core backend service responsible for metadata managment. MDS is a RESTfull API implemented in python with the fastAPI framework. This service provides persitant globally unique identifiers (guids) as ARKS for many types of digital objects and maintains provenance metadata during the data science life-cycle. 
 
-[ ] Implement all backend classes
-- [ ] Computation
-	- [ ] Implemented
-	- [ ] Tested
-- [ ] Dataset
-	- [ ] Implemented
-	- [ ] Tested
-- [ ] EvidenceGraph
-	- [ ] Implemented
-	- [ ] Tested
-- [ ] Group
-	- [ ] Implemented
-	- [ ] Tested
-- [ ] Organization
-	- [ ] Implemented
-	- [ ] Tested
-- [ ] Project
-	- [ ] Implemented
-	- [ ] Tested
-- [ ] Software
-	- [ ] Implemented
-	- [ ] Tested
-- [ ] User
-	- [ ] Implemented
-	- [ ] Tested
-
-
-[ ] Implement Transfer Functionality
-
-[ ] Basic Authorization Implementation
-
-[ ] Implement Compute Functionality
-
-[ ] Frontend Functionality
-- [ ] Resolve Identifier
-- [ ] Login
-- [ ] Dashboard
-- [ ] Create Organization
-- [ ] Create Project
+As a generalist repository MDS supports a core metadata requirement derived from schema.org, but can be extended with any ontology annotation in JSON-LD.
