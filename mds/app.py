@@ -21,6 +21,7 @@ from mds.web.routers.signup import router as WebSignupRouter
 from mds.web.routers.home import router as WebHomeRouter
 from mds.routers.auth import router as AuthHandlerRouter
 
+
 tags_metadata = [
     {
         "name": "user",
@@ -72,21 +73,23 @@ tags_metadata = [
 
 app = FastAPI(
     title="Fairscape Metadata Service (MDS)",
-    description="[Write a description]",
-    version="0.0.1",
+    description="",
+    version="0.1.0",
     #terms_of_service="http://example.com/terms/",
     contact={
-        "name": "ENTER CONTACT NAME",
+        "name": "Max Levinson",
         "email": "mal8ch@virginia.edu",
     },
     license_info={
         "name": "Apache 2.0",
         "url": "https://www.apache.org/licenses/LICENSE-2.0.html",
     },
-    openapi_tags=tags_metadata)
+    openapi_tags=tags_metadata
+)
 
+
+# mounting templates
 app.mount("/static", StaticFiles(directory="static"), name="static")
-
 templates = Jinja2Templates(directory="templates")
 
 

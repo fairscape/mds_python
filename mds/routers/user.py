@@ -1,16 +1,41 @@
-from fastapi import APIRouter
+from typing import Annotated
+
+from fastapi import (
+    APIRouter,
+    Header
+)
 from fastapi.responses import JSONResponse
 from mds.models.user import User, list_users
 from mds.database import mongo
-from mds.database.config import MONGO_DATABASE, MONGO_COLLECTION
+from mds.database.config import (
+    MONGO_DATABASE, 
+    MONGO_COLLECTION
+)
+from mds.config import (
+    get_minio,
+    get_casbin,
+    get_mongo,
+    MongoConfig,
+    CasbinConfig
+) 
+
+import mds.auth.casbin
+
 
 router = APIRouter()
+
+mongo_config = get_mongo()
+mongo_client = mongo_config.CreateClient()
+
+casbin_config = get_casbin()
+casbin_enforcer = casbin_config.CreateClient()
+casbin_enforcer.load_policy()
 
 
 @router.post('/user',
              summary="Create a user",
              response_description="The created user")
-async def user_create(user: User):
+def user_create(user: User):
     """
     Create a user with the following properties:
 
@@ -20,18 +45,33 @@ async def user_create(user: User):
     - **email**: an email
     - **password**: a password
     """
-    mongo_client = mongo.GetConfig()
-    mongo_db = mongo_client[MONGO_DATABASE]
-    mongo_collection = mongo_db[MONGO_COLLECTION]
+
+    mongo_db = mongo_client[mongo_config.db]
+    mongo_collection = mongo_db[mongo_config.collection]
 
     create_status = user.create(mongo_collection)
 
-    mongo_client.close()
 
     if create_status.success:
+
+        # create permissions for casbin
+        mds.auth.casbin.createUser(
+            casbin_enforcer,
+            user.email,
+            user.guid
+        )
+        casbin_enforcer.save_policy()
+        
+
         return JSONResponse(
             status_code=201,
-            content={'created': {'@id': user.id, '@type': 'Person', 'name': user.name}}
+            content={
+                'created': {
+                    '@id': user.id, 
+                    '@type': 'Person', 
+                    'name': user.name
+                }
+            }
         )
     else:
         return JSONResponse(
@@ -43,10 +83,10 @@ async def user_create(user: User):
 @router.get('/user', status_code=200,
             summary="List all users",
             response_description="Retrieved list of users")
-async def user_list():
-    mongo_client = mongo.GetConfig()
-    mongo_db = mongo_client[MONGO_DATABASE]
-    mongo_collection = mongo_db[MONGO_COLLECTION]
+def user_list():
+
+    mongo_db = mongo_client[mongo_config.db]
+    mongo_collection = mongo_db[mongo_config.collection]
 
     users = list_users(mongo_collection)
 

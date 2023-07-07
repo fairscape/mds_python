@@ -1,5 +1,6 @@
 # sqlite casbin permissions
 casbin.db
+casbin_policy.db
 
 # music source code
 tests/music_pipeline/MuSIC
