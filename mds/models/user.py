@@ -14,6 +14,33 @@ from mds.utilities.operation_status import OperationStatus
 from mds.utilities.utils import validate_email
 
 
+def getUserByID():
+    pass
+
+def updateUser():
+    pass
+
+def listUsers(mongo_collection: pymongo.collection.Collection):
+    
+    pass
+
+
+def deleteUserByID(
+    mongo_collection: pymongo.collection.Collection, 
+    user_id: str
+    )-> dict:
+    ''' Delete a user by setting their account status to deactivated
+
+    - TODO Preserves all their metadata.
+    - TODO removes their ability to login
+    - TODO in order to delete account all files must be given admin access to 
+        another individual
+    '''
+    
+    deleted_user = mongo_collection.find_one_and_delete({"@id": user_id})
+    return deleted_user
+
+
 class User(FairscapeBaseModel, extra=Extra.allow):
     context = {"@vocab": "https://schema.org/", "evi": "https://w3id.org/EVI#"}
     type = "Person"

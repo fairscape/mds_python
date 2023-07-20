@@ -93,9 +93,7 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
 
-@app.get('/',
-        response_class=HTMLResponse,
-        tags=["Root"])
+@app.get('/', response_class=HTMLResponse, tags=["Root"])
 async def get_root(request: Request):
     context = {
         "request": request
@@ -128,8 +126,43 @@ app.include_router(WebIndexRouter, tags=["webindex"])
 app.include_router(WebHomeRouter, tags=["webhome"])
 app.include_router(AuthHandlerRouter, tags=["webauth"])
 
-@app.get("/page/{page_name}",
-        response_class=HTMLResponse)
+@app.get("/page/{page_name}", response_class=HTMLResponse)
 def show_page(request: Request, page_name: str):
     return templates.TemplateResponse("page/" + page_name + ".html", {"request": request})
+
+from typing import Annotated
+from fastapi import Depends
+from fastapi.security import OAuth2PasswordRequestForm
+
+from mds.config import (
+    get_minio,
+    get_casbin,
+    get_mongo,
+    MongoConfig,
+    CasbinConfig
+) 
+
+from mds.models.auth import (
+    Session,
+    LoginUserBasic
+)
+
+mongo_config = get_mongo()
+mongo_client = mongo_config.CreateClient()
+
+
+@app.post("/token")
+def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
+
+    mongo_db = mongo_client[mongo_config.db]
+    mongo_collection = mongo_db[mongo_config.collection]
+
+    try:
+        session = LoginUserBasic(mongo_collection, form_data.username, form_data.password) 
+
+    except UserNotFound:
+        raise HTTPException(status_code=400, detail="Incorrect username or password")
+
+    return {"access_token": session.encode(), "token_type": "bearer"}
+
 

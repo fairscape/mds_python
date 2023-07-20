@@ -16,6 +16,7 @@ from functools import lru_cache
 import casbin
 import casbin_sqlalchemy_adapter
 
+#AUTH_ENABLED = bool(os.environ.get("MDS_AUTH_ENABLED", "True"))
 
 @lru_cache()
 def get_mongo():

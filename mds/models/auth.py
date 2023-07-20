@@ -67,7 +67,7 @@ class Session(BaseModel):
         return OperationStatus(True, "", 200)
 
     def encode(self) -> str:
-        return jwt .encode(self.dict(), JWT_SECRET, algorithm="HS256")
+        return jwt.encode(self.dict(), JWT_SECRET, algorithm="HS256")
 
 
 class UserNotFound(Exception):
@@ -142,7 +142,7 @@ def LoginUserBasic(
 
 def ParseSession(EncodedSession: str) -> Session:
     if "Bearer " in EncodedSession:
-        raw_session = EncodedSession.strip("Bearer").strip()
+        raw_session = EncodedSession.strip("Bearer ").strip()
     else:
         raw_session = EncodedSession
 

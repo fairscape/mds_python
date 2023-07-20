@@ -2,7 +2,8 @@ from typing import Annotated
 
 from fastapi import (
     APIRouter,
-    Header
+    Header,
+    Depends
 )
 from fastapi.responses import JSONResponse
 from mds.models.user import User, list_users
@@ -14,9 +15,13 @@ from mds.config import (
     MongoConfig,
     CasbinConfig
 ) 
-
+from mds.models.auth import (
+    Session
+)
 import mds.auth.casbin
-
+from mds.auth.auth import (
+    get_current_user
+)
 
 router = APIRouter()
 
@@ -79,7 +84,7 @@ def user_create(user: User):
 @router.get('/user', status_code=200,
             summary="List all users",
             response_description="Retrieved list of users")
-def user_list():
+def user_list(current_user: Annotated[User, Depends(get_current_user)]):
 
     mongo_db = mongo_client[mongo_config.db]
     mongo_collection = mongo_db[mongo_config.collection]
@@ -123,7 +128,10 @@ async def user_get(NAAN: str, postfix: str):
 @router.put("/user",
             summary="Update a user",
             response_description="The updated user")
-def user_update(user: User):
+def user_update(
+    current_user: Annotated[User, Depends(get_current_user)],
+    user: User
+):
     mongo_db = mongo_client[mongo_config.db]
     mongo_collection = mongo_db[mongo_config.collection]
 
