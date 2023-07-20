@@ -14,6 +14,7 @@ from mds.routers.project import router as ProjectRouter
 from mds.routers.organization import router as OrganizationRouter
 from mds.routers.evidencegraph import router as EvidenceGraphRouter
 from mds.routers.transfer import router as TransferRouter
+from mds.routers.resolver import ResolverRouter
 
 from mds.web.routers.index import router as WebIndexRouter
 from mds.web.routers.signin import router as WebSigninRouter
@@ -118,6 +119,7 @@ app.include_router(ProjectRouter, tags=["project"])
 app.include_router(OrganizationRouter, tags=["organization"])
 app.include_router(EvidenceGraphRouter, tags=["evidencegraph"])
 app.include_router(TransferRouter, tags=["transfer"])
+app.include_router(ResolverRouter, tags=["resolver"])
 
 # Routes for Web pages
 app.include_router(WebIndexRouter, tags=["webindex"])
