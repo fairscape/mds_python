@@ -137,11 +137,8 @@ from fastapi import Depends
 from fastapi.security import OAuth2PasswordRequestForm
 
 from mds.config import (
-    get_minio,
-    get_casbin,
-    get_mongo,
-    MongoConfig,
-    CasbinConfig
+    get_mongo_config,
+    get_mongo_client
 ) 
 
 from mds.models.auth import (
@@ -149,18 +146,25 @@ from mds.models.auth import (
     LoginUserBasic
 )
 
-mongo_config = get_mongo()
-mongo_client = mongo_config.CreateClient()
+mongo_config = get_mongo_config()
+mongo_client = get_mongo_client()
 
 
 @app.post("/token")
 def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
 
     mongo_db = mongo_client[mongo_config.db]
-    mongo_collection = mongo_db[mongo_config.collection]
+    user_collection = mongo_db[mongo_config.user_collection]
+    session_collection = mongo_db[mongo_config.session_collection)
+
 
     try:
-        session = LoginUserBasic(mongo_collection, form_data.username, form_data.password) 
+        session = LoginUserBasic(
+            user_collection, 
+            session_collection, 
+            form_data.username, 
+            form_data.password
+        ) 
 
     except UserNotFound:
         raise HTTPException(status_code=400, detail="Incorrect username or password")

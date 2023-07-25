@@ -18,8 +18,19 @@ import casbin_sqlalchemy_adapter
 
 #AUTH_ENABLED = bool(os.environ.get("MDS_AUTH_ENABLED", "True"))
 
+def setup_mongo():
+    mongo_config = get_mongo()
+    mongo_client = mongo_config.CreateClient()
+    # create database if not created 
+
+    # create identifier collection
+
+    # create text index for 
+    # db.stores.createIndex( { name: "text", description: "text" } )
+    
+
 @lru_cache()
-def get_mongo():
+def get_mongo_config():
     return MongoConfig(
         host= os.environ.get("MONGO_HOST", "localhost"),
         port= os.environ.get("MONGO_PORT", "27017"),
@@ -28,6 +39,11 @@ def get_mongo():
         db= os.environ.get("MONGO_DATABASE", "fairscape"),
         collection= os.environ.get("MONGO_COLLECTION", "mds")
     )
+
+@lru_cache()
+def get_mongo_client():
+    mongo_config = get_mongo_config()
+    return mongo_config.CreateClient()
 
 
 @lru_cache()
@@ -42,7 +58,7 @@ def get_minio():
 
 
 @lru_cache()
-def get_casbin():
+def get_casbin_config():
     return CasbinConfig(
         policy_path= pathlib.Path(
             os.environ.get("CASBIN_POLICY", "casbin_policy.db")
@@ -51,7 +67,15 @@ def get_casbin():
             os.environ.get("CASBIN_MODEL", "./tests/restful_casbin.conf")
         )
     )
+
+@lru_cache()
+def get_casbin_enforcer():
+    casbin_config = get_casbin_config()
+    return casbin_config.CreateClient()
  
+@lru_cache()
+def get_jwt_secret():
+    return os.environ.get("JWT_SECRET", "test-local-secret")
 
 
 #MongoDep = Annotated[pymongo.MongoClient, Depends(common_parameters)]
@@ -65,7 +89,9 @@ class MongoConfig(BaseModel):
     user: Optional[str] = "user"
     password: Optional[str] = "pass"
     db: Optional[str] = "fairscape"
-    collection: Optional[str] = "mds"
+    identifier_collection: Optional[str] = "mds"
+    user_collection: Optional[str] = "users"
+    session_collection: Optional[str] = "sessions"
 
     class Config:
         validate_assignment=True

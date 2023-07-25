@@ -3,7 +3,9 @@ from fastapi import Depends, HTTPException, status
 from typing import Annotated
 
 from mds.config import (
-    get_mongo 
+    get_mongo_config,
+    get_mongo_client,
+    get_jwt_secret
 )
 from mds.models.user import (
     User
@@ -18,13 +20,14 @@ import jwt
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-mongo_config = get_mongo()
-mongo_client = mongo_config.CreateClient()
+mongo_config = get_mongo_config()
+mongo_client = get_mongo_client()
 
 mongo_db = mongo_client[mongo_config.db]
-mongo_collection = mongo_db[mongo_config.collection]
+user_collection = mongo_db[mongo_config.user_collection]
+session_collection = mongo_db[mongo_config.session_collection]
 
-JWT_SECRET="test jwt"
+JWT_SECRET= get_jwt_secret()
 
 
 def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
@@ -41,8 +44,10 @@ def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
             detail=f"Authorization Error {str(e)}" 
         )
 
+    # TODO is the session registered
+
     # find the current user
-    user_metadata = mongo_collection.find_one({
+    user_metadata = user_collection.find_one({
         "@type": "Person",
         "email": token_metadata.get("sub"),
         "name": token_metadata.get("name"),
