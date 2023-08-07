@@ -9,19 +9,20 @@ from fastapi.responses import JSONResponse
 
 from mds.config import (
     get_minio,
-    get_casbin,
-    get_mongo,
+    get_casbin_enforcer,
+    get_mongo_config,
+    get_mongo_client,
     MongoConfig,
     CasbinConfig
 ) 
 
 ResolverRouter = APIRouter()
 
-mongo_config = get_mongo()
-mongo_client = mongo_config.CreateClient()
+mongo_config = get_mongo_config()
+mongo_client = get_mongo_client()
 
-casbin_config = get_casbin()
-casbin_enforcer = casbin_config.CreateClient()
+casbin_enforcer = get_casbin_enforcer()
+casbin_enforcer.load_policy()
 casbin_enforcer.load_policy()
 
 @ResolverRouter.get(
@@ -40,7 +41,7 @@ def resolve(NAAN: str, postfix: str):
     # TODO if not a local NAAN redirect to n2t.net
 
     mongo_db = mongo_client[mongo_config.db]
-    mongo_collection = mongo_db[mongo_config.collection]
+    mongo_collection = mongo_db[mongo_config.identifier_collection]
 
     ark_metadata = mongo_collection.find_one({"@id": f"ark:{NAAN}/{postfix}"})
 

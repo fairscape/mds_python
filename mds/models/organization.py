@@ -1,23 +1,29 @@
 from bson import SON
-from pydantic import Extra
+from pydantic import (
+    Extra,
+    Field,
+    constr
+)
 from typing import List, Union, Optional
 from mds.models.fairscape_base import *
-from mds.models.compact.user import UserCompactView
-from mds.models.compact.project import ProjectCompactView
 from mds.database.config import MONGO_DATABASE, MONGO_COLLECTION
 
 
 # from mds.models.compact.project import ProjectCompactView
 
-class Organization(FairscapeBaseModel):
-    context = {"@vocab": "https://schema.org/", "evi": "https://w3id.org/EVI#"}
-    type = "Organization"
-    owner: Optional[UserCompactView] = []
-    members: Optional[List[UserCompactView]] = []
-    projects: Optional[List[ProjectCompactView]] = []
+class Organization(FairscapeBaseModel, extra = Extra.allow):
+    context: dict = Field(
+        default={
+            "@vocab": "https://schema.org/", 
+            "evi": "https://w3id.org/EVI#"
+        },
+        alias="@context"
+    )
+    metadataType: str = Field(default="Organization", alias="@type")
+    owner: constr(pattern=IdentifierPattern) = Field(...)
+    members: Optional[List[constr(pattern=IdentifierPattern)]] = Field(default=[])
+    projects: Optional[List[constr(pattern=IdentifierPattern)]] = Field(default=[])
 
-    class Config:
-        extra = Extra.allow
 
     def create(self, MongoClient: pymongo.MongoClient) -> OperationStatus:
 

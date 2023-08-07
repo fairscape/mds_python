@@ -21,12 +21,19 @@ import casbin_sqlalchemy_adapter
 def setup_mongo():
     mongo_config = get_mongo()
     mongo_client = mongo_config.CreateClient()
-    # create database if not created 
 
+    # create database if not created 
+    mongo_db = mongo_client[mongo_config.db]
+    
     # create identifier collection
+    identifier_collection = mongo_db[mongo_config.identifier_collection]
+
+    # create user collection
+    mongo_collection = mongo_db[mongo_config.user_collection]
 
     # create text index for 
-    # db.stores.createIndex( { name: "text", description: "text" } )
+    # db.identifier.createIndex( { name: "text", description: "text" } )
+    identifier_collection.create_index({"description": "text", "name": "text"})
     
 
 @lru_cache()

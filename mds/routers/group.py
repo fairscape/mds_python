@@ -6,8 +6,10 @@ from mds.models.compact.user import UserCompactView
 
 from mds.config import (
     get_minio,
-    get_casbin,
-    get_mongo,
+    get_casbin_config,
+    get_casbin_enforcer,
+    get_mongo_config,
+    get_mongo_client,
     MongoConfig,
     CasbinConfig
 ) 
@@ -15,11 +17,10 @@ from mds.config import (
 router = APIRouter()
 
 # setup database clients
-mongo_config = get_mongo()
-mongo_client = mongo_config.CreateClient()
+mongo_config = get_mongo_config()
+mongo_client = get_mongo_client()
 
-casbin_config = get_casbin()
-casbin_enforcer = casbin_config.CreateClient()
+casbin_enforcer = get_casbin_enforcer()
 casbin_enforcer.load_policy()
 
 
@@ -36,7 +37,7 @@ async def group_create(group: Group):
     - **owner**: an existing user in its compact form with @id, @type, name, and email
     """
     mongo_db = mongo_client[mongo_config.db]
-    mongo_collection = mongo_db[mongo_config.collection]
+    mongo_collection = mongo_db[mongo_config.identifier_collection]
 
     create_status = group.create(mongo_collection)
 
@@ -64,7 +65,7 @@ async def group_create(group: Group):
             response_description="Retrieved list of groups")
 def group_list():
     mongo_db = mongo_client[mongo_config.db]
-    mongo_collection = mongo_db[mongo_config.collection]
+    mongo_collection = mongo_db[mongo_config.identifier_collection]
 
     groups = list_groups(mongo_collection)
 
@@ -82,7 +83,7 @@ def group_get(NAAN: str, postfix: str):
     - **postfix**: a unique string
     """
     mongo_db = mongo_client[mongo_config.db]
-    mongo_collection = mongo_db[mongo_config.collection]
+    mongo_collection = mongo_db[mongo_config.identifier_collection]
 
     group_id = f"ark:{NAAN}/{postfix}"
 
@@ -105,7 +106,7 @@ def group_get(NAAN: str, postfix: str):
             response_description="The updated group")
 def group_update(group: Group):
     mongo_db = mongo_client[mongo_config.db]
-    mongo_collection = mongo_db[mongo_config.collection]
+    mongo_collection = mongo_db[mongo_config.identifier_collection]
 
     update_status = group.update(mongo_collection)
 
@@ -138,7 +139,7 @@ def group_delete(NAAN: str, postfix: str):
     """
 
     mongo_db = mongo_client[mongo_config.db]
-    mongo_collection = mongo_db[mongo_config.collection]
+    mongo_collection = mongo_db[mongo_config.identifier_collection]
 
     # TODO delete function should have FindOneAndDelete
     group_id = f"ark:{NAAN}/{postfix}"

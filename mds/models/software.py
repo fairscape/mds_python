@@ -1,36 +1,24 @@
 from bson import SON
-from pydantic import Extra
+from pydantic import (
+    Extra,
+    Field,
+    constr
+)
 from typing import Optional, List
 from mds.models.fairscape_base import *
-from mds.models.compact.user import UserCompactView
-from mds.models.compact.computation import ComputationCompactView
-from mds.models.compact.download import DataDownloadCompactView
-from mds.models.compact.project import ProjectCompactView
-from mds.models.compact.organization import OrganizationCompactView
 
 
-class Software(FairscapeBaseModel):
-    context = {"@vocab": "https://schema.org/", "evi": "https://w3id.org/EVI#"}
-    type = "evi:Software"
-    owner: UserCompactView
+class Software(FairscapeBaseModel, extra = Extra.allow):
+    metadataType: str = Field(default="evi:Software")
+    owner: constr(pattern=IdentifierPattern) = Field(...)
     # author: str
     # citation: str
-    distribution: Optional[List[DataDownloadCompactView]] = []
-    usedBy: Optional[List[ComputationCompactView]] = []
-    sourceOrganization: Optional[OrganizationCompactView] = None
-    includedInDataCatalog: Optional[ProjectCompactView] = None
+    distribution: List[constr(pattern=IdentifierPattern)] = Field(default=[])
+    usedBy: List[constr(pattern=IdentifierPattern)] = Field(default=[])
+    sourceOrganization: constr(pattern=IdentifierPattern) = Field(default=None)
+    includedInDataCatalog: constr(pattern=IdentifierPattern) = Field(default=None)
 
 
-    class Config:
-        extra = Extra.allow
-        fields = {
-            "usedBy": {
-                "alias": "evi:usedBy"
-            },
-            "type": {
-                "alias": "@type"
-            }
-        }
 
     def create(self, MongoCollection: pymongo.collection.Collection) -> OperationStatus:
 

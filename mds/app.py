@@ -20,7 +20,6 @@ from mds.web.routers.index import router as WebIndexRouter
 from mds.web.routers.signin import router as WebSigninRouter
 from mds.web.routers.signup import router as WebSignupRouter
 from mds.web.routers.home import router as WebHomeRouter
-from mds.routers.auth import router as AuthHandlerRouter
 
 
 tags_metadata = [
@@ -126,7 +125,6 @@ app.include_router(WebIndexRouter, tags=["webindex"])
 #app.include_router(WebSigninRouter, tags=["websignin"])
 #app.include_router(WebSignupRouter, tags=["websignup"])
 app.include_router(WebHomeRouter, tags=["webhome"])
-app.include_router(AuthHandlerRouter, tags=["webauth"])
 
 @app.get("/page/{page_name}", response_class=HTMLResponse)
 def show_page(request: Request, page_name: str):
@@ -155,7 +153,7 @@ def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
 
     mongo_db = mongo_client[mongo_config.db]
     user_collection = mongo_db[mongo_config.user_collection]
-    session_collection = mongo_db[mongo_config.session_collection)
+    session_collection = mongo_db[mongo_config.session_collection]
 
 
     try:

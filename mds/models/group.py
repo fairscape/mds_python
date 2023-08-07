@@ -2,17 +2,22 @@ from typing import Optional, List
 from pydantic import Extra
 from mds.models.fairscape_base import *
 from mds.models.user import User
-from mds.models.compact.user import UserCompactView
 from mds.utilities.operation_status import OperationStatus
 import pymongo
 from bson.son import SON
 
 
 class Group(FairscapeBaseModel, extra=Extra.allow):
-    context = {"@vocab": "https://schema.org/", "evi": "https://w3id.org/EVI#"}
-    type = "Organization"
-    owner: UserCompactView
-    members: Optional[List[UserCompactView]] = []
+    context: dict = Field(
+        default={
+            "@vocab": "https://schema.org/", 
+            "evi": "https://w3id.org/EVI#"
+        },
+        alias="@context"
+    )
+    metadataType: str = Field(default="Organization", alias="@type")
+    owner: constr(pattern=IdentifierPattern) = Field(...)
+    members: List[constr(pattern=IdentifierPattern)] = Field(default=[])
 
     def create(self, MongoCollection: pymongo.collection.Collection) -> OperationStatus:
         """Add a new group and persist in mongo.

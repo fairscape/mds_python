@@ -2,13 +2,6 @@ from typing import Optional
 
 from pydantic import Extra
 
-from mds.models.compact.organization import OrganizationCompactView
-from mds.models.compact.software import SoftwareCompactView
-from mds.models.compact.dataset import DatasetCompactView
-from mds.models.compact.rocrate import ROCrateCompactView
-from mds.models.compact.computation import ComputationCompactView
-from mds.models.compact.project import ProjectCompactView
-from mds.models.compact.evidencegraph import EvidenceGraphCompactView
 from mds.models.fairscape_base import *
 from mds.utilities.operation_status import OperationStatus
 from mds.utilities.utils import validate_email
@@ -21,7 +14,13 @@ def updateUser():
     pass
 
 def listUsers(mongo_collection: pymongo.collection.Collection):
+   
+    user_cursor = mongo_collection.find(
+        query={"@type": "Person"}, 
+        projection={"@id": True, "name": True, "email": True}
+        )
     
+
     pass
 
 
@@ -41,18 +40,21 @@ def deleteUserByID(
     return deleted_user
 
 
-class User(FairscapeBaseModel, extra=Extra.allow):
-    context = {"@vocab": "https://schema.org/", "evi": "https://w3id.org/EVI#"}
-    type = "Person"
+class User(BaseModel, extra=Extra.allow):
+    context: dict = Field( 
+        default= {"@vocab": "https://schema.org/", "evi": "https://w3id.org/EVI#"},
+        alias="@context" 
+    )
+    metadataType: str = Field(alias="@type", default= "Person")
     email: str
     password: str
-    organizations: Optional[List[OrganizationCompactView]] = []
-    projects: Optional[List[ProjectCompactView]] = []
-    datasets: Optional[List[DatasetCompactView]] = []
-    rocrates: Optional[List[ROCrateCompactView]] = []
-    software: Optional[List[SoftwareCompactView]] = []
-    computations: Optional[List[ComputationCompactView]] = []
-    evidencegraphs: Optional[List[EvidenceGraphCompactView]] = []
+    organizations: Optional[List[str]] = []
+    projects: Optional[List[str]] = []
+    datasets: Optional[List[str]] = []
+    rocrates: Optional[List[str]] = []
+    software: Optional[List[str]] = []
+    computations: Optional[List[str]] = []
+    evidencegraphs: Optional[List[str]] = []
 
     validate_email = validator('email', allow_reuse=True)(validate_email)
 

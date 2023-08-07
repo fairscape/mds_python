@@ -8,10 +8,6 @@ from mds.models.fairscape_base import *
 from mds.models.dataset import Dataset
 from mds.models.download import Download as DataDownload
 from mds.models.software import Software
-from mds.models.compact.user import UserCompactView
-from mds.models.compact.software import SoftwareCompactView
-from mds.models.compact.dataset import DatasetCompactView
-from mds.models.compact.organization import OrganizationCompactView
 from mds.utilities.funcs import *
 from mds.utilities.utils import *
 
@@ -27,7 +23,10 @@ from mds.database.minio import *
 from mds.database.container_config import *
 
 root_url = "http://localhost:8000/"
-
+default_context = {
+    "@vocab": "https://schema.org/", 
+    "evi": "https://w3id.org/EVI#"
+}
 
 class ResourceTuple(BaseModel):
     requests: str
@@ -39,25 +38,23 @@ class JobRequirements(BaseModel):
     mem: ResourceTuple
 
 
-class Computation(FairscapeBaseModel):
-    context = {"@vocab": "https://schema.org/", "evi": "https://w3id.org/EVI#"}
-    type = "evi:Computation"
-    owner: UserCompactView
-    #author: Union[str, UserCompactView]
-    #    author: UserCompactView
+class Computation(FairscapeBaseModel, extra = Extra.allow):
+    metadataType: str = Field(default="evi:Computation", alias="@type")
+    owner: constr(pattern=IdentifierPattern) 
+    author: str
     dateCreated: Optional[datetime]
     dateFinished: Optional[datetime]
-    associatedWith: Optional[List[Union[OrganizationCompactView, UserCompactView]]] = []
+    # TODO check 
+    sourceOrganization: constr(pattern=IdentifierPattern)
+    sourceProject: constr(pattern=IdentifierPattern)
     container: str
     command: Optional[Union[str,List[str]]]
-    usedSoftware: Union[str, SoftwareCompactView]
-    usedDataset: List[Union[str, DatasetCompactView]]  # ,List[Union[str, DatasetCompactView]]]
+    usedSoftware: str
+    usedDataset: str 
     containerId: Optional[str]
-    requirements: Optional[JobRequirements]
-    generated: Optional[Union[str, List[str]]]
+    #requirements: Optional[JobRequirements]
+    generated: List[str]
 
-    class Config:
-        extra = Extra.allow
 
     def create(self, MongoCollection: pymongo.collection.Collection) -> OperationStatus:
 

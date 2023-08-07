@@ -1,41 +1,39 @@
-from pydantic import BaseModel, validator
+from pydantic import (
+    BaseModel, 
+    validator,
+    ConfigDict,
+    Field,
+    constr,
+    Extra
+)
 from typing import List
 import pymongo
 from mds.utilities.utils import validate_ark
 from mds.utilities.operation_status import OperationStatus
 
+IdentifierPattern = "ark[0-9]{5}\/.*"
 
-class FairscapeBaseModel(BaseModel):
+class FairscapeBaseModel(BaseModel, extra=Extra.allow):
     """Refers to the Fairscape BaseModel inherited from Pydantic
 
     Args:
         BaseModel (Default Pydantic): Every instance of the Fairscape BaseModel must contain
         an id, a type, and a name
     """
-    id: str
-    type: str
-    name: str
-
-    class Config:
-        allow_population_by_field_name = True
+    model_config = ConfigDict(
+        populate_by_name= True,
         validate_assignment = True
-        fields = {
-            "context": {
-                "title": "context",
-                "alias": "@context",
-            },
-            "id": {
-                "title": "id",
-                "alias": "@id",
-            },
-            "type": {
-                "title": "type",
-                "alias": "@type",
-            },
-            "name": {
-                "title": "name",
-            }
-        }
+    )
+    context: dict = Field(
+        default={
+            "@vocab": "https://schema.org/", 
+            "evi": "https://w3id.org/EVI#"
+        },
+        alias="@context"
+    )
+    id: constr(pattern=IdentifierPattern) = Field(alias="@id")
+    metadataType: str = Field(alias="@type")
+    name: str
 
     _validate_guid = validator('id', allow_reuse=True)(validate_ark)
 

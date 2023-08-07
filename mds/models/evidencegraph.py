@@ -1,21 +1,21 @@
 from bson import SON
-from pydantic import Extra
+from pydantic import (
+    Extra,
+    Field,
+    constr
+)
 from typing import List, Union
 from mds.models.fairscape_base import *
-from mds.models.compact.user import UserCompactView
 
 
 # from mds.models.compact.project import ProjectCompactView
 
-class EvidenceGraph(FairscapeBaseModel):
-    context = {"@vocab": "https://schema.org/", "evi": "https://w3id.org/EVI#"}
-    type = "evi:EvidenceGraph"
-    owner: UserCompactView
+class EvidenceGraph(FairscapeBaseModel, extra = Extra.allow):
+    metadataType: str = Field(default="evi:EvidenceGraph", alias="@type")
+    owner: constr(pattern=IdentifierPattern)
 
     # graph: str
 
-    class Config:
-        extra = Extra.allow
 
     def create(self, MongoCollection: pymongo.collection.Collection) -> OperationStatus:
 
