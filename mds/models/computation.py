@@ -1,6 +1,6 @@
 from bson import SON
 from pydantic import Extra
-from typing import List, Union, Optional
+from typing import List, Union, Optional, Literal
 from datetime import datetime
 from pathlib import Path
 from mds.database import mongo
@@ -39,7 +39,7 @@ class JobRequirements(BaseModel):
 
 
 class Computation(FairscapeBaseModel, extra = Extra.allow):
-    metadataType: str = Field(default="evi:Computation", alias="@type")
+    metadataType: Literal['evi:Computation'] = Field(alias="@type")
     owner: constr(pattern=IdentifierPattern) 
     author: str
     dateCreated: Optional[datetime]

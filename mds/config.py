@@ -1,6 +1,5 @@
 from enum import Enum
 from pydantic import (
-    BaseSettings,
     BaseModel
 )
 from typing import (
@@ -100,9 +99,6 @@ class MongoConfig(BaseModel):
     user_collection: Optional[str] = "users"
     session_collection: Optional[str] = "sessions"
 
-    class Config:
-        validate_assignment=True
-
 
     def CreateClient(self):
 
@@ -165,7 +161,7 @@ class CasbinConfig(BaseModel):
         return casbinEnforcer
 
 
-class FairscapeConfig(BaseSettings):
+class FairscapeConfig(BaseModel):
     host: str
     port: int
     reload_server: bool

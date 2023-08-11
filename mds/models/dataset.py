@@ -3,7 +3,7 @@ from pydantic import (
     Extra,
     Field,
 )
-from typing import Optional, List, Union
+from typing import Optional, List, Union, Literal
 from datetime import datetime
 from pymongo.collection import Collection
 
@@ -15,7 +15,7 @@ from mds.utilities.operation_status import OperationStatus
 from mds.database.config import MONGO_DATABASE, MONGO_COLLECTION
 
 class Dataset(FairscapeBaseModel, extra=Extra.allow):
-    metadataType: str = Field(default="evi:Dataset", alias="@type")
+    metadataType: Literal['evi:Dataset'] = Field(alias="@type")
     owner: constr(pattern=IdentifierPattern) = Field(...)
     distribution: Optional[List[str]] = []
     includedInDataCatalog: Optional[str] = Field(default=None)

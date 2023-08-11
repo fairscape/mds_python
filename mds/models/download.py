@@ -1,4 +1,4 @@
-from typing import Optional, Union
+from typing import Optional, Union, Literal
 from datetime import datetime
 from pydantic import (
     Extra,
@@ -28,7 +28,7 @@ class Download(FairscapeBaseModel, extra=Extra.allow):
         },
         alias="@context"
     )
-    metadataType: str = Field(alias="@type", default="evi:DataDownload")
+    metadataType: Literal['evi:DataDownload'] = Field(alias="@type")
     encodingFormat: str
     owner: constr(pattern=IdentifierPattern) = Field(...)
     contentSize: Optional[str]

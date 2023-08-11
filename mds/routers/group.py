@@ -2,7 +2,6 @@ from fastapi import APIRouter, Response
 from fastapi.responses import JSONResponse
 
 from mds.models.group import Group, list_groups
-from mds.models.compact.user import UserCompactView
 
 from mds.config import (
     get_minio,
@@ -169,7 +168,7 @@ def group_delete(NAAN: str, postfix: str):
 @router.put("/group/ark:{NAAN}/{postfix}/addUser/",
             summary="Add user to a group",
             response_description="The updated group")
-def group_add_user(NAAN: str, postfix: str, user: UserCompactView):
+def group_add_user(NAAN: str, postfix: str, userID: str):
     """
     Add member to a group based on a given group identifier and member data:
 
