@@ -69,7 +69,7 @@ def get_casbin_config():
         policy_path= pathlib.Path(
             os.environ.get("CASBIN_POLICY", "casbin_policy.db")
         ),
-        model_path= pathlib.Path(
+        casbin_model_path= pathlib.Path(
             os.environ.get("CASBIN_MODEL", "./tests/restful_casbin.conf")
         )
     )
@@ -155,13 +155,13 @@ class CasbinAdapterEnum(str, Enum):
 
 
 class CasbinConfig(BaseModel):
-    model_path: pathlib.Path
+    casbin_model_path: pathlib.Path
     policy_path: pathlib.Path 
     #backend: CasbinAdapterEnum
 
     def CreateClient(self):
         adapter = casbin_sqlalchemy_adapter.Adapter(f'sqlite:///{self.policy_path}')
-        casbinEnforcer = casbin.Enforcer(str(self.model_path), adapter)
+        casbinEnforcer = casbin.Enforcer(str(self.casbin_model_path), adapter)
         return casbinEnforcer
 
 

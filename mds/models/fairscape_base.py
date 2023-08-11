@@ -6,7 +6,11 @@ from pydantic import (
     constr,
     Extra
 )
-from typing import List
+from typing import (
+    List,
+    Optional,
+    Literal
+)
 import pymongo
 from mds.utilities.utils import validate_ark
 from mds.utilities.operation_status import OperationStatus
@@ -31,11 +35,13 @@ class FairscapeBaseModel(BaseModel, extra=Extra.allow):
         },
         alias="@context"
     )
-    id: constr(pattern=IdentifierPattern) = Field(alias="@id")
+    guid: constr(pattern=IdentifierPattern) = Field(alias="@id")
     metadataType: str = Field(alias="@type")
-    name: str
+    url: Optional[str] = Field(default=None)
+    name: str = Field(max_length=200)
+    keywords: List[str] = Field(default=[])
+    description: str = Field(min_length=5)
 
-    _validate_guid = validator('id', allow_reuse=True)(validate_ark)
 
     def create(self, MongoCollection: pymongo.collection.Collection, bson=None) -> OperationStatus:
         """Persist instance of model in mongo

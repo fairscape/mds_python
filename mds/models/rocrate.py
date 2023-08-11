@@ -24,27 +24,82 @@ from typing import Optional, Union, Dict, List, Generator
 from datetime import datetime
 import pymongo
 
-from mds.fairscape_models.base import FairscapeBaseModel
-from mds.fairscape_models.datasetcontainer import DatasetContainer
-from mds.fairscape_models.dataset import Dataset
-from mds.fairscape_models.software import Software
-from mds.fairscape_models.computation import Computation
-
+from mds.models.fairscape_base import FairscapeBaseModel
 from mds.utilities.operation_status import OperationStatus
 
 from mds.database.config import MINIO_BUCKET, MINIO_ROCRATE_BUCKET, MONGO_DATABASE, MONGO_COLLECTION
 
 
+class ROCrateDataset(FairscapeBaseModel):
+    metadataType: Optional[str] = Field(default="https://w3id.org/EVI#Dataset")
+    additionalType: Optional[str] = Field(default="Dataset")
+    author: str = Field(max_length=64)
+    datePublished: str = Field(...)
+    version: str
+    description: str = Field(min_length=10)
+    keywords: List[str] = Field(...)
+    associatedPublication: Optional[str] = None
+    additionalDocumentation: Optional[str] = None
+    fileFormat: str = Field(alias="format")
+    dataSchema: Optional[Union[str, dict]] = Field(alias="schema", default=None)
+    generatedBy: Optional[List[str]] = Field(default=[])
+    derivedFrom: Optional[List[str]] = Field(default=[])
+    usedBy: Optional[List[str]] = Field(default =[])
+    contentUrl: Optional[str] = Field(default=None)
 
-    
+
+
+class ROCrateDatasetContainer(FairscapeBaseModel): 
+    metadataType: Optional[str] = Field(default="https://w3id.org/EVI#Dataset", alias="@type")
+    additionalType: Optional[str] = Field(default="DatasetContainer")
+    name: str
+    version: str = Field(default="0.1.0")
+    description: str = Field(min_length=10)
+    keywords: List[str] = Field(...)
+    generatedBy: Optional[List[str]] = Field(default=[])
+    derivedFrom: Optional[List[str]] = Field(default=[])
+    usedBy: Optional[List[str]] = Field(default = [])
+    hasPart: Optional[List[str]] = Field(default=[])
+    isPartOf: Optional[List[str]] = Field(default=[])
+
+
+class ROCrateSoftware(FairscapeBaseModel): 
+    metadataType: Optional[str] = Field(default="https://w3id.org/EVI#Software")
+    additionalType: Optional[str] = Field(default="Software")
+    author: str = Field(min_length=4, max_length=64)
+    dateModified: str
+    version: str
+    description: str =  Field(min_length=10)
+    associatedPublication: Optional[str] = Field(default=None)
+    additionalDocumentation: Optional[str] = Field(default=None)
+    fileFormat: str = Field(title="fileFormat", alias="format")
+    usedByComputation: Optional[List[str]] = Field(default=[])
+    contentUrl: Optional[str] = Field(default=None)
+
+
+class ROCrateComputation(FairscapeBaseModel):
+    metadataType: Optional[str] = Field(default="https://w3id.org/EVI#Computation")
+    additionalType: Optional[str] = Field(default="Computation")
+    runBy: str
+    dateCreated: str 
+    associatedPublication: Optional[str] = Field(default=None)
+    additionalDocumentation: Optional[str] = Field(default=None)
+    command: Optional[Union[List[str], str]] = Field(default="")
+    usedSoftware: Optional[List[str]] = Field(default=[])
+    usedDataset: Optional[Union[List[str], str]] = Field(default=[])
+    generated: Optional[Union[str,List[str]]] = Field(default=[])
 
 
 class ROCrate(FairscapeBaseModel):    
     metadataType: Optional[str] = Field(default="https://schema.org/Dataset", alias="@type")
     name: constr(max_length=100)
-    projectName: Optional[str] = Field(default=None)
-    organizationName: Optional[str] = Field(default=None)
-    metadataGraph: List[Union[Dataset, Software, Computation, DatasetContainer]] = Field(alias="@graph")
+    sourceOrganization: Optional[str] = Field(default=None)
+    metadataGraph: List[Union[
+        ROCrateDataset, 
+        ROCrateSoftware, 
+        ROCrateComputation, 
+        ROCrateDatasetContainer
+        ]] = Field(alias="@graph", discriminator='addtionalType')
 
     
     @computed_field(alias="@id")
@@ -63,8 +118,6 @@ class ROCrate(FairscapeBaseModel):
         # use a subset of properties for hash digest
         digest_dict = {
             "name": self.name,
-            "projectName": self.projectName,
-            "organizationName": self.organizationName,
             "@graph": [model.model_dump_json(by_alias=True) for model in self.metadataGraph]
         }
         encoded = json.dumps(digest_dict, sort_keys=True).encode()
