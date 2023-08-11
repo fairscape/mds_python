@@ -6,7 +6,6 @@ from mds.database import mongo, minio
 from mds.database.config import MONGO_DATABASE, MONGO_COLLECTION
 from mds.models.dataset import Dataset
 from mds.models.download import Download
-from mds.models.compact.user import UserCompactView
 
 router = APIRouter()
 

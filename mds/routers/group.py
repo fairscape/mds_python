@@ -202,7 +202,7 @@ def group_add_user(NAAN: str, postfix: str, userID: str):
 @router.put("/group/ark:{NAAN}/{postfix}/rmUser/",
             summary="Remove user from a group",
             response_description="The updated group")
-def group_remove_user(NAAN: str, postfix: str, user: UserCompactView):
+def group_remove_user(NAAN: str, postfix: str, userId: str):
     """
     Remove member from a group based on a given group identifier and member data:
 
@@ -216,7 +216,7 @@ def group_remove_user(NAAN: str, postfix: str, user: UserCompactView):
     group_id = f"ark:{NAAN}/{postfix}"
     group = Group.construct(id=group_id)
 
-    member_id = user.id
+    member_id = userId
     add_user_status = group.remove_user(mongo_collection, member_id)
 
     mongo_client.close()

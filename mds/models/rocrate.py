@@ -2,11 +2,14 @@ from zipfile import ZipFile
 from fastapi.responses import StreamingResponse, FileResponse
 import zipfile
 from bson import SON
+from mds.config import get_ark_naan
 from pydantic import (
     BaseModel,
+    Field,
     constr,
     AnyUrl,
-    Extra
+    Extra,
+    computed_field
 )
 import io
 import os
@@ -37,26 +40,39 @@ from mds.database.config import MINIO_BUCKET, MINIO_ROCRATE_BUCKET, MONGO_DATABA
 
 
 class ROCrate(FairscapeBaseModel):    
-    metadataType: str = "Dataset"
-    name: constr(max_length=64)
-    metadataGraph: List[Union[Dataset, Software, Computation, DatasetContainer]]
-    
-    
+    metadataType: Optional[str] = Field(default="https://schema.org/Dataset", alias="@type")
+    name: constr(max_length=100)
+    projectName: Optional[str] = Field(default=None)
+    organizationName: Optional[str] = Field(default=None)
+    metadataGraph: List[Union[Dataset, Software, Computation, DatasetContainer]] = Field(alias="@graph")
 
-    class Config:
-        allow_population_by_field_name = True
-        validate_assignment = True    
-        fields={                        
-            "metadataType": {
-                "title": "metadataType",
-                "alias": "@type"
-            },
-            "metadataGraph": {
-                "title": "metadataGraph",
-                "alias": "@graph"
-            }
+    
+    @computed_field(alias="@id")
+    @property
+    def guid(self) -> str:
+
+        # remove trailing whitespace 
+        cleaned_name = re.sub('\s+$', '', self.name)
+
+        # remove restricted characters
+        url_name = re.sub('\W','', cleaned_name.replace('', '-'))
+        
+        # add md5 hash digest on remainder of metadata
+        sha_256_hash = hashlib.sha256()
+
+        # use a subset of properties for hash digest
+        digest_dict = {
+            "name": self.name,
+            "projectName": self.projectName,
+            "organizationName": self.organizationName,
+            "@graph": [model.model_dump_json(by_alias=True) for model in self.metadataGraph]
         }
-
+        encoded = json.dumps(digest_dict, sort_keys=True).encode()
+        sha_256_hash.update(encoded)
+        digest_string = sha_256_hash.hexdigest()
+        
+        return f"ark:{get_ark_naan()}/rocrate-{url_name}-{digest_string[0:10]}"
+        
 
     def validate_rocrate_objects(self, MongoClient: pymongo.MongoClient, MinioClient, Object) -> OperationStatus:
         

@@ -83,6 +83,10 @@ def get_casbin_enforcer():
 def get_jwt_secret():
     return os.environ.get("JWT_SECRET", "test-local-secret")
 
+@lru_cache()
+def get_ark_naan():
+    # TODO return entire config object
+    return os.environ.get("ARK_NAAN", "59853")
 
 #MongoDep = Annotated[pymongo.MongoClient, Depends(common_parameters)]
 #CasbinDep = Annotated[casbin.Enforcer, Depends(get_casbin)]

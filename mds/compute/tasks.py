@@ -1,6 +1,4 @@
 from mds.models import Dataset, Software, Computation
-from mds.models.compact.software import SoftwareCompactView
-from mds.models.compact.dataset import DatasetCompactView
 from mds.database import mongo, minio
 from mds.database.config import MONGO_DATABASE, MONGO_COLLECTION
 
