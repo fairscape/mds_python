@@ -50,13 +50,21 @@ def upload(file: UploadFile = File(...)):
                 )
 
     crate = ROCrate(**json.loads(rocrate_metadata))
+
+    # TODO run entailment
+    # crate.entailment()
+    
     #print(crate)
     #print(crate.dict(by_alias=True))
 
     # Compare objects referenced in the metadata file to the objects in the crate 
     validation_status = crate.validate_rocrate_objects(mongo_client, minio_client, file.file)
-                    
+
+    
     if validation_status.success:
+
+        # TODO insert all records into mongo
+        
         return JSONResponse(
             status_code=201,
             content={

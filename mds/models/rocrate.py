@@ -62,6 +62,15 @@ class ROCrateDatasetContainer(FairscapeBaseModel):
     hasPart: Optional[List[str]] = Field(default=[])
     isPartOf: Optional[List[str]] = Field(default=[])
 
+    def validate_crate(self, passed_ro_crate)->None:
+        # for all linked IDs they must be
+
+        # hasPart/isPartOf must be inside the crate or a valid ark
+
+        # lookup ark if NAAN is local
+
+        # if remote, take as valid
+        pass
 
 class ROCrateSoftware(FairscapeBaseModel): 
     metadataType: Optional[str] = Field(default="https://w3id.org/EVI#Software")
