@@ -1,0 +1,176 @@
+{
+  "@context": {
+    "@vocab": "https://schema.org/",
+    "evi": "https://w3id.org/EVI#"
+  },
+  "@type": "https://schema.org/Dataset",
+  "url": null,
+  "name": "test crate",
+  "keywords": [
+    "test"
+  ],
+  "description": "a testing example",
+  "@graph": [
+    {
+      "@context": {
+        "@vocab": "https://schema.org/",
+        "evi": "https://w3id.org/EVI#"
+      },
+      "metadataType": "https://w3id.org/EVI#Dataset",
+      "url": null,
+      "name": "test dataset",
+      "keywords": [
+        "test"
+      ],
+      "description": "my example test dataset",
+      "sourceOrganization": null,
+      "additionalType": "Dataset",
+      "author": "Max Levinson",
+      "datePublished": "08-09-2023",
+      "version": "0.1",
+      "associatedPublication": null,
+      "additionalDocumentation": null,
+      "format": "text/csv",
+      "schema": null,
+      "generatedBy": [],
+      "derivedFrom": [],
+      "usedBy": [],
+      "contentUrl": "file://test-one.csv",
+      "@id": "ark:59853/rocrate-testdataset"
+    },
+    {
+      "@context": {
+        "@vocab": "https://schema.org/",
+        "evi": "https://w3id.org/EVI#"
+      },
+      "metadataType": "https://w3id.org/EVI#Dataset",
+      "url": null,
+      "name": "test dataset two",
+      "keywords": [
+        "test"
+      ],
+      "description": "my example test dataset",
+      "sourceOrganization": null,
+      "additionalType": "Dataset",
+      "author": "Max Levinson",
+      "datePublished": "08-09-2023",
+      "version": "0.1",
+      "associatedPublication": null,
+      "additionalDocumentation": null,
+      "format": "text/csv",
+      "schema": null,
+      "generatedBy": [],
+      "derivedFrom": [],
+      "usedBy": [],
+      "contentUrl": "file://test-two.csv",
+      "@id": "ark:59853/rocrate-testdatasettwo"
+    },
+    {
+      "@context": {
+        "@vocab": "https://schema.org/",
+        "evi": "https://w3id.org/EVI#"
+      },
+      "metadataType": "https://w3id.org/EVI#Dataset",
+      "url": null,
+      "name": "test result",
+      "keywords": [
+        "test"
+      ],
+      "description": "my example test dataset",
+      "sourceOrganization": null,
+      "additionalType": "Dataset",
+      "author": "Max Levinson",
+      "datePublished": "08-09-2023",
+      "version": "0.1",
+      "associatedPublication": null,
+      "additionalDocumentation": null,
+      "format": "text/csv",
+      "schema": null,
+      "generatedBy": [],
+      "derivedFrom": [],
+      "usedBy": [],
+      "contentUrl": "file://output.csv",
+      "@id": "ark:59853/rocrate-testresult"
+    },
+    {
+      "@context": {
+        "@vocab": "https://schema.org/",
+        "evi": "https://w3id.org/EVI#"
+      },
+      "@type": "https://w3id.org/EVI#Dataset",
+      "url": null,
+      "name": "test dataset container",
+      "keywords": [
+        "test"
+      ],
+      "description": "my example test dataset",
+      "sourceOrganization": null,
+      "additionalType": "DatasetContainer",
+      "version": "0.1",
+      "generatedBy": [],
+      "derivedFrom": [],
+      "usedBy": [],
+      "hasPart": [
+        "ark:59853/rocrate-testdataset",
+        "ark:59853/rocrate-testdatasettwo"
+      ],
+      "isPartOf": [],
+      "@id": "ark:59853/rocrate-testdatasetcontainer"
+    },
+    {
+      "@context": {
+        "@vocab": "https://schema.org/",
+        "evi": "https://w3id.org/EVI#"
+      },
+      "metadataType": "https://w3id.org/EVI#Software",
+      "url": null,
+      "name": "test software",
+      "keywords": [
+        "test"
+      ],
+      "description": "A test software",
+      "sourceOrganization": null,
+      "additionalType": "Software",
+      "author": "Max Levinson",
+      "dateModified": "08-09-2023",
+      "version": "0.1.0",
+      "associatedPublication": null,
+      "additionalDocumentation": null,
+      "format": ".py",
+      "usedByComputation": [],
+      "contentUrl": "file://script.py",
+      "@id": "ark:59853/rocrate-testsoftware"
+    },
+    {
+      "@context": {
+        "@vocab": "https://schema.org/",
+        "evi": "https://w3id.org/EVI#"
+      },
+      "metadataType": "https://w3id.org/EVI#Computation",
+      "url": null,
+      "name": "computation",
+      "keywords": [
+        "test"
+      ],
+      "description": "A pretend computation",
+      "sourceOrganization": null,
+      "additionalType": "Computation",
+      "runBy": "Max Levinson",
+      "dateCreated": "08-09-2023",
+      "associatedPublication": null,
+      "additionalDocumentation": null,
+      "command": "",
+      "usedSoftware": [
+        "ark:59853/rocrate-testsoftware"
+      ],
+      "usedDataset": [
+        "ark:59853/rocrate-testdatasetcontainer"
+      ],
+      "generated": [
+        "ark:59853/rocrate-testresult"
+      ],
+      "@id": "ark:59853/rocrate-computation"
+    }
+  ],
+  "@id": "ark:59853/rocrate-testcrate-78a5f3e86e"
+}
