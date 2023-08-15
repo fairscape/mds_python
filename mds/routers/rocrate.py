@@ -1,7 +1,12 @@
 from typing import Union
 from fastapi import APIRouter, UploadFile, Form, File, Response, Header
 from fastapi.responses import JSONResponse, StreamingResponse, FileResponse
-from mds.database.config import MONGO_DATABASE, MONGO_COLLECTION, MINIO_ROCRATE_BUCKET
+from mds.config import (
+    get_minio,
+    get_casbin_enforcer,
+    get_mongo_config,
+    get_mongo_client,
+)
 from pydantic import ValidationError
 from mds.database import minio, mongo
 from mds.models.rocrate import ROCrate
@@ -15,15 +20,21 @@ import json
 
 router = APIRouter()
 
+mongo_config = get_mongo_config()
+mongo_client = get_mongo_client()
+mongo_db = mongo_client[mongo_config.db]
+rocrate_collection = mongo_db[mongo_config.rocrate_collection]
+
+minio_client = get_minio()
+
+casbin_enforcer = get_casbin_enforcer()
+casbin_enforcer.load_policy()
 
 @router.post("/rocrate/upload",
              summary="Unzip the ROCrate and upload to object store",
              response_description="The transferred rocrate")
 def upload(file: UploadFile = File(...)):
-    
-    mongo_client = mongo.GetConfig()
-    minio_client = minio.GetMinioConfig()    
-    
+     
     # Unzip the ROCrate and upload to MinIO
     upload_status = unzip_and_upload(         
         minio_client, 
@@ -124,7 +135,6 @@ def fake_data_streamer():
     bucket_name = "test"
     zip_file_name = "UVA/B2AI/test_rocrate/test rocrate.zip"
     
-    minio_client = minio.GetMinioConfig()
     # Get zip file metadata
     
     
@@ -151,14 +161,18 @@ def rocrate_download(
     #print(rocrate_id)
     
     
+    #rocrate = ROCrate.construct(guid=rocrate_id)
+    try:
+        crate_metadata = read_rocrate_metadata(
+            MongoCollection=rocrate_collection,
+            ROCrateGUID=rocrate_id
+        )
 
-    rocrate = ROCrate.construct(guid=rocrate_id)
-    #print(rocrate)
-
-    mongo_client = mongo.GetConfig()
-    
-    # get the connection to the databases
-    minio_client = minio.GetMinioConfig()
+    # TODO: break out different cases
+    # 404
+    # parsing failure from mongo 500 
+    except Exception as e:
+        return JSONResponse({"error": str(e), "message": "ERROR Retrieving Crate"})
 
     #read_status = rocrate.read_metadata(mongo_client)
     bucket_name, object_loc_in_bucket = get_object_info_from_crate(rocrate_id, mongo_client)
@@ -186,18 +200,10 @@ def rocrate_download_as_stream(
     ):
     
     rocrate_id = f"ark:{NAAN}/{postfix}"
-    #print(rocrate_id)
     
+    # get rocrate metadata 
+      
     
-
-    rocrate = ROCrate.construct(guid=rocrate_id)
-    #print(rocrate)
-
-    mongo_client = mongo.GetConfig()
-    
-    # get the connection to the databases
-    minio_client = minio.GetMinioConfig()
-
     #read_status = rocrate.read_metadata(mongo_client)
     bucket_name, object_loc_in_bucket = get_object_info_from_crate(rocrate_id, mongo_client)
 

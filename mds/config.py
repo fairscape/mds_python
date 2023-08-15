@@ -100,6 +100,7 @@ class MongoConfig(BaseModel):
     password: Optional[str] = "pass"
     db: Optional[str] = "fairscape"
     identifier_collection: Optional[str] = "mds"
+    rocrate_collection: Optional[str] = "rocrate"
     user_collection: Optional[str] = "users"
     session_collection: Optional[str] = "sessions"
 

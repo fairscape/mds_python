@@ -510,27 +510,18 @@ def get_data_from_stream(file_data) -> Generator:
         yield file_data.getvalue()
 
 
+def read_rocrate_metadata(MongoCollection: pymongo.collection.Collection, ROCrateGUID: str) -> ROCrate:
+    query = MongoCollection.find_one(
+        {'@id': ROCrateGUID},
+        projection={'_id': False}
+    )
 
-
-def read_rocrate_metadata(MongoClient: pymongo.MongoClient, crate_id: str) -> dict:
-
-        mongo_db = MongoClient[MONGO_DATABASE]
-        mongo_collection = mongo_db[MONGO_COLLECTION]
-
-                    
-        query = mongo_collection.find_one(
-            {'@id': crate_id},
-            projection={'_id': False}
-        )
-            
-            
-            
-            # check that the results are no empty
-        if query:
-                # update class with values from database                
-            return query
-        else:
-            raise Exception(message=f"ROCRATE NOT FOUND: {str(query)}")
-
-        
+    if query:
+        try:
+            parsed_crate = ROCrate(**query)
+        except Exception as e:
+            raise Exception(message=f"ROCRATE Metadata not valid: {str(e)}")
     
+    else:
+        raise Exception(message=f"ROCRATE NOT FOUND: {str(query)}")
+ 
