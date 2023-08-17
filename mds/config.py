@@ -17,24 +17,7 @@ import casbin_sqlalchemy_adapter
 
 #AUTH_ENABLED = bool(os.environ.get("MDS_AUTH_ENABLED", "True"))
 
-def setup_mongo():
-    mongo_config = get_mongo()
-    mongo_client = mongo_config.CreateClient()
-
-    # create database if not created 
-    mongo_db = mongo_client[mongo_config.db]
-    
-    # create identifier collection
-    identifier_collection = mongo_db[mongo_config.identifier_collection]
-
-    # create user collection
-    mongo_collection = mongo_db[mongo_config.user_collection]
-
-    # create text index for 
-    # db.identifier.createIndex( { name: "text", description: "text" } )
-    identifier_collection.create_index({"description": "text", "name": "text"})
-    
-
+ 
 @lru_cache()
 def get_mongo_config():
     return MongoConfig(
@@ -43,8 +26,11 @@ def get_mongo_config():
         user= os.environ.get("MONGO_ACCESS_KEY", "root"),
         password= os.environ.get("MONGO_SECRET_KEY", "rootpass"),
         db= os.environ.get("MONGO_DATABASE", "fairscape"),
-        collection= os.environ.get("MONGO_COLLECTION", "mds")
+        identifier_collection = os.environ.get("MONGO_COLLECTION", "mds"),
+        user_collection = os.environ.get("MONGO_USER_COLLECTION"),
+        rocrate_collection = os.environ.get("MONGO_ROCRATE_COLLECTION")
     )
+
 
 @lru_cache()
 def get_mongo_client():
@@ -53,14 +39,22 @@ def get_mongo_client():
 
 
 @lru_cache()
-def get_minio():
+def get_minio_config():
     return MinioConfig(
-        uri= os.environ.get("MINIO_URI"),
-        user= os.environ.get("MINIO_BUCKET"),
-        password= os.environ.get("MINIO_ACCESS_KEY"),
-        default_bucket= os.environ.get("MINIO_SECRET_KEY"), 
+        host= os.environ.get("MINIO_HOST"),
+        port=os.environ.get("MINIO_PORT"),
+        access_key = os.environ.get("MINIO_ACCESS_KEY"),
+        secret_key = os.environ.get("MINIO_SECRET_KEY"),
+        default_bucket= os.environ.get("MINIO_DEFAULT_BUCKET"), 
+        rocrate_bucket=os.environ.get("MINIO_ROCRATE_BUCKET"),
         secure= bool(os.environ.get("MINIO_SECURE", False)),
     )
+
+
+@lru_cache()
+def get_minio_client():
+   minio_config = get_minio_config()
+   return minio_config.CreateClient()
 
 
 @lru_cache()
@@ -113,15 +107,17 @@ class MongoConfig(BaseModel):
 
 
 class MinioConfig(BaseModel):
-    uri: str 
-    user: str 
-    password: str 
-    default_bucket: str 
+    host: Optional[str] = None
+    port: Optional[str] = None
+    secret_key: Optional[str] = None
+    access_key: Optional[str] = None
+    default_bucket: Optional[str] = "mds"
+    rocrate_bucket: Optional[str] = "rocrate"
     secure: bool
 
     def CreateClient(self):
         return minio.Minio(
-                self.hostname, 
+                f"{self.host}:{self.port}", 
                 access_key= self.access_key, 
                 secret_key= self.secret_key,
                 secure = self.secure
@@ -188,5 +184,54 @@ class FairscapeConfig(BaseModel):
         app.conf.result_backend = self.compute.redis.result_backend
 
         return celery_app
+
+
+
+def setup_mongo():
+    ''' Initalize mongo database for fairscape server application
+    '''
+
+    mongo_config = get_mongo_config()
+    mongo_client = mongo_config.CreateClient()
+
+    # create database if not created 
+    mongo_db = mongo_client[mongo_config.db]
+    
+    # create identifier collection
+    identifier_collection = mongo_db[mongo_config.identifier_collection]
+
+    # create user collection
+    mongo_collection = mongo_db[mongo_config.user_collection]
+
+    # create text index for 
+    # db.identifier.createIndex( { name: "text", description: "text" } )
+    identifier_collection.create_index({"description": "text", "name": "text"})
+
+    # create index for identifiers
+    identifier_collection.create_index({"@id": 1})
+
+    # TODO create index for provenance properties
+    #
+
+    # TODO recency of metadata publication
+    #identifier_collection.create_index({})
+
+
+
+
+def setup_minio():
+    ''' Initalize minio buckets for fairscape server application
+    '''
+
+    minio_config = get_minio_config()
+    minio_client = get_minio_client()
+
+    # create default bucket
+    print(minio_config.default_bucket)
+    minio_client.make_bucket(minio_config.default_bucket)
+
+    # create rocrate bucket
+    print(minio_config.rocrate_bucket)
+    minio_client.make_bucket(minio_config.rocrate_bucket)
 
 

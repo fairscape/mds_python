@@ -1,7 +1,9 @@
 import argparse
 import uvicorn
-from os import environ
-from mds.database.minio import GetMinioConfig
+from mds.config import (
+    setup_minio,
+    setup_mongo
+)
 
 
 # TODO make sure configuration is valid, if not create configured minio bucket and mongo database
@@ -13,6 +15,9 @@ parser.add_argument("--port", default='8080')
 if __name__ == '__main__':
 
     args = parser.parse_args()
+
+    setup_minio()
+    setup_mongo()
 
     uvicorn.run(
         'mds.app:app', 
