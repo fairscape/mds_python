@@ -1,26 +1,32 @@
-from zipfile import ZipFile
 from fastapi.responses import StreamingResponse, FileResponse
-import zipfile
 from bson import SON
 from mds.config import get_ark_naan
 from pydantic import (
-    BaseModel,
     Field,
     constr,
     AnyUrl,
     Extra,
     computed_field
 )
+from typing import (
+    Optional, 
+    Union, 
+    Dict, 
+    List, 
+    Generator
+)
+import hashlib
+import json
+import re
+
 import io
 import os
-import tempfile
-import json
 from pathlib import Path
 from io import BytesIO
-import boto3
+import zipfile
+from zipfile import ZipFile
 from botocore.client import Config
 
-from typing import Optional, Union, Dict, List, Generator
 from datetime import datetime
 import pymongo
 
@@ -35,18 +41,17 @@ class ROCrateDataset(FairscapeBaseModel):
     additionalType: Optional[str] = Field(default="Dataset")
     author: str = Field(max_length=64)
     datePublished: str = Field(...)
-    version: str
+    version: str = Field(default="0.1.0")
     description: str = Field(min_length=10)
     keywords: List[str] = Field(...)
-    associatedPublication: Optional[str] = None
-    additionalDocumentation: Optional[str] = None
+    associatedPublication: Optional[str] = Field(default=None)
+    additionalDocumentation: Optional[str] = Field(default=None)
     fileFormat: str = Field(alias="format")
     dataSchema: Optional[Union[str, dict]] = Field(alias="schema", default=None)
     generatedBy: Optional[List[str]] = Field(default=[])
     derivedFrom: Optional[List[str]] = Field(default=[])
     usedBy: Optional[List[str]] = Field(default =[])
     contentUrl: Optional[str] = Field(default=None)
-
 
 
 class ROCrateDatasetContainer(FairscapeBaseModel): 
@@ -62,7 +67,7 @@ class ROCrateDatasetContainer(FairscapeBaseModel):
     hasPart: Optional[List[str]] = Field(default=[])
     isPartOf: Optional[List[str]] = Field(default=[])
 
-    def validate_crate(self, passed_ro_crate)->None:
+    def validate_crate(self, PassedCrate)->None:
         # for all linked IDs they must be
 
         # hasPart/isPartOf must be inside the crate or a valid ark
@@ -72,12 +77,13 @@ class ROCrateDatasetContainer(FairscapeBaseModel):
         # if remote, take as valid
         pass
 
+
 class ROCrateSoftware(FairscapeBaseModel): 
     metadataType: Optional[str] = Field(default="https://w3id.org/EVI#Software")
     additionalType: Optional[str] = Field(default="Software")
     author: str = Field(min_length=4, max_length=64)
     dateModified: str
-    version: str
+    version: str = Field(default="0.1.0")
     description: str =  Field(min_length=10)
     associatedPublication: Optional[str] = Field(default=None)
     additionalDocumentation: Optional[str] = Field(default=None)
@@ -93,10 +99,10 @@ class ROCrateComputation(FairscapeBaseModel):
     dateCreated: str 
     associatedPublication: Optional[str] = Field(default=None)
     additionalDocumentation: Optional[str] = Field(default=None)
-    command: Optional[Union[List[str], str]] = Field(default="")
+    command: Optional[Union[List[str], str]] = Field(default=None)
     usedSoftware: Optional[List[str]] = Field(default=[])
-    usedDataset: Optional[Union[List[str], str]] = Field(default=[])
-    generated: Optional[Union[str,List[str]]] = Field(default=[])
+    usedDataset: Optional[List[str]] = Field(default=[])
+    generated: Optional[List[str]] = Field(default=[])
 
 
 class ROCrate(FairscapeBaseModel):    
@@ -110,9 +116,9 @@ class ROCrate(FairscapeBaseModel):
         ROCrateDatasetContainer
         ]] = Field(alias="@graph", discriminator='addtionalType')
 
-    
-    @computed_field(alias="@id")
-    @property
+ 
+ #   @computed_field(alias="@id")
+ #   @property
     def guid(self) -> str:
 
         # remove trailing whitespace 
@@ -308,7 +314,7 @@ class ROCrate(FairscapeBaseModel):
             return OperationStatus(False, f"Error: {str(e)}", 500)
 
 
-def unzip_and_upload(MinioClient, Object) -> OperationStatus:
+def unzip_and_upload(MinioClient, Object, ROCrateBucket: str) -> OperationStatus:
     """Accepts zipped ROCrate, unzip and upload onto MinIO.
 
     Args:
@@ -324,7 +330,12 @@ def unzip_and_upload(MinioClient, Object) -> OperationStatus:
         with zipfile.ZipFile(io.BytesIO(zip_contents), "r") as zip_file:                                        
             for file_info in zip_file.infolist():
                 file_contents = zip_file.read(file_info.filename)
-                MinioClient.put_object(MINIO_ROCRATE_BUCKET, file_info.filename, io.BytesIO(file_contents), len(file_contents))
+                MinioClient.put_object(
+                    ROCrateBucket, 
+                    file_info.filename, 
+                    io.BytesIO(file_contents), 
+                    len(file_contents)
+                    )
 
     except Exception as e:
         return OperationStatus(False, f"Exception uploading ROCrate: {str(e)}", 500)
