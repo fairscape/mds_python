@@ -5,6 +5,9 @@ services:
     - infinity
     image: python:3.11.4
     init: true
+    links:
+      - "mongo:mongo"
+      - "minio:minio"
     volumes:
     - type: bind
       source: /var/run/docker.sock

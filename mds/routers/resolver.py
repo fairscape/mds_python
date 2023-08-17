@@ -8,7 +8,6 @@ from fastapi import (
 from fastapi.responses import JSONResponse
 
 from mds.config import (
-    get_minio,
     get_casbin_enforcer,
     get_mongo_config,
     get_mongo_client,

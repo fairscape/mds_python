@@ -8,7 +8,7 @@ from typing import (
 import os
 import pathlib
 from urllib.parse import quote_plus
-from pymongo import MongoClient
+from pymongo import MongoClient, ASCENDING
 import minio
 from functools import lru_cache
 
@@ -205,10 +205,10 @@ def setup_mongo():
 
     # create text index for 
     # db.identifier.createIndex( { name: "text", description: "text" } )
-    identifier_collection.create_index({"description": "text", "name": "text"})
+    identifier_collection.create_index([('description', 'text'), ('name', 'text')], name="description_text")
 
     # create index for identifiers
-    identifier_collection.create_index({"@id": 1})
+    identifier_collection.create_index([("@id", ASCENDING)])
 
     # TODO create index for provenance properties
     #

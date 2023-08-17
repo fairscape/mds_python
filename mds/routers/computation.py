@@ -1,7 +1,6 @@
 import pymongo
 from fastapi import APIRouter, Response, BackgroundTasks
 from mds.config import (
-    get_minio,
     get_casbin_config,
     get_casbin_enforcer,
     get_mongo_config,
