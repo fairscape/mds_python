@@ -35,8 +35,8 @@
       "generatedBy": [],
       "derivedFrom": [],
       "usedBy": [],
-      "contentUrl": "file://test-one.csv",
-      "@id": "ark:59853/rocrate-testdataset"
+      "contentUrl": "file://test-input-1.csv",
+      "@id": "ark:59852/rocrate-testdataset"
     },
     {
       "@context": {
@@ -62,8 +62,8 @@
       "generatedBy": [],
       "derivedFrom": [],
       "usedBy": [],
-      "contentUrl": "file://test-two.csv",
-      "@id": "ark:59853/rocrate-testdatasettwo"
+      "contentUrl": "file://test-input-2.csv",
+      "@id": "ark:59852/rocrate-testdatasettwo"
     },
     {
       "@context": {
@@ -89,8 +89,8 @@
       "generatedBy": [],
       "derivedFrom": [],
       "usedBy": [],
-      "contentUrl": "file://output.csv",
-      "@id": "ark:59853/rocrate-testresult"
+      "contentUrl": "file://test-output.csv",
+      "@id": "ark:59852/rocrate-testresult"
     },
     {
       "@context": {
@@ -111,11 +111,11 @@
       "derivedFrom": [],
       "usedBy": [],
       "hasPart": [
-        "ark:59853/rocrate-testdataset",
-        "ark:59853/rocrate-testdatasettwo"
+        "ark:59852/rocrate-testdataset",
+        "ark:59852/rocrate-testdatasettwo"
       ],
       "isPartOf": [],
-      "@id": "ark:59853/rocrate-testdatasetcontainer"
+      "@id": "ark:59852/rocrate-testdatasetcontainer"
     },
     {
       "@context": {
@@ -139,7 +139,7 @@
       "format": ".py",
       "usedByComputation": [],
       "contentUrl": "file://script.py",
-      "@id": "ark:59853/rocrate-testsoftware"
+      "@id": "ark:59852/rocrate-testsoftware"
     },
     {
       "@context": {
@@ -161,16 +161,16 @@
       "additionalDocumentation": null,
       "command": "",
       "usedSoftware": [
-        "ark:59853/rocrate-testsoftware"
+        "ark:59852/rocrate-testsoftware"
       ],
       "usedDataset": [
-        "ark:59853/rocrate-testdatasetcontainer"
+        "ark:59852/rocrate-testdatasetcontainer"
       ],
       "generated": [
-        "ark:59853/rocrate-testresult"
+        "ark:59852/rocrate-testresult"
       ],
-      "@id": "ark:59853/rocrate-computation"
+      "@id": "ark:59852/rocrate-computation"
     }
   ],
-  "@id": "ark:59853/rocrate-testcrate-78a5f3e86e"
+  "@id": "ark:59852/rocrate-testcrate-8e74f7c353"
 }

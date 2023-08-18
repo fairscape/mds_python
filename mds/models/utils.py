@@ -1,4 +1,6 @@
 from pymongo.collection import Collection
+from typing import List
+
 
 def list_dataset(mongo_collection: Collection):
     cursor = mongo_collection.find(
@@ -15,5 +17,5 @@ def list_dataset(mongo_collection: Collection):
     return {"datasets": dataset_list }
 
 
-def delete_distribution_metadata(mongo_collection: Collection, distribution_ids: list[str]):
+def delete_distribution_metadata(mongo_collection: Collection, distribution_ids: List[str]):
     pass

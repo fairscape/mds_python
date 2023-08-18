@@ -47,7 +47,6 @@ def upload(file: UploadFile = File(...)):
             content={"error": upload_status.message}
         )
 
-    
 
     RO_CRATE_METADATA_FILE_NAME = 'ro-crate-metadata.json'
     

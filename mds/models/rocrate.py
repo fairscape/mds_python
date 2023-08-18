@@ -25,6 +25,7 @@ from datetime import datetime
 import pymongo
 
 from mds.models.fairscape_base import FairscapeBaseModel
+
 from mds.utilities.operation_status import OperationStatus
 
 from mds.database.config import MINIO_BUCKET, MINIO_ROCRATE_BUCKET, MONGO_DATABASE, MONGO_COLLECTION
@@ -46,7 +47,6 @@ class ROCrateDataset(FairscapeBaseModel):
     derivedFrom: Optional[List[str]] = Field(default=[])
     usedBy: Optional[List[str]] = Field(default =[])
     contentUrl: Optional[str] = Field(default=None)
-
 
 
 class ROCrateDatasetContainer(FairscapeBaseModel): 

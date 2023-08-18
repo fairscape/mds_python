@@ -1,6 +1,6 @@
 from fastapi.security import OAuth2PasswordBearer
 from fastapi import Depends, HTTPException, status
-from typing import Annotated
+from typing_extensions import Annotated
 
 from mds.config import (
     get_mongo_config,
