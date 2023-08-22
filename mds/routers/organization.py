@@ -4,7 +4,6 @@ from fastapi.responses import JSONResponse
 from mds.database import mongo, casbin
 from mds.models.organization import Organization, list_organization
 from mds.models.auth import ParseAuthHeader, UserNotFound, TokenError
-from mds.models.compact.user import UserCompactView
 from mds.database.config import MONGO_DATABASE, MONGO_COLLECTION
 
 import base64
@@ -25,7 +24,7 @@ def organization_create(
     - **@id**: a unique identifier
     - **@type**: Organization
     - **name**: a name
-    - **owner**: an existing user in its compact form with @id, @type, name, and email
+    - **owner**: an existing user @id
     """
     
     mongo_client = mongo.GetConfig()
@@ -47,11 +46,7 @@ def organization_create(
         )
 
     # set the calling user as the owner
-    organization.owner = UserCompactView(
-        id=calling_user.id,
-        name=calling_user.name,
-        email=calling_user.email)
-
+    organization.owner = calling_user.id,
     create_status = organization.create(mongo_client)
     mongo_client.close()
 

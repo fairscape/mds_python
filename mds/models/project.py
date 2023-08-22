@@ -1,30 +1,24 @@
 from bson import SON
-from pydantic import Extra
+from pydantic import (
+    Extra,
+    Field,
+    constr
+)
 from typing import List, Union, Optional
 from mds.models.fairscape_base import *
-from mds.models.compact.user import UserCompactView
-from mds.models.compact.computation import ComputationCompactView
-from mds.models.compact.dataset import DatasetCompactView
-from mds.models.compact.software import SoftwareCompactView
-from mds.models.compact.evidencegraph import EvidenceGraphCompactView
-from mds.models.compact.organization import OrganizationCompactView
-from mds.models.compact.rocrate import ROCrateCompactView
 
 
-class Project(FairscapeBaseModel):
-    context = {"@vocab": "https://schema.org/", "evi": "https://w3id.org/EVI#"}
-    type = "Project"
-    owner: UserCompactView
-    members: List[UserCompactView] = []
-    memberOf: OrganizationCompactView
-    datasets: Optional[List[DatasetCompactView]]
-    computations: Optional[List[ComputationCompactView]]
-    software: Optional[List[SoftwareCompactView]]
-    evidencegraphs: Optional[List[EvidenceGraphCompactView]]
-    rocrates: Optional[List[ROCrateCompactView]]
+class Project(FairscapeBaseModel, extra = Extra.allow):
+    metadataType: str = Field(default="Project", alias="@type")
+    owner: constr(pattern=IdentifierPattern) = Field(...)
+    members: List[constr(pattern=IdentifierPattern)] = []
+    memberOf: constr(pattern=IdentifierPattern) = Field(...)
+    datasets: Optional[List[constr(pattern=IdentifierPattern)]]
+    computations: Optional[List[constr(pattern=IdentifierPattern)]]
+    software: Optional[List[constr(pattern=IdentifierPattern)]]
+    evidencegraphs: Optional[List[constr(pattern=IdentifierPattern)]]
+    rocrates: Optional[List[constr(pattern=IdentifierPattern)]]
 
-    class Config:
-        extra = Extra.allow
 
     def create(self, MongoCollection: pymongo.collection.Collection) -> OperationStatus:
 

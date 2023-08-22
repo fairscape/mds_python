@@ -67,7 +67,7 @@ class Session(BaseModel):
         return OperationStatus(True, "", 200)
 
     def encode(self) -> str:
-        return jwt .encode(self.dict(), JWT_SECRET, algorithm="HS256")
+        return jwt.encode(self.dict(), JWT_SECRET, algorithm="HS256")
 
 
 class UserNotFound(Exception):
@@ -99,7 +99,8 @@ class TokenError(Exception):
 
 
 def LoginUserBasic(
-        MongoCollection: pymongo.collection.Collection,
+        UserCollection:    pymongo.collection.Collection,
+        SessionCollection: pymongo.collection.Collection,
         email: str,
         password: str
 ) -> Session:
@@ -107,7 +108,7 @@ def LoginUserBasic(
 	given a users email and password create and register a session, and return the session object
 	'''
 
-    auth_user = MongoCollection.find_one({
+    auth_user = UserCollection.find_one({
         "@type": "Person",
         "email": email,
         "password": password
@@ -135,14 +136,14 @@ def LoginUserBasic(
         exp=expiration_utc_timestamp
     )
 
-    session_create = sess.register(MongoCollection)
+    session_create = sess.register(SessionCollection)
 
     return sess
 
 
 def ParseSession(EncodedSession: str) -> Session:
     if "Bearer " in EncodedSession:
-        raw_session = EncodedSession.strip("Bearer").strip()
+        raw_session = EncodedSession.strip("Bearer ").strip()
     else:
         raw_session = EncodedSession
 

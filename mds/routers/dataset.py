@@ -1,11 +1,22 @@
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse
-from mds.database.config import MONGO_DATABASE, MONGO_COLLECTION
+from mds.config import (
+    get_casbin_config,
+    get_casbin_enforcer,
+    get_mongo_config,
+    get_mongo_client,
+) 
 
 from mds.database import mongo
-from mds.models.dataset import Dataset, list_dataset
+from mds.models.dataset import Dataset
+from mds.models.utils import list_dataset
 
 router = APIRouter()
+mongo_config = get_mongo_config()
+mongo_client = get_mongo_client()
+
+casbin_enforcer = get_casbin_enforcer()
+casbin_enforcer.load_policy()
 
 
 @router.post("/dataset",

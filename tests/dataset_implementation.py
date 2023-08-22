@@ -1,30 +1,29 @@
 from bson import SON
-from pydantic import (
-    Extra,
-    Field,
-)
-from typing import Optional, List, Union, Literal
+from pydantic import Extra
+from typing import Optional, List, Union
 from datetime import datetime
-from pymongo.collection import Collection
+import pymongo
 
 from mds.models.fairscape_base import *
-from mds.models.utils import (
-    delete_distribution_metadata
-)
+from mds.models.compact import *
 from mds.utilities.operation_status import OperationStatus
 from mds.database.config import MONGO_DATABASE, MONGO_COLLECTION
 
-class Dataset(FairscapeBaseModel, extra=Extra.allow):
-    metadataType: Literal['evi:Dataset'] = Field(alias="@type")
-    owner: constr(pattern=IdentifierPattern) = Field(...)
-    distribution: Optional[List[str]] = []
-    includedInDataCatalog: Optional[str] = Field(default=None)
-    sourceOrganization: Optional[str] = Field(default=None)
-    author: Optional[str] = Field(default=None)
-    dateCreated: Optional[datetime] = Field(default_factory=datetime.now)
-    dateModified: Optional[datetime] = Field(default_factory=datetime.now)
-    usedBy: Optional[List[str]] = []
+class Dataset(FairscapeBaseModel):
+    context = {"@vocab": "https://schema.org/", "evi": "https://w3id.org/EVI#"}
+    type = "evi:Dataset"
+    owner: UserCompactView
+    distribution: Optional[List[DataDownloadCompactView]] = []
+    includedInDataCatalog: Optional[ProjectCompactView] = None
+    sourceOrganization: Optional[OrganizationCompactView] = None
+    author: Optional[Union[str, UserCompactView]] = ""
+    dateCreated: Optional[datetime]
+    dateModified: Optional[datetime]
+    activity: Optional[List[ComputationCompactView]] = []
+    acl: Optional[dict]
 
+    class Config:
+        extra = Extra.allow
 
     def create(
         self, 
@@ -151,12 +150,13 @@ class Dataset(FairscapeBaseModel, extra=Extra.allow):
                 )
 
         if update_organization.modified_count != 1:
+            # cancel transaction
             return OperationStatus(False, "", 500)
 
         # TODO delete all distributions 
         if len(self.distribution) != 0:
             distribution_identifiers = [ dist['@id'] for dist in self.distribution ]
-            delete_status = delete_distribution_metadata(distribution_identifiers)
+            delete_status = delete_distributions(distribution_identifiers)
             
 
         # delete the distribution
@@ -167,22 +167,11 @@ class Dataset(FairscapeBaseModel, extra=Extra.allow):
 
         return OperationStatus(True, "", 200)
 
-def DeleteDataset(
-    identifier_collection: Collection, 
-    user_collection: Collection,
-    dataset_id: str
-):
-    """
-    """
-    pass
 
-
-def DeleteDownload(
-    identifier_collection: Collection,
-    user_collection: Collection,
-    minio_client,
-    download_identifier,
-):
-    """
-    """
-    pass
+def list_dataset(mongo_collection: pymongo.collection.Collection):
+    cursor = mongo_collection.find(
+        filter={"@type": "evi:Dataset"},
+        projection={"_id": False}
+    )
+    return {"datasets": [{"@id": dataset.get("@id"), "@type": "evi:Dataset", "name": dataset.get("name")} for dataset in
+                         cursor]}

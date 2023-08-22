@@ -13,3 +13,4 @@ pyjwt
 requests-toolbelt
 celery[redis]
 boto3
+python-dotenv

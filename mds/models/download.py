@@ -1,16 +1,18 @@
-from typing import Optional, Union
+from typing import Optional, Union, Literal
 from datetime import datetime
-from pydantic import Extra
+from pydantic import (
+    Extra,
+    Field,
+    constr
+)
 from bson import SON
 import pymongo
 
-from mds.models.fairscape_base import FairscapeBaseModel
+from mds.models.fairscape_base import (
+    FairscapeBaseModel,
+    IdentifierPattern
+)
 from mds.models.dataset import Dataset
-from mds.models.compact.dataset import DatasetCompactView
-from mds.models.compact.software import SoftwareCompactView
-from mds.models.compact.project import ProjectCompactView
-from mds.models.compact.organization import OrganizationCompactView
-from mds.models.compact.user import UserCompactView 
 
 from mds.utilities.operation_status import OperationStatus
 from fastapi.encoders import jsonable_encoder
@@ -19,18 +21,24 @@ from mds.database.config import MINIO_BUCKET, MONGO_DATABASE, MONGO_COLLECTION
 
 
 class Download(FairscapeBaseModel, extra=Extra.allow):
-    context = {"@vocab": "https://schema.org/", "evi": "https://w3id/EVI#"}
-    type = "DataDownload"
+    context: dict = Field(
+        default={
+            "@vocab": "https://schema.org/", 
+            "evi": "https://w3id.org/EVI#"
+        },
+        alias="@context"
+    )
+    metadataType: Literal['evi:DataDownload'] = Field(alias="@type")
     encodingFormat: str
-    owner: UserCompactView
+    owner: constr(pattern=IdentifierPattern) = Field(...)
     contentSize: Optional[str]
     contentUrl: Optional[str]
-    encodesCreativeWork: Union[DatasetCompactView, SoftwareCompactView, str]
+    encodesCreativeWork: constr(pattern=IdentifierPattern) = Field(...)
     sha256: Optional[str]
-    uploadDate: Optional[datetime]
-    version: Optional[str]
-    sourceOrganization: Optional[OrganizationCompactView] = None
-    includedInDataCatalog: Optional[ProjectCompactView] = None
+    uploadDate: Optional[datetime] = Field(default_factory=datetime.now)
+    version: Optional[str] = Field(default="0.1.0")
+    sourceOrganization: Optional[constr(pattern=IdentifierPattern)] = Field(default=None)
+    includedInDataCatalog: Optional[constr(pattern=IdentifierPattern)] = Field(default=None)
 
 
     def create_metadata(self, MongoClient: pymongo.MongoClient) -> OperationStatus: 
@@ -316,6 +324,7 @@ class Download(FairscapeBaseModel, extra=Extra.allow):
 
     def update_metadata(self, MongoCollection: pymongo.collection.Collection):
         pass
+
 
 
 def list_download(MongoCollection):

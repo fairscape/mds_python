@@ -1,6 +1,5 @@
 from enum import Enum
 from pydantic import (
-    BaseSettings,
     BaseModel
 )
 from typing import (
@@ -9,49 +8,101 @@ from typing import (
 import os
 import pathlib
 from urllib.parse import quote_plus
-from pymongo import MongoClient
+from pymongo import MongoClient, ASCENDING
 import minio
 from functools import lru_cache
 
 import casbin
 import casbin_sqlalchemy_adapter
 
+from dotenv import dotenv_values
+from pathlib import Path
+
+
+#AUTH_ENABLED = bool(os.environ.get("MDS_AUTH_ENABLED", "True"))
 
 @lru_cache()
-def get_mongo():
+def cached_dotenv():
+    # TODO temporary hardcoded fix for path issues
+    env_path = Path("/com.docker.devenvironments.code") / ".env"
+    config = dotenv_values(env_path)
+
+    return config
+
+ 
+@lru_cache()
+def get_mongo_config():
+
+    config_values = cached_dotenv()
+
     return MongoConfig(
-        host= os.environ.get("MONGO_HOST", "localhost"),
-        port= os.environ.get("MONGO_PORT", "27017"),
-        user= os.environ.get("MONGO_ACCESS_KEY", "root"),
-        password= os.environ.get("MONGO_SECRET_KEY", "rootpass"),
-        db= os.environ.get("MONGO_DATABASE", "fairscape"),
-        collection= os.environ.get("MONGO_COLLECTION", "mds")
+        host= config_values['MONGO_HOST'],
+        port= config_values['MONGO_PORT'],
+        user= config_values['MONGO_ACCESS_KEY'],
+        password= config_values['MONGO_SECRET_KEY'],
+        db= config_values['MONGO_DATABASE'],
+        identifier_collection = config_values["MONGO_IDENTIFIER_COLLECTION"],
+        user_collection = config_values["MONGO_USER_COLLECTION"],
+        rocrate_collection = config_values["MONGO_ROCRATE_COLLECTION"]
     )
 
 
 @lru_cache()
-def get_minio():
+def get_mongo_client():
+    mongo_config = get_mongo_config()
+    return mongo_config.CreateClient()
+
+
+@lru_cache()
+def get_minio_config():
+
+    config_values = cached_dotenv()
+
     return MinioConfig(
-        uri= os.environ.get("MINIO_URI"),
-        user= os.environ.get("MINIO_BUCKET"),
-        password= os.environ.get("MINIO_ACCESS_KEY"),
-        default_bucket= os.environ.get("MINIO_SECRET_KEY"), 
-        secure= bool(os.environ.get("MINIO_SECURE", False)),
+        host= config_values["MINIO_URI"],
+        port=config_values["MINIO_PORT"],
+        access_key = config_values["MINIO_ACCESS_KEY"],
+        secret_key = config_values["MINIO_SECRET_KEY"],
+        default_bucket= config_values["MINIO_DEFAULT_BUCKET"], 
+        rocrate_bucket=config_values["MINIO_ROCRATE_BUCKET"],
+        secure= bool(config_values["MINIO_SECURE"]=="True"),
     )
 
 
 @lru_cache()
-def get_casbin():
+def get_minio_client():
+   minio_config = get_minio_config()
+   return minio_config.CreateClient()
+
+
+@lru_cache()
+def get_casbin_config():
+    config_values = cached_dotenv()
+
     return CasbinConfig(
         policy_path= pathlib.Path(
-            os.environ.get("CASBIN_POLICY", "casbin_policy.db")
+            config_values["CASBIN_POLICY"]
         ),
-        model_path= pathlib.Path(
-            os.environ.get("CASBIN_MODEL", "./tests/restful_casbin.conf")
+        casbin_model_path= pathlib.Path(
+            config_values["CASBIN_MODEL"]
         )
     )
- 
 
+@lru_cache()
+def get_casbin_enforcer():
+    casbin_config = get_casbin_config()
+    return casbin_config.CreateClient()
+ 
+@lru_cache()
+def get_jwt_secret():
+    config_values = cached_dotenv()
+    return config_values["JWT_SECRET"]
+
+@lru_cache()
+def get_ark_naan():
+    # TODO return entire config object
+    config_values= cached_dotenv()
+    return config_values.get("ARK_NAAN", "59853")
 
 #MongoDep = Annotated[pymongo.MongoClient, Depends(common_parameters)]
 #CasbinDep = Annotated[casbin.Enforcer, Depends(get_casbin)]
@@ -64,10 +115,10 @@ class MongoConfig(BaseModel):
     user: Optional[str] = "user"
     password: Optional[str] = "pass"
     db: Optional[str] = "fairscape"
-    collection: Optional[str] = "mds"
-
-    class Config:
-        validate_assignment=True
+    identifier_collection: Optional[str] = "mds"
+    rocrate_collection: Optional[str] = "rocrate"
+    user_collection: Optional[str] = "users"
+    session_collection: Optional[str] = "sessions"
 
 
     def CreateClient(self):
@@ -78,15 +129,23 @@ class MongoConfig(BaseModel):
 
 
 class MinioConfig(BaseModel):
-    uri: str 
-    user: str 
-    password: str 
-    default_bucket: str 
+    host: Optional[str] = None
+    port: Optional[str] = None
+    secret_key: Optional[str] = None
+    access_key: Optional[str] = None
+    default_bucket: Optional[str] = "mds"
+    rocrate_bucket: Optional[str] = "rocrate"
     secure: bool
 
     def CreateClient(self):
+
+        if self.port is None:
+            uri = self.host
+        else:
+            uri = f"{self.host}:{self.port}"
+
         return minio.Minio(
-                self.hostname, 
+                endpoint= uri, 
                 access_key= self.access_key, 
                 secret_key= self.secret_key,
                 secure = self.secure
@@ -121,17 +180,17 @@ class CasbinAdapterEnum(str, Enum):
 
 
 class CasbinConfig(BaseModel):
-    model_path: pathlib.Path
+    casbin_model_path: pathlib.Path
     policy_path: pathlib.Path 
     #backend: CasbinAdapterEnum
 
     def CreateClient(self):
         adapter = casbin_sqlalchemy_adapter.Adapter(f'sqlite:///{self.policy_path}')
-        casbinEnforcer = casbin.Enforcer(str(self.model_path), adapter)
+        casbinEnforcer = casbin.Enforcer(str(self.casbin_model_path), adapter)
         return casbinEnforcer
 
 
-class FairscapeConfig(BaseSettings):
+class FairscapeConfig(BaseModel):
     host: str
     port: int
     reload_server: bool
@@ -153,5 +212,54 @@ class FairscapeConfig(BaseSettings):
         app.conf.result_backend = self.compute.redis.result_backend
 
         return celery_app
+
+
+
+def setup_mongo():
+    ''' Initalize mongo database for fairscape server application
+    '''
+
+    mongo_config = get_mongo_config()
+    mongo_client = mongo_config.CreateClient()
+
+    # create database if not created 
+    mongo_db = mongo_client[mongo_config.db]
+    
+    # create identifier collection
+    identifier_collection = mongo_db[mongo_config.identifier_collection]
+
+    # create user collection
+    mongo_collection = mongo_db[mongo_config.user_collection]
+
+    # create text index for 
+    # db.identifier.createIndex( { name: "text", description: "text" } )
+    identifier_collection.create_index([('description', 'text'), ('name', 'text')], name="description_text")
+
+    # create index for identifiers
+    identifier_collection.create_index([("@id", ASCENDING)])
+
+    # TODO create index for provenance properties
+    #
+
+    # TODO recency of metadata publication
+    #identifier_collection.create_index({})
+
+
+
+
+def setup_minio():
+    ''' Initalize minio buckets for fairscape server application
+    '''
+
+    minio_config = get_minio_config()
+    minio_client = get_minio_client()
+
+    # create default bucket
+    print(minio_config.default_bucket)
+    minio_client.make_bucket(minio_config.default_bucket)
+
+    # create rocrate bucket
+    print(minio_config.rocrate_bucket)
+    minio_client.make_bucket(minio_config.rocrate_bucket)
 
 

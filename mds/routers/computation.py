@@ -1,8 +1,13 @@
 import pymongo
 from fastapi import APIRouter, Response, BackgroundTasks
-
-from mds.database import mongo, minio
-from mds.database.config import MONGO_DATABASE, MONGO_COLLECTION
+from mds.config import (
+    get_casbin_config,
+    get_casbin_enforcer,
+    get_mongo_config,
+    get_mongo_client,
+    MongoConfig,
+    CasbinConfig
+) 
 
 from mds.compute import create_job
 from mds.models.computation import Computation, list_computation, RegisterComputation
@@ -18,6 +23,11 @@ from mds.utilities.funcs import *
 
 router = APIRouter()
 
+mongo_config = get_mongo_config()
+mongo_client = get_mongo_client()
+
+casbin_enforcer = get_casbin_enforcer()
+casbin_enforcer.load_policy()
 
 @router.post("/computation",
              summary="Create a computation",
@@ -31,13 +41,10 @@ def computation_create(computation: Computation, response: Response):
     - **name**: a name
     - **owner**: an existing user in its compact form with @id, @type, name, and email
     """
-    mongo_client = mongo.GetConfig()
-    mongo_db = mongo_client[MONGO_DATABASE]
-    mongo_collection = mongo_db[MONGO_COLLECTION]
+    mongo_db = mongo_client[mongo_config.db]
+    mongo_collection = mongo_db[mongo_config.identifier_collection]
 
     create_status = computation.create(mongo_collection)
-
-    mongo_client.close()
 
     if create_status.success:
         return JSONResponse(
@@ -54,9 +61,9 @@ def computation_create(computation: Computation, response: Response):
 @router.put("/computation/execute/ark:{NAAN}/{postfix}")
 def computation_execute(NAAN: str, postfix: str):
 
-    mongo_client = mongo.GetConfig()
-    mongo_db = mongo_client[MONGO_DATABASE]
-    mongo_collection = mongo_db[MONGO_COLLECTION]
+    mongo_db = mongo_client[mongo_config.db]
+    mongo_collection = mongo_db[mongo_config.identifier_collection]
+
     computation_id = f"ark:{NAAN}/{postfix}"
 
     computation = Computation.construct(id=computation_id)
@@ -81,9 +88,8 @@ def computation_execute(NAAN: str, postfix: str):
             summary="List all computations",
             response_description="Retrieved list of computations")
 def computation_list(response: Response):
-    mongo_client = mongo.GetConfig()
-    mongo_db = mongo_client[MONGO_DATABASE]
-    mongo_collection = mongo_db[MONGO_COLLECTION]
+    mongo_db = mongo_client[mongo_config.db]
+    mongo_collection = mongo_db[mongo_config.identifier_collection]
 
     computation = list_computation(mongo_collection)
 
@@ -102,9 +108,8 @@ def computation_get(NAAN: str, postfix: str, response: Response):
     - **NAAN**: Name Assigning Authority Number which uniquely identifies an organization e.g. 12345
     - **postfix**: a unique string
     """
-    mongo_client = mongo.GetConfig()
-    mongo_db = mongo_client[MONGO_DATABASE]
-    mongo_collection = mongo_db[MONGO_COLLECTION]
+    mongo_db = mongo_client[mongo_config.db]
+    mongo_collection = mongo_db[mongo_config.identifier_collection]
 
     computation_id = f"ark:{NAAN}/{postfix}"
 
@@ -125,9 +130,10 @@ def computation_get(NAAN: str, postfix: str, response: Response):
             summary="Update a computation",
             response_description="The updated computation")
 def computation_update(computation: Computation, response: Response):
-    mongo_client = mongo.GetConfig()
-    mongo_db = mongo_client[MONGO_DATABASE]
-    mongo_collection = mongo_db[MONGO_COLLECTION]
+    mongo_db = mongo_client[mongo_config.db]
+    mongo_collection = mongo_db[mongo_config.identifier_collection]
+
+    computation_id = f"ark:{NAAN}/{postfix}"
 
     update_status = computation.update(mongo_collection)
 
@@ -155,11 +161,10 @@ def computation_delete(NAAN: str, postfix: str):
     - **NAAN**: Name Assigning Authority Number which uniquely identifies an organization e.g. 12345
     - **postfix**: a unique string
     """
-    computation_id = f"ark:{NAAN}/{postfix}"
 
-    mongo_client = mongo.GetConfig()
-    mongo_db = mongo_client[MONGO_DATABASE]
-    mongo_collection = mongo_db[MONGO_COLLECTION]
+    mongo_db = mongo_client[mongo_config.db]
+    mongo_collection = mongo_db[mongo_config.identifier_collection]
+    computation_id = f"ark:{NAAN}/{postfix}"
 
     computation = Computation.construct(id=computation_id)
 

@@ -14,12 +14,12 @@ from mds.routers.project import router as ProjectRouter
 from mds.routers.organization import router as OrganizationRouter
 from mds.routers.evidencegraph import router as EvidenceGraphRouter
 from mds.routers.transfer import router as TransferRouter
+from mds.routers.resolver import ResolverRouter
 
 from mds.web.routers.index import router as WebIndexRouter
 from mds.web.routers.signin import router as WebSigninRouter
 from mds.web.routers.signup import router as WebSignupRouter
 from mds.web.routers.home import router as WebHomeRouter
-from mds.routers.auth import router as AuthHandlerRouter
 
 
 tags_metadata = [
@@ -93,9 +93,7 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
 
-@app.get('/',
-        response_class=HTMLResponse,
-        tags=["Root"])
+@app.get('/', response_class=HTMLResponse, tags=["Root"])
 async def get_root(request: Request):
     context = {
         "request": request
@@ -120,16 +118,55 @@ app.include_router(ProjectRouter, tags=["project"])
 app.include_router(OrganizationRouter, tags=["organization"])
 app.include_router(EvidenceGraphRouter, tags=["evidencegraph"])
 app.include_router(TransferRouter, tags=["transfer"])
+app.include_router(ResolverRouter, tags=["resolver"])
 
 # Routes for Web pages
 app.include_router(WebIndexRouter, tags=["webindex"])
 #app.include_router(WebSigninRouter, tags=["websignin"])
 #app.include_router(WebSignupRouter, tags=["websignup"])
 app.include_router(WebHomeRouter, tags=["webhome"])
-app.include_router(AuthHandlerRouter, tags=["webauth"])
 
-@app.get("/page/{page_name}",
-        response_class=HTMLResponse)
+@app.get("/page/{page_name}", response_class=HTMLResponse)
 def show_page(request: Request, page_name: str):
     return templates.TemplateResponse("page/" + page_name + ".html", {"request": request})
+
+from typing import Annotated
+from fastapi import Depends
+from fastapi.security import OAuth2PasswordRequestForm
+
+from mds.config import (
+    get_mongo_config,
+    get_mongo_client
+) 
+
+from mds.models.auth import (
+    Session,
+    LoginUserBasic
+)
+
+mongo_config = get_mongo_config()
+mongo_client = get_mongo_client()
+
+
+@app.post("/token")
+def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
+
+    mongo_db = mongo_client[mongo_config.db]
+    user_collection = mongo_db[mongo_config.user_collection]
+    session_collection = mongo_db[mongo_config.session_collection]
+
+
+    try:
+        session = LoginUserBasic(
+            user_collection, 
+            session_collection, 
+            form_data.username, 
+            form_data.password
+        ) 
+
+    except UserNotFound:
+        raise HTTPException(status_code=400, detail="Incorrect username or password")
+
+    return {"access_token": session.encode(), "token_type": "bearer"}
+
 
