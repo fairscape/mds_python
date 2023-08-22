@@ -31,7 +31,7 @@ casbin_enforcer.load_policy()
 @router.post("/rocrate/upload",
              summary="Unzip the ROCrate and upload to object store",
              response_description="The transferred rocrate")
-def upload(file: UploadFile = File(...)):
+def rocrate_upload(file: UploadFile = File(...)):
     # Unzip the ROCrate and upload to MinIO
     upload_status = unzip_and_upload(
         minio_client,
@@ -47,21 +47,21 @@ def upload(file: UploadFile = File(...)):
     RO_CRATE_METADATA_FILE_NAME = 'ro-crate-metadata.json'
 
     # Get metadata from the unzipped crate
-    rocrate_metadata = get_metadata_from_crate(minio_client, RO_CRATE_METADATA_FILE_NAME)
+    rocrate_metadata_read = get_metadata_from_crate(minio_client, RO_CRATE_METADATA_FILE_NAME, file.file)
 
-    if not rocrate_metadata:
+    if not rocrate_metadata_read:
         return JSONResponse(
             status_code=404,
             content={"error": f"{RO_CRATE_METADATA_FILE_NAME} not found in ROCrate"}
         )
 
-    crate = ROCrate(**json.loads(rocrate_metadata))
+    crate = ROCrate(**json.loads(rocrate_metadata_read))
 
     # TODO run entailment
     # crate.entailment()
 
     # Compare objects referenced in the metadata file to the objects in the crate 
-    validation_status = crate.validate_rocrate_objects(mongo_client, minio_client, file.file)
+    validation_status = crate.validate_rocrate_object_reference(mongo_client, minio_client, file.file)
 
     if validation_status.success:
 
