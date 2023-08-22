@@ -4,13 +4,10 @@ from fastapi.responses import JSONResponse
 from mds.models.group import Group, list_groups
 
 from mds.config import (
-    get_minio_config,
     get_casbin_config,
     get_casbin_enforcer,
     get_mongo_config,
-    get_mongo_client,
-    MongoConfig,
-    CasbinConfig
+    get_mongo_client
 ) 
 
 router = APIRouter()

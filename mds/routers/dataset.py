@@ -6,8 +6,6 @@ from mds.config import (
     get_casbin_enforcer,
     get_mongo_config,
     get_mongo_client,
-    MongoConfig,
-    CasbinConfig
 ) 
 
 from mds.database import mongo

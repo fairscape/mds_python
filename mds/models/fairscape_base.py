@@ -15,7 +15,7 @@ import pymongo
 from mds.utilities.utils import validate_ark
 from mds.utilities.operation_status import OperationStatus
 
-IdentifierPattern = "ark[0-9]{5}\/.*"
+IdentifierPattern = "ark:[0-9]{5}\/.*"
 
 class FairscapeBaseModel(BaseModel, extra=Extra.allow):
     """Refers to the Fairscape BaseModel inherited from Pydantic

@@ -1,33 +1,45 @@
-from zipfile import ZipFile
 from fastapi.responses import StreamingResponse, FileResponse
+
 import zipfile
 import re
 import hashlib
+
+from bson import SON
+
 from mds.config import get_ark_naan
 from pydantic import (
-    BaseModel,
     Field,
     constr,
     AnyUrl,
     Extra,
     computed_field
 )
+
 from mds.config import (
     get_minio_config,
     get_casbin_enforcer,
     get_mongo_config,
     get_mongo_client,
 )
+from typing import (
+    Optional, 
+    Union, 
+    Dict, 
+    List, 
+    Generator
+)
+import hashlib
+import json
+import re
+
 import io
 import os
-import tempfile
-import json
 from pathlib import Path
 from io import BytesIO
-import boto3
+import zipfile
+from zipfile import ZipFile
 from botocore.client import Config
 
-from typing import Optional, Union, Dict, List, Generator
 from datetime import datetime
 import pymongo
 
@@ -43,11 +55,11 @@ class ROCrateDataset(FairscapeBaseModel):
     additionalType: Optional[str] = Field(default="Dataset")
     author: str = Field(max_length=64)
     datePublished: str = Field(...)
-    version: str
+    version: str = Field(default="0.1.0")
     description: str = Field(min_length=10)
     keywords: List[str] = Field(...)
-    associatedPublication: Optional[str] = None
-    additionalDocumentation: Optional[str] = None
+    associatedPublication: Optional[str] = Field(default=None)
+    additionalDocumentation: Optional[str] = Field(default=None)
     fileFormat: str = Field(alias="format")
     dataSchema: Optional[Union[str, dict]] = Field(alias="schema", default=None)
     generatedBy: Optional[List[str]] = Field(default=[])
@@ -56,7 +68,7 @@ class ROCrateDataset(FairscapeBaseModel):
     contentUrl: Optional[str] = Field(default=None)
 
 
-class ROCrateDatasetContainer(FairscapeBaseModel):
+class ROCrateDatasetContainer(FairscapeBaseModel): 
     metadataType: Optional[str] = Field(default="https://w3id.org/EVI#Dataset", alias="@type")
     additionalType: Optional[str] = Field(default="DatasetContainer")
     name: str
@@ -69,7 +81,8 @@ class ROCrateDatasetContainer(FairscapeBaseModel):
     hasPart: Optional[List[str]] = Field(default=[])
     isPartOf: Optional[List[str]] = Field(default=[])
 
-    def validate_crate(self, passed_ro_crate) -> None:
+
+    def validate_crate(self, PassedCrate)->None:
         # for all linked IDs they must be
 
         # hasPart/isPartOf must be inside the crate or a valid ark
@@ -80,13 +93,14 @@ class ROCrateDatasetContainer(FairscapeBaseModel):
         pass
 
 
-class ROCrateSoftware(FairscapeBaseModel):
+
+class ROCrateSoftware(FairscapeBaseModel): 
     metadataType: Optional[str] = Field(default="https://w3id.org/EVI#Software")
     additionalType: Optional[str] = Field(default="Software")
     author: str = Field(min_length=4, max_length=64)
     dateModified: str
-    version: str
-    description: str = Field(min_length=10)
+    version: str = Field(default="0.1.0")
+    description: str =  Field(min_length=10)
     associatedPublication: Optional[str] = Field(default=None)
     additionalDocumentation: Optional[str] = Field(default=None)
     fileFormat: str = Field(title="fileFormat", alias="format")
@@ -101,10 +115,10 @@ class ROCrateComputation(FairscapeBaseModel):
     dateCreated: str
     associatedPublication: Optional[str] = Field(default=None)
     additionalDocumentation: Optional[str] = Field(default=None)
-    command: Optional[Union[List[str], str]] = Field(default="")
+    command: Optional[Union[List[str], str]] = Field(default=None)
     usedSoftware: Optional[List[str]] = Field(default=[])
-    usedDataset: Optional[Union[List[str], str]] = Field(default=[])
-    generated: Optional[Union[str, List[str]]] = Field(default=[])
+    usedDataset: Optional[List[str]] = Field(default=[])
+    generated: Optional[List[str]] = Field(default=[])
 
 
 class ROCrate(FairscapeBaseModel):
@@ -118,8 +132,8 @@ class ROCrate(FairscapeBaseModel):
         ROCrateDatasetContainer
     ]] = Field(alias="@graph", discriminator='addtionalType')
 
-    @computed_field(alias="@id")
-    @property
+ #   @computed_field(alias="@id")
+ #   @property
     def guid(self) -> str:
 
         # remove trailing whitespace 
@@ -141,6 +155,47 @@ class ROCrate(FairscapeBaseModel):
         digest_string = sha_256_hash.hexdigest()
 
         return f"ark:{get_ark_naan()}/rocrate-{url_name}-{digest_string[0:10]}"
+
+
+    def entailment(self):
+        """ Run entailment on EVI Provenance properties
+        """
+
+        computations = list(filter(lambda x: x.additionalType == "Computation", self.metadataGraph))
+
+        def filterCrateByGUID(guid):
+            return list(filter(lambda x: x.guid==guid, self.metadataGraph))
+
+        def inverseUsedDataset(used_dataset_guid, computation_guid):
+            used_dataset_list = filterCrateByGUID(used_dataset_guid)
+            
+            # update each dataset as 
+            for used_dataset in used_dataset_list:
+                used_dataset.usedBy.append(computation_guid)
+
+        def inverseUsedSoftware(used_software_guid, computation_guid):
+            used_software_list = filterCrateByGUID(used_software_guid) 
+            
+            for used_software in used_software_list:
+                used_software.usedBy.append(computation_guid)
+
+
+        def inverseGenerated(generated_guid, computation_guid):
+            generated_list = filterCrateByGUID(generated_guid)
+
+            for generated_element in generated_list:
+                generated_element.generatedBy.append(computation_guid)
+
+
+        for computation_element in computations:
+            #used_datasets = computation.usedDatasets
+            #used_software = computation.usedSoftware
+            #  generated = computation.generated
+
+            [ inverseUsedDataset(used_dataset.guid, computation_element.guid) for used_dataset in computation_element.usedDatasets]
+            [ inverseUsedSoftware(used_software.guid, computation_element.guid) for used_software in computation_element.usedSoftware]
+            [ inverseGenerated(generated.guid, computation_element.guid) for generated in computation_element.generated]
+
 
     def validate_rocrate_object_reference(self, MongoClient: pymongo.MongoClient, MinioClient, Object) -> OperationStatus:
 
@@ -216,7 +271,7 @@ class ROCrate(FairscapeBaseModel):
         return OperationStatus(True, "", 200)
 
 
-def unzip_and_upload(MinioClient, Object) -> OperationStatus:
+def unzip_and_upload(MinioClient, Object, ROCrateBucket: str) -> OperationStatus:
     """Accepts zipped ROCrate, unzip and upload onto MinIO.
 
     Args:
@@ -232,8 +287,12 @@ def unzip_and_upload(MinioClient, Object) -> OperationStatus:
         with zipfile.ZipFile(io.BytesIO(zip_contents), "r") as zip_file:
             for file_info in zip_file.infolist():
                 file_contents = zip_file.read(file_info.filename)
-                MinioClient.put_object(MINIO_ROCRATE_BUCKET, file_info.filename, io.BytesIO(file_contents),
-                                       len(file_contents))
+                MinioClient.put_object(
+                    ROCrateBucket, 
+                    file_info.filename, 
+                    io.BytesIO(file_contents), 
+                    len(file_contents)
+                    )
 
     except Exception as e:
         return OperationStatus(False, f"Exception uploading ROCrate: {str(e)}", 500)
@@ -361,9 +420,47 @@ def get_metadata_by_id(rocrate_collection: pymongo.collection, rocrate_id):
             projection=query_projection
         )
 
-        if query:
-            return query
-        else:
-            return
     except Exception as e:
         raise Exception(e)
+        
+    if query:
+        return query
+        #try:
+        #    parsed_crate = ROCrate(**query)
+        #    return parsed_crate
+        #except Exception as e:
+        #    raise Exception(message=f"ROCRATE Metadata not valid: {str(e)}")
+    
+    else:
+        raise Exception(message=f"ROCRATE NOT FOUND: {str(query)}")
+
+
+def PublishROCrateMetadata(rocrate: ROCrate, rocrate_collection: pymongo.collection.Collection):
+    """ Insert ROCrate metadata into mongo rocrate collection
+    """
+
+    rocrate_json = rocrate.model_dump(by_alias=True)
+    insert_result = rocrate_collection.insert_one(rocrate_json)
+    if insert_result.inserted_id is None:
+        return False
+    else:
+        return True
+
+
+def PublishProvMetadata(rocrate: ROCrate, identifier_collection: pymongo.collection.Collection):
+    """ Insert ROCrate metadata and metadata for all identifiers into the identifier collection
+    """
+
+    # for every element in the rocrate model dump json
+    insert_metadata = [ prov.model_dump(by_alias=True) for prov in rocrate.metadataGraph  ]
+    # insert rocrate json into identifier collection
+    insert_metadata.append(rocrate.model_dump(by_alias=True))
+
+    # insert all identifiers into the identifier collection
+    insert_result = identifier_collection.insert_many(insert_metadata)
+
+    if len(insert_result.inserted_ids) != len(insert_metadata):
+        return False
+    else:
+        return True
+
