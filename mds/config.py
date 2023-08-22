@@ -15,20 +15,35 @@ from functools import lru_cache
 import casbin
 import casbin_sqlalchemy_adapter
 
+from dotenv import dotenv_values
+from pathlib import Path
+
+
 #AUTH_ENABLED = bool(os.environ.get("MDS_AUTH_ENABLED", "True"))
+
+@lru_cache()
+def cached_dotenv():
+    # TODO temporary hardcoded fix for path issues
+    env_path = Path("/com.docker.devenvironments.code") / ".env"
+    config = dotenv_values(env_path)
+
+    return config
 
  
 @lru_cache()
 def get_mongo_config():
+
+    config_values = cached_dotenv()
+
     return MongoConfig(
-        host= os.environ.get("MONGO_HOST", "localhost"),
-        port= os.environ.get("MONGO_PORT", "27017"),
-        user= os.environ.get("MONGO_ACCESS_KEY", "root"),
-        password= os.environ.get("MONGO_SECRET_KEY", "rootpass"),
-        db= os.environ.get("MONGO_DATABASE", "fairscape"),
-        identifier_collection = os.environ.get("MONGO_COLLECTION", "mds"),
-        user_collection = os.environ.get("MONGO_USER_COLLECTION"),
-        rocrate_collection = os.environ.get("MONGO_ROCRATE_COLLECTION")
+        host= config_values['MONGO_HOST'],
+        port= config_values['MONGO_PORT'],
+        user= config_values['MONGO_ACCESS_KEY'],
+        password= config_values['MONGO_SECRET_KEY'],
+        db= config_values['MONGO_DATABASE'],
+        identifier_collection = config_values["MONGO_IDENTIFIER_COLLECTION"],
+        user_collection = config_values["MONGO_USER_COLLECTION"],
+        rocrate_collection = config_values["MONGO_ROCRATE_COLLECTION"]
     )
 
 
@@ -40,14 +55,17 @@ def get_mongo_client():
 
 @lru_cache()
 def get_minio_config():
+
+    config_values = cached_dotenv()
+
     return MinioConfig(
-        host= os.environ.get("MINIO_HOST"),
-        port=os.environ.get("MINIO_PORT"),
-        access_key = os.environ.get("MINIO_ACCESS_KEY"),
-        secret_key = os.environ.get("MINIO_SECRET_KEY"),
-        default_bucket= os.environ.get("MINIO_DEFAULT_BUCKET"), 
-        rocrate_bucket=os.environ.get("MINIO_ROCRATE_BUCKET"),
-        secure= bool(os.environ.get("MINIO_SECURE", False)),
+        host= config_values["MINIO_URI"],
+        port=config_values["MINIO_PORT"],
+        access_key = config_values["MINIO_ACCESS_KEY"],
+        secret_key = config_values["MINIO_SECRET_KEY"],
+        default_bucket= config_values["MINIO_DEFAULT_BUCKET"], 
+        rocrate_bucket=config_values["MINIO_ROCRATE_BUCKET"],
+        secure= bool(config_values["MINIO_SECURE"]=="True"),
     )
 
 
@@ -59,12 +77,14 @@ def get_minio_client():
 
 @lru_cache()
 def get_casbin_config():
+    config_values = cached_dotenv()
+
     return CasbinConfig(
         policy_path= pathlib.Path(
-            os.environ.get("CASBIN_POLICY", "casbin_policy.db")
+            config_values["CASBIN_POLICY"]
         ),
         casbin_model_path= pathlib.Path(
-            os.environ.get("CASBIN_MODEL", "./tests/restful_casbin.conf")
+            config_values["CASBIN_MODEL"]
         )
     )
 
@@ -75,12 +95,14 @@ def get_casbin_enforcer():
  
 @lru_cache()
 def get_jwt_secret():
-    return os.environ.get("JWT_SECRET", "test-local-secret")
+    config_values = cached_dotenv()
+    return config_values["JWT_SECRET"]
 
 @lru_cache()
 def get_ark_naan():
     # TODO return entire config object
-    return os.environ.get("ARK_NAAN", "59853")
+    config_values= cached_dotenv()
+    return config_values.get("ARK_NAAN", "59853")
 
 #MongoDep = Annotated[pymongo.MongoClient, Depends(common_parameters)]
 #CasbinDep = Annotated[casbin.Enforcer, Depends(get_casbin)]
@@ -116,8 +138,14 @@ class MinioConfig(BaseModel):
     secure: bool
 
     def CreateClient(self):
+
+        if self.port is None:
+            uri = self.host
+        else:
+            uri = f"{self.host}:{self.port}"
+
         return minio.Minio(
-                f"{self.host}:{self.port}", 
+                endpoint= uri, 
                 access_key= self.access_key, 
                 secret_key= self.secret_key,
                 secure = self.secure

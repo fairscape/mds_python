@@ -16,8 +16,11 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    setup_minio()
-    setup_mongo()
+    try:
+        setup_minio()
+        setup_mongo()
+    except:
+        pass
 
     uvicorn.run(
         'mds.app:app', 

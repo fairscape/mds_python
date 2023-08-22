@@ -140,7 +140,48 @@ class ROCrate(FairscapeBaseModel):
         digest_string = sha_256_hash.hexdigest()
         
         return f"ark:{get_ark_naan()}/rocrate-{url_name}-{digest_string[0:10]}"
-        
+
+
+    def entailment(self):
+        """ Run entailment on EVI Provenance properties
+        """
+
+        computations = list(filter(lambda x: x.additionalType == "Computation", self.metadataGraph))
+
+        def filterCrateByGUID(guid):
+            return list(filter(lambda x: x.guid==guid, self.metadataGraph))
+
+        def inverseUsedDataset(used_dataset_guid, computation_guid):
+            used_dataset_list = filterCrateByGUID(used_dataset_guid)
+            
+            # update each dataset as 
+            for used_dataset in used_dataset_list:
+                used_dataset.usedBy.append(computation_guid)
+
+        def inverseUsedSoftware(used_software_guid, computation_guid):
+            used_software_list = filterCrateByGUID(used_software_guid) 
+            
+            for used_software in used_software_list:
+                used_software.usedBy.append(computation_guid)
+
+
+        def inverseGenerated(generated_guid, computation_guid):
+            generated_list = filterCrateByGUID(generated_guid)
+
+            for generated_element in generated_list:
+                generated_element.generatedBy.append(computation_guid)
+
+
+        for computation_element in computations:
+            #used_datasets = computation.usedDatasets
+            #used_software = computation.usedSoftware
+            #  generated = computation.generated
+
+            [ inverseUsedDataset(used_dataset.guid, computation_element.guid) for used_dataset in computation_element.usedDatasets]
+            [ inverseUsedSoftware(used_software.guid, computation_element.guid) for used_software in computation_element.usedSoftware]
+            [ inverseGenerated(generated.guid, computation_element.guid) for generated in computation_element.generated]
+
+
 
     def validate_rocrate_objects(self, MongoClient: pymongo.MongoClient, MinioClient, Object) -> OperationStatus:
         
@@ -535,4 +576,33 @@ def read_rocrate_metadata(MongoCollection: pymongo.collection.Collection, ROCrat
     
     else:
         raise Exception(message=f"ROCRATE NOT FOUND: {str(query)}")
- 
+
+
+def PublishROCrateMetadata(rocrate: ROCrate, rocrate_collection: pymongo.collection.Collection):
+    """ Insert ROCrate metadata into mongo rocrate collection
+    """
+
+    rocrate_json = rocrate.model_dump(by_alias=True)
+    insert_result = rocrate_collection.insert_one(rocrate_json)
+    if insert_result.inserted_id is None:
+        return False
+    else:
+        return True
+
+
+def PublishProvMetadata(rocrate: ROCrate, identifier_collection: pymongo.collection.Collection):
+    """ Insert ROCrate metadata and metadata for all identifiers into the identifier collection
+    """
+
+    # for every element in the rocrate model dump json
+    insert_metadata = [ prov.model_dump(by_alias=True) for prov in rocrate.metadataGraph  ]
+    # insert rocrate json into identifier collection
+    insert_metadata.append(rocrate.model_dump(by_alias=True))
+
+    # insert all identifiers into the identifier collection
+    insert_result = identifier_collection.insert_many(insert_metadata)
+
+    if len(insert_result.inserted_ids) != len(insert_metadata):
+        return False
+    else:
+        return True

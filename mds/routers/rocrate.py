@@ -23,6 +23,7 @@ mongo_config = get_mongo_config()
 mongo_client = get_mongo_client()
 mongo_db = mongo_client[mongo_config.db]
 rocrate_collection = mongo_db[mongo_config.rocrate_collection]
+identifier_collection = mongo_db[mongo_config.identifier_collection]
 minio_config= get_minio_config()
 minio_client = get_minio_client()
 casbin_enforcer = get_casbin_enforcer()
@@ -32,12 +33,13 @@ casbin_enforcer.load_policy()
 @router.post("/rocrate/upload",
              summary="Unzip the ROCrate and upload to object store",
              response_description="The transferred rocrate")
-def upload(file: UploadFile = File(...)):
+def upload(rocrate: UploadFile = File(...)):
      
     # Unzip the ROCrate and upload to MinIO
     upload_status = unzip_and_upload(         
         minio_client, 
-        file.file 
+        rocrate.file,
+        ROCrateBucket=minio_config.rocrate_bucket
     )
 
     if not upload_status.success:
@@ -60,26 +62,37 @@ def upload(file: UploadFile = File(...)):
                     content={"error": f"{RO_CRATE_METADATA_FILE_NAME} not found in ROCrate"}
                 )
 
+    # TODO handle validation failures gracefully
     #try:
-    crate = ROCrate(**json.loads(rocrate_metadata))
+
     #except ValidationError as e:
         # try to parse differently
         # additionalType generation
     #    pass
+        
+    crate = ROCrate(**json.loads(rocrate_metadata))
 
-    # TODO run entailment
-    # crate.entailment()
+    # TODO check if new identifiers must be minted
+
+
+    # run entailment
+    crate.entailment()
+
     
-    #print(crate)
-    #print(crate.dict(by_alias=True))
 
     # Compare objects referenced in the metadata file to the objects in the crate 
-    validation_status = crate.validate_rocrate_objects(mongo_client, minio_client, file.file)
+    validation_status = crate.validate_rocrate_objects(mongo_client, minio_client, rocrate.file)
 
     
     if validation_status.success:
 
-        # TODO insert all records into mongo
+        # mint rocrate identifier
+        # TODO check mongo write success
+        insert_rocrate = PublishROCrateMetadata(crate, rocrate_collection)
+
+        # mint all identifiers in identifier namespace
+        # TODO check mongo write success
+        insert_identifiers = PublishProvMetadata(crate, identifier_collection)
         
         return JSONResponse(
             status_code=201,
@@ -91,9 +104,12 @@ def upload(file: UploadFile = File(...)):
                 }
             }
         )
+
     else:
-        remove_status = remove_unzipped_crate(minio_client, 
-                            file.file)
+        remove_status = remove_unzipped_crate(
+            minio_client, 
+            rocrate.file
+            )
         
         if not remove_status.success:
             return JSONResponse(
