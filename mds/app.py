@@ -130,7 +130,7 @@ app.include_router(WebHomeRouter, tags=["webhome"])
 def show_page(request: Request, page_name: str):
     return templates.TemplateResponse("page/" + page_name + ".html", {"request": request})
 
-from typing import Annotated
+from typing_extensions import Annotated
 from fastapi import Depends
 from fastapi.security import OAuth2PasswordRequestForm
 

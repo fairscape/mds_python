@@ -18,7 +18,7 @@ import casbin_sqlalchemy_adapter
 #AUTH_ENABLED = bool(os.environ.get("MDS_AUTH_ENABLED", "True"))
 
 def setup_mongo():
-    mongo_config = get_mongo()
+    mongo_config = get_mongo_config()
     mongo_client = mongo_config.CreateClient()
 
     # create database if not created 
@@ -53,13 +53,13 @@ def get_mongo_client():
 
 
 @lru_cache()
-def get_minio():
+def get_minio_config():
     return MinioConfig(
-        uri= os.environ.get("MINIO_URI"),
-        user= os.environ.get("MINIO_BUCKET"),
-        password= os.environ.get("MINIO_ACCESS_KEY"),
-        default_bucket= os.environ.get("MINIO_SECRET_KEY"), 
-        secure= bool(os.environ.get("MINIO_SECURE", False)),
+        uri = os.environ.get("MINIO_URI", "localhost:9000"),
+        user = os.environ.get("MINIO_BUCKET", "testroot"),
+        password = os.environ.get("MINIO_ACCESS_KEY", "testroot"),
+        default_bucket = os.environ.get("MINIO_SECRET_KEY", "test"),
+        secure = bool(os.environ.get("MINIO_SECURE", False)),
     )
 
 
@@ -113,17 +113,17 @@ class MongoConfig(BaseModel):
 
 
 class MinioConfig(BaseModel):
-    uri: str 
-    user: str 
-    password: str 
-    default_bucket: str 
-    secure: bool
+    uri: str = "localhost:9000"
+    user: str = "testroot"
+    password: str = "testroot"
+    default_bucket: str = "test"
+    secure: bool = False
 
     def CreateClient(self):
         return minio.Minio(
-                self.hostname, 
-                access_key= self.access_key, 
-                secret_key= self.secret_key,
+                self.uri,
+                access_key= self.user,
+                secret_key= self.password,
                 secure = self.secure
                 )
 

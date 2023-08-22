@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing_extensions import Annotated
 
 from fastapi import (
     APIRouter,
@@ -8,7 +8,7 @@ from fastapi import (
 from fastapi.responses import JSONResponse
 
 from mds.config import (
-    get_minio,
+    get_minio_config,
     get_casbin_enforcer,
     get_mongo_config,
     get_mongo_client,
