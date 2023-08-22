@@ -1,0 +1,111 @@
+{
+  "@id": "ark:59852/994bb47b-3a3e-410f-9a6e-8eb7009b17bb",
+  "@context": {
+    "EVI": "https://w3id.org/EVI#",
+    "@vocab": "https://schema.org/"
+  },
+  "@type": "https://schema.org/Dataset",
+  "url": null,
+  "name": "Example input dataset",
+  "keywords": [
+    "test"
+  ],
+  "description": "a testing example",
+  "@graph": [
+    {
+      "@context": {
+        "@vocab": "https://schema.org/",
+        "evi": "https://w3id.org/EVI#"
+      },
+      "@type": "https://w3id.org/EVI#Dataset",
+      "url": null,
+      "name": "test dataset container",
+      "keywords": [
+        "test"
+      ],
+      "description": "my example test dataset",
+      "additionalType": "DatasetContainer",
+      "version": "0.1",
+      "generatedBy": [],
+      "derivedFrom": [],
+      "usedBy": [],
+      "hasPart": [
+        "ark:59852/a7d6c513-c9d6-4dcb-92c2-c20be7adcb6f"
+      ],
+      "isPartOf": [],
+      "@id": "ark:59852/rocrate-testdatasetcontainer"
+    },
+    {
+      "@id": "ark:59852/a1d210c1-f859-4590-b292-8579e12cae86",
+      "@context": {
+        "@vocab": "https://schema.org/",
+        "evi": "https://w3id.org/EVI#"
+      },
+      "metadataType": "https://w3id.org/EVI#Software",
+      "additionalType": "Software",
+      "url": "https://github.com/idekerlab/cellmaps_ppi_embedding",
+      "name": "cellmaps_ppi_embedding",
+      "keywords": ["embedding", "networks"],
+      "author": "Ideker Lab CM4AI team",
+      "dateModified": "01-01-1969",
+      "version": "0.1.0a4",
+      "description": "A tool to generate embeddings from networks",
+      "associatedPublication": null,
+      "additionalDocumentation": null,
+      "format": ".py",
+      "usedByComputation": [],
+      "contentUrl": "file://https://github.com/idekerlab/cellmaps_ppi_embedding-main.zip"
+    },
+    {
+      "@id": "ark:59852/a7d6c513-c9d6-4dcb-92c2-c20be7adcb6f",
+      "@context": {
+        "@vocab": "https://schema.org/",
+        "evi": "https://w3id.org/EVI#"
+      },
+      "metadataType": "https://w3id.org/EVI#Dataset",
+      "additionalType": "Dataset",
+      "url": null,
+      "name": "cellmaps_ppi_embedding output file",
+      "keywords": ["ppi", "embedding"],
+      "author": "cellmaps_ppi_embedding",
+      "datePublished": "07-31-2023",
+      "version": "0.1.0a4",
+      "description": "PPI Embedding file",
+      "associatedPublication": null,
+      "additionalDocumentation": null,
+      "format": "tsv",
+      "schema": null,
+      "generatedBy": [],
+      "derivedFrom": [],
+      "usedBy": [],
+      "contentUrl": "file:///cellar/users/cchuras/music/pipeline/cellmaps_pipeline_example/run7.31.23/2.ppi_embedding/ppi_emd.tsv"
+    },
+    {
+      "@id": "ark:59852/922352f5-802a-41c7-bf81-537ebb1bf388",
+      "@context": {
+        "@vocab": "https://schema.org/",
+        "evi": "https://w3id.org/EVI#"
+      },
+      "@type": "https://w3id.org/EVI#Computation",
+      "additionalType": "Computation",
+      "url": null,
+      "name": "cellmaps_ppi_embedding",
+      "keywords": ["cellmaps", "ppi", "embedding"],
+      "runBy": "cchuras",
+      "dateCreated": "07-31-2023",
+      "description": "run of cellmaps_ppi_embedding",
+      "associatedPublication": null,
+      "additionalDocumentation": null,
+      "command": null,
+      "usedSoftware": [
+        "ark:59852/a1d210c1-f859-4590-b292-8579e12cae86"
+      ],
+      "usedDataset": [
+        "ark:59852/9432b9ce-5ddf-408d-a7d7-74b68d870190"
+      ],
+      "generated": [
+        "ark:59852/a7d6c513-c9d6-4dcb-92c2-c20be7adcb6f"
+      ]
+    }
+  ]
+}

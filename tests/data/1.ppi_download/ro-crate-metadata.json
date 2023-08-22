@@ -1,0 +1,162 @@
+{
+  "@id": "ark:59852/9432b9ce-5ddf-408d-a7d7-74b68d870190",
+  "@context": {
+    "EVI": "https://w3id.org/EVI#",
+    "@vocab": "https://schema.org/"
+  },
+  "@type": "https://schema.org/Dataset",
+  "url": null,
+  "name": "Example input dataset",
+  "keywords": [
+    "test"
+  ],
+  "description": "a testing example",
+  "@graph": [
+    {
+      "@context": {
+        "@vocab": "https://schema.org/",
+        "evi": "https://w3id.org/EVI#"
+      },
+      "@type": "https://w3id.org/EVI#Dataset",
+      "url": null,
+      "name": "test dataset container",
+      "keywords": [
+        "test"
+      ],
+      "description": "my example test dataset",
+      "additionalType": "DatasetContainer",
+      "version": "0.1",
+      "generatedBy": [],
+      "derivedFrom": [],
+      "usedBy": [],
+      "hasPart": [
+        "ark:59852/e9f18ba9-67f7-4f1c-8fca-ef28f117e8c2",
+        "ark:59852/abde1d81-5f81-47f0-879f-1cb46102dd23",
+        "ark:59852/def15288-ae9a-4780-9bc4-9958491263ce"
+      ],
+      "isPartOf": [],
+      "@id": "ark:59852/rocrate-testdatasetcontainer"
+    },
+    {
+      "@id": "ark:59852/e9f18ba9-67f7-4f1c-8fca-ef28f117e8c2",
+      "@context": {
+        "@vocab": "https://schema.org/",
+        "evi": "https://w3id.org/EVI#"
+      },
+      "metadataType": "https://w3id.org/EVI#Dataset",
+      "additionalType": "Dataset",
+      "url": null,
+      "name": "Antoine Forget sample edgelist",
+      "keywords": ["AP-MS", "Protein", "interactions", "HSC2"],
+      "author": "Krogan Lab",
+      "datePublished": "07-31-2023",
+      "version": "1.0",
+      "description": "AP-MS Protein interactions on HSC2 cell line, example dataset",
+      "associatedPublication": null,
+      "additionalDocumentation": null,
+      "format": "tsv",
+      "schema": null,
+      "generatedBy": [],
+      "derivedFrom": [],
+      "usedBy": [],
+      "contentUrl": "file:///cellar/users/cchuras/music/pipeline/cellmaps_pipeline_example/run7.31.23/1.ppi_download/edgelist.tsv"
+    },
+    {
+      "@id": "ark:59852/abde1d81-5f81-47f0-879f-1cb46102dd23",
+      "@context": {
+        "@vocab": "https://schema.org/",
+        "evi": "https://w3id.org/EVI#"
+      },
+      "metadataType": "https://w3id.org/EVI#Dataset",
+      "additionalType": "Dataset",
+      "url": null,
+      "name": "Antoine Forget sample baitlist",
+      "keywords": ["AP-MS", "Baits", "Protein", "interactions", "HSC2"],
+      "author": "Krogan Lab",
+      "datePublished": "07-31-2023",
+      "version": "1.0",
+      "description": "AP-MS Baits used for Protein interactions on HSC2 cell line",
+      "associatedPublication": null,
+      "additionalDocumentation": null,
+      "format": "tsv",
+      "schema": null,
+      "generatedBy": [],
+      "derivedFrom": [],
+      "usedBy": [],
+      "contentUrl": "file:///cellar/users/cchuras/music/pipeline/cellmaps_pipeline_example/run7.31.23/1.ppi_download/baitlist.tsv"
+    },
+    {
+      "@id": "ark:59852/415c758c-0e70-472e-bc1d-4b272f5adf18",
+      "@context": {
+        "@vocab": "https://schema.org/",
+        "evi": "https://w3id.org/EVI#"
+      },
+      "metadataType": "https://w3id.org/EVI#Software",
+      "additionalType": "Software",
+      "url": "https://github.com/idekerlab/cellmaps_ppidownloader",
+      "name": "cellmaps_ppidownloader",
+      "keywords": ["download", "APMS"],
+      "author": "Ideker Lab CM4AI team",
+      "dateModified": "01-01-1969",
+      "version": "0.1.0a3",
+      "description": "A tool to download APMS data for CM4AI pipeline",
+      "associatedPublication": null,
+      "additionalDocumentation": null,
+      "format": ".py",
+      "usedByComputation": [],
+      "contentUrl": "file://https://github.com/idekerlab/cellmaps_ppidownloader/cellmaps_ppidownloader-main.zip"
+    },
+    {
+      "@id": "ark:59852/def15288-ae9a-4780-9bc4-9958491263ce",
+      "@context": {
+        "@vocab": "https://schema.org/",
+        "evi": "https://w3id.org/EVI#"
+      },
+      "metadataType": "https://w3id.org/EVI#Dataset",
+      "additionalType": "Dataset",
+      "url": null,
+      "name": "cellmaps_ppidownloader output file",
+      "keywords": ["APMS", "gene"],
+      "author": "some author",
+      "datePublished": "07-31-2023",
+      "version": "0.1.0a3",
+      "description": "APMS gene node attributes file",
+      "associatedPublication": null,
+      "additionalDocumentation": null,
+      "format": "tsv",
+      "schema": null,
+      "generatedBy": [],
+      "derivedFrom": [],
+      "usedBy": [],
+      "contentUrl": "file:///cellar/users/cchuras/music/pipeline/cellmaps_pipeline_example/run7.31.23/1.ppi_download/ppi_gene_node_attributes.tsv"
+    },
+    {
+      "@id": "ark:59852/ab5ff31f-3451-4b05-b0c1-51b0f16715d7",
+      "@context": {
+        "@vocab": "https://schema.org/",
+        "evi": "https://w3id.org/EVI#"
+      },
+      "metadataType": "https://w3id.org/EVI#Computation",
+      "url": null,
+      "name": "cellmaps_ppidownloader computation",
+      "keywords": ["test"],
+      "description": "run of cellmaps_ppidownloader",
+      "additionalType": "Computation",
+      "runBy": "cchuras",
+      "dateCreated": "07-31-2023",
+      "associatedPublication": null,
+      "additionalDocumentation": null,
+      "command": "",
+      "usedSoftware": [
+        "ark:59852/415c758c-0e70-472e-bc1d-4b272f5adf18"
+      ],
+      "usedDataset": [
+        "ark:59852/abde1d81-5f81-47f0-879f-1cb46102dd23",
+        "ark:59852/e9f18ba9-67f7-4f1c-8fca-ef28f117e8c2"
+      ],
+      "generated": [
+        "ark:59852/def15288-ae9a-4780-9bc4-9958491263ce"
+      ]
+    }
+  ]
+}

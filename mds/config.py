@@ -137,6 +137,7 @@ class MinioConfig(BaseModel):
     rocrate_bucket: Optional[str] = "rocrate"
     secure: bool
 
+
     def CreateClient(self):
 
         if self.port is None:
