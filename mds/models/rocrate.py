@@ -130,7 +130,7 @@ class ROCrate(FairscapeBaseModel):
         ROCrateSoftware,
         ROCrateComputation,
         ROCrateDatasetContainer
-    ]] = Field(alias="@graph", discriminator='addtionalType')
+    ]] = Field(alias="@graph", discriminator='additionalType')
 
  #   @computed_field(alias="@id")
  #   @property
@@ -211,6 +211,7 @@ class ROCrate(FairscapeBaseModel):
 
         archived_object_path = f"{creative_work_id}/{self.name}"
 
+
         # List instances of Dataset, Software in the ROCrate metadata
         object_instances_in_metadata = list(filter(
             lambda x: (x.additionalType == "Dataset"
@@ -220,13 +221,25 @@ class ROCrate(FairscapeBaseModel):
 
         # List full object paths specified in the ROCrate metadata
         object_paths_in_metadata = [obj_instance.contentUrl for obj_instance in object_instances_in_metadata]
-
+        #print(object_paths_in_metadata)
         # List object names only from their full path                    
         objects_in_metadata = [Path(obj).name for obj in object_paths_in_metadata]
+        #print(objects_in_metadata)
+
+
+        # Retrieve name of rocrate root directory
+        rocrate_root_dir = ''
+        try:
+            with zipfile.ZipFile(Object) as archive:
+                if archive.namelist():
+                    rocrate_root_dir = Path(archive.namelist()[0]).parent.joinpath('')
+
+        except zipfile.BadZipFile as e:
+            return OperationStatus(False, f"exception validating objects in ROCrate: {str(e)}", 500)
+
 
         try:
-            rocrate_root_dir = Path(Object).stem
-            object_instances_in_crate = MinioClient.list_objects(MINIO_ROCRATE_BUCKET, prefix=rocrate_root_dir, recursive=True)
+            object_instances_in_crate = MinioClient.list_objects(MINIO_ROCRATE_BUCKET, prefix=f"{rocrate_root_dir}", recursive=True)
             object_paths_in_crate = [obj_instance.object_name for obj_instance in object_instances_in_crate]
             objects_in_crate = [Path(obj).name for obj in object_paths_in_crate]
 
@@ -336,16 +349,24 @@ def get_metadata_from_crate(minio_client, crate_file_name, Object):
         _type_: content from the crate_file_name
     """
 
-    rocrate_root_dir = Path(Object).stem
-    print(rocrate_root_dir)
+    # Retrieve name of rocrate root directory
+    rocrate_root_dir = ''
+    try:
+        with zipfile.ZipFile(Object) as archive:
+            if archive.namelist():
+                # convert into a string from Path instance
+                rocrate_root_dir = Path(archive.namelist()[0]).parent.joinpath('')
+                print("rocrate root dir:", f"{rocrate_root_dir}")
+    except zipfile.BadZipFile as e:
+        return
+
     # List all objects in the bucket
-    objects = minio_client.list_objects(MINIO_ROCRATE_BUCKET, prefix=rocrate_root_dir, recursive=True)
+    objects = minio_client.list_objects(MINIO_ROCRATE_BUCKET, prefix=f"{rocrate_root_dir}", recursive=True)
 
     for obj in objects:
-        if obj.object_name.endswith(crate_file_name):
+        if crate_file_name in obj.object_name:
             metadata_content = minio_client.get_object(MINIO_ROCRATE_BUCKET, obj.object_name).read()
             return metadata_content
-
     return
 
 def list_rocrates(MongoClient: pymongo.MongoClient):
