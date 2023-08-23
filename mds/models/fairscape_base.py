@@ -20,6 +20,8 @@ from mds.utilities.operation_status import OperationStatus
 ARK_NAAN = "59852"
 IdentifierPattern = "ark[0-9]{5}\/.*"
 
+
+
 default_context = {
     "@vocab": "https://schema.org/",
     "evi": "https://w3id.org/EVI#"
