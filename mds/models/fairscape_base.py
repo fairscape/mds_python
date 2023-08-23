@@ -4,18 +4,38 @@ from pydantic import (
     ConfigDict,
     Field,
     constr,
-    Extra
+    Extra,
+    computed_field
 )
 from typing import (
     List,
     Optional,
-    Literal
+    Dict,
+    Union
 )
 import pymongo
 from mds.utilities.utils import validate_ark
 from mds.utilities.operation_status import OperationStatus
 
+ARK_NAAN = "59852"
 IdentifierPattern = "ark[0-9]{5}\/.*"
+
+default_context = {
+    "@vocab": "https://schema.org/",
+    "evi": "https://w3id.org/EVI#"
+}
+
+
+class Identifier(BaseModel):
+    guid: str = Field(
+        title="guid",
+        alias="@id"
+    )
+    metadataType: str = Field(
+        title="metadataType",
+        alias="@type"
+    )
+    name: str
 
 class FairscapeBaseModel(BaseModel, extra=Extra.allow):
     """Refers to the Fairscape BaseModel inherited from Pydantic
@@ -25,23 +45,31 @@ class FairscapeBaseModel(BaseModel, extra=Extra.allow):
         an id, a type, and a name
     """
     model_config = ConfigDict(
-        populate_by_name= True,
-        validate_assignment = True
+        populate_by_name=True,
+        validate_assignment=True,
     )
-    context: dict = Field(
-        default={
-            "@vocab": "https://schema.org/", 
-            "evi": "https://w3id.org/EVI#"
-        },
+    context: Dict[str, str] = Field(
+        default=default_context,
+        title="context",
         alias="@context"
     )
-    guid: constr(pattern=IdentifierPattern) = Field(alias="@id")
-    metadataType: str = Field(alias="@type")
+    metadataType: str = Field(
+        title="metadataType",
+        alias="@type"
+    )
     url: Optional[str] = Field(default=None)
     name: str = Field(max_length=200)
     keywords: List[str] = Field(default=[])
     description: str = Field(min_length=5)
 
+    @computed_field(alias="@id")
+    @property
+    def guid(self) -> str:
+        # TODO url encode values
+        # TODO add random hash digest
+
+        # if
+        return f"ark:{ARK_NAAN}/rocrate-{self.name.replace(' ', '')}"
 
     def create(self, MongoCollection: pymongo.collection.Collection, bson=None) -> OperationStatus:
         """Persist instance of model in mongo
