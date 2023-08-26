@@ -9,6 +9,7 @@ from mds.config import get_ark_naan
 from pydantic import (
     Field,
     constr,
+    BaseModel
 #   computed_field
 )
 
@@ -44,7 +45,6 @@ import pymongo
 from mds.models.fairscape_base import FairscapeBaseModel
 from mds.utilities.operation_status import OperationStatus
 
-from mds.database.config import MINIO_BUCKET, MINIO_ROCRATE_BUCKET, MONGO_DATABASE, MONGO_COLLECTION
 import sys
 import logging
 
@@ -132,6 +132,13 @@ class ROCrateComputation(FairscapeBaseModel):
     generated: Optional[List[str]] = Field(default=[])
 
 
+class ROCrateDistribution(BaseModel):
+    extractedROCrateBucket: Optional[str] = Field(default=None)
+    archivedROCrateBucket: Optional[str] = Field(default=None)
+    extractedObjectPath: Optional[str] = Field(default=None)
+    archivedObjectPath: Optional[str] = Field(default=None)
+
+
 class ROCrate(FairscapeBaseModel):
     metadataType: Optional[str] = Field(default="https://schema.org/Dataset", alias="@type")
     additionalType: Optional[str] = Field(default=ROCRATE_TYPE)
@@ -143,6 +150,11 @@ class ROCrate(FairscapeBaseModel):
         ROCrateComputation,
         ROCrateDatasetContainer
     ]] = Field(alias="@graph", discriminator='additionalType')
+    contentURL: Optional[str] = Field(
+        default=None, 
+        description="Value for ROCrate S3 URI of zip location"
+        )
+    distribution: Optional[ROCrateDistribution] = Field(default=None)
 
  #   @computed_field(alias="@id")
  #   @property
@@ -246,9 +258,6 @@ class ROCrate(FairscapeBaseModel):
         rocrate_logger(f"Parsing RO-CRATE objects={objects_in_metadata}")
 
 
-        # Retrieve name of rocrate root directory
-
-
         try:
             object_instances_in_crate = minio_client.list_objects(
                 minio_config.rocrate_bucket, 
@@ -270,12 +279,15 @@ class ROCrate(FairscapeBaseModel):
                 # print(file_size)
 
                 # insert the metadata onto the mongo metadata store
-                self.distribution = {
+                self.distribution = ROCrateDistribution(**{
                     "extractedROCrateBucket": minio_config.default_bucket,
                     "archivedROCrateBucket": minio_config.rocrate_bucket,
                     "extractedObjectPath": object_paths_in_crate,
                     "archivedObjectPath": f"{archived_object_path}.zip"
-                }
+                })
+
+                zip_bucket = minio_config.rocrate_bucket
+                self.contentURL =  f"s3a://{zip_bucket}/{TransactionFolder}/{archived_object_path}.zip"
 
                 return OperationStatus(True, "", 200)
 
