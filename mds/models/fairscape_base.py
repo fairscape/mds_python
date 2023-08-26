@@ -39,7 +39,7 @@ class Identifier(BaseModel):
     )
     name: str
 
-class FairscapeBaseModel(BaseModel, extra=Extra.allow):
+class FairscapeBaseModel(BaseModel, extra='allow'):
     """Refers to the Fairscape BaseModel inherited from Pydantic
 
     Args:
@@ -64,8 +64,8 @@ class FairscapeBaseModel(BaseModel, extra=Extra.allow):
     keywords: List[str] = Field(default=[])
     description: str = Field(min_length=5)
 
-    @computed_field(alias="@id")
-    @property
+    #@computed_field(alias="@id")
+    #@property
     def guid(self) -> str:
         # TODO url encode values
         # TODO add random hash digest

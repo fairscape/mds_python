@@ -90,11 +90,6 @@ def rocrate_upload(file: UploadFile = File(...)):
 
     if validation_status.success:
 
-
-        # mint rocrate identifier
-        # TODO check mongo write success
-        insert_rocrate = PublishROCrateMetadata(crate, rocrate_collection)
-
         # mint all identifiers in identifier namespace
         # TODO check mongo write success
         insert_identifiers = PublishProvMetadata(crate, identifier_collection)
