@@ -52,8 +52,7 @@ class TestROCrateParsing():
 				ZippedObject=zipfile,
 				BucketName=self.minio_config.rocrate_bucket,
 				TransactionFolder=self.transaction_folder,
-				Filename="1.ppi_download.zip",
-				GUID=self.guid
+				Filename="1.ppi_download.zip"
 			)
 
 			assert upload_result is not None
@@ -80,16 +79,14 @@ class TestROCrateParsing():
 	def test_2_get_metadata(self):
 		""" test get_metadata_from_crate function
 		"""
-		self.rocrate_metadata = GetMetadataFromCrate(
+		self.rocrate = GetMetadataFromCrate(
 			self.minio_client,
 			BucketName=self.minio_config.default_bucket,
 			TransactionFolder=self.transaction_folder,
 			CratePath=self.crate_stem
 			)
 
-		assert self.rocrate_metadata is not None
-		
-		self.rocrate = ROCrate(**json.loads(self.rocrate_metadata))
+		assert self.rocrate is not None		
 
 		assert isinstance(self.rocrate, ROCrate)
 
@@ -135,11 +132,13 @@ class TestROCrateParsing():
 
 	def test_4_verify_crate_contents(self):
 
-		rocrate_validation = self.rocrate.validate_rocrate_object_reference(
+		rocrate_validation = self.rocrate.validateObjectReference(
+			MinioClient=self.minio_client,
+			MinioConfig=self.minio_config,
 			TransactionFolder=self.transaction_folder,
 			CrateName=self.crate_stem,
 		)
-
+	
 		assert rocrate_validation.success
 
 

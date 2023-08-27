@@ -9,7 +9,8 @@ from mds.config import get_ark_naan
 from pydantic import (
     Field,
     constr,
-    BaseModel
+    BaseModel,
+    ValidationError, 
 #   computed_field
 )
 
@@ -37,7 +38,7 @@ from pathlib import Path
 from io import BytesIO
 import zipfile
 from zipfile import ZipFile
-
+from minio import DeleteObject
 
 from datetime import datetime
 import pymongo
@@ -135,7 +136,7 @@ class ROCrateComputation(FairscapeBaseModel):
 class ROCrateDistribution(BaseModel):
     extractedROCrateBucket: Optional[str] = Field(default=None)
     archivedROCrateBucket: Optional[str] = Field(default=None)
-    extractedObjectPath: Optional[str] = Field(default=None)
+    extractedObjectPath: Optional[List[str]] = Field(default=None)
     archivedObjectPath: Optional[str] = Field(default=None)
 
 
@@ -229,18 +230,13 @@ class ROCrate(FairscapeBaseModel):
                 ]
 
 
-    def validate_rocrate_object_reference(
+    def validateObjectReference(
             self, 
+            MinioClient,
+            MinioConfig,
             TransactionFolder, 
-            CrateName
+            CrateName,
             ) -> OperationStatus:
-
-        minio_config = get_minio_config()
-        minio_client = get_minio_client()
-
-
-        archived_object_path = f"{TransactionFolder}/{CrateName}"
-
 
         # List instances of Dataset, Software in the ROCrate metadata
         object_instances_in_metadata = list(filter(
@@ -255,13 +251,18 @@ class ROCrate(FairscapeBaseModel):
             object_instances_in_metadata if metadata_elem.contentUrl is not None
             ]
 
-        rocrate_logger(f"Parsing RO-CRATE objects={objects_in_metadata}")
+        rocrate_logger.info(
+            "ParsingROCrate message='found files in rocrate metadata'\t" +
+            f"transaction={TransactionFolder}\t" +
+            f"objects={objects_in_metadata}"
+            )
 
+        object_path = f"{TransactionFolder}/{CrateName}"
 
         try:
-            object_instances_in_crate = minio_client.list_objects(
-                minio_config.rocrate_bucket, 
-                prefix=f"{TransactionFolder}", 
+            object_instances_in_crate = MinioClient.list_objects(
+                bucket_name = MinioConfig.default_bucket, 
+                prefix=object_path, 
                 recursive=True
                 )
 
@@ -272,6 +273,13 @@ class ROCrate(FairscapeBaseModel):
                 Path(obj).name for obj in object_paths_in_crate
                 ]
 
+            rocrate_logger.info(
+                "ParsingROCrate\t" +
+                "message='found objects in minio'\t" +
+                f"transaction={TransactionFolder}\t" +
+                f"objects={objects_in_crate}"
+                )
+
             # Check if metadata objects exist in the crate
             if set(objects_in_metadata).issubset(set(objects_in_crate)):
                 # calculate filesize
@@ -280,19 +288,25 @@ class ROCrate(FairscapeBaseModel):
 
                 # insert the metadata onto the mongo metadata store
                 self.distribution = ROCrateDistribution(**{
-                    "extractedROCrateBucket": minio_config.default_bucket,
-                    "archivedROCrateBucket": minio_config.rocrate_bucket,
                     "extractedObjectPath": object_paths_in_crate,
-                    "archivedObjectPath": f"{archived_object_path}.zip"
+                    "archivedObjectPath": f"{object_path}.zip"
                 })
 
-                zip_bucket = minio_config.rocrate_bucket
-                self.contentURL =  f"s3a://{zip_bucket}/{TransactionFolder}/{archived_object_path}.zip"
+                zip_bucket = MinioConfig.rocrate_bucket
+                self.contentURL =  f"s3a://{zip_bucket}/{TransactionFolder}/{CrateName}.zip"
 
                 return OperationStatus(True, "", 200)
 
             else:
                 missing_objects = set(objects_in_metadata) - set(objects_in_crate)
+
+                rocrate_logger.error(
+                    "ParsingROCrate\t" +
+                    "message='Objects Missing Annotation'\t" +
+                    f"transaction={TransactionFolder}\t" +
+                    f"objects={missing_objects}"
+                    )
+
                 return OperationStatus(
                     False,
                     f"ROCrate ERROR: Missing Objects {str(missing_objects)}",
@@ -314,7 +328,6 @@ def UploadZippedCrate(
         BucketName, 
         TransactionFolder: uuid.UUID, 
         Filename: str,
-        GUID: str
         ) -> str:
 
     #source_filepath = Path(ZippedObject.filename).name
@@ -324,7 +337,6 @@ def UploadZippedCrate(
         bucket_name=BucketName, 
         object_name=str(upload_filepath), 
         data=ZippedObject, 
-        metadata={"guid": GUID},
         length=-1,
         part_size= 5 * 1024 * 1024 ,
         content_type="application/zip"
@@ -332,8 +344,10 @@ def UploadZippedCrate(
 
     # log upload of zipped rocrate
     rocrate_logger.info(
-        "message='Uploaded file to minio' " +
-        f"object_name='{upload_result.object_name}' " +
+        "UploadZippedCrate\t" +
+        f"transaction={TransactionFolder}\t" +
+        "message='Uploaded Zipped Crate Minio'\t" +
+        f"object_name='{upload_result.object_name}\t' " +
         f"object_etag='{upload_result.etag}'"
         )
 
@@ -377,7 +391,9 @@ def UploadExtractedCrate(
                     )
 
                 rocrate_logger.info(
-                    "message='Uploaded file to minio' " +
+                    "UploadExtractedCrate\t" +
+                    f"transaction={TransactionFolder}\t" +
+                    "message='Uploaded File to minio' " +
                     f"object_name='{upload_result.object_name}' " +
                     f"object_etag='{upload_result.etag}'"
                     )
@@ -389,7 +405,12 @@ def UploadExtractedCrate(
 
 
 
-def remove_unzipped_crate(MinioClient, BucketName: str, Object) -> OperationStatus:
+def DeleteExtractedCrate(
+        MinioClient, 
+        BucketName: str, 
+        TransactionFolder: str,
+        CratePath: str
+        ) -> OperationStatus:
     """Accepts zipped ROCrate, unzip and upload onto MinIO.
 
     Args:
@@ -400,17 +421,47 @@ def remove_unzipped_crate(MinioClient, BucketName: str, Object) -> OperationStat
         OperationStatus: Message
     """
 
-    # TODO fix for path refactor
 
     try:
-        # zip_contents = Object.read()
-        with zipfile.ZipFile(Object, "r") as zip_file:
-            for file_info in zip_file.infolist():
-                # print(file_info.filename)
-                MinioClient.remove_object(
-                    bucket_name=BucketName, 
-                    object_name=file_info.filename
-                    )
+        # remove all listed files
+        minio_listed_objects = MinioClient.list_objects(
+            bucket_name = BucketName, 
+            prefix=CratePath, 
+            recursive=True
+            )
+
+        object_names = [
+            obj_instance.object_name for obj_instance in minio_listed_objects
+            ]
+
+        delete_list = [DeleteObject(obj) for obj in object_names]
+        
+        delete_errors = MinioClient.remove_objects(
+                bucket_name=BucketName, 
+                delete_object_list=delete_list
+        )
+
+        # if errors occur
+        if len(delete_errors) != 0:
+
+            for error in delete_errors:
+                rocrate_logger.error(
+                    "DeleteExtractedCrate\t"+
+                    f"transaction_folder={TransactionFolder}\t" +
+                    f"bucket_name={BucketName}\t" +
+                    f"object_names={object}\t" +
+                    f"error={str(error)}"
+                )
+
+            return OperationStatus(False, f"ERROR Deleting ROCrate: {delete_errors}", 400)
+        
+        
+        rocrate_logger.info(
+            "DeleteExtractedCrate\t" +
+            f"transaction_folder={TransactionFolder}\t" +
+            f"bucket_name={BucketName}\t" +
+            f"objects={object_names}\t"
+        )
 
     except Exception as e:
         return OperationStatus(False, f"Exception removing ROCrate: {str(e)}", 404)
@@ -418,7 +469,7 @@ def remove_unzipped_crate(MinioClient, BucketName: str, Object) -> OperationStat
     return OperationStatus(True, "", 200)
 
 
-def GetMetadataFromCrate(MinioClient, BucketName, TransactionFolder, CratePath) -> dict:
+def GetMetadataFromCrate(MinioClient, BucketName, TransactionFolder, CratePath):
     """Extract metadata from the unzipped ROCrate onto MinIO
 
     Args:
@@ -441,19 +492,31 @@ def GetMetadataFromCrate(MinioClient, BucketName, TransactionFolder, CratePath) 
         # read all metadata as json
         ro_crate_json = ro_crate_response.read()
 
-        # TODO try to parse
+        # parse file contents into dictionary
+        try:
+            ro_crate_dict = json.loads(ro_crate_json)
+        except Exception:
+            return None
 
-        return ro_crate_json
+        # parse dictionary into ROCrate pydantic model
+        try:
+            crate = ROCrate(**ro_crate_dict)
+            return crate
+        except ValidationError:
+
+            # TODO try to parse gracefully
+            # additionalType generation
+            return None
 
     except Exception as e:
         raise Exception(f"ROCRATE ERROR: ro-crate-metadata.json not found exception={str(e)}")
 
 
-def ListROCrates(rocrate_collection: pymongo.collection.Collection):
+def ListROCrates(ROCrateCollection: pymongo.collection.Collection):
     """ List all ROCrates uploaded to FAIRSCAPE
     """
 
-    rocrate_cursor = rocrate_collection.find(
+    rocrate_cursor = ROCrateCollection.find(
         filter={"additionalType": ROCRATE_TYPE},
         projection={
             "@id": 1, 
@@ -545,7 +608,7 @@ def get_metadata_by_id(rocrate_collection: pymongo.collection, rocrate_id):
 def PublishROCrateMetadata(
         rocrate: ROCrate, 
         rocrate_collection: pymongo.collection.Collection
-        ):  
+        ) -> bool:  
     """ Insert ROCrate metadata into mongo rocrate collection
     """
 
@@ -557,7 +620,10 @@ def PublishROCrateMetadata(
         return True
 
 
-def PublishProvMetadata(rocrate: ROCrate, identifier_collection: pymongo.collection.Collection):
+def PublishProvMetadata(
+        rocrate: ROCrate, 
+        identifier_collection: pymongo.collection.Collection
+        ) -> bool:
     """ Insert ROCrate metadata and metadata for all identifiers into the identifier collection
     """
 

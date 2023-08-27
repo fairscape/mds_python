@@ -10,14 +10,23 @@ from mds.config import (
 )
 
 from mds.database import minio, mongo
-
-
-
-from mds.models.rocrate import *
+from mds.models.rocrate import (
+    UploadExtractedCrate,
+    UploadZippedCrate,
+    DeleteExtractedCrate,
+    GetMetadataFromCrate,
+    ListROCrates,
+    zip_archived_rocrate,
+    zip_extracted_rocrate,
+    PublishROCrateMetadata,
+    PublishProvMetadata
+)
 from mds.utilities.funcs import to_str
 from mds.utilities.utils import get_file_from_zip
 from  builtins import any as b_any
 
+import uuid
+from pathlib import Path
 import json
 
 router = APIRouter()
@@ -39,53 +48,82 @@ casbin_enforcer.load_policy()
              summary="Unzip the ROCrate and upload to object store",
              response_description="The transferred rocrate")
 def rocrate_upload(file: UploadFile = File(...)):
-    # Unzip the ROCrate and upload to MinIO
-    upload_status = unzip_and_upload(
-        minio_client,
-        file.file
+
+    # create a uuid for transaction
+    transaction_folder = str(uuid.uuid4())
+
+    # get the zipfile's filename
+    zip_filename = str(Path(file.filename).name)
+
+    # get the zipfile extracted name
+    zip_foldername = str(Path(file.filename).stem)
+
+
+    # upload the zipped ROCrate 
+    zipped_upload_status = UploadZippedCrate(
+        MinioClient=minio_client,
+        ZippedObject=file.file,
+        BucketName=minio_config.rocrate_bucket,
+        TransactionFolder=transaction_folder,
+        Filename=zip_filename
     )
 
-    if not upload_status.success:
+    if zipped_upload_status is None:
         return JSONResponse(
             status_code=upload_status.status_code,
             content={"error": upload_status.message}
         )
 
-    RO_CRATE_METADATA_FILE_NAME = 'ro-crate-metadata.json'
+    # upload the unziped ROcrate
+    extracted_upload_status = UploadExtractedCrate(
+        MinioClient=minio_client,
+        ZippedObject=file.file,
+        BucketName=minio_config.rocrate_bucket,
+        TransactionFolder=transaction_folder
+    )
 
-    # Get metadata from the unzipped crate
-    rocrate_metadata = get_metadata_from_crate(
-        minio_client, 
-        RO_CRATE_METADATA_FILE_NAME
-        )
-    
-    if not rocrate_metadata:
-
+    if not extracted_upload_status.success:
         return JSONResponse(
-            status_code=404,
+            status_code = extracted_upload_status.status_code,
+            content = {"error": extracted_upload_status.message}
+        )
+
+
+    try:
+        # Get metadata from the unzipped crate
+        crate = GetMetadataFromCrate(
+            MinioClient=minio_client, 
+            BucketName=minio_config.default_bucket,
+            TransactionFolder=transaction_folder,
+            CratePath=zip_foldername
+            )
+
+        if crate is None:
+            return JSONResponse(
+                status_code=400,
+                content={"error": "ROCrate Parsing Error"}
+            )
+
+    except Exception: 
+        return JSONResponse(
+            status_code=400,
             content={"error": f"{RO_CRATE_METADATA_FILE_NAME} not found in ROCrate"}
         )
 
-    # TODO handle validation failures gracefully
-    #try:
-
-    #except ValidationError as e:
-        # try to parse differently
-        # additionalType generation
-    #    pass
         
-    crate = ROCrate(**json.loads(rocrate_metadata))
-
     # TODO check if new identifiers must be minted
-
 
     # run entailment
     crate.entailment()
-
     
 
     # Compare objects referenced in the metadata file to the objects in the crate 
-    validation_status = crate.validate_rocrate_objects(mongo_client, minio_client, file.file)
+    validation_status = crate.validateObjectReference(
+        MinioClient=minio_client,
+        MinioConfig=minio_config,
+        TransactionFolder=transaction_folder,
+        CrateName=zip_foldername
+        )
 
 
     if validation_status.success:
@@ -93,6 +131,7 @@ def rocrate_upload(file: UploadFile = File(...)):
         # mint all identifiers in identifier namespace
         # TODO check mongo write success
         insert_identifiers = PublishProvMetadata(crate, identifier_collection)
+        insert_rocrate = PublishROCrateMetadata(crate, rocrate_collection)
 
         return JSONResponse(
             status_code=201,
@@ -107,9 +146,11 @@ def rocrate_upload(file: UploadFile = File(...)):
 
     else:
 
-        remove_status = remove_unzipped_crate(
-            minio_client, 
-            rocrate.file
+        remove_status = DeleteExtractedCrate(
+            MinioClient=minio_client, 
+            BucketName=minio_config.default_bucket,
+            TransactionFolder=transaction_folder,
+            CratePath=zip_foldername
             )
         
 
@@ -127,10 +168,13 @@ def rocrate_upload(file: UploadFile = File(...)):
 @router.get("/rocrate",
             summary="List all ROCrates",
             response_description="Retrieved list of ROCrates")
-def rocrate_list(response: Response):
-    rocrate = list_rocrates(mongo_client)
-    mongo_client.close()
-    return rocrate
+def rocrate_list():
+    rocrate = ListROCrates(rocrate_collection)
+
+    return JSONResponse(
+        status_code=200,
+        content=rocrate
+    )
 
 
 @router.get("/rocrate/extracted/download/ark:{NAAN}/{postfix:path}",
