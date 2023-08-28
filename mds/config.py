@@ -14,9 +14,7 @@ from functools import lru_cache
 
 import casbin
 import casbin_sqlalchemy_adapter
-
 from dotenv import dotenv_values
-from pathlib import Path
 
 
 #AUTH_ENABLED = bool(os.environ.get("MDS_AUTH_ENABLED", "True"))
@@ -24,9 +22,11 @@ from pathlib import Path
 @lru_cache()
 def cached_dotenv():
     # TODO temporary hardcoded fix for path issues
-    env_path = Path("/com.docker.devenvironments.code") / ".env"
-    config = dotenv_values(env_path)
-
+    env_path = "./.env"
+    config = {
+        **dotenv_values(env_path),
+        **os.environ,
+    }
     return config
 
  
