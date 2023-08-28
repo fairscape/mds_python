@@ -170,20 +170,21 @@ def rocrate_upload(file: UploadFile = File(...)):
 
     else:
 
-        # TODO cleanup operations
-        #remove_status = DeleteExtractedCrate(
-        #    MinioClient=minio_client, 
-        #    BucketName=minio_config.default_bucket,
-        #    TransactionFolder=transaction_folder,
-        #    CratePath=zip_foldername
-        #    )
+        remove_status = DeleteExtractedCrate(
+            MinioClient=minio_client, 
+            BucketName=minio_config.default_bucket,
+            TransactionFolder=transaction_folder,
+            CratePath=zip_foldername
+            )
         
+        # TODO cleanup operations
 
-        #if not remove_status.success:
-        #    return JSONResponse(
-        #        status_code=remove_status.status_code,
-        #        content={"error": remove_status.message}
-        #    )
+        if not remove_status.success:
+            return JSONResponse(
+                status_code=remove_status.status_code,
+                content={"error": remove_status.message}
+            )
+
         return JSONResponse(
             status_code=validation_status.status_code,
             content={"error": validation_status.message}
