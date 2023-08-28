@@ -11,16 +11,9 @@ from pydantic import (
     constr,
     BaseModel,
     ValidationError, 
-#   computed_field
+    computed_field
 )
 
-from mds.config import (
-    get_minio_config,
-    get_minio_client,
-#    get_casbin_enforcer,
-    get_mongo_config,
-    get_mongo_client,
-)
 from typing import (
     Optional, 
     Union, 
@@ -38,7 +31,7 @@ from pathlib import Path
 from io import BytesIO
 import zipfile
 from zipfile import ZipFile
-from minio import DeleteObject
+from minio.deleteobjects import DeleteObject
 
 from datetime import datetime
 import pymongo
@@ -157,8 +150,8 @@ class ROCrate(FairscapeBaseModel):
         )
     distribution: Optional[ROCrateDistribution] = Field(default=None)
 
- #   @computed_field(alias="@id")
- #   @property
+    @computed_field(alias="@id")
+    @property
     def guid(self) -> str:
 
         # remove trailing whitespace 
@@ -285,6 +278,13 @@ class ROCrate(FairscapeBaseModel):
                 # calculate filesize
                 # file_size = os.fstat(Object.fileno()).st_size
                 # print(file_size)
+
+                rocrate_logger.info(
+                    "validateObjectReference\t" +
+                    f"transaction_folder={TransactionFolder}\t" +
+                    "message='validation successfull'\t" +
+                    "success=true"
+                )
 
                 # insert the metadata onto the mongo metadata store
                 self.distribution = ROCrateDistribution(**{
@@ -471,7 +471,7 @@ def DeleteExtractedCrate(
 
 def GetMetadataFromCrate(MinioClient, BucketName, TransactionFolder, CratePath):
     """Extract metadata from the unzipped ROCrate onto MinIO
-
+    
     Args:
         MinioClient (Any): MinIO client
         BucketName (str): name for bucket to search for the crate metadata
@@ -481,6 +481,12 @@ def GetMetadataFromCrate(MinioClient, BucketName, TransactionFolder, CratePath):
     Returns:
         ro_crate_json (dict): contents of the ro-crate-metadata.json file as a dictionary
     """
+
+    rocrate_logger.info(
+        "GetMetadataFromCrate\t" +
+        f"transaction_folder={TransactionFolder}" +
+        f"crate_path={CratePath}" 
+    )
 
     try:
         # List all objects in the bucket
@@ -554,16 +560,23 @@ def zip_extracted_rocrate(bucket_name: str, object_loc_in_bucket, minio_client):
         raise Exception("Unable to zip objects: ", e)
 
 
-def zip_archived_rocrate(bucket_name: str, object_loc_in_bucket, minio_client):
+def StreamZippedROCrate(MinioClient, BucketName: str, ObjectPath: str):
 
     headers = {
             "Content-Type": "application/zip",
-            "Content-Disposition": f"attachment;filename=downloaded-rocrate.zip"
+            "Content-Disposition": "attachment;filename=downloaded-rocrate.zip"
     }
 
-    file_stream = minio_client.get_object(bucket_name=bucket_name, object_name=object_loc_in_bucket).read()
+    file_stream = MinioClient.get_object(
+        bucket_name=BucketName, 
+        object_name=ObjectPath
+        ).read()
 
-    return StreamingResponse(generator_iterfile(file_stream), headers=headers, media_type="application/zip")
+    return StreamingResponse(
+        generator_iterfile(file_stream), 
+        headers=headers, 
+        media_type="application/zip"
+        )
 
 
 # generator function to iterate over that file-like object
@@ -580,29 +593,23 @@ def get_data_from_stream(file_data) -> Generator:
 
 
 
-def get_metadata_by_id(rocrate_collection: pymongo.collection, rocrate_id):
-    try:
-        # ignore _id in mongo documents
-        query_projection = {'_id': False}
-        # find rocrate metadata by the unique @id
-        query = rocrate_collection.find_one(
-            {'@id': rocrate_id},
-            projection=query_projection
+def GetROCrateMetadata(rocrate_collection: pymongo.collection, rocrate_id):
+    # ignore _id in mongo documents
+    query_projection = {'_id': False}
+    # find rocrate metadata by the unique @id
+    query = rocrate_collection.find_one(
+        {'@id': rocrate_id},
+        projection=query_projection
         )
-
-    except Exception as e:
-        raise Exception(e)
-        
+ 
     if query:
-        return query
-        #try:
-        #    parsed_crate = ROCrate(**query)
-        #    return parsed_crate
-        #except Exception as e:
-        #    raise Exception(message=f"ROCRATE Metadata not valid: {str(e)}")
-    
+        try:
+            parsed_crate = ROCrate(**query)
+            return parsed_crate
+        except Exception as e:
+            raise Exception(message=f"ROCRATE Metadata not valid: {str(e)}")
     else:
-        raise Exception(message=f"ROCRATE NOT FOUND: {str(query)}")
+        return None    
 
 
 def PublishROCrateMetadata(

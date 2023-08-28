@@ -1,6 +1,17 @@
 from typing import Union
-from fastapi import APIRouter, UploadFile, Form, File, Response, Header
-from fastapi.responses import JSONResponse, StreamingResponse, FileResponse
+from fastapi import (
+    APIRouter, 
+    UploadFile, 
+#    Form, 
+    File, 
+#    Response, 
+#    Header
+)
+from fastapi.responses import (
+    JSONResponse, 
+#    StreamingResponse, 
+#    FileResponse
+)
 from mds.config import (
     get_minio_config,
     get_minio_client,
@@ -8,26 +19,20 @@ from mds.config import (
     get_mongo_config,
     get_mongo_client,
 )
-
-from mds.database import minio, mongo
 from mds.models.rocrate import (
     UploadExtractedCrate,
     UploadZippedCrate,
     DeleteExtractedCrate,
     GetMetadataFromCrate,
     ListROCrates,
-    zip_archived_rocrate,
-    zip_extracted_rocrate,
+    StreamZippedROCrate,
+    GetROCrateMetadata,
     PublishROCrateMetadata,
     PublishProvMetadata
 )
-from mds.utilities.funcs import to_str
-from mds.utilities.utils import get_file_from_zip
-from  builtins import any as b_any
 
 import uuid
 from pathlib import Path
-import json
 
 router = APIRouter()
 
@@ -70,22 +75,30 @@ def rocrate_upload(file: UploadFile = File(...)):
 
     if zipped_upload_status is None:
         return JSONResponse(
-            status_code=upload_status.status_code,
-            content={"error": upload_status.message}
+            status_code=zipped_upload_status.status_code,
+            content={
+                "error": zipped_upload_status.message
+                }
         )
+
+    # try to seek the begining of the file
+    file.file.seek(0)
 
     # upload the unziped ROcrate
     extracted_upload_status = UploadExtractedCrate(
         MinioClient=minio_client,
         ZippedObject=file.file,
-        BucketName=minio_config.rocrate_bucket,
+        BucketName=minio_config.default_bucket,
         TransactionFolder=transaction_folder
     )
 
     if not extracted_upload_status.success:
         return JSONResponse(
             status_code = extracted_upload_status.status_code,
-            content = {"error": extracted_upload_status.message}
+            content = {
+                "message": "Error UploadExtractedCrate",
+                "error": extracted_upload_status.message
+                }
         )
 
 
@@ -104,10 +117,13 @@ def rocrate_upload(file: UploadFile = File(...)):
                 content={"error": "ROCrate Parsing Error"}
             )
 
+    # TODO handle exception more specifically
     except Exception: 
         return JSONResponse(
             status_code=400,
-            content={"error": f"{RO_CRATE_METADATA_FILE_NAME} not found in ROCrate"}
+            content={
+                "error": "ro-crate-metadata.json not found in ROCrate"
+                }
         )
 
         
@@ -130,8 +146,16 @@ def rocrate_upload(file: UploadFile = File(...)):
 
         # mint all identifiers in identifier namespace
         # TODO check mongo write success
-        insert_identifiers = PublishProvMetadata(crate, identifier_collection)
-        insert_rocrate = PublishROCrateMetadata(crate, rocrate_collection)
+        prov_metadata = PublishProvMetadata(crate, identifier_collection)
+
+        if not prov_metadata:
+            pass
+
+
+        rocrate_metadata = PublishROCrateMetadata(crate, rocrate_collection)
+
+        if not rocrate_metadata:
+            pass
 
         return JSONResponse(
             status_code=201,
@@ -146,19 +170,20 @@ def rocrate_upload(file: UploadFile = File(...)):
 
     else:
 
-        remove_status = DeleteExtractedCrate(
-            MinioClient=minio_client, 
-            BucketName=minio_config.default_bucket,
-            TransactionFolder=transaction_folder,
-            CratePath=zip_foldername
-            )
+        # TODO cleanup operations
+        #remove_status = DeleteExtractedCrate(
+        #    MinioClient=minio_client, 
+        #    BucketName=minio_config.default_bucket,
+        #    TransactionFolder=transaction_folder,
+        #    CratePath=zip_foldername
+        #    )
         
 
-        if not remove_status.success:
-            return JSONResponse(
-                status_code=remove_status.status_code,
-                content={"error": remove_status.message}
-            )
+        #if not remove_status.success:
+        #    return JSONResponse(
+        #        status_code=remove_status.status_code,
+        #        content={"error": remove_status.message}
+        #    )
         return JSONResponse(
             status_code=validation_status.status_code,
             content={"error": validation_status.message}
@@ -177,38 +202,20 @@ def rocrate_list():
     )
 
 
-@router.get("/rocrate/extracted/download/ark:{NAAN}/{postfix:path}",
-            summary="Download extracted form of ROCrate using StreamingResponse",
-            response_description="ROCrate downloaded as a zip file")
-def extracted_rocrate_download(NAAN: str, postfix: str):
-
-    rocrate_id = f"ark:{NAAN}/{postfix}"
-
-    rocrate_metadata = get_metadata_by_id(rocrate_collection, rocrate_id)
-    if rocrate_metadata:
-        bucket_name = ''
-        object_name = ''
-        for key, value in rocrate_metadata.items():
-            if key == 'distribution':
-                if value['extractedROCrateBucket']:
-                    bucket_name = value['extractedROCrateBucket']
-                if value['extractedObjectPath']:
-                    object_name = value['extractedObjectPath']
-                    break
-
-        if not bucket_name or not object_name:
-            return JSONResponse(
-                status_code=404,
-                content={"error": f"unable to find the object and bucket for RO-Crate: {rocrate_id}"}
-            )
-        else:
-            return zip_extracted_rocrate(bucket_name, object_name, minio_client)
-
-    else:
-        return JSONResponse(
-            status_code=404,
-            content={"error": f"unable to find record for RO-Crate: {rocrate_id}"}
-        )
+#@router.get("/rocrate/extracted/download/ark:{NAAN}/{postfix:path}",
+#            summary="Download extracted form of ROCrate using StreamingResponse",
+#            response_description="ROCrate downloaded as a zip file")
+#def extracted_rocrate_download(NAAN: str, postfix: str):
+#    rocrate_id = f"ark:{NAAN}/{postfix}"
+#    rocrate_metadata = GetROCrateMetadata(rocrate_collection, rocrate_id)
+#    if rocrate_metadata is None:
+#        return JSONResponse(
+#            status_code=404,
+#            content={"error": f"unable to find record for RO-Crate: {rocrate_id}"}
+#        )
+#
+#    else:
+#        return 
 
 
 @router.get("/rocrate/archived/download/ark:{NAAN}/{postfix:path}",
@@ -219,29 +226,17 @@ def archived_rocrate_download(
         postfix: str
 ):
     rocrate_id = f"ark:{NAAN}/{postfix}"
-    rocrate_metadata = get_metadata_by_id(rocrate_collection, rocrate_id)
+    rocrate_metadata = GetROCrateMetadata(rocrate_collection, rocrate_id)
 
-    if rocrate_metadata:
-        bucket_name = ''
-        object_name = ''
-        for key, value in rocrate_metadata.items():
-            if key == 'distribution':
-                if value['archivedROCrateBucket']:
-                    bucket_name = value['archivedROCrateBucket']
-                if value['archivedObjectPath']:
-                    object_name = value['archivedObjectPath']
-                    break
-
-        if not bucket_name or not object_name:
-            return JSONResponse(
-                status_code=404,
-                content={"error": f"unable to find the object and bucket for RO-Crate: {rocrate_id}"}
-            )
-        else:
-            return zip_archived_rocrate(bucket_name, object_name, minio_client)
-
-    else:
+    if rocrate_metadata is None:
         return JSONResponse(
             status_code=404,
             content={"error": f"unable to find record for RO-Crate: {rocrate_id}"}
+        )
+        
+    else:
+        return StreamZippedROCrate(
+            MinioClient=minio_client,
+            BucketName=minio_config.rocrate_bucket,
+            ObjectPath = rocrate_metadata.distribution.archivedObjectPath
         )
