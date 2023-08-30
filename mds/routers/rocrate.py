@@ -195,7 +195,15 @@ def rocrate_upload(file: UploadFile = File(...)):
             summary="List all ROCrates",
             response_description="Retrieved list of ROCrates")
 def rocrate_list():
+    # TODO check headers to return json or html view
+
     rocrate = ListROCrates(rocrate_collection)
+
+    # if headers.requests == "text/html":
+    #    return Response(
+    #       template = "./static/templates/rocrate-list.html" 
+    #        content = rocrate_list
+    #       )
 
     return JSONResponse(
         status_code=200,
