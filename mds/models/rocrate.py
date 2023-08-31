@@ -150,9 +150,10 @@ class ROCrate(FairscapeBaseModel):
         )
     distribution: Optional[ROCrateDistribution] = Field(default=None)
 
-    @computed_field(alias="@id")
-    @property
-    def guid(self) -> str:
+    # turning off automatically generated GUIDs
+    #@computed_field(alias="@id")
+    #@property
+    def generate_guid(self) -> str:
 
         # remove trailing whitespace 
         cleaned_name = re.sub('\s+$', '', self.name)
