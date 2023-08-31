@@ -1,13 +1,6 @@
 {
 	"name": "mds-dev",
 	"image": "docker/dev-environments-default:stable-1",
-	"remoteUser": "vscode",
-	"mounts": [
-		{
-			"source": "D:\\Work\\B2AI-Data",
-			"target": "/mnt/b2ai",
-			"type": "bind"
-		}
-	]	
+	"remoteUser": "vscode"
 
 }
