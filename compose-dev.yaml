@@ -1,17 +1,17 @@
 services:
-  dev:
+  app:
     entrypoint:
     - sleep
     - infinity
-    image: python:3.11.4
+    image: docker/dev-environments-default:stable-1
     init: true
-    links:
-      - "mongo:mongo"
-      - "minio:minio"
     volumes:
     - type: bind
       source: /var/run/docker.sock
       target: /var/run/docker.sock
+    links:
+    - mongo:mongo
+    - minio:minio
   mongo:
     image: mongo
     restart: always
@@ -24,17 +24,19 @@ services:
     image: mongo-express
     restart: always
     ports:
-      - 8080:8081
+      - 8081:8081
     environment:
       ME_CONFIG_MONGODB_ADMINUSERNAME: mongotestaccess
       ME_CONFIG_MONGODB_ADMINPASSWORD: mongotestsecret
       ME_CONFIG_MONGODB_URL: mongodb://mongotestaccess:mongotestsecret@mongo:27017/
+    links:
+    - mongo:mongo
   minio:
     image: minio/minio
     restart: always
     ports:
-      - 9001:9001
       - 9000:9000
+      - 9001:9001
     command: server /data --console-address ":9001"
     environment:
       MINIO_ROOT_USER: miniotestuser

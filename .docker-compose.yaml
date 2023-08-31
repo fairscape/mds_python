@@ -8,6 +8,19 @@
 # #    build: .
 # #    ports:
 # #    - 8080:8080
+  # dev:
+  #   entrypoint:
+  #   - sleep
+  #   - infinity
+  #   image: python:3.11.4
+  #   init: true
+  #   links:
+  #     - "mongo:mongo"  
+  #     - "minio:minio"
+  #   volumes:
+  #   - type: bind
+  #     source: /var/run/docker.sock
+  #     target: /var/run/docker.sock
 
 #   mongo:
 #     image: mongo
