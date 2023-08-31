@@ -19,8 +19,7 @@ from mds.utilities.operation_status import OperationStatus
 
 ARK_NAAN = "59852"
 IdentifierPattern = "ark[0-9]{5}\/.*"
-
-
+DEFAULT_LICENSE = " https://creativecommons.org/licenses/by/4.0/"
 
 default_context = {
     "@vocab": "https://schema.org/",
@@ -38,6 +37,7 @@ class Identifier(BaseModel):
         alias="@type"
     )
     name: str
+
 
 class FairscapeBaseModel(BaseModel, extra='allow'):
     """Refers to the Fairscape BaseModel inherited from Pydantic
@@ -63,10 +63,12 @@ class FairscapeBaseModel(BaseModel, extra='allow'):
     name: str = Field(max_length=200)
     keywords: List[str] = Field(default=[])
     description: str = Field(min_length=5)
+    license: Optional[str] = Field(default=DEFAULT_LICENSE)
+
 
     #@computed_field(alias="@id")
     #@property
-    def guid(self) -> str:
+    def generate_guid(self) -> str:
         # TODO url encode values
         # TODO add random hash digest
 
