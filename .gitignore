@@ -4,6 +4,7 @@ casbin_policy.db
 
 # music source code
 tests/music_pipeline/MuSIC
+tests/data
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
