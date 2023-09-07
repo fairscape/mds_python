@@ -133,62 +133,64 @@ def rocrate_upload(file: UploadFile = File(...)):
     crate.entailment()
     
 
+    # turn off validation for not found metadata
     # Compare objects referenced in the metadata file to the objects in the crate 
-    validation_status = crate.validateObjectReference(
-        MinioClient=minio_client,
-        MinioConfig=minio_config,
-        TransactionFolder=transaction_folder,
-        CrateName=zip_foldername
-        )
+    #validation_status = crate.validateObjectReference(
+    #    MinioClient=minio_client,
+    #    MinioConfig=minio_config,
+    #    TransactionFolder=transaction_folder,
+    #    CrateName=zip_foldername
+    #    )
 
 
-    if validation_status.success:
-
+    #if validation_status.success:
         # mint all identifiers in identifier namespace
-        # TODO check mongo write success
-        prov_metadata = PublishProvMetadata(crate, identifier_collection)
+    
+    prov_metadata = PublishProvMetadata(crate, identifier_collection)
 
-        if not prov_metadata:
-            pass
+    # TODO check mongo write success
+    if not prov_metadata:
+        pass
 
 
-        rocrate_metadata = PublishROCrateMetadata(crate, rocrate_collection)
+    rocrate_metadata = PublishROCrateMetadata(crate, rocrate_collection)
 
-        if not rocrate_metadata:
-            pass
+    # TODO check mongo write success
+    if not rocrate_metadata:
+        pass
 
-        return JSONResponse(
-            status_code=201,
-            content={
-                "created": {
-                    "@id": crate.guid,
-                    "@type": "Dataset",
-                    "name": crate.name
-                }
+    return JSONResponse(
+        status_code=201,
+        content={
+            "created": {
+                "@id": crate.guid,
+                "@type": "Dataset",
+                "name": crate.name
             }
-        )
+        }
+    )
 
-    else:
+    # else:
 
-        remove_status = DeleteExtractedCrate(
-            MinioClient=minio_client, 
-            BucketName=minio_config.default_bucket,
-            TransactionFolder=transaction_folder,
-            CratePath=zip_foldername
-            )
+    #     remove_status = DeleteExtractedCrate(
+    #         MinioClient=minio_client, 
+    #         BucketName=minio_config.default_bucket,
+    #         TransactionFolder=transaction_folder,
+    #         CratePath=zip_foldername
+    #         )
         
-        # TODO cleanup operations
+    #     # TODO cleanup operations
 
-        if not remove_status.success:
-            return JSONResponse(
-                status_code=remove_status.status_code,
-                content={"error": remove_status.message}
-            )
+    #     if not remove_status.success:
+    #         return JSONResponse(
+    #             status_code=remove_status.status_code,
+    #             content={"error": remove_status.message}
+    #         )
 
-        return JSONResponse(
-            status_code=validation_status.status_code,
-            content={"error": validation_status.message}
-        )
+    #     return JSONResponse(
+    #         status_code=validation_status.status_code,
+    #         content={"error": validation_status.message}
+    #     )
 
 
 @router.get("/rocrate",
