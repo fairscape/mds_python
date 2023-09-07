@@ -54,6 +54,7 @@ COMPUTATION_TYPE = "Computation"
 ROCRATE_TYPE = "ROCrate"
 
 class ROCrateDataset(FairscapeBaseModel):
+    guid: str = Field(alias="@id")
     metadataType: Optional[str] = Field(default="https://w3id.org/EVI#Dataset")
     additionalType: Optional[str] = Field(default=DATASET_TYPE)
     author: str = Field(max_length=64)
@@ -72,6 +73,7 @@ class ROCrateDataset(FairscapeBaseModel):
 
 
 class ROCrateDatasetContainer(FairscapeBaseModel): 
+    guid: str = Field(alias="@id")
     metadataType: Optional[str] = Field(
         default="https://w3id.org/EVI#Dataset", 
         alias="@type"
@@ -100,6 +102,7 @@ class ROCrateDatasetContainer(FairscapeBaseModel):
 
 
 class ROCrateSoftware(FairscapeBaseModel): 
+    guid: str = Field(alias="@id")
     metadataType: Optional[str] = Field(default="https://w3id.org/EVI#Software")
     additionalType: Optional[str] = Field(default=SOFTWARE_TYPE)
     author: str = Field(min_length=4, max_length=64)
@@ -114,6 +117,7 @@ class ROCrateSoftware(FairscapeBaseModel):
 
 
 class ROCrateComputation(FairscapeBaseModel):
+    guid: str = Field(alias="@id")
     metadataType: Optional[str] = Field(default="https://w3id.org/EVI#Computation")
     additionalType: Optional[str] = Field(default=COMPUTATION_TYPE)
     runBy: str
@@ -134,6 +138,7 @@ class ROCrateDistribution(BaseModel):
 
 
 class ROCrate(FairscapeBaseModel):
+    guid: str = Field(alias="@id")
     metadataType: Optional[str] = Field(default="https://schema.org/Dataset", alias="@type")
     additionalType: Optional[str] = Field(default=ROCRATE_TYPE)
     name: constr(max_length=100)
@@ -320,6 +325,19 @@ class ROCrate(FairscapeBaseModel):
                 f"exception validating objects in ROCrate: {str(e)}", 
                 500
                 )
+
+class ProcessROCrate():
+    """ Class for Processing an ROCrate
+    """
+
+    def __init__(self, crate_file):
+        self.crate_file = crate_file
+
+    def uploadExtractedCrate():
+        pass
+
+    def Process(self):
+        pass
 
 
 
