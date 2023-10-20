@@ -19,6 +19,7 @@ from mds.config import (
     get_mongo_config,
     get_mongo_client,
 )
+
 from mds.models.rocrate import (
     UploadExtractedCrate,
     UploadZippedCrate,
@@ -130,7 +131,7 @@ def rocrate_upload(file: UploadFile = File(...)):
     # TODO check if new identifiers must be minted
 
     # run entailment
-    crate.entailment()
+    #crate.entailment()
     
 
     # turn off validation for not found metadata
@@ -163,9 +164,11 @@ def rocrate_upload(file: UploadFile = File(...)):
         status_code=201,
         content={
             "created": {
-                "@id": crate.guid,
+                #"@id": crate.guid,
+                "@id": crate.get("@id"),
                 "@type": "Dataset",
-                "name": crate.name
+                #"name": crate.name
+                "name": crate.get("name")
             }
         }
     )

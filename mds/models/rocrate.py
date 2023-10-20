@@ -333,12 +333,30 @@ class ProcessROCrate():
     def __init__(self, crate_file):
         self.crate_file = crate_file
 
-    def uploadExtractedCrate():
+    def UploadZippedCrate():
+        """ Function to take
+        """
+        pass
+
+    def UploadExtractedCrate():
         pass
 
     def Process(self):
         pass
 
+
+class UploadROCrate():
+    """ Class for Uploading ROCrate to Minio
+    """
+
+    def __init__(self, crate_file):
+        pass
+
+    def UploadZipped():
+        pass
+
+    def UploadExtracted():
+        pass
 
 
 def UploadZippedCrate(
@@ -400,6 +418,12 @@ def UploadExtractedCrate(
                 # TODO the source filepath will not start at the root of the rocrate
                 # but rather the full passed filename
                 source_filepath = Path(file_info.filename)
+
+                # TODO file_info.filename can be 
+                # Extracted/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha/ro-crate-metadata.json
+                # this causes the GetROCrateMetadata function to fail later on becaues it looks only in
+                # 1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha/ 
+
                 upload_filepath = Path(TransactionFolder) / source_filepath
 
                 upload_result = MinioClient.put_object(
@@ -500,18 +524,19 @@ def GetMetadataFromCrate(MinioClient, BucketName, TransactionFolder, CratePath):
     Returns:
         ro_crate_json (dict): contents of the ro-crate-metadata.json file as a dictionary
     """
+    object_path = f"{TransactionFolder}/{CratePath}/ro-crate-metadata.json"
 
-    rocrate_logger.info(
+    rocrate_logger.debug(
         "GetMetadataFromCrate\t" +
         f"transaction_folder={TransactionFolder}" +
-        f"crate_path={CratePath}" 
+        f"object_path={object_path}" 
     )
 
     try:
         # List all objects in the bucket
         ro_crate_response = MinioClient.get_object(
             bucket_name= BucketName, 
-            object_name=f"{TransactionFolder}/{CratePath}/ro-crate-metadata.json", 
+            object_name=object_path, 
             )
 
         # read all metadata as json
@@ -520,18 +545,25 @@ def GetMetadataFromCrate(MinioClient, BucketName, TransactionFolder, CratePath):
         # parse file contents into dictionary
         try:
             ro_crate_dict = json.loads(ro_crate_json)
-        except Exception:
+            return ro_crate_dict
+        except Exception as json_exception:
+            rocrate_logger.debug(
+                "GetMetadataFromCrate\t" +
+                f"transaction_folder={TransactionFolder} " + 
+                f"object_path={object_path} " +
+                f"exception={str(json_exception)} "
+            )
             return None
 
         # parse dictionary into ROCrate pydantic model
-        try:
-            crate = ROCrate(**ro_crate_dict)
-            return crate
-        except ValidationError:
+        #try:
+        #    crate = ROCrate(**ro_crate_dict)
+        #    return crate
+        #except ValidationError:
 
             # TODO try to parse gracefully
             # additionalType generation
-            return None
+        #    return None
 
     except Exception as e:
         raise Exception(f"ROCRATE ERROR: ro-crate-metadata.json not found exception={str(e)}")
@@ -542,16 +574,20 @@ def ListROCrates(ROCrateCollection: pymongo.collection.Collection):
     """
 
     rocrate_cursor = ROCrateCollection.find(
-        filter={"additionalType": ROCRATE_TYPE},
-        projection={
-            "@id": 1, 
-            "name": 1, 
-            "keywords": 1,
-            "description": 1,
-            "sourceOrganization": 1
-            }
+        filter={"additionalType": ROCRATE_TYPE}
     )
-    query_results = { "rocrates": list(rocrate_cursor) }
+    query_results = { "rocrates": 
+        [ 
+            {
+                "@id": crate.get("@id"), 
+                "name": crate.get("name"),
+                "description": crate.get("description"),
+                "keywords": crate.get("keywords"),
+                "sourceOrganization": crate.get("sourceOrganization")
+            } 
+            for crate in list(rocrate_cursor) 
+        ] 
+        }
     rocrate_cursor.close()
     return query_results
 
@@ -632,13 +668,14 @@ def GetROCrateMetadata(rocrate_collection: pymongo.collection, rocrate_id):
 
 
 def PublishROCrateMetadata(
-        rocrate: ROCrate, 
+        rocrate_json,
+        #rocrate: ROCrate, 
         rocrate_collection: pymongo.collection.Collection
         ) -> bool:  
     """ Insert ROCrate metadata into mongo rocrate collection
     """
 
-    rocrate_json = rocrate.model_dump(by_alias=True)
+    #rocrate_json = rocrate.model_dump(by_alias=True)
     insert_result = rocrate_collection.insert_one(rocrate_json)
     if insert_result.inserted_id is None:
         return False
@@ -647,16 +684,21 @@ def PublishROCrateMetadata(
 
 
 def PublishProvMetadata(
-        rocrate: ROCrate, 
+        rocrate_json,
+        #rocrate: ROCrate, 
         identifier_collection: pymongo.collection.Collection
         ) -> bool:
     """ Insert ROCrate metadata and metadata for all identifiers into the identifier collection
     """
 
+
+
     # for every element in the rocrate model dump json
-    insert_metadata = [ prov.model_dump(by_alias=True) for prov in rocrate.metadataGraph  ]
+    #insert_metadata = [ prov.model_dump(by_alias=True) for prov in rocrate.metadataGraph  ]
+    insert_metadata = [ elem for elem in rocrate_json.get("@graph")]
     # insert rocrate json into identifier collection
-    insert_metadata.append(rocrate.model_dump(by_alias=True))
+    #insert_metadata.append(rocrate.model_dump(by_alias=True))
+    insert_metadata.append(rocrate_json)
 
     # insert all identifiers into the identifier collection
     insert_result = identifier_collection.insert_many(insert_metadata)
