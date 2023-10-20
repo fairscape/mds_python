@@ -1,0 +1,5275 @@
+[
+  {
+    "@id": "ark:59852/f8ceefbc-fa52-495a-ac5f-5ccaafb9bcad",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "cellmaps_ppidownloader output file",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run AP-MS Edgelist AP-MS gene node attributes file",
+    "author": "Ideker Lab Cell Maps team",
+    "datePublished": "2023-08-31",
+    "version": "0.1.0a6",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": "tsv",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/7ab9bf7e-a52d-47b0-881e-c835150d5f6a"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///ppi_gene_node_attributes.tsv",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_apmsloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_apmsloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/6790af66-db21-4273-a0cf-34993a4dd7b8",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Software",
+    "url": "https://github.com/idekerlab/cellmaps_ppidownloader",
+    "name": "cellmaps_ppidownloader",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run AP-MS Edgelist A tool to download AP-MS data for Cell Maps pipeline",
+    "author": "Ideker Lab Cell Maps team",
+    "dateModified": "2023-08-31",
+    "version": "0.1.0a6",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": "py",
+    "contentUrl": "https://github.com/idekerlab/cellmaps_ppidownloader",
+    "@type": "https://w3id.org/EVI#Software",
+    "additionalType": "Software",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_apmsloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_apmsloader_initialrun0.1alpha"
+    },
+    "usedBy": [
+      "ark:59852/7ab9bf7e-a52d-47b0-881e-c835150d5f6a"
+    ]
+  },
+  {
+    "@id": "ark:59852/7ab9bf7e-a52d-47b0-881e-c835150d5f6a",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Computation",
+    "url": null,
+    "name": "AP-MS Loader",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run AP-MS Edgelist run of cellmaps_ppidownloader",
+    "runBy": "cchuras",
+    "dateCreated": "2023-08-31",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "command": "{'outdir': '0.1pipeline/1.cm4ai_chromatin_mda-mb-468_untreated_apmsloader_initialrun0.1alpha', 'cm4ai_table': '0.1rocrates/cm4ai_chromatin_mda-mb-468_untreated_apms_0.1_alpha/apms.tsv', 'edgelist': None, 'edgelist_geneid_one_col': 'GeneID1', 'edgelist_symbol_one_col': 'Symbol1', 'edgelist_geneid_two_col': 'GeneID2', 'edgelist_symbol_two_col': 'Symbol2', 'baitlist': None, 'baitlist_symbol_col': 'GeneSymbol', 'baitlist_geneid_col': 'GeneID', 'baitlist_numinteractors_col': '# Interactors', 'provenance': 'ppiprovenance.json', 'logconf': None, 'skip_logging': False, 'verbose': 0, 'program': '/cellar/users/cchuras/miniconda3/envs/py38/bin/cellmaps_ppidownloadercmd.py', 'version': '0.1.0a6'}",
+    "usedSoftware": [
+      "ark:59852/6790af66-db21-4273-a0cf-34993a4dd7b8"
+    ],
+    "usedDataset": [
+      "ark:59852/62cbb46e-1d3d-4f72-b7e9-c7c140aa9367"
+    ],
+    "generated": [
+      "ark:59852/f8ceefbc-fa52-495a-ac5f-5ccaafb9bcad"
+    ],
+    "@type": "https://w3id.org/EVI#Computation",
+    "additionalType": "Computation",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_apmsloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_apmsloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/62cbb46e-1d3d-4f72-b7e9-c7c140aa9367",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "cellmaps_ppidownloader input file",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run AP-MS Edgelist AP-MS gene node attributes file",
+    "author": "Ideker Lab Cell Maps team",
+    "datePublished": "2023-08-31",
+    "version": "0.1.0a6",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": "tsv",
+    "schema": {},
+    "generatedBy": [],
+    "derivedFrom": [],
+    "usedBy": [
+      "ark:59852/7ab9bf7e-a52d-47b0-881e-c835150d5f6a",
+      "ark:59852/7ab9bf7e-a52d-47b0-881e-c835150d5f6a"
+    ],
+    "contentUrl": null,
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_apmsloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_apmsloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/f8ceefbc-fa52-495a-ac5f-5ccaafb9bcad",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "cellmaps_ppidownloader output file",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run AP-MS Edgelist AP-MS gene node attributes file",
+    "author": "Ideker Lab Cell Maps team",
+    "datePublished": "2023-08-31",
+    "version": "0.1.0a6",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": "tsv",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/7ab9bf7e-a52d-47b0-881e-c835150d5f6a"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///ppi_gene_node_attributes.tsv",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_apmsloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_apmsloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/6790af66-db21-4273-a0cf-34993a4dd7b8",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Software",
+    "url": "https://github.com/idekerlab/cellmaps_ppidownloader",
+    "name": "cellmaps_ppidownloader",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run AP-MS Edgelist A tool to download AP-MS data for Cell Maps pipeline",
+    "author": "Ideker Lab Cell Maps team",
+    "dateModified": "2023-08-31",
+    "version": "0.1.0a6",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": "py",
+    "contentUrl": "https://github.com/idekerlab/cellmaps_ppidownloader",
+    "@type": "https://w3id.org/EVI#Software",
+    "additionalType": "Software",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_apmsloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_apmsloader_initialrun0.1alpha"
+    },
+    "usedBy": [
+      "ark:59852/7ab9bf7e-a52d-47b0-881e-c835150d5f6a"
+    ]
+  },
+  {
+    "@id": "ark:59852/7ab9bf7e-a52d-47b0-881e-c835150d5f6a",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Computation",
+    "url": null,
+    "name": "AP-MS Loader",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run AP-MS Edgelist run of cellmaps_ppidownloader",
+    "runBy": "cchuras",
+    "dateCreated": "2023-08-31",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "command": "{'outdir': '0.1pipeline/1.cm4ai_chromatin_mda-mb-468_untreated_apmsloader_initialrun0.1alpha', 'cm4ai_table': '0.1rocrates/cm4ai_chromatin_mda-mb-468_untreated_apms_0.1_alpha/apms.tsv', 'edgelist': None, 'edgelist_geneid_one_col': 'GeneID1', 'edgelist_symbol_one_col': 'Symbol1', 'edgelist_geneid_two_col': 'GeneID2', 'edgelist_symbol_two_col': 'Symbol2', 'baitlist': None, 'baitlist_symbol_col': 'GeneSymbol', 'baitlist_geneid_col': 'GeneID', 'baitlist_numinteractors_col': '# Interactors', 'provenance': 'ppiprovenance.json', 'logconf': None, 'skip_logging': False, 'verbose': 0, 'program': '/cellar/users/cchuras/miniconda3/envs/py38/bin/cellmaps_ppidownloadercmd.py', 'version': '0.1.0a6'}",
+    "usedSoftware": [
+      "ark:59852/6790af66-db21-4273-a0cf-34993a4dd7b8"
+    ],
+    "usedDataset": [
+      "ark:59852/62cbb46e-1d3d-4f72-b7e9-c7c140aa9367"
+    ],
+    "generated": [
+      "ark:59852/f8ceefbc-fa52-495a-ac5f-5ccaafb9bcad"
+    ],
+    "@type": "https://w3id.org/EVI#Computation",
+    "additionalType": "Computation",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_apmsloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_apmsloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/62cbb46e-1d3d-4f72-b7e9-c7c140aa9367",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "cellmaps_ppidownloader input file",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run AP-MS Edgelist AP-MS gene node attributes file",
+    "author": "Ideker Lab Cell Maps team",
+    "datePublished": "2023-08-31",
+    "version": "0.1.0a6",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": "tsv",
+    "schema": {},
+    "generatedBy": [],
+    "derivedFrom": [],
+    "usedBy": [
+      "ark:59852/7ab9bf7e-a52d-47b0-881e-c835150d5f6a",
+      "ark:59852/7ab9bf7e-a52d-47b0-881e-c835150d5f6a"
+    ],
+    "contentUrl": null,
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_apmsloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_apmsloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/fd21fe5d-ca8c-463c-88a3-fe1035284819",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "Simulated Samples file",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Samples file derived from input RO-CRATE tsv file",
+    "author": "NA",
+    "datePublished": "2023-08-28",
+    "version": "0.1 alpha",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": "tsv",
+    "schema": {},
+    "generatedBy": [],
+    "derivedFrom": [],
+    "usedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "contentUrl": "file:///samplescopy.csv",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/3c159191-564c-4f5c-a1a0-99d5813dd7f9",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "Simulated unique file",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Unique file derived from input RO-CRATE tsv file",
+    "author": "NA",
+    "datePublished": "2023-08-28",
+    "version": "0.1 alpha",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": "tsv",
+    "schema": {},
+    "generatedBy": [],
+    "derivedFrom": [],
+    "usedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "contentUrl": "file:///uniquecopy.csv",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/892697d9-9f97-4916-abef-0d60bdb0bd6f",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "cellmaps_imagedownloader output file",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images Fold 1 Image gene node attributes file",
+    "author": "cellmaps_imagedownloader",
+    "datePublished": "2023-08-31",
+    "version": "0.1.0a12",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": "tsv",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///1_image_gene_node_attributes.tsv",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/3b49ed96-68a7-4584-9153-cebb6b864007",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "cellmaps_imagedownloader output file",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images Fold 2 Image gene node attributes file",
+    "author": "cellmaps_imagedownloader",
+    "datePublished": "2023-08-31",
+    "version": "0.1.0a12",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": "tsv",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///2_image_gene_node_attributes.tsv",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/b0af601d-06e9-4e45-a3d2-d90ba4ad2fd6",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_G1_R2_red.jpg red channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///red/B2AI_1_untreated_G1_R2_red.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/a5c0e516-e013-4d94-8d11-fd2d38ece8bc",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_C2_R2_red.jpg red channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///red/B2AI_1_untreated_C2_R2_red.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/d3e57a1d-5cc4-492a-9867-6e44da779f8f",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_E1_R4_red.jpg red channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///red/B2AI_1_untreated_E1_R4_red.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/7e1188b1-7405-4e13-b75e-611fed4647b3",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_E1_R7_red.jpg red channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///red/B2AI_1_untreated_E1_R7_red.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/5c212be2-b9c8-42a3-8c2e-b387baa90eca",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_E3_R1_red.jpg red channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///red/B2AI_1_untreated_E3_R1_red.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/a5b55826-b1d5-4c0d-9232-d0efd9d8e5d9",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_A6_R8_red.jpg red channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///red/B2AI_1_untreated_A6_R8_red.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/c2f2c54d-6535-4b9f-b004-a75c1fae3d18",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_C8_R6_red.jpg red channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///red/B2AI_1_untreated_C8_R6_red.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/35f4fbf1-701b-4ac1-9bfa-773e4738fcca",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_A5_R5_red.jpg red channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///red/B2AI_1_untreated_A5_R5_red.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/8d963614-3897-455b-b486-3ba6d355e2cf",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_F9_R6_red.jpg red channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///red/B2AI_1_untreated_F9_R6_red.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/01178945-f830-4557-95e9-d7b985956914",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_H2_R3_red.jpg red channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///red/B2AI_1_untreated_H2_R3_red.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/77c0d1cb-bb95-46b1-af53-b78e12b95645",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_H4_R6_red.jpg red channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///red/B2AI_1_untreated_H4_R6_red.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/1d8eef41-bc7e-4b83-a846-d3e657c83f08",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_H5_R4_red.jpg red channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///red/B2AI_1_untreated_H5_R4_red.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/c35f08cb-1602-4fdd-9d0b-1e471c9ffa67",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_B3_R3_red.jpg red channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///red/B2AI_1_untreated_B3_R3_red.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/f3c162f3-e9a7-4e83-9449-3cabb0809751",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_H2_R4_red.jpg red channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///red/B2AI_1_untreated_H2_R4_red.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/3d67f22d-797f-4ebc-81f4-961917f98f60",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_D3_R3_red.jpg red channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///red/B2AI_1_untreated_D3_R3_red.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/f982d896-de5a-489f-af9d-987114a771af",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_F10_R3_red.jpg red channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///red/B2AI_1_untreated_F10_R3_red.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/4786b684-bada-4bc7-98e4-9a17c0089d2c",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_C9_R6_red.jpg red channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///red/B2AI_1_untreated_C9_R6_red.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/814af2ed-c9af-4982-941c-ee7467f6b5db",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_G7_R7_red.jpg red channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///red/B2AI_1_untreated_G7_R7_red.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/4fbaa92f-42c2-41cf-9d8a-7d10ba45c2a9",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_F1_R8_red.jpg red channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///red/B2AI_1_untreated_F1_R8_red.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/5ad535ab-2bf0-4ee7-82b9-4b818f53745d",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_G10_R5_red.jpg red channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///red/B2AI_1_untreated_G10_R5_red.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/db30fa9d-32a8-4505-92a5-5a81569896c0",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_F4_R2_red.jpg red channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///red/B2AI_1_untreated_F4_R2_red.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/7569cbd7-3f3c-42e2-86f8-113598578c9a",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_B3_R4_red.jpg red channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///red/B2AI_1_untreated_B3_R4_red.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/02299b6f-2e81-4dd9-888c-0ff2261fe0c6",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_D7_R1_red.jpg red channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///red/B2AI_1_untreated_D7_R1_red.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/433c6cad-a309-48f7-8c12-c5f2bb3da096",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_D7_R7_red.jpg red channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///red/B2AI_1_untreated_D7_R7_red.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/baa9f3c2-454e-422f-993c-c4f750b8446c",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_F5_R4_red.jpg red channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///red/B2AI_1_untreated_F5_R4_red.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/df9d82e8-732c-4e83-b12b-10612201f0bf",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_H1_R2_red.jpg red channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///red/B2AI_1_untreated_H1_R2_red.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/5b031875-eaa1-469d-831b-59ce828f70ba",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_B1_R7_blue.jpg blue channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///blue/B2AI_1_untreated_B1_R7_blue.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/df65ff76-1a8b-4959-96d3-cd501622bda7",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_A10_R8_blue.jpg blue channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///blue/B2AI_1_untreated_A10_R8_blue.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/f7ca9430-142b-434e-99a6-a6dd38a1c699",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_C11_R4_blue.jpg blue channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///blue/B2AI_1_untreated_C11_R4_blue.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/27cd3282-fa76-462f-84bc-0f675cb133a1",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_D7_R3_blue.jpg blue channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///blue/B2AI_1_untreated_D7_R3_blue.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/8e010db5-d382-4fc5-b236-beea4f60f898",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_B8_R5_blue.jpg blue channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///blue/B2AI_1_untreated_B8_R5_blue.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/b521eca6-83d5-4811-91a5-1720d20e9020",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_F2_R4_blue.jpg blue channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///blue/B2AI_1_untreated_F2_R4_blue.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/2b76f6ea-310f-4f09-9e21-fa6175126b2e",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_A5_R5_blue.jpg blue channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///blue/B2AI_1_untreated_A5_R5_blue.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/93c10bfb-4eb4-44e9-a43b-c3fa919a2ec9",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_E10_R7_blue.jpg blue channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///blue/B2AI_1_untreated_E10_R7_blue.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/d450a85b-f185-4069-993c-21eb14a30c1c",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_C12_R3_blue.jpg blue channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///blue/B2AI_1_untreated_C12_R3_blue.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/2c7f1465-7c63-4e99-9b7a-79952de1a988",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_H5_R4_blue.jpg blue channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///blue/B2AI_1_untreated_H5_R4_blue.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/056598a3-88bc-43ca-8ab3-00af8dc54b62",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_F12_R3_blue.jpg blue channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///blue/B2AI_1_untreated_F12_R3_blue.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/cd46cef4-c718-45fd-83e4-cdd76f9cf225",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_E5_R5_blue.jpg blue channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///blue/B2AI_1_untreated_E5_R5_blue.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/c724b3fc-c708-451e-868d-0cc955b86302",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_C7_R8_blue.jpg blue channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///blue/B2AI_1_untreated_C7_R8_blue.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/7bd57e02-9696-4777-88ee-2e41be435db3",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_D1_R3_blue.jpg blue channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///blue/B2AI_1_untreated_D1_R3_blue.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/b1d8203b-eb93-4c3e-bf46-397e1d3b763d",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_A7_R6_blue.jpg blue channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///blue/B2AI_1_untreated_A7_R6_blue.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/1680debc-e173-40d2-9ab3-7b3cdea10699",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_D9_R8_blue.jpg blue channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///blue/B2AI_1_untreated_D9_R8_blue.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/b1a01131-e12a-44ca-b354-7bd9e5c8eb0f",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_E9_R5_blue.jpg blue channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///blue/B2AI_1_untreated_E9_R5_blue.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/a590a489-4b05-4ef8-a812-c7a924bb18da",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_F8_R8_blue.jpg blue channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///blue/B2AI_1_untreated_F8_R8_blue.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/0804d36c-d0b5-4089-b04c-963cae492557",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_C10_R8_blue.jpg blue channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///blue/B2AI_1_untreated_C10_R8_blue.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/2bf0d48f-6387-4366-8dd5-0ea48fc7fcee",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_D6_R3_blue.jpg blue channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///blue/B2AI_1_untreated_D6_R3_blue.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/df527102-dcc6-4ed5-b3b3-8ef642a48707",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_A6_R1_blue.jpg blue channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///blue/B2AI_1_untreated_A6_R1_blue.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/dc86cd75-5597-4a8e-a278-b56abf8aae6c",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_B2_R1_blue.jpg blue channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///blue/B2AI_1_untreated_B2_R1_blue.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/21d8e1d0-f5c2-4b5c-8707-d0c56ac1774c",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_A5_R2_blue.jpg blue channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///blue/B2AI_1_untreated_A5_R2_blue.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/a787ba08-0464-4e6c-8a8b-6256486d8e4c",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_G8_R5_blue.jpg blue channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///blue/B2AI_1_untreated_G8_R5_blue.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/18240f47-1357-4536-9960-60c50ec9a7ae",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_B7_R1_blue.jpg blue channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///blue/B2AI_1_untreated_B7_R1_blue.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/4efbb1e6-9fdf-4d6e-9e06-a01544db9139",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_B12_R8_blue.jpg blue channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///blue/B2AI_1_untreated_B12_R8_blue.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/3cd20138-0ce0-4397-b7f0-42f80815e960",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_D3_R7_green.jpg green channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///green/B2AI_1_untreated_D3_R7_green.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/68347557-db9d-4c1b-9d0b-c730ae760c62",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_G9_R4_green.jpg green channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///green/B2AI_1_untreated_G9_R4_green.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/55ff6824-1aaa-4b02-9f75-041267058e60",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_B7_R4_green.jpg green channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///green/B2AI_1_untreated_B7_R4_green.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/3092125c-d85a-4907-886b-c107d3f66d0e",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_C8_R3_green.jpg green channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///green/B2AI_1_untreated_C8_R3_green.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/12df4453-86f2-431e-813e-888ce803aa0c",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_A6_R7_green.jpg green channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///green/B2AI_1_untreated_A6_R7_green.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/90eb5fec-4ff7-4dc7-ba2c-290f15bd91cf",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_F4_R4_green.jpg green channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///green/B2AI_1_untreated_F4_R4_green.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/2d9b2f5a-4cb1-4994-bf55-9091902a8a82",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_D6_R8_green.jpg green channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///green/B2AI_1_untreated_D6_R8_green.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/e240a69e-de15-457f-9f95-de993135be45",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_A9_R8_green.jpg green channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///green/B2AI_1_untreated_A9_R8_green.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/a789bc2d-2708-4613-b990-c96837222e00",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_B4_R5_green.jpg green channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///green/B2AI_1_untreated_B4_R5_green.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/860c76f3-06e7-4bf2-bd8d-3e71b4f534dc",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_G4_R1_green.jpg green channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///green/B2AI_1_untreated_G4_R1_green.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/fb41d7bb-fad0-4238-8792-ea410e3fedf5",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_C12_R8_green.jpg green channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///green/B2AI_1_untreated_C12_R8_green.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/8eb62c46-c49a-43f8-aa9e-ec017b64af57",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_H2_R1_green.jpg green channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///green/B2AI_1_untreated_H2_R1_green.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/e243cc87-af83-4243-9626-346c02601ff2",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_G2_R1_green.jpg green channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///green/B2AI_1_untreated_G2_R1_green.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/e815cad5-4314-4aab-8266-6b92ec034f2c",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_B2_R8_green.jpg green channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///green/B2AI_1_untreated_B2_R8_green.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/bf9bfca8-6013-428d-8ed5-328041c3bffa",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_E3_R1_green.jpg green channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///green/B2AI_1_untreated_E3_R1_green.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/051b6b47-cdd7-4996-b69c-a9b1aa8bf211",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_G6_R4_green.jpg green channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///green/B2AI_1_untreated_G6_R4_green.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/82b12179-9fe5-4f50-813b-4542365911ef",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_G2_R2_green.jpg green channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///green/B2AI_1_untreated_G2_R2_green.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/7ac0d890-7127-400f-bd83-3da3f27af411",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_C10_R4_green.jpg green channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///green/B2AI_1_untreated_C10_R4_green.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/10883f3f-fca5-4f53-ab73-855af891686e",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_E10_R2_green.jpg green channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///green/B2AI_1_untreated_E10_R2_green.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/9e779361-330c-44a0-8c2b-b777463df60a",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_F7_R1_green.jpg green channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///green/B2AI_1_untreated_F7_R1_green.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/2ce968f1-4ff2-42ec-bca8-0591867b9860",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_A2_R7_green.jpg green channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///green/B2AI_1_untreated_A2_R7_green.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/fe4f13fb-9d83-4a84-b4d0-6d106d3321a6",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_F2_R3_green.jpg green channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///green/B2AI_1_untreated_F2_R3_green.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/2fc802a8-e34b-43d9-aad3-bf333ab1e5c5",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_E3_R5_green.jpg green channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///green/B2AI_1_untreated_E3_R5_green.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/5a29b1cd-5d07-4593-a581-75eb2d00f182",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_E2_R2_green.jpg green channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///green/B2AI_1_untreated_E2_R2_green.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/44f7f5c8-ebcc-4c60-96ab-d8bc7c0db106",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_G7_R5_green.jpg green channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///green/B2AI_1_untreated_G7_R5_green.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/d5d81d09-90d3-4a43-97ee-96c963fd0de1",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_F11_R6_green.jpg green channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///green/B2AI_1_untreated_F11_R6_green.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/e8dbfd6d-e3d3-4db3-8314-e5f4f7cb8f95",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_C8_R3_yellow.jpg yellow channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///yellow/B2AI_1_untreated_C8_R3_yellow.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/2dea9bc8-a808-4fd1-abff-0e9bc2d9e1f9",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_D12_R5_yellow.jpg yellow channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///yellow/B2AI_1_untreated_D12_R5_yellow.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/3f1ac40f-4560-48fe-8b53-6943aaee9397",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_A6_R2_yellow.jpg yellow channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///yellow/B2AI_1_untreated_A6_R2_yellow.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/0b3ed23d-c4cf-4774-9321-19e22afaa468",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_C11_R1_yellow.jpg yellow channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///yellow/B2AI_1_untreated_C11_R1_yellow.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/51bc47aa-5a13-4828-9b04-9d51740bbb7b",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_C12_R1_yellow.jpg yellow channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///yellow/B2AI_1_untreated_C12_R1_yellow.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/a8e497e3-0046-4b80-94a7-b6c51e9fbed2",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_A10_R2_yellow.jpg yellow channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///yellow/B2AI_1_untreated_A10_R2_yellow.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/8b7826ff-6879-45d6-916f-04086daa8154",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_D11_R2_yellow.jpg yellow channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///yellow/B2AI_1_untreated_D11_R2_yellow.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/7f25b5f7-8b0c-4198-9c6b-1af63c2d3596",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_G9_R7_yellow.jpg yellow channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///yellow/B2AI_1_untreated_G9_R7_yellow.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/0c961487-9112-474b-8d64-45d6dcc133c9",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_G5_R8_yellow.jpg yellow channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///yellow/B2AI_1_untreated_G5_R8_yellow.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/8471a61b-3e91-4adb-acd0-57855cd95e22",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_G3_R6_yellow.jpg yellow channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///yellow/B2AI_1_untreated_G3_R6_yellow.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/af7dfcf4-6d0b-4244-b831-dcb80e4f828d",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_H5_R2_yellow.jpg yellow channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///yellow/B2AI_1_untreated_H5_R2_yellow.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/dd791de4-76ed-4427-bbc6-3825a7d6ea26",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_E5_R5_yellow.jpg yellow channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///yellow/B2AI_1_untreated_E5_R5_yellow.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/55d19789-3cf7-4d1a-be86-36cc5eaf2a99",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_E4_R4_yellow.jpg yellow channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///yellow/B2AI_1_untreated_E4_R4_yellow.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/bc64167e-5351-47e7-8858-30979b507710",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_A9_R5_yellow.jpg yellow channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///yellow/B2AI_1_untreated_A9_R5_yellow.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/dcf54e20-bd1f-4c08-af09-96e825a8a768",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_G8_R5_yellow.jpg yellow channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///yellow/B2AI_1_untreated_G8_R5_yellow.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/c87e03cc-b8e3-4e53-b84a-a0584a9766ce",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_C11_R4_yellow.jpg yellow channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///yellow/B2AI_1_untreated_C11_R4_yellow.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/44ff5866-2e2f-49e5-8f1b-7d00acbf070f",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_A5_R3_yellow.jpg yellow channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///yellow/B2AI_1_untreated_A5_R3_yellow.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/c5121ce4-2906-4cb9-845b-38f002e6dd49",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_C1_R8_yellow.jpg yellow channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///yellow/B2AI_1_untreated_C1_R8_yellow.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/afbf78c3-e46b-4619-9e7b-0a689cc884b8",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_D12_R7_yellow.jpg yellow channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///yellow/B2AI_1_untreated_D12_R7_yellow.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/33138c47-b774-43c5-a25b-ca0c8723b563",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_C3_R1_yellow.jpg yellow channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///yellow/B2AI_1_untreated_C3_R1_yellow.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/56d960de-9e00-4cac-89ce-94ca7c5c96d9",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_B3_R6_yellow.jpg yellow channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///yellow/B2AI_1_untreated_B3_R6_yellow.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/15f5f44c-a9de-4e48-a4cb-aff1828a91fc",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_B2_R6_yellow.jpg yellow channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///yellow/B2AI_1_untreated_B2_R6_yellow.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/81aa7dca-5f24-4a79-948d-d46f1abfa7e8",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_C7_R8_yellow.jpg yellow channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///yellow/B2AI_1_untreated_C7_R8_yellow.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/34eed73f-67e9-4c83-8515-7c18ab1f9115",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_B11_R2_yellow.jpg yellow channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///yellow/B2AI_1_untreated_B11_R2_yellow.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/dfdd5d3a-c1c5-4a42-ad20-c49715e9d6b7",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_G2_R2_yellow.jpg yellow channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///yellow/B2AI_1_untreated_G2_R2_yellow.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/d0cb0edb-4358-4797-a5d1-fcf275db97d2",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "B2AI_1_untreated_C4_R2_yellow.jpg yellow channel image",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images IF image file",
+    "author": "???",
+    "datePublished": "2023-08-31",
+    "version": "???",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": ".jpg",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///yellow/B2AI_1_untreated_C4_R2_yellow.jpg",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/0ea7cbc3-d2aa-4a77-b612-827b2824f110",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Software",
+    "url": "https://github.com/idekerlab/cellmaps_imagedownloader",
+    "name": "cellmaps_imagedownloader",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images A tool to download specified image data from the Human Protein Atlas website using CSV file",
+    "author": "Cell Maps team",
+    "dateModified": "2023-08-31",
+    "version": "0.1.0a12",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": "py",
+    "contentUrl": "https://github.com/idekerlab/cellmaps_imagedownloader",
+    "@type": "https://w3id.org/EVI#Software",
+    "additionalType": "Software",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    },
+    "usedBy": [
+      "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5"
+    ]
+  },
+  {
+    "@id": "ark:59852/623f4e05-a897-4c3c-8f6a-bdd81f036dd5",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Computation",
+    "url": null,
+    "name": "IF Image Loader",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF microscopy images run of cellmaps_imagedownloader",
+    "runBy": "cchuras",
+    "dateCreated": "2023-08-31",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "command": "{'outdir': '0.1pipeline/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha', 'cm4ai_table': '0.1rocrates/cm4ai_chromatin_mda-mb-468_untreated_ifimage_0.1_alpha/MDA-MB-468_untreated_antibody_gene_table.tsv', 'samples': None, 'unique': None, 'provenance': 'imageprovenance.json', 'proteinatlasxml': 'https://www.proteinatlas.org/download/proteinatlas.xml.gz', 'fake_images': False, 'poolsize': 4, 'imgsuffix': '.jpg', 'skip_existing': False, 'skip_failed': False, 'logconf': None, 'skip_logging': False, 'verbose': 0, 'program': '/cellar/users/cchuras/miniconda3/envs/py38/bin/cellmaps_imagedownloadercmd.py', 'version': '0.1.0a12'}",
+    "usedSoftware": [
+      "ark:59852/0ea7cbc3-d2aa-4a77-b612-827b2824f110"
+    ],
+    "usedDataset": [
+      "ark:59852/3c159191-564c-4f5c-a1a0-99d5813dd7f9",
+      "ark:59852/fd21fe5d-ca8c-463c-88a3-fe1035284819"
+    ],
+    "generated": [
+      "ark:59852/892697d9-9f97-4916-abef-0d60bdb0bd6f",
+      "ark:59852/3b49ed96-68a7-4584-9153-cebb6b864007",
+      "ark:59852/b0af601d-06e9-4e45-a3d2-d90ba4ad2fd6",
+      "ark:59852/a5c0e516-e013-4d94-8d11-fd2d38ece8bc",
+      "ark:59852/d3e57a1d-5cc4-492a-9867-6e44da779f8f",
+      "ark:59852/7e1188b1-7405-4e13-b75e-611fed4647b3",
+      "ark:59852/5c212be2-b9c8-42a3-8c2e-b387baa90eca",
+      "ark:59852/a5b55826-b1d5-4c0d-9232-d0efd9d8e5d9",
+      "ark:59852/c2f2c54d-6535-4b9f-b004-a75c1fae3d18",
+      "ark:59852/35f4fbf1-701b-4ac1-9bfa-773e4738fcca",
+      "ark:59852/8d963614-3897-455b-b486-3ba6d355e2cf",
+      "ark:59852/01178945-f830-4557-95e9-d7b985956914",
+      "ark:59852/77c0d1cb-bb95-46b1-af53-b78e12b95645",
+      "ark:59852/1d8eef41-bc7e-4b83-a846-d3e657c83f08",
+      "ark:59852/c35f08cb-1602-4fdd-9d0b-1e471c9ffa67",
+      "ark:59852/f3c162f3-e9a7-4e83-9449-3cabb0809751",
+      "ark:59852/3d67f22d-797f-4ebc-81f4-961917f98f60",
+      "ark:59852/f982d896-de5a-489f-af9d-987114a771af",
+      "ark:59852/4786b684-bada-4bc7-98e4-9a17c0089d2c",
+      "ark:59852/814af2ed-c9af-4982-941c-ee7467f6b5db",
+      "ark:59852/4fbaa92f-42c2-41cf-9d8a-7d10ba45c2a9",
+      "ark:59852/5ad535ab-2bf0-4ee7-82b9-4b818f53745d",
+      "ark:59852/db30fa9d-32a8-4505-92a5-5a81569896c0",
+      "ark:59852/7569cbd7-3f3c-42e2-86f8-113598578c9a",
+      "ark:59852/02299b6f-2e81-4dd9-888c-0ff2261fe0c6",
+      "ark:59852/433c6cad-a309-48f7-8c12-c5f2bb3da096",
+      "ark:59852/baa9f3c2-454e-422f-993c-c4f750b8446c",
+      "ark:59852/df9d82e8-732c-4e83-b12b-10612201f0bf",
+      "ark:59852/5b031875-eaa1-469d-831b-59ce828f70ba",
+      "ark:59852/df65ff76-1a8b-4959-96d3-cd501622bda7",
+      "ark:59852/f7ca9430-142b-434e-99a6-a6dd38a1c699",
+      "ark:59852/27cd3282-fa76-462f-84bc-0f675cb133a1",
+      "ark:59852/8e010db5-d382-4fc5-b236-beea4f60f898",
+      "ark:59852/b521eca6-83d5-4811-91a5-1720d20e9020",
+      "ark:59852/2b76f6ea-310f-4f09-9e21-fa6175126b2e",
+      "ark:59852/93c10bfb-4eb4-44e9-a43b-c3fa919a2ec9",
+      "ark:59852/d450a85b-f185-4069-993c-21eb14a30c1c",
+      "ark:59852/2c7f1465-7c63-4e99-9b7a-79952de1a988",
+      "ark:59852/056598a3-88bc-43ca-8ab3-00af8dc54b62",
+      "ark:59852/cd46cef4-c718-45fd-83e4-cdd76f9cf225",
+      "ark:59852/c724b3fc-c708-451e-868d-0cc955b86302",
+      "ark:59852/7bd57e02-9696-4777-88ee-2e41be435db3",
+      "ark:59852/b1d8203b-eb93-4c3e-bf46-397e1d3b763d",
+      "ark:59852/1680debc-e173-40d2-9ab3-7b3cdea10699",
+      "ark:59852/b1a01131-e12a-44ca-b354-7bd9e5c8eb0f",
+      "ark:59852/a590a489-4b05-4ef8-a812-c7a924bb18da",
+      "ark:59852/0804d36c-d0b5-4089-b04c-963cae492557",
+      "ark:59852/2bf0d48f-6387-4366-8dd5-0ea48fc7fcee",
+      "ark:59852/df527102-dcc6-4ed5-b3b3-8ef642a48707",
+      "ark:59852/dc86cd75-5597-4a8e-a278-b56abf8aae6c",
+      "ark:59852/21d8e1d0-f5c2-4b5c-8707-d0c56ac1774c",
+      "ark:59852/a787ba08-0464-4e6c-8a8b-6256486d8e4c",
+      "ark:59852/18240f47-1357-4536-9960-60c50ec9a7ae",
+      "ark:59852/4efbb1e6-9fdf-4d6e-9e06-a01544db9139",
+      "ark:59852/3cd20138-0ce0-4397-b7f0-42f80815e960",
+      "ark:59852/68347557-db9d-4c1b-9d0b-c730ae760c62",
+      "ark:59852/55ff6824-1aaa-4b02-9f75-041267058e60",
+      "ark:59852/3092125c-d85a-4907-886b-c107d3f66d0e",
+      "ark:59852/12df4453-86f2-431e-813e-888ce803aa0c",
+      "ark:59852/90eb5fec-4ff7-4dc7-ba2c-290f15bd91cf",
+      "ark:59852/2d9b2f5a-4cb1-4994-bf55-9091902a8a82",
+      "ark:59852/e240a69e-de15-457f-9f95-de993135be45",
+      "ark:59852/a789bc2d-2708-4613-b990-c96837222e00",
+      "ark:59852/860c76f3-06e7-4bf2-bd8d-3e71b4f534dc",
+      "ark:59852/fb41d7bb-fad0-4238-8792-ea410e3fedf5",
+      "ark:59852/8eb62c46-c49a-43f8-aa9e-ec017b64af57",
+      "ark:59852/e243cc87-af83-4243-9626-346c02601ff2",
+      "ark:59852/e815cad5-4314-4aab-8266-6b92ec034f2c",
+      "ark:59852/bf9bfca8-6013-428d-8ed5-328041c3bffa",
+      "ark:59852/051b6b47-cdd7-4996-b69c-a9b1aa8bf211",
+      "ark:59852/82b12179-9fe5-4f50-813b-4542365911ef",
+      "ark:59852/7ac0d890-7127-400f-bd83-3da3f27af411",
+      "ark:59852/10883f3f-fca5-4f53-ab73-855af891686e",
+      "ark:59852/9e779361-330c-44a0-8c2b-b777463df60a",
+      "ark:59852/2ce968f1-4ff2-42ec-bca8-0591867b9860",
+      "ark:59852/fe4f13fb-9d83-4a84-b4d0-6d106d3321a6",
+      "ark:59852/2fc802a8-e34b-43d9-aad3-bf333ab1e5c5",
+      "ark:59852/5a29b1cd-5d07-4593-a581-75eb2d00f182",
+      "ark:59852/44f7f5c8-ebcc-4c60-96ab-d8bc7c0db106",
+      "ark:59852/d5d81d09-90d3-4a43-97ee-96c963fd0de1",
+      "ark:59852/e8dbfd6d-e3d3-4db3-8314-e5f4f7cb8f95",
+      "ark:59852/2dea9bc8-a808-4fd1-abff-0e9bc2d9e1f9",
+      "ark:59852/3f1ac40f-4560-48fe-8b53-6943aaee9397",
+      "ark:59852/0b3ed23d-c4cf-4774-9321-19e22afaa468",
+      "ark:59852/51bc47aa-5a13-4828-9b04-9d51740bbb7b",
+      "ark:59852/a8e497e3-0046-4b80-94a7-b6c51e9fbed2",
+      "ark:59852/8b7826ff-6879-45d6-916f-04086daa8154",
+      "ark:59852/7f25b5f7-8b0c-4198-9c6b-1af63c2d3596",
+      "ark:59852/0c961487-9112-474b-8d64-45d6dcc133c9",
+      "ark:59852/8471a61b-3e91-4adb-acd0-57855cd95e22",
+      "ark:59852/af7dfcf4-6d0b-4244-b831-dcb80e4f828d",
+      "ark:59852/dd791de4-76ed-4427-bbc6-3825a7d6ea26",
+      "ark:59852/55d19789-3cf7-4d1a-be86-36cc5eaf2a99",
+      "ark:59852/bc64167e-5351-47e7-8858-30979b507710",
+      "ark:59852/dcf54e20-bd1f-4c08-af09-96e825a8a768",
+      "ark:59852/c87e03cc-b8e3-4e53-b84a-a0584a9766ce",
+      "ark:59852/44ff5866-2e2f-49e5-8f1b-7d00acbf070f",
+      "ark:59852/c5121ce4-2906-4cb9-845b-38f002e6dd49",
+      "ark:59852/afbf78c3-e46b-4619-9e7b-0a689cc884b8",
+      "ark:59852/33138c47-b774-43c5-a25b-ca0c8723b563",
+      "ark:59852/56d960de-9e00-4cac-89ce-94ca7c5c96d9",
+      "ark:59852/15f5f44c-a9de-4e48-a4cb-aff1828a91fc",
+      "ark:59852/81aa7dca-5f24-4a79-948d-d46f1abfa7e8",
+      "ark:59852/34eed73f-67e9-4c83-8515-7c18ab1f9115",
+      "ark:59852/dfdd5d3a-c1c5-4a42-ad20-c49715e9d6b7",
+      "ark:59852/d0cb0edb-4358-4797-a5d1-fcf275db97d2"
+    ],
+    "@type": "https://w3id.org/EVI#Computation",
+    "additionalType": "Computation",
+    "isPartOf": {
+      "@id": "ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha",
+      "name": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/9163dd6f-96aa-4f4d-afb6-3f9c7f7db6c9",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "cellmaps_ppi_embedding output file",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run AP-MS Embedding AP-MS embedding file",
+    "author": "cellmaps_ppi_embedding",
+    "datePublished": "2023-08-31",
+    "version": "0.1.0a7",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": "tsv",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/06ce2579-f0a5-4cf7-b4cd-2ab6fb856797"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///ppi_emd.tsv",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/2.cm4ai_chromatin_mda-mb-468_untreated_apmsembed_initialrun0.1alpha",
+      "name": "2.cm4ai_chromatin_mda-mb-468_untreated_apmsembed_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/fbe9f6ca-e03b-446c-9428-b442b7e6caaa",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Software",
+    "url": "https://github.com/idekerlab/cellmaps_ppi_embedding",
+    "name": "cellmaps_ppi_embedding",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run AP-MS Embedding AP-MS embedding A tool to generate embeddings from networks",
+    "author": "Ideker Lab Cell Maps team",
+    "dateModified": "2023-08-31",
+    "version": "0.1.0a7",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": "py",
+    "contentUrl": "https://github.com/idekerlab/cellmaps_ppi_embedding",
+    "@type": "https://w3id.org/EVI#Software",
+    "additionalType": "Software",
+    "isPartOf": {
+      "@id": "ark:59852/2.cm4ai_chromatin_mda-mb-468_untreated_apmsembed_initialrun0.1alpha",
+      "name": "2.cm4ai_chromatin_mda-mb-468_untreated_apmsembed_initialrun0.1alpha"
+    },
+    "usedBy": [
+      "ark:59852/06ce2579-f0a5-4cf7-b4cd-2ab6fb856797"
+    ]
+  },
+  {
+    "@id": "ark:59852/06ce2579-f0a5-4cf7-b4cd-2ab6fb856797",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Computation",
+    "url": null,
+    "name": "AP-MS Embedding",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run AP-MS Embedding AP-MS embedding run of cellmaps_ppi_embedding",
+    "runBy": "cchuras",
+    "dateCreated": "2023-08-31",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "command": "{'outdir': '0.1pipeline/2.cm4ai_chromatin_mda-mb-468_untreated_apmsembed_initialrun0.1alpha', 'inputdir': '0.1pipeline/1.cm4ai_chromatin_mda-mb-468_untreated_apmsloader_initialrun0.1alpha', 'dimensions': 1024, 'walk_length': 80, 'num_walks': 10, 'workers': 8, 'p': 2, 'q': 1, 'fake_embedder': False, 'skip_logging': False, 'logconf': None, 'verbose': 4, 'program': '/cellar/users/cchuras/miniconda3/envs/py38/bin/cellmaps_ppi_embeddingcmd.py', 'version': '0.1.0a7'}",
+    "usedSoftware": [
+      "ark:59852/fbe9f6ca-e03b-446c-9428-b442b7e6caaa"
+    ],
+    "usedDataset": [
+      "ark:59852/f8ceefbc-fa52-495a-ac5f-5ccaafb9bcad"
+    ],
+    "generated": [
+      "ark:59852/9163dd6f-96aa-4f4d-afb6-3f9c7f7db6c9"
+    ],
+    "@type": "https://w3id.org/EVI#Computation",
+    "additionalType": "Computation",
+    "isPartOf": {
+      "@id": "ark:59852/2.cm4ai_chromatin_mda-mb-468_untreated_apmsembed_initialrun0.1alpha",
+      "name": "2.cm4ai_chromatin_mda-mb-468_untreated_apmsembed_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/4d50ee5a-058e-482c-957b-3b32327944de",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "cellmaps_image_embedding output file",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF Image Embedding IF microscopy images embedding fold1 file",
+    "author": "cellmaps_image_embedding",
+    "datePublished": "2023-08-31",
+    "version": "0.1.0a11",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": "tsv",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/30d1e880-f04e-4834-965c-36120b336526"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///image_emd.tsv",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/2.cm4ai_chromatin_mda-mb-468_untreated_imageembedfold1_initialrun0.1alpha",
+      "name": "2.cm4ai_chromatin_mda-mb-468_untreated_imageembedfold1_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/c170412d-43c6-4d78-8cce-4322f40bb5d4",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "Densenet model file",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Trained Densenet model used for classification of IF images from https://github.com/CellProfiling/densenet/releases/download/v0.1.0/external_crop512_focal_slov_hardlog_class_densenet121_dropout_i768_aug2_5folds_fold0_final.pth",
+    "author": "cellmaps_image_embedding",
+    "datePublished": "2023-08-31",
+    "version": "0.1.0a11",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": "pth",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/30d1e880-f04e-4834-965c-36120b336526"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///model.pth",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/2.cm4ai_chromatin_mda-mb-468_untreated_imageembedfold1_initialrun0.1alpha",
+      "name": "2.cm4ai_chromatin_mda-mb-468_untreated_imageembedfold1_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/0970ef42-25f1-4ad7-945a-423ad1a7f488",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Software",
+    "url": "https://github.com/idekerlab/cellmaps_image_embedding",
+    "name": "cellmaps_image_embedding",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF Image Embedding IF microscopy images embedding fold1 A tool to generate embeddings from HPA IF images",
+    "author": "Ideker Cell Maps team",
+    "dateModified": "2023-08-31",
+    "version": "0.1.0a11",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": "py",
+    "contentUrl": "https://github.com/idekerlab/cellmaps_image_embedding",
+    "@type": "https://w3id.org/EVI#Software",
+    "additionalType": "Software",
+    "isPartOf": {
+      "@id": "ark:59852/2.cm4ai_chromatin_mda-mb-468_untreated_imageembedfold1_initialrun0.1alpha",
+      "name": "2.cm4ai_chromatin_mda-mb-468_untreated_imageembedfold1_initialrun0.1alpha"
+    },
+    "usedBy": [
+      "ark:59852/30d1e880-f04e-4834-965c-36120b336526"
+    ]
+  },
+  {
+    "@id": "ark:59852/30d1e880-f04e-4834-965c-36120b336526",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Computation",
+    "url": null,
+    "name": "IF Image Embedding",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF Image Embedding IF microscopy images embedding fold1 run of cellmaps_image_embedding",
+    "runBy": "cchuras",
+    "dateCreated": "2023-08-31",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "command": "{'outdir': '0.1pipeline/2.cm4ai_chromatin_mda-mb-468_untreated_imageembedfold1_initialrun0.1alpha', 'inputdir': '0.1pipeline/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha', 'model_path': 'https://github.com/CellProfiling/densenet/releases/download/v0.1.0/external_crop512_focal_slov_hardlog_class_densenet121_dropout_i768_aug2_5folds_fold0_final.pth', 'name': None, 'organization_name': None, 'project_name': None, 'fold': 1, 'fake_embedder': False, 'dimensions': 1024, 'suffix': '.jpg', 'logconf': None, 'verbose': 4, 'program': '/cellar/users/cchuras/miniconda3/envs/py38/bin/cellmaps_image_embeddingcmd.py', 'version': '0.1.0a11'}",
+    "usedSoftware": [
+      "ark:59852/0970ef42-25f1-4ad7-945a-423ad1a7f488"
+    ],
+    "usedDataset": [
+      "ark:59852/892697d9-9f97-4916-abef-0d60bdb0bd6f",
+      "ark:59852/3b49ed96-68a7-4584-9153-cebb6b864007",
+      "ark:59852/b0af601d-06e9-4e45-a3d2-d90ba4ad2fd6",
+      "ark:59852/a5c0e516-e013-4d94-8d11-fd2d38ece8bc",
+      "ark:59852/d3e57a1d-5cc4-492a-9867-6e44da779f8f",
+      "ark:59852/7e1188b1-7405-4e13-b75e-611fed4647b3",
+      "ark:59852/5c212be2-b9c8-42a3-8c2e-b387baa90eca",
+      "ark:59852/a5b55826-b1d5-4c0d-9232-d0efd9d8e5d9",
+      "ark:59852/c2f2c54d-6535-4b9f-b004-a75c1fae3d18",
+      "ark:59852/35f4fbf1-701b-4ac1-9bfa-773e4738fcca",
+      "ark:59852/8d963614-3897-455b-b486-3ba6d355e2cf",
+      "ark:59852/01178945-f830-4557-95e9-d7b985956914",
+      "ark:59852/77c0d1cb-bb95-46b1-af53-b78e12b95645",
+      "ark:59852/1d8eef41-bc7e-4b83-a846-d3e657c83f08",
+      "ark:59852/c35f08cb-1602-4fdd-9d0b-1e471c9ffa67",
+      "ark:59852/f3c162f3-e9a7-4e83-9449-3cabb0809751",
+      "ark:59852/3d67f22d-797f-4ebc-81f4-961917f98f60",
+      "ark:59852/f982d896-de5a-489f-af9d-987114a771af",
+      "ark:59852/4786b684-bada-4bc7-98e4-9a17c0089d2c",
+      "ark:59852/814af2ed-c9af-4982-941c-ee7467f6b5db",
+      "ark:59852/4fbaa92f-42c2-41cf-9d8a-7d10ba45c2a9",
+      "ark:59852/5ad535ab-2bf0-4ee7-82b9-4b818f53745d",
+      "ark:59852/db30fa9d-32a8-4505-92a5-5a81569896c0",
+      "ark:59852/7569cbd7-3f3c-42e2-86f8-113598578c9a",
+      "ark:59852/02299b6f-2e81-4dd9-888c-0ff2261fe0c6",
+      "ark:59852/433c6cad-a309-48f7-8c12-c5f2bb3da096",
+      "ark:59852/baa9f3c2-454e-422f-993c-c4f750b8446c",
+      "ark:59852/df9d82e8-732c-4e83-b12b-10612201f0bf",
+      "ark:59852/5b031875-eaa1-469d-831b-59ce828f70ba",
+      "ark:59852/df65ff76-1a8b-4959-96d3-cd501622bda7",
+      "ark:59852/f7ca9430-142b-434e-99a6-a6dd38a1c699",
+      "ark:59852/27cd3282-fa76-462f-84bc-0f675cb133a1",
+      "ark:59852/8e010db5-d382-4fc5-b236-beea4f60f898",
+      "ark:59852/b521eca6-83d5-4811-91a5-1720d20e9020",
+      "ark:59852/2b76f6ea-310f-4f09-9e21-fa6175126b2e",
+      "ark:59852/93c10bfb-4eb4-44e9-a43b-c3fa919a2ec9",
+      "ark:59852/d450a85b-f185-4069-993c-21eb14a30c1c",
+      "ark:59852/2c7f1465-7c63-4e99-9b7a-79952de1a988",
+      "ark:59852/056598a3-88bc-43ca-8ab3-00af8dc54b62",
+      "ark:59852/cd46cef4-c718-45fd-83e4-cdd76f9cf225",
+      "ark:59852/c724b3fc-c708-451e-868d-0cc955b86302",
+      "ark:59852/7bd57e02-9696-4777-88ee-2e41be435db3",
+      "ark:59852/b1d8203b-eb93-4c3e-bf46-397e1d3b763d",
+      "ark:59852/1680debc-e173-40d2-9ab3-7b3cdea10699",
+      "ark:59852/b1a01131-e12a-44ca-b354-7bd9e5c8eb0f",
+      "ark:59852/a590a489-4b05-4ef8-a812-c7a924bb18da",
+      "ark:59852/0804d36c-d0b5-4089-b04c-963cae492557",
+      "ark:59852/2bf0d48f-6387-4366-8dd5-0ea48fc7fcee",
+      "ark:59852/df527102-dcc6-4ed5-b3b3-8ef642a48707",
+      "ark:59852/dc86cd75-5597-4a8e-a278-b56abf8aae6c",
+      "ark:59852/21d8e1d0-f5c2-4b5c-8707-d0c56ac1774c",
+      "ark:59852/a787ba08-0464-4e6c-8a8b-6256486d8e4c",
+      "ark:59852/18240f47-1357-4536-9960-60c50ec9a7ae",
+      "ark:59852/4efbb1e6-9fdf-4d6e-9e06-a01544db9139",
+      "ark:59852/3cd20138-0ce0-4397-b7f0-42f80815e960",
+      "ark:59852/68347557-db9d-4c1b-9d0b-c730ae760c62",
+      "ark:59852/55ff6824-1aaa-4b02-9f75-041267058e60",
+      "ark:59852/3092125c-d85a-4907-886b-c107d3f66d0e",
+      "ark:59852/12df4453-86f2-431e-813e-888ce803aa0c",
+      "ark:59852/90eb5fec-4ff7-4dc7-ba2c-290f15bd91cf",
+      "ark:59852/2d9b2f5a-4cb1-4994-bf55-9091902a8a82",
+      "ark:59852/e240a69e-de15-457f-9f95-de993135be45",
+      "ark:59852/a789bc2d-2708-4613-b990-c96837222e00",
+      "ark:59852/860c76f3-06e7-4bf2-bd8d-3e71b4f534dc",
+      "ark:59852/fb41d7bb-fad0-4238-8792-ea410e3fedf5",
+      "ark:59852/8eb62c46-c49a-43f8-aa9e-ec017b64af57",
+      "ark:59852/e243cc87-af83-4243-9626-346c02601ff2",
+      "ark:59852/e815cad5-4314-4aab-8266-6b92ec034f2c",
+      "ark:59852/bf9bfca8-6013-428d-8ed5-328041c3bffa",
+      "ark:59852/051b6b47-cdd7-4996-b69c-a9b1aa8bf211",
+      "ark:59852/82b12179-9fe5-4f50-813b-4542365911ef",
+      "ark:59852/7ac0d890-7127-400f-bd83-3da3f27af411",
+      "ark:59852/10883f3f-fca5-4f53-ab73-855af891686e",
+      "ark:59852/9e779361-330c-44a0-8c2b-b777463df60a",
+      "ark:59852/2ce968f1-4ff2-42ec-bca8-0591867b9860",
+      "ark:59852/fe4f13fb-9d83-4a84-b4d0-6d106d3321a6",
+      "ark:59852/2fc802a8-e34b-43d9-aad3-bf333ab1e5c5",
+      "ark:59852/5a29b1cd-5d07-4593-a581-75eb2d00f182",
+      "ark:59852/44f7f5c8-ebcc-4c60-96ab-d8bc7c0db106",
+      "ark:59852/d5d81d09-90d3-4a43-97ee-96c963fd0de1",
+      "ark:59852/e8dbfd6d-e3d3-4db3-8314-e5f4f7cb8f95",
+      "ark:59852/2dea9bc8-a808-4fd1-abff-0e9bc2d9e1f9",
+      "ark:59852/3f1ac40f-4560-48fe-8b53-6943aaee9397",
+      "ark:59852/0b3ed23d-c4cf-4774-9321-19e22afaa468",
+      "ark:59852/51bc47aa-5a13-4828-9b04-9d51740bbb7b",
+      "ark:59852/a8e497e3-0046-4b80-94a7-b6c51e9fbed2",
+      "ark:59852/8b7826ff-6879-45d6-916f-04086daa8154",
+      "ark:59852/7f25b5f7-8b0c-4198-9c6b-1af63c2d3596",
+      "ark:59852/0c961487-9112-474b-8d64-45d6dcc133c9",
+      "ark:59852/8471a61b-3e91-4adb-acd0-57855cd95e22",
+      "ark:59852/af7dfcf4-6d0b-4244-b831-dcb80e4f828d",
+      "ark:59852/dd791de4-76ed-4427-bbc6-3825a7d6ea26",
+      "ark:59852/55d19789-3cf7-4d1a-be86-36cc5eaf2a99",
+      "ark:59852/bc64167e-5351-47e7-8858-30979b507710",
+      "ark:59852/dcf54e20-bd1f-4c08-af09-96e825a8a768",
+      "ark:59852/c87e03cc-b8e3-4e53-b84a-a0584a9766ce",
+      "ark:59852/44ff5866-2e2f-49e5-8f1b-7d00acbf070f",
+      "ark:59852/c5121ce4-2906-4cb9-845b-38f002e6dd49",
+      "ark:59852/afbf78c3-e46b-4619-9e7b-0a689cc884b8",
+      "ark:59852/33138c47-b774-43c5-a25b-ca0c8723b563",
+      "ark:59852/56d960de-9e00-4cac-89ce-94ca7c5c96d9",
+      "ark:59852/15f5f44c-a9de-4e48-a4cb-aff1828a91fc",
+      "ark:59852/81aa7dca-5f24-4a79-948d-d46f1abfa7e8",
+      "ark:59852/34eed73f-67e9-4c83-8515-7c18ab1f9115",
+      "ark:59852/dfdd5d3a-c1c5-4a42-ad20-c49715e9d6b7",
+      "ark:59852/d0cb0edb-4358-4797-a5d1-fcf275db97d2"
+    ],
+    "generated": [
+      "ark:59852/4d50ee5a-058e-482c-957b-3b32327944de",
+      "ark:59852/c170412d-43c6-4d78-8cce-4322f40bb5d4"
+    ],
+    "@type": "https://w3id.org/EVI#Computation",
+    "additionalType": "Computation",
+    "isPartOf": {
+      "@id": "ark:59852/2.cm4ai_chromatin_mda-mb-468_untreated_imageembedfold1_initialrun0.1alpha",
+      "name": "2.cm4ai_chromatin_mda-mb-468_untreated_imageembedfold1_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/37e8c3e0-b2db-4519-9132-6baefc0cf24c",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "cellmaps_image_embedding output file",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF Image Embedding IF microscopy images embedding fold2 file",
+    "author": "cellmaps_image_embedding",
+    "datePublished": "2023-08-31",
+    "version": "0.1.0a11",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": "tsv",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/19e5a27b-26e1-4f53-9b87-d57ab2b7484a"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///image_emd.tsv",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/2.cm4ai_chromatin_mda-mb-468_untreated_imageembedfold2_initialrun0.1alpha",
+      "name": "2.cm4ai_chromatin_mda-mb-468_untreated_imageembedfold2_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/fc22bbc3-1e2a-4e61-958a-277340141e4d",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "Densenet model file",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Trained Densenet model used for classification of IF images from https://github.com/CellProfiling/densenet/releases/download/v0.1.0/external_crop512_focal_slov_hardlog_class_densenet121_dropout_i768_aug2_5folds_fold0_final.pth",
+    "author": "cellmaps_image_embedding",
+    "datePublished": "2023-08-31",
+    "version": "0.1.0a11",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": "pth",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/19e5a27b-26e1-4f53-9b87-d57ab2b7484a"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///model.pth",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/2.cm4ai_chromatin_mda-mb-468_untreated_imageembedfold2_initialrun0.1alpha",
+      "name": "2.cm4ai_chromatin_mda-mb-468_untreated_imageembedfold2_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/e96e70b9-ca75-45e2-a7de-b6160b0717a1",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Software",
+    "url": "https://github.com/idekerlab/cellmaps_image_embedding",
+    "name": "cellmaps_image_embedding",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF Image Embedding IF microscopy images embedding fold2 A tool to generate embeddings from HPA IF images",
+    "author": "Ideker Cell Maps team",
+    "dateModified": "2023-08-31",
+    "version": "0.1.0a11",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": "py",
+    "contentUrl": "https://github.com/idekerlab/cellmaps_image_embedding",
+    "@type": "https://w3id.org/EVI#Software",
+    "additionalType": "Software",
+    "isPartOf": {
+      "@id": "ark:59852/2.cm4ai_chromatin_mda-mb-468_untreated_imageembedfold2_initialrun0.1alpha",
+      "name": "2.cm4ai_chromatin_mda-mb-468_untreated_imageembedfold2_initialrun0.1alpha"
+    },
+    "usedBy": [
+      "ark:59852/19e5a27b-26e1-4f53-9b87-d57ab2b7484a"
+    ]
+  },
+  {
+    "@id": "ark:59852/19e5a27b-26e1-4f53-9b87-d57ab2b7484a",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Computation",
+    "url": null,
+    "name": "IF Image Embedding",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run IF Image Embedding IF microscopy images embedding fold2 run of cellmaps_image_embedding",
+    "runBy": "cchuras",
+    "dateCreated": "2023-08-31",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "command": "{'outdir': '0.1pipeline/2.cm4ai_chromatin_mda-mb-468_untreated_imageembedfold2_initialrun0.1alpha', 'inputdir': '0.1pipeline/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha', 'model_path': 'https://github.com/CellProfiling/densenet/releases/download/v0.1.0/external_crop512_focal_slov_hardlog_class_densenet121_dropout_i768_aug2_5folds_fold0_final.pth', 'name': None, 'organization_name': None, 'project_name': None, 'fold': 2, 'fake_embedder': False, 'dimensions': 1024, 'suffix': '.jpg', 'logconf': None, 'verbose': 4, 'program': '/cellar/users/cchuras/miniconda3/envs/py38/bin/cellmaps_image_embeddingcmd.py', 'version': '0.1.0a11'}",
+    "usedSoftware": [
+      "ark:59852/e96e70b9-ca75-45e2-a7de-b6160b0717a1"
+    ],
+    "usedDataset": [
+      "ark:59852/892697d9-9f97-4916-abef-0d60bdb0bd6f",
+      "ark:59852/3b49ed96-68a7-4584-9153-cebb6b864007",
+      "ark:59852/b0af601d-06e9-4e45-a3d2-d90ba4ad2fd6",
+      "ark:59852/a5c0e516-e013-4d94-8d11-fd2d38ece8bc",
+      "ark:59852/d3e57a1d-5cc4-492a-9867-6e44da779f8f",
+      "ark:59852/7e1188b1-7405-4e13-b75e-611fed4647b3",
+      "ark:59852/5c212be2-b9c8-42a3-8c2e-b387baa90eca",
+      "ark:59852/a5b55826-b1d5-4c0d-9232-d0efd9d8e5d9",
+      "ark:59852/c2f2c54d-6535-4b9f-b004-a75c1fae3d18",
+      "ark:59852/35f4fbf1-701b-4ac1-9bfa-773e4738fcca",
+      "ark:59852/8d963614-3897-455b-b486-3ba6d355e2cf",
+      "ark:59852/01178945-f830-4557-95e9-d7b985956914",
+      "ark:59852/77c0d1cb-bb95-46b1-af53-b78e12b95645",
+      "ark:59852/1d8eef41-bc7e-4b83-a846-d3e657c83f08",
+      "ark:59852/c35f08cb-1602-4fdd-9d0b-1e471c9ffa67",
+      "ark:59852/f3c162f3-e9a7-4e83-9449-3cabb0809751",
+      "ark:59852/3d67f22d-797f-4ebc-81f4-961917f98f60",
+      "ark:59852/f982d896-de5a-489f-af9d-987114a771af",
+      "ark:59852/4786b684-bada-4bc7-98e4-9a17c0089d2c",
+      "ark:59852/814af2ed-c9af-4982-941c-ee7467f6b5db",
+      "ark:59852/4fbaa92f-42c2-41cf-9d8a-7d10ba45c2a9",
+      "ark:59852/5ad535ab-2bf0-4ee7-82b9-4b818f53745d",
+      "ark:59852/db30fa9d-32a8-4505-92a5-5a81569896c0",
+      "ark:59852/7569cbd7-3f3c-42e2-86f8-113598578c9a",
+      "ark:59852/02299b6f-2e81-4dd9-888c-0ff2261fe0c6",
+      "ark:59852/433c6cad-a309-48f7-8c12-c5f2bb3da096",
+      "ark:59852/baa9f3c2-454e-422f-993c-c4f750b8446c",
+      "ark:59852/df9d82e8-732c-4e83-b12b-10612201f0bf",
+      "ark:59852/5b031875-eaa1-469d-831b-59ce828f70ba",
+      "ark:59852/df65ff76-1a8b-4959-96d3-cd501622bda7",
+      "ark:59852/f7ca9430-142b-434e-99a6-a6dd38a1c699",
+      "ark:59852/27cd3282-fa76-462f-84bc-0f675cb133a1",
+      "ark:59852/8e010db5-d382-4fc5-b236-beea4f60f898",
+      "ark:59852/b521eca6-83d5-4811-91a5-1720d20e9020",
+      "ark:59852/2b76f6ea-310f-4f09-9e21-fa6175126b2e",
+      "ark:59852/93c10bfb-4eb4-44e9-a43b-c3fa919a2ec9",
+      "ark:59852/d450a85b-f185-4069-993c-21eb14a30c1c",
+      "ark:59852/2c7f1465-7c63-4e99-9b7a-79952de1a988",
+      "ark:59852/056598a3-88bc-43ca-8ab3-00af8dc54b62",
+      "ark:59852/cd46cef4-c718-45fd-83e4-cdd76f9cf225",
+      "ark:59852/c724b3fc-c708-451e-868d-0cc955b86302",
+      "ark:59852/7bd57e02-9696-4777-88ee-2e41be435db3",
+      "ark:59852/b1d8203b-eb93-4c3e-bf46-397e1d3b763d",
+      "ark:59852/1680debc-e173-40d2-9ab3-7b3cdea10699",
+      "ark:59852/b1a01131-e12a-44ca-b354-7bd9e5c8eb0f",
+      "ark:59852/a590a489-4b05-4ef8-a812-c7a924bb18da",
+      "ark:59852/0804d36c-d0b5-4089-b04c-963cae492557",
+      "ark:59852/2bf0d48f-6387-4366-8dd5-0ea48fc7fcee",
+      "ark:59852/df527102-dcc6-4ed5-b3b3-8ef642a48707",
+      "ark:59852/dc86cd75-5597-4a8e-a278-b56abf8aae6c",
+      "ark:59852/21d8e1d0-f5c2-4b5c-8707-d0c56ac1774c",
+      "ark:59852/a787ba08-0464-4e6c-8a8b-6256486d8e4c",
+      "ark:59852/18240f47-1357-4536-9960-60c50ec9a7ae",
+      "ark:59852/4efbb1e6-9fdf-4d6e-9e06-a01544db9139",
+      "ark:59852/3cd20138-0ce0-4397-b7f0-42f80815e960",
+      "ark:59852/68347557-db9d-4c1b-9d0b-c730ae760c62",
+      "ark:59852/55ff6824-1aaa-4b02-9f75-041267058e60",
+      "ark:59852/3092125c-d85a-4907-886b-c107d3f66d0e",
+      "ark:59852/12df4453-86f2-431e-813e-888ce803aa0c",
+      "ark:59852/90eb5fec-4ff7-4dc7-ba2c-290f15bd91cf",
+      "ark:59852/2d9b2f5a-4cb1-4994-bf55-9091902a8a82",
+      "ark:59852/e240a69e-de15-457f-9f95-de993135be45",
+      "ark:59852/a789bc2d-2708-4613-b990-c96837222e00",
+      "ark:59852/860c76f3-06e7-4bf2-bd8d-3e71b4f534dc",
+      "ark:59852/fb41d7bb-fad0-4238-8792-ea410e3fedf5",
+      "ark:59852/8eb62c46-c49a-43f8-aa9e-ec017b64af57",
+      "ark:59852/e243cc87-af83-4243-9626-346c02601ff2",
+      "ark:59852/e815cad5-4314-4aab-8266-6b92ec034f2c",
+      "ark:59852/bf9bfca8-6013-428d-8ed5-328041c3bffa",
+      "ark:59852/051b6b47-cdd7-4996-b69c-a9b1aa8bf211",
+      "ark:59852/82b12179-9fe5-4f50-813b-4542365911ef",
+      "ark:59852/7ac0d890-7127-400f-bd83-3da3f27af411",
+      "ark:59852/10883f3f-fca5-4f53-ab73-855af891686e",
+      "ark:59852/9e779361-330c-44a0-8c2b-b777463df60a",
+      "ark:59852/2ce968f1-4ff2-42ec-bca8-0591867b9860",
+      "ark:59852/fe4f13fb-9d83-4a84-b4d0-6d106d3321a6",
+      "ark:59852/2fc802a8-e34b-43d9-aad3-bf333ab1e5c5",
+      "ark:59852/5a29b1cd-5d07-4593-a581-75eb2d00f182",
+      "ark:59852/44f7f5c8-ebcc-4c60-96ab-d8bc7c0db106",
+      "ark:59852/d5d81d09-90d3-4a43-97ee-96c963fd0de1",
+      "ark:59852/e8dbfd6d-e3d3-4db3-8314-e5f4f7cb8f95",
+      "ark:59852/2dea9bc8-a808-4fd1-abff-0e9bc2d9e1f9",
+      "ark:59852/3f1ac40f-4560-48fe-8b53-6943aaee9397",
+      "ark:59852/0b3ed23d-c4cf-4774-9321-19e22afaa468",
+      "ark:59852/51bc47aa-5a13-4828-9b04-9d51740bbb7b",
+      "ark:59852/a8e497e3-0046-4b80-94a7-b6c51e9fbed2",
+      "ark:59852/8b7826ff-6879-45d6-916f-04086daa8154",
+      "ark:59852/7f25b5f7-8b0c-4198-9c6b-1af63c2d3596",
+      "ark:59852/0c961487-9112-474b-8d64-45d6dcc133c9",
+      "ark:59852/8471a61b-3e91-4adb-acd0-57855cd95e22",
+      "ark:59852/af7dfcf4-6d0b-4244-b831-dcb80e4f828d",
+      "ark:59852/dd791de4-76ed-4427-bbc6-3825a7d6ea26",
+      "ark:59852/55d19789-3cf7-4d1a-be86-36cc5eaf2a99",
+      "ark:59852/bc64167e-5351-47e7-8858-30979b507710",
+      "ark:59852/dcf54e20-bd1f-4c08-af09-96e825a8a768",
+      "ark:59852/c87e03cc-b8e3-4e53-b84a-a0584a9766ce",
+      "ark:59852/44ff5866-2e2f-49e5-8f1b-7d00acbf070f",
+      "ark:59852/c5121ce4-2906-4cb9-845b-38f002e6dd49",
+      "ark:59852/afbf78c3-e46b-4619-9e7b-0a689cc884b8",
+      "ark:59852/33138c47-b774-43c5-a25b-ca0c8723b563",
+      "ark:59852/56d960de-9e00-4cac-89ce-94ca7c5c96d9",
+      "ark:59852/15f5f44c-a9de-4e48-a4cb-aff1828a91fc",
+      "ark:59852/81aa7dca-5f24-4a79-948d-d46f1abfa7e8",
+      "ark:59852/34eed73f-67e9-4c83-8515-7c18ab1f9115",
+      "ark:59852/dfdd5d3a-c1c5-4a42-ad20-c49715e9d6b7",
+      "ark:59852/d0cb0edb-4358-4797-a5d1-fcf275db97d2"
+    ],
+    "generated": [
+      "ark:59852/37e8c3e0-b2db-4519-9132-6baefc0cf24c",
+      "ark:59852/fc22bbc3-1e2a-4e61-958a-277340141e4d"
+    ],
+    "@type": "https://w3id.org/EVI#Computation",
+    "additionalType": "Computation",
+    "isPartOf": {
+      "@id": "ark:59852/2.cm4ai_chromatin_mda-mb-468_untreated_imageembedfold2_initialrun0.1alpha",
+      "name": "2.cm4ai_chromatin_mda-mb-468_untreated_imageembedfold2_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/0fbf0814-37be-4f23-acee-784ef9cd353a",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "coembedding_emd.tsv coembedding output file",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run merged embedding Co-Embedding file",
+    "author": "cellmaps_coembedding",
+    "datePublished": "2023-08-31",
+    "version": "0.1.0a7",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": "tsv",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/1b0dc14d-bc23-401f-b539-6849a9ac0fff"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///coembedding_emd.tsv",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/3.cm4ai_chromatin_mda-mb-468_untreated_coembedfold1_initialrun0.1alpha",
+      "name": "3.cm4ai_chromatin_mda-mb-468_untreated_coembedfold1_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/44d12e3a-9965-4f7a-9749-c6a1e81d86f4",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Software",
+    "url": "https://github.com/idekerlab/cellmaps_coembedding",
+    "name": "cellmaps_coembedding",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run merged embedding A tool to generate coembeddings from IF image embeddings and PPI network embeddings",
+    "author": "Ideker Lab Cell Maps team",
+    "dateModified": "2023-08-31",
+    "version": "0.1.0a7",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": "py",
+    "contentUrl": "https://github.com/idekerlab/cellmaps_coembedding",
+    "@type": "https://w3id.org/EVI#Software",
+    "additionalType": "Software",
+    "isPartOf": {
+      "@id": "ark:59852/3.cm4ai_chromatin_mda-mb-468_untreated_coembedfold1_initialrun0.1alpha",
+      "name": "3.cm4ai_chromatin_mda-mb-468_untreated_coembedfold1_initialrun0.1alpha"
+    },
+    "usedBy": [
+      "ark:59852/1b0dc14d-bc23-401f-b539-6849a9ac0fff"
+    ]
+  },
+  {
+    "@id": "ark:59852/1b0dc14d-bc23-401f-b539-6849a9ac0fff",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Computation",
+    "url": null,
+    "name": "Merged Embedding",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run merged embedding run of cellmaps_coembedding",
+    "runBy": "cchuras",
+    "dateCreated": "2023-08-31",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "command": "{'outdir': '0.1pipeline/3.cm4ai_chromatin_mda-mb-468_untreated_coembedfold1_initialrun0.1alpha', 'ppi_embeddingdir': '0.1pipeline/2.cm4ai_chromatin_mda-mb-468_untreated_apmsembed_initialrun0.1alpha', 'image_embeddingdir': '0.1pipeline/2.cm4ai_chromatin_mda-mb-468_untreated_imageembedfold1_initialrun0.1alpha', 'latent_dimension': 128, 'n_epochs_init': 200, 'n_epochs': 500, 'jackknife_percent': 0.0, 'fake_embedding': False, 'logconf': None, 'verbose': 4, 'program': '/cellar/users/cchuras/miniconda3/envs/py38/bin/cellmaps_coembeddingcmd.py', 'version': '0.1.0a7'}",
+    "usedSoftware": [
+      "ark:59852/44d12e3a-9965-4f7a-9749-c6a1e81d86f4"
+    ],
+    "usedDataset": [
+      "ark:59852/4d50ee5a-058e-482c-957b-3b32327944de",
+      "ark:59852/c170412d-43c6-4d78-8cce-4322f40bb5d4",
+      "ark:59852/9163dd6f-96aa-4f4d-afb6-3f9c7f7db6c9"
+    ],
+    "generated": [
+      "ark:59852/0fbf0814-37be-4f23-acee-784ef9cd353a"
+    ],
+    "@type": "https://w3id.org/EVI#Computation",
+    "additionalType": "Computation",
+    "isPartOf": {
+      "@id": "ark:59852/3.cm4ai_chromatin_mda-mb-468_untreated_coembedfold1_initialrun0.1alpha",
+      "name": "3.cm4ai_chromatin_mda-mb-468_untreated_coembedfold1_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/ebda79fa-275e-4e35-9f77-aefdf7b7e932",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Dataset",
+    "url": null,
+    "name": "coembedding_emd.tsv coembedding output file",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run merged embedding Co-Embedding file",
+    "author": "cellmaps_coembedding",
+    "datePublished": "2023-08-31",
+    "version": "0.1.0a7",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": "tsv",
+    "schema": {},
+    "generatedBy": [
+      "ark:59852/53628ae9-295e-4bac-b316-d09b06e46457"
+    ],
+    "derivedFrom": [],
+    "usedBy": [],
+    "contentUrl": "file:///coembedding_emd.tsv",
+    "@type": "https://w3id.org/EVI#Dataset",
+    "additionalType": "Dataset",
+    "isPartOf": {
+      "@id": "ark:59852/3.cm4ai_chromatin_mda-mb-468_untreated_coembedfold2_initialrun0.1alpha",
+      "name": "3.cm4ai_chromatin_mda-mb-468_untreated_coembedfold2_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/04782ef0-04a3-4c58-80ff-35038f9c57ac",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Software",
+    "url": "https://github.com/idekerlab/cellmaps_coembedding",
+    "name": "cellmaps_coembedding",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run merged embedding A tool to generate coembeddings from IF image embeddings and PPI network embeddings",
+    "author": "Ideker Lab Cell Maps team",
+    "dateModified": "2023-08-31",
+    "version": "0.1.0a7",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": "py",
+    "contentUrl": "https://github.com/idekerlab/cellmaps_coembedding",
+    "@type": "https://w3id.org/EVI#Software",
+    "additionalType": "Software",
+    "isPartOf": {
+      "@id": "ark:59852/3.cm4ai_chromatin_mda-mb-468_untreated_coembedfold2_initialrun0.1alpha",
+      "name": "3.cm4ai_chromatin_mda-mb-468_untreated_coembedfold2_initialrun0.1alpha"
+    },
+    "usedBy": [
+      "ark:59852/53628ae9-295e-4bac-b316-d09b06e46457"
+    ]
+  },
+  {
+    "@id": "ark:59852/53628ae9-295e-4bac-b316-d09b06e46457",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Computation",
+    "url": null,
+    "name": "Merged Embedding",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run merged embedding run of cellmaps_coembedding",
+    "runBy": "cchuras",
+    "dateCreated": "2023-08-31",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "command": "{'outdir': '0.1pipeline/3.cm4ai_chromatin_mda-mb-468_untreated_coembedfold2_initialrun0.1alpha', 'ppi_embeddingdir': '0.1pipeline/2.cm4ai_chromatin_mda-mb-468_untreated_apmsembed_initialrun0.1alpha', 'image_embeddingdir': '0.1pipeline/2.cm4ai_chromatin_mda-mb-468_untreated_imageembedfold2_initialrun0.1alpha', 'latent_dimension': 128, 'n_epochs_init': 200, 'n_epochs': 500, 'jackknife_percent': 0.0, 'fake_embedding': False, 'logconf': None, 'verbose': 4, 'program': '/cellar/users/cchuras/miniconda3/envs/py38/bin/cellmaps_coembeddingcmd.py', 'version': '0.1.0a7'}",
+    "usedSoftware": [
+      "ark:59852/04782ef0-04a3-4c58-80ff-35038f9c57ac"
+    ],
+    "usedDataset": [
+      "ark:59852/37e8c3e0-b2db-4519-9132-6baefc0cf24c",
+      "ark:59852/fc22bbc3-1e2a-4e61-958a-277340141e4d",
+      "ark:59852/9163dd6f-96aa-4f4d-afb6-3f9c7f7db6c9"
+    ],
+    "generated": [
+      "ark:59852/ebda79fa-275e-4e35-9f77-aefdf7b7e932"
+    ],
+    "@type": "https://w3id.org/EVI#Computation",
+    "additionalType": "Computation",
+    "isPartOf": {
+      "@id": "ark:59852/3.cm4ai_chromatin_mda-mb-468_untreated_coembedfold2_initialrun0.1alpha",
+      "name": "3.cm4ai_chromatin_mda-mb-468_untreated_coembedfold2_initialrun0.1alpha"
+    }
+  },
+  {
+    "@id": "ark:59852/ef331244-5b61-48a4-bedf-00684e4984fe",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Software",
+    "url": "https://github.com/idekerlab/cellmaps_generate_hierarchy",
+    "name": "cellmaps_generate_hierarchy",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run hierarchy model A tool to generate hierarchies from protein to protein interaction networks",
+    "author": "Ideker Lab Cell Maps team",
+    "dateModified": "2023-08-31",
+    "version": "0.1.0a10",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "format": "py",
+    "contentUrl": "https://github.com/idekerlab/cellmaps_generate_hierarchy",
+    "@type": "https://w3id.org/EVI#Software",
+    "additionalType": "Software",
+    "isPartOf": {
+      "@id": "ark:59852/4.cm4ai_chromatin_mda-mb-468_untreated_hierarchy_initialrun0.1alpha",
+      "name": "4.cm4ai_chromatin_mda-mb-468_untreated_hierarchy_initialrun0.1alpha"
+    },
+    "usedBy": [
+      "ark:59852/b99ef8b7-52b4-436f-ada3-1ab3ac3a355d"
+    ]
+  },
+  {
+    "@id": "ark:59852/b99ef8b7-52b4-436f-ada3-1ab3ac3a355d",
+    "@context": {
+      "@vocab": "https://schema.org/",
+      "evi": "https://w3id.org/EVI#"
+    },
+    "metadataType": "https://w3id.org/EVI#Computation",
+    "url": null,
+    "name": "Hierarchy",
+    "keywords": [
+      "cm4ai",
+      "alpha",
+      "data release",
+      "b2ai"
+    ],
+    "description": "Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run hierarchy model run of cellmaps_generate_hierarchy",
+    "runBy": "cchuras",
+    "dateCreated": "2023-08-31",
+    "associatedPublication": null,
+    "additionalDocumentation": null,
+    "command": "{'outdir': '0.1pipeline/4.cm4ai_chromatin_mda-mb-468_untreated_hierarchy_initialrun0.1alpha', 'coembedding_dirs': ['0.1pipeline/3.cm4ai_chromatin_mda-mb-468_untreated_coembedfold1_initialrun0.1alpha', '0.1pipeline/3.cm4ai_chromatin_mda-mb-468_untreated_coembedfold2_initialrun0.1alpha'], 'name': None, 'organization_name': None, 'project_name': None, 'containment_threshold': 0.75, 'jaccard_threshold': 0.9, 'min_diff': 1, 'min_system_size': 4, 'ppi_cutoffs': [0.001, 0.002, 0.003, 0.004, 0.005, 0.006, 0.007, 0.008, 0.009, 0.01, 0.02, 0.03, 0.04, 0.05, 0.1], 'skip_layout': False, 'logconf': None, 'verbose': 4, 'program': '/cellar/users/cchuras/miniconda3/envs/py38/bin/cellmaps_generate_hierarchycmd.py', 'version': '0.1.0a10'}",
+    "usedSoftware": [
+      "ark:59852/ef331244-5b61-48a4-bedf-00684e4984fe"
+    ],
+    "usedDataset": [
+      "ark:59852/0fbf0814-37be-4f23-acee-784ef9cd353a",
+      "ark:59852/ebda79fa-275e-4e35-9f77-aefdf7b7e932"
+    ],
+    "generated": [
+      "ark:59852/38a3fc9c-e0df-4f52-810b-b7591afd961d",
+      "ark:59852/4d890d28-598b-4acf-9b38-4a6afa20b80f",
+      "ark:59852/5a1362e7-23e9-41e9-bbd9-7933a5e88846",
+      "ark:59852/37c169f6-2b81-4868-a84c-4b45a91297ed",
+      "ark:59852/68d97570-2ee5-4f46-96e1-ea4bf075c13a",
+      "ark:59852/1cdccda0-4c62-4e89-a1c7-01a51e676f11",
+      "ark:59852/820ae6d3-290f-4019-93ab-a55a11ccccbc",
+      "ark:59852/24e4e7d9-477c-4426-b9f8-ddf2136417e5",
+      "ark:59852/3d3683c7-a3b2-446b-87e0-7842368c7a26",
+      "ark:59852/cf4f927c-270a-4705-958c-0178dbd533f2",
+      "ark:59852/ac4afa76-7e60-4e36-87f6-53a11f07cd20",
+      "ark:59852/98bb427b-155a-4db6-a55a-e87971c22e03",
+      "ark:59852/9b236283-660a-42f7-acba-f971f720d61b",
+      "ark:59852/e2057ee9-710b-4261-ab53-09617fbf5170",
+      "ark:59852/a08445b5-8df9-4d82-a662-622fe30869cb",
+      "ark:59852/49c9ab75-3a1e-44a3-8938-668bb2ea37f5",
+      "ark:59852/fcba3a98-50e6-404b-8e3e-96ecbabdd778",
+      "ark:59852/ad8f08bb-c119-4b0f-a201-ca7a4692d515",
+      "ark:59852/7779c6b8-3787-490b-884e-16797259cba9",
+      "ark:59852/5f5ff87e-de9d-4b2b-a366-a9e285b1b633",
+      "ark:59852/596cfa39-95c5-42f5-9cbf-f7c65bf47f4f",
+      "ark:59852/1d3f823f-97bf-4e32-9867-41b7b87492ef",
+      "ark:59852/5f700569-138b-4d7c-a469-7f1e42805025",
+      "ark:59852/942b6075-244b-474a-ad62-e50760a37a54",
+      "ark:59852/cada00ea-0841-49f9-a6d1-c71fff5b021a",
+      "ark:59852/09dde52c-fdb7-4823-b62d-da3169273676",
+      "ark:59852/8ce02e62-1cd7-41b3-b9b4-cd36d65f691e",
+      "ark:59852/a1ba6af7-616f-4de1-88c3-d45e01ff1660",
+      "ark:59852/e351a963-43cd-40a6-81b7-e24395d5911b",
+      "ark:59852/07d21547-0379-4d72-9702-a3caadabd3c0",
+      "ark:59852/a5f635c9-956e-4206-8351-5e58f1fde3f8",
+      "ark:59852/aeb0feb7-c76b-417c-81e3-75cec4dc1a2f",
+      "ark:59852/2d0bf739-4830-41c5-b0cf-f7e044e25eea",
+      "ark:59852/7bd899cf-5b9e-42e6-b78b-d0c7048e0438",
+      "ark:59852/afff9878-39f7-4639-8e73-16bcabe730f3"
+    ],
+    "@type": "https://w3id.org/EVI#Computation",
+    "additionalType": "Computation",
+    "isPartOf": {
+      "@id": "ark:59852/4.cm4ai_chromatin_mda-mb-468_untreated_hierarchy_initialrun0.1alpha",
+      "name": "4.cm4ai_chromatin_mda-mb-468_untreated_hierarchy_initialrun0.1alpha"
+    }
+  }
+]

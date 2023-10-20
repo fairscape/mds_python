@@ -1,0 +1,26 @@
+<html>
+  <body>
+    <pre class="mermaid">
+	graph TD
+    subgraph untreated_apmsloader
+	  id0([cellmaps_ppidownloader output file])
+	  id1([cellmaps_ppidownloader])
+	  id2([AP-MS Loader])
+	  id3([cellmaps_ppidownloader input file])
+    click untreated_apmsloader "https://fairscape.pods.uvarc.io/ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_apmsloader_initialrun0.1alpha"
+    click id0 "https://fairscape.pods.uvarc.io/ark:59852/f8ceefbc-fa52-495a-ac5f-5ccaafb9bcad"
+    click id1 "https://fairscape.pods.uvarc.io/ark:59852/6790af66-db21-4273-a0cf-34993a4dd7b8"
+    click id2 "https://fairscape.pods.uvarc.io/ark:59852/7ab9bf7e-a52d-47b0-881e-c835150d5f6a"
+    click id3 "https://fairscape.pods.uvarc.io/ark:59852/62cbb46e-1d3d-4f72-b7e9-c7c140aa9367"
+	  id1 -->|usedBy| id2
+	  id3 -->|usedBy| id2
+	  id2 -->|generated| id0
+    end
+    </pre>
+
+    <script type="module">
+      import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+      mermaid.initialize({ startOnLoad: true });
+    </script>
+  </body>
+</html>
