@@ -1,11 +1,7 @@
-# Compose Specification for Docker Dev Container 
+# Docker Compose Spec for Local Testing of Fairscape
 services:
-  app:
-    entrypoint:
-    - sleep
-    - infinity
-    image: docker/dev-environments-default:stable-1
-    init: true
+  fairscape:
+    build: .
     volumes:
     - type: bind
       source: /var/run/docker.sock
@@ -14,7 +10,7 @@ services:
     - mongo:mongo
     - minio:minio
   mongo:
-    image: mongo
+    image: mongo:6.0
     restart: always
     environment:
       MONGO_INITDB_ROOT_USERNAME: mongotestaccess
@@ -33,12 +29,9 @@ services:
     links:
     - mongo:mongo
   minio:
-    image: minio/minio
+    image: minio/minio:RELEASE.2023-08-16T20-17-30Z.hotfix.a51234923
     restart: always
     ports:
       - 9000:9000
       - 9001:9001
     command: server /data --console-address ":9001"
-    environment:
-      MINIO_ROOT_USER: miniotestuser
-      MINIO_ROOT_PASSWORD: miniotestpass
