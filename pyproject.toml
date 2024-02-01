@@ -35,7 +35,6 @@ dependencies = [
         "sqids>=0.4.1", 
         "boto3>=1.34.26",
         "pydantic>=2.5.1",
-        "click>=8.1.7",
 ]
 requires-python = ">=3.8"                                                                                                                                                         
                                                        
@@ -43,4 +42,4 @@ requires-python = ">=3.8"
 Homepage = "https://fairscape.github.io"
                                             
 [project.scripts]
-fairscape-mds = "mds_python.__main__:app"
+fairscape-mds = "mds_python.__main__"
