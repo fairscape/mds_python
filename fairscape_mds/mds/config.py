@@ -29,6 +29,40 @@ def cached_dotenv(env_path: str = '.env'):
 
 
 @lru_cache()
+def get_fairscape_config():
+    
+    config_values = cached_dotenv()
+
+    server_mongo_config = MongoConfig(
+            host= config_values.get('MONGO_HOST'),
+            port= config_values,get('MONGO_PORT'),
+            user= config_values.get('MONGO_ACCESS_KEY'),
+            password= config_values.get('MONGO_SECRET_KEY'),
+            db= config_values.get('MONGO_DATABASE'),
+            identifier_collection = config_values.get("MONGO_IDENTIFIER_COLLECTION"),
+            user_collection = config_values.get("MONGO_USER_COLLECTION"),
+            rocrate_collection = config_values.get("MONGO_ROCRATE_COLLECTION")
+        )
+
+    server_minio_config = MinioConfig(
+        host= config_values.get("MINIO_URI"),
+        port=config_values.get("MINIO_PORT"),
+        access_key = config_values.get("MINIO_ACCESS_KEY"),
+        secret_key = config_values.get("MINIO_SECRET_KEY"),
+        default_bucket= config_values.get("MINIO_DEFAULT_BUCKET"), 
+        rocrate_bucket=config_values,get("MINIO_ROCRATE_BUCKET"),
+        secure= bool(config_values.get("MINIO_SECURE")=="True"),
+    )
+    
+    return FairscapeConfig(
+            host = config_values.get('FAIRSCAPE_HOST'),
+            port = config_values.get('FAIRSCAPE_PORT'),
+            mongo = server_mongo_config,
+            minio = server_minio_config
+            )
+
+
+@lru_cache()
 def get_rdflib_config():
     return None
 
@@ -200,9 +234,8 @@ class CasbinConfig(BaseModel):
 
 
 class FairscapeConfig(BaseModel):
-    host: str
-    port: int
-    reload_server: bool
+    host: Optional[str] = Field(default='0.0.0.0')
+    port: Optional[int] = Field(default=8080)
     mongo: MongoConfig
     minio: MinioConfig
     compute: K8sComputeConfig
@@ -214,6 +247,10 @@ class FairscapeConfig(BaseModel):
     
     def CreateMinioClient(self):
         return self.minio.CreateClient()
+
+
+    def RunServer(self):
+        pass
 
     def StartWorker(self):
         celery_app = Celery('compute', include="mds.compute.tasks")
