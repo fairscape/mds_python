@@ -7,12 +7,12 @@ from typing import Optional, List, Union, Literal
 from datetime import datetime
 from pymongo.collection import Collection
 
-from mds.models.fairscape_base import *
-from mds.models.utils import (
+from fairscape_mds.mds.models.fairscape_base import *
+from fairscape_mds.mds.models.utils import (
     delete_distribution_metadata
 )
-from mds.utilities.operation_status import OperationStatus
-from mds.database.config import MONGO_DATABASE, MONGO_COLLECTION
+from fairscape_mds.mds.utilities.operation_status import OperationStatus
+from fairscape_mds.mds.database.config import MONGO_DATABASE, MONGO_COLLECTION
 
 class Dataset(FairscapeBaseModel, extra=Extra.allow):
     metadataType: Literal['evi:Dataset'] = Field(alias="@type")

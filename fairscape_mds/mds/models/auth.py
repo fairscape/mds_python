@@ -1,12 +1,12 @@
 from pydantic import BaseModel, validator
 import pymongo
-from mds.utilities.operation_status import OperationStatus
-from mds.models.user import User
+from fairscape_mds.mds.utilities.operation_status import OperationStatus
+from fairscape_mds.mds.models.user import User
+from fairscape_mds.mds.config import get_jwt_secret
 import base64
 import datetime
 import jwt
 
-JWT_SECRET = "test jwt"
 
 
 class Session(BaseModel):
@@ -148,7 +148,8 @@ def ParseSession(EncodedSession: str) -> Session:
         raw_session = EncodedSession
 
     try:
-        session_values = jwt.decode(raw_session, JWT_SECRET)
+        jwtSecret = get_jwt_secret()
+        session_values = jwt.decode(raw_session, jwtSecret)
     except Exception as e:
         raise TokenError(str(e))
 
@@ -157,7 +158,8 @@ def ParseSession(EncodedSession: str) -> Session:
 
 def DecodeBearerAuth(MongoCollection, AuthHeader: str) -> User:
     stripped_header = AuthHeader.strip("Bearer").strip()
-    session_values = jwt.decode(stripped_header, JWT_SECRET, algorithms=["HS256"])
+    jwtSecret = get_jwt_secret()
+    session_values = jwt.decode(stripped_header, jwtSecret, algorithms=["HS256"])
     sess = Session(**session_values)
 
     user_values = MongoCollection.find_one({"email": sess.sub})

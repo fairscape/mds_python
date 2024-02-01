@@ -1,8 +1,8 @@
 from typing import Optional, List
 from pydantic import Extra
-from mds.models.fairscape_base import *
-from mds.models.user import User
-from mds.utilities.operation_status import OperationStatus
+from fairscape_mds.mds.models.fairscape_base import *
+from fairscape_mds.mds.models.user import User
+from fairscape_mds.mds.utilities.operation_status import OperationStatus
 import pymongo
 from bson.son import SON
 
@@ -194,6 +194,7 @@ class Group(FairscapeBaseModel, extra=Extra.allow):
 
 
         return OperationStatus(True, "", 200)
+
 
 def list_groups(mongo_collection: pymongo.collection.Collection):
     cursor = mongo_collection.find(

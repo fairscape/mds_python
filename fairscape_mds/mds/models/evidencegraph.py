@@ -5,7 +5,7 @@ from pydantic import (
     constr
 )
 from typing import List, Union
-from mds.models.fairscape_base import *
+from fairscape_mds.mds.models.fairscape_base import *
 
 
 # from mds.models.compact.project import ProjectCompactView

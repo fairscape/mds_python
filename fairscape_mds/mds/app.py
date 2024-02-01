@@ -1,26 +1,41 @@
-from fastapi import FastAPI, Request
+from typing_extensions import Annotated
+from fastapi import FastAPI, Request, Depends
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
+from fastapi.security import OAuth2PasswordRequestForm
 
-from mds.routers.user import router as UserRouter
-from mds.routers.group import router as GroupRouter
-from mds.routers.software import router as SoftwareRouter
-from mds.routers.dataset import router as DatasetRouter
-from mds.routers.rocrate import router as ROCrateRouter
-from mds.routers.computation import router as ComputationRouter
-from mds.routers.project import router as ProjectRouter
-from mds.routers.organization import router as OrganizationRouter
-from mds.routers.evidencegraph import router as EvidenceGraphRouter
-from mds.routers.transfer import router as TransferRouter
-from mds.routers.resolver import ResolverRouter
+from fairscape_mds.mds.routers.user import router as UserRouter
+from fairscape_mds.mds.routers.group import router as GroupRouter
+from fairscape_mds.mds.routers.software import router as SoftwareRouter
+from fairscape_mds.mds.routers.dataset import router as DatasetRouter
+from fairscape_mds.mds.routers.rocrate import router as ROCrateRouter
+from fairscape_mds.mds.routers.computation import router as ComputationRouter
+from fairscape_mds.mds.routers.project import router as ProjectRouter
+from fairscape_mds.mds.routers.organization import router as OrganizationRouter
+from fairscape_mds.mds.routers.evidencegraph import router as EvidenceGraphRouter
+from fairscape_mds.mds.routers.transfer import router as TransferRouter
+from fairscape_mds.mds.routers.resolver import ResolverRouter
 
-from mds.web.routers.index import router as WebIndexRouter
-from mds.web.routers.signin import router as WebSigninRouter
-from mds.web.routers.signup import router as WebSignupRouter
-from mds.web.routers.home import router as WebHomeRouter
+from fairscape_mds.mds.web.routers.index import router as WebIndexRouter
+from fairscape_mds.mds.web.routers.signin import router as WebSigninRouter
+from fairscape_mds.mds.web.routers.signup import router as WebSignupRouter
+from fairscape_mds.mds.web.routers.home import router as WebHomeRouter
 
+
+from fairscape_mds.mds.config import (
+    get_mongo_config,
+    get_mongo_client
+) 
+
+from fairscape_mds.mds.models.auth import (
+    Session,
+    LoginUserBasic
+)
+
+mongo_config = get_mongo_config()
+mongo_client = get_mongo_client()
 
 tags_metadata = [
     {
@@ -130,22 +145,7 @@ app.include_router(WebHomeRouter, tags=["webhome"])
 def show_page(request: Request, page_name: str):
     return templates.TemplateResponse("page/" + page_name + ".html", {"request": request})
 
-from typing_extensions import Annotated
-from fastapi import Depends
-from fastapi.security import OAuth2PasswordRequestForm
 
-from mds.config import (
-    get_mongo_config,
-    get_mongo_client
-) 
-
-from mds.models.auth import (
-    Session,
-    LoginUserBasic
-)
-
-mongo_config = get_mongo_config()
-mongo_client = get_mongo_client()
 
 
 @app.post("/token")

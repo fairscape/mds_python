@@ -5,7 +5,7 @@ from pydantic import (
     constr
 )
 from typing import Optional, List
-from mds.models.fairscape_base import *
+from fairscape_mds.mds.models.fairscape_base import *
 
 
 class Software(FairscapeBaseModel, extra = Extra.allow):

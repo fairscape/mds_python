@@ -20,14 +20,22 @@ from dotenv import dotenv_values
 #AUTH_ENABLED = bool(os.environ.get("MDS_AUTH_ENABLED", "True"))
 
 @lru_cache()
-def cached_dotenv():
-    # TODO temporary hardcoded fix for path issues
-    env_path = "./.env"
+def cached_dotenv(env_path: str = '.env'):
     config = {
         **dotenv_values(env_path),
         **os.environ,
     }
     return config
+
+
+@lru_cache()
+def get_rdflib_config():
+    return None
+
+
+@lru_cache()
+def get_rdflib_client():
+    return None
 
  
 @lru_cache()
@@ -59,13 +67,13 @@ def get_minio_config():
     config_values = cached_dotenv()
 
     return MinioConfig(
-        host= config_values["MINIO_URI"],
-        port=config_values["MINIO_PORT"],
-        access_key = config_values["MINIO_ACCESS_KEY"],
-        secret_key = config_values["MINIO_SECRET_KEY"],
-        default_bucket= config_values["MINIO_DEFAULT_BUCKET"], 
-        rocrate_bucket=config_values["MINIO_ROCRATE_BUCKET"],
-        secure= bool(config_values["MINIO_SECURE"]=="True"),
+        host= config_values.get("MINIO_URI"),
+        port=config_values.get("MINIO_PORT"),
+        access_key = config_values.get("MINIO_ACCESS_KEY"),
+        secret_key = config_values.get("MINIO_SECRET_KEY"),
+        default_bucket= config_values.get("MINIO_DEFAULT_BUCKET"), 
+        rocrate_bucket=config_values,get("MINIO_ROCRATE_BUCKET"),
+        secure= bool(config_values.get("MINIO_SECURE")=="True"),
     )
 
 
@@ -81,10 +89,10 @@ def get_casbin_config():
 
     return CasbinConfig(
         policy_path= pathlib.Path(
-            config_values["CASBIN_POLICY"]
+            config_values.get("CASBIN_POLICY")
         ),
         casbin_model_path= pathlib.Path(
-            config_values["CASBIN_MODEL"]
+            config_values.get("CASBIN_MODEL")
         )
     )
 
@@ -96,7 +104,7 @@ def get_casbin_enforcer():
 @lru_cache()
 def get_jwt_secret():
     config_values = cached_dotenv()
-    return config_values["JWT_SECRET"]
+    return config_values.get("JWT_SECRET")
 
 @lru_cache()
 def get_ark_naan():
@@ -110,15 +118,15 @@ def get_ark_naan():
 
 
 class MongoConfig(BaseModel):
-    host: Optional[str] = "localhost"
-    port: Optional[str] = "27017"
-    user: Optional[str] = "user"
-    password: Optional[str] = "pass"
-    db: Optional[str] = "fairscape"
-    identifier_collection: Optional[str] = "mds"
-    rocrate_collection: Optional[str] = "rocrate"
-    user_collection: Optional[str] = "users"
-    session_collection: Optional[str] = "sessions"
+    host: Optional[str] = Field(default="localhost")
+    port: Optional[str] = Field(default="27017")
+    user: Optional[str] = Field(default="mongotestaccess")
+    password: Optional[str] = Field(default="mongotestsecret")
+    db: Optional[str] = Field(default="fairscape")
+    identifier_collection: Optional[str] = Field(default="mds")
+    rocrate_collection: Optional[str] = Field(default="rocrate")
+    user_collection: Optional[str] = Field(default="users")
+    session_collection: Optional[str] = Field(default="sessions")
 
 
     def CreateClient(self):
@@ -129,13 +137,13 @@ class MongoConfig(BaseModel):
 
 
 class MinioConfig(BaseModel):
-    host: Optional[str] = None
-    port: Optional[str] = None
-    secret_key: Optional[str] = None
-    access_key: Optional[str] = None
-    default_bucket: Optional[str] = "mds"
-    rocrate_bucket: Optional[str] = "rocrate"
-    secure: bool
+    host: Optional[str] = Field(default="localhost")
+    port: Optional[str] = Field(default="9000")
+    secret_key: Optional[str] = Field(default="")
+    access_key: Optional[str] = Field(default="")
+    default_bucket: Optional[str] = Field(default="mds")
+    rocrate_bucket: Optional[str] = Field(default="rocrate")
+    secure: Optional[bool] = Field(default=False)
 
 
     def CreateClient(self):
@@ -181,8 +189,8 @@ class CasbinAdapterEnum(str, Enum):
 
 
 class CasbinConfig(BaseModel):
-    casbin_model_path: pathlib.Path
-    policy_path: pathlib.Path 
+    casbin_model_path: Optional[str] = Field(default="./deploy/casbin_model.conf")
+    policy_path: Optional[str] = Field(default="./deploy/casbin_policy.db")
     #backend: CasbinAdapterEnum
 
     def CreateClient(self):

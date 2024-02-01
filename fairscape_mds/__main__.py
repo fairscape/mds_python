@@ -1,6 +1,6 @@
 import argparse
 import uvicorn
-from fairscape_mds.mds.config import (
+from mds.config import (
     setup_minio,
     setup_mongo
 )
@@ -26,7 +26,7 @@ if __name__ == '__main__':
     #    pass
 
     uvicorn.run(
-        'fairscape_mds.mds.app:app', 
+        'mds.app:app', 
         host='0.0.0.0', 
         port=8080, 
         reload=True

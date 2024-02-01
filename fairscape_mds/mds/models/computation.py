@@ -3,13 +3,12 @@ from pydantic import Extra
 from typing import List, Union, Optional, Literal
 from datetime import datetime
 from pathlib import Path
-from mds.database import mongo
-from mds.models.fairscape_base import *
-from mds.models.dataset import Dataset
-from mds.models.download import Download as DataDownload
-from mds.models.software import Software
-from mds.utilities.funcs import *
-from mds.utilities.utils import *
+from fairscape_mds.mds.models.fairscape_base import *
+from fairscape_mds.mds.models.dataset import Dataset
+from fairscape_mds.mds.models.download import Download as DataDownload
+from fairscape_mds.mds.models.software import Software
+from fairscape_mds.mds.utilities.funcs import *
+from fairscape_mds.mds.utilities.utils import *
 
 from pydantic import BaseModel
 import requests
@@ -18,9 +17,13 @@ import time
 import uuid
 import pathlib
 import shutil
-from mds.database.config import MINIO_BUCKET, MONGO_DATABASE, MONGO_COLLECTION
-from mds.database.minio import *
-from mds.database.container_config import *
+
+from fairscape_mds.mds.config import (
+        get_minio_config,
+        get_mongo_config,
+        get_casbin_config
+        )
+from fairscape_mds.mds.database.container_config import *
 
 root_url = "http://localhost:8000/"
 default_context = {
@@ -308,7 +311,11 @@ class Computation(FairscapeBaseModel, extra = Extra.allow):
             return OperationStatus(False, f"error starting container: {str(e)}", 500)
 
 
+
 def list_computation(mongo_collection: pymongo.collection.Collection):
+    mongo_config = get_mongo_config()
+
+
     cursor = mongo_collection.find(
         filter={"@type": "evi:Computation"},
         projection={"_id": False}

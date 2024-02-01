@@ -6,17 +6,22 @@ from pydantic import (
     constr
 )
 from bson import SON
+from fastapi.encoders import jsonable_encoder
 import pymongo
 
-from mds.models.fairscape_base import (
+from fairscape_mds.mds.models.fairscape_base import (
     FairscapeBaseModel,
     IdentifierPattern
 )
-from mds.models.dataset import Dataset
+from fairscape_mds.mds.models.dataset import Dataset
+from fairscape_mds.mds.utilities.operation_status import OperationStatus
 
-from mds.utilities.operation_status import OperationStatus
-from fastapi.encoders import jsonable_encoder
 
+
+from fairscape_mds.mds.config import (
+        get_minio_config,
+        get_mongo_config,
+)
 from mds.database.config import MINIO_BUCKET, MONGO_DATABASE, MONGO_COLLECTION
 
 
@@ -89,8 +94,11 @@ class Download(FairscapeBaseModel, extra=Extra.allow):
         uploads the file and ammends the dataDownload metadata and dataset metadata
         """
 
-        mongo_database = MongoClient[MONGO_DATABASE]
-        mongo_collection = mongo_database[MONGO_COLLECTION]
+        mongo_config = get_mongo_config()
+        minio_config = get_minio_config()
+
+        mongo_database = MongoClient[mongo_config.db]
+        mongo_collection = mongo_database[mongo_config.identifier_collection]
 
         # check that the data download doesn't already exist
         if mongo_collection.find_one({"@id": self.id}) != None:
@@ -136,7 +144,7 @@ class Download(FairscapeBaseModel, extra=Extra.allow):
         # upload object to minio
         try:
             upload_operation = MinioClient.put_object(
-                bucket_name=MINIO_BUCKET,
+                bucket_name=minio_config.default_bucket,
                 object_name=self.contentUrl,
                 data=Object,
                 length=-1,
@@ -146,7 +154,7 @@ class Download(FairscapeBaseModel, extra=Extra.allow):
 
             # get the size of the file from the stats
             result_stats = MinioClient.stat_object(
-                bucket_name=MINIO_BUCKET,
+                bucket_name=minio_config.default_bucket,
                 object_name=self.contentUrl
             )
 
@@ -179,8 +187,11 @@ class Download(FairscapeBaseModel, extra=Extra.allow):
         """
         uploads the file and ammends the dataDownload metadata and dataset metadata
         """
-        mongo_database = MongoClient[MONGO_DATABASE]
-        mongo_collection = mongo_database[MONGO_COLLECTION]
+        mongo_config = get_mongo_config()
+        minio_config = get_minio_config()
+
+        mongo_database = MongoClient[mongo_config.db]
+        mongo_collection = mongo_database[mongo_config.identifier_collection]
 
         with MongoClient.start_session(causal_consistency=True) as session:
 
@@ -213,7 +224,7 @@ class Download(FairscapeBaseModel, extra=Extra.allow):
             # upload object to minio
             try:
                 upload_operation = MinioClient.put_object(
-                    bucket_name=MINIO_BUCKET,
+                    bucket_name=minio_config.default_bucket,
                     object_name=upload_path,
                     data=Object.file,
                     length=-1,
@@ -227,7 +238,7 @@ class Download(FairscapeBaseModel, extra=Extra.allow):
 
                 # get the size of the file from the stats
                 result_stats = MinioClient.stat_object(
-                    bucket_name=MINIO_BUCKET,
+                    bucket_name=minio_config.default_bucket,
                     object_name=upload_path
                 )
 
@@ -270,8 +281,11 @@ class Download(FairscapeBaseModel, extra=Extra.allow):
         removes the contentUrl property from the object, and deletes the file from minio
         """
 
-        mongo_database = MongoClient[MONGO_DATABASE]
-        mongo_collection = mongo_database[MONGO_COLLECTION]
+        mongo_config = get_mongo_config()
+        minio_config = get_minio_config()
+
+        mongo_database = MongoClient[mongo_config.db]
+        mongo_collection = mongo_database[mongo_config.identifier_collection]
 
         # get metadata record
         read_status = self.super(mongo_collection).read()
@@ -292,7 +306,7 @@ class Download(FairscapeBaseModel, extra=Extra.allow):
             return OperationStatus(False, f"mongo error: bulk write error {bwe}", 500)
 
         # remove the object from minio
-        delete_object = MinioClient.remove_object(MINIO_BUCKET, self.contentUrl)
+        delete_object = MinioClient.remove_object(minio_config.default_bucket, self.contentUrl)
 
         # TODO: determine when minio client fails to remove an object and handle those cases
 
@@ -300,9 +314,11 @@ class Download(FairscapeBaseModel, extra=Extra.allow):
 
 
     def read_metadata(self, MongoClient: pymongo.MongoClient) -> OperationStatus:
+        mongo_config = get_mongo_config()
+        minio_config = get_minio_config()
 
-        mongo_db = MongoClient[MONGO_DATABASE]
-        mongo_collection = mongo_db[MONGO_COLLECTION]
+        mongo_db = MongoClient[mongo_config.db]
+        mongo_collection = mongo_db[mongo_config.identifier_collection]
         return self.read(mongo_collection)
 
 
