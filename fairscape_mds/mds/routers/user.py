@@ -6,19 +6,20 @@ from fastapi import (
     Depends
 )
 from fastapi.responses import JSONResponse
-from mds.models.user import User, list_users
-from mds.config import (
+
+from fairscape_mds.mds.models.user import User, list_users
+from fairscape_mds.mds.config import (
     get_casbin_enforcer,
     get_mongo_config,
     get_mongo_client,
     MongoConfig,
     CasbinConfig
 ) 
-from mds.models.auth import (
+from fairscape_mds.mds.models.auth import (
     Session
 )
-import mds.auth.casbin
-from mds.auth.auth import (
+import fairscape_mds.mds.auth.casbin
+from fairscape_mds.mds.auth.auth import (
     get_current_user
 )
 

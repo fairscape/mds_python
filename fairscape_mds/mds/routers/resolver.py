@@ -8,7 +8,7 @@ from fastapi import (
 )
 from fastapi.responses import JSONResponse
 
-from mds.config import (
+from fairscape_mds.mds.config import (
     get_casbin_enforcer,
     get_mongo_config,
     get_mongo_client,

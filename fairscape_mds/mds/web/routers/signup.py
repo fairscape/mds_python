@@ -2,8 +2,9 @@ from multiprocessing import context
 from fastapi import APIRouter, Request, Depends
 from fastapi.responses import JSONResponse
 from fastapi.templating import Jinja2Templates
-from mds.web.models.signup import SignupRequest, SignupForm
-from mds.web.utils.signup import *
+
+from fairscape_mds.mds.web.models.signup import SignupRequest, SignupForm
+from fairscape_mds.mds.web.utils.signup import *
 from pydantic import BaseModel
 
 router = APIRouter()

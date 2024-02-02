@@ -1,10 +1,11 @@
 from fastapi import APIRouter, Response
 from fastapi.responses import JSONResponse
-from mds.database import mongo
-from mds.models.software import Software, list_software
-from mds.database.config import MONGO_DATABASE, MONGO_COLLECTION
-router = APIRouter()
 
+from fairscape_mds.database import mongo
+from fairscape_mds.mds.models.software import Software, list_software
+from fairscape_mds.mds.database.config import MONGO_DATABASE, MONGO_COLLECTION
+
+router = APIRouter()
 
 @router.post("/software",
              summary="Create a software",

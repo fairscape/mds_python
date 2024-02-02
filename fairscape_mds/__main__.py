@@ -1,12 +1,11 @@
 import argparse
 import uvicorn
-from mds.config import (
+from fairscape_mds.mds.config import (
     setup_minio,
     setup_mongo
 )
 
 
-# TODO make sure configuration is valid, if not create configured minio bucket and mongo database
 parser = argparse.ArgumentParser()
 parser.add_argument("--host", default='0.0.0.0')
 parser.add_argument("--port", default='8080')

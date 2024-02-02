@@ -1,6 +1,6 @@
 import pymongo
 from fastapi import APIRouter, Response, BackgroundTasks
-from mds.config import (
+from fairscape_mds.mds.config import (
     get_minio_config,
     get_casbin_config,
     get_casbin_enforcer,
@@ -10,10 +10,10 @@ from mds.config import (
     CasbinConfig
 ) 
 
-from mds.compute import create_job
-from mds.models.computation import Computation, list_computation, RegisterComputation
-from mds.database.container_config import *
-from mds.database.config import *
+from fairscape_mds.mds.compute import create_job
+from fairscape_mds.mds.models.computation import Computation, list_computation, RegisterComputation
+from fairscape_mds.mds.database.container_config import *
+from fairscape_mds.mds.database.config import *
 from datetime import datetime
 import time
 import docker

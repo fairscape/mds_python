@@ -1,6 +1,7 @@
 from enum import Enum
 from pydantic import (
-    BaseModel
+    BaseModel,
+    Field
 )
 from typing import (
     Optional
@@ -17,7 +18,6 @@ import casbin_sqlalchemy_adapter
 from dotenv import dotenv_values
 
 
-#AUTH_ENABLED = bool(os.environ.get("MDS_AUTH_ENABLED", "True"))
 
 @lru_cache()
 def cached_dotenv(env_path: str = '.env'):
@@ -33,15 +33,17 @@ def get_fairscape_config():
     
     config_values = cached_dotenv()
 
-    server_mongo_config = MongoConfig(
-            host= config_values.get('MONGO_HOST'),
-            port= config_values,get('MONGO_PORT'),
-            user= config_values.get('MONGO_ACCESS_KEY'),
-            password= config_values.get('MONGO_SECRET_KEY'),
-            db= config_values.get('MONGO_DATABASE'),
-            identifier_collection = config_values.get("MONGO_IDENTIFIER_COLLECTION"),
-            user_collection = config_values.get("MONGO_USER_COLLECTION"),
-            rocrate_collection = config_values.get("MONGO_ROCRATE_COLLECTION")
+    server_mongo_config = MongoConfig.model_validate(
+        {
+            'host': config_values.get('MONGO_HOST'), 
+            'port': config_values.get("MONGO_PORT"),
+            'user': config_values.get('MONGO_ACCESS_KEY'),
+            'password': config_values.get('MONGO_SECRET_KEY'),
+            'db': config_values.get('MONGO_DATABASE'),
+            'identifier_collection': config_values.get('MONGO_IDENTIFIER_COLLECTION'),
+            'user_collection': config_values.get('MONGO_USER_COLLECTION'),
+            'rocrate_collection': config_values.get('MONGO_ROCRATE_COLLECTION')
+        }
         )
 
     server_minio_config = MinioConfig(
@@ -50,7 +52,7 @@ def get_fairscape_config():
         access_key = config_values.get("MINIO_ACCESS_KEY"),
         secret_key = config_values.get("MINIO_SECRET_KEY"),
         default_bucket= config_values.get("MINIO_DEFAULT_BUCKET"), 
-        rocrate_bucket=config_values,get("MINIO_ROCRATE_BUCKET"),
+        rocrate_bucket=config_values.get("MINIO_ROCRATE_BUCKET"),
         secure= bool(config_values.get("MINIO_SECURE")=="True"),
     )
     
@@ -106,7 +108,7 @@ def get_minio_config():
         access_key = config_values.get("MINIO_ACCESS_KEY"),
         secret_key = config_values.get("MINIO_SECRET_KEY"),
         default_bucket= config_values.get("MINIO_DEFAULT_BUCKET"), 
-        rocrate_bucket=config_values,get("MINIO_ROCRATE_BUCKET"),
+        rocrate_bucket=config_values.get("MINIO_ROCRATE_BUCKET"),
         secure= bool(config_values.get("MINIO_SECURE")=="True"),
     )
 
@@ -238,8 +240,8 @@ class FairscapeConfig(BaseModel):
     port: Optional[int] = Field(default=8080)
     mongo: MongoConfig
     minio: MinioConfig
-    compute: K8sComputeConfig
-    casbin: CasbinConfig
+#    compute: K8sComputeConfig
+#    casbin: CasbinConfig
 
 
     def CreateMongoClient(self):
@@ -250,7 +252,13 @@ class FairscapeConfig(BaseModel):
 
 
     def RunServer(self):
-        pass
+        uvicorn.run(
+            'fairscape_mds.mds.app:app', 
+            host=self.host, 
+            port=self.port, 
+            reload=True
+            )
+
 
     def StartWorker(self):
         celery_app = Celery('compute', include="mds.compute.tasks")

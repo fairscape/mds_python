@@ -2,9 +2,10 @@ from fastapi import APIRouter, Request, Depends
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
-from mds.web.models.signin import SignInForm, SigninRequest
-from mds.web.models.active_user import ActiveUser
-from mds.web.utils.signin import *
+
+from fairscape_mds.mds.web.models.signin import SignInForm, SigninRequest
+from fairscape_mds.mds.web.models.active_user import ActiveUser
+from fairscape_mds.mds.web.utils.signin import *
 
 router = APIRouter()
 

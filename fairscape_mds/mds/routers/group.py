@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Response
 from fastapi.responses import JSONResponse
 
-from mds.models.group import Group, list_groups
+from fairscape_mds.mds.models.group import Group, list_groups
 
-from mds.config import (
+from fairscape_mds.mds.config import (
     get_casbin_config,
     get_casbin_enforcer,
     get_mongo_config,

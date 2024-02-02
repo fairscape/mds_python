@@ -1,10 +1,10 @@
 from typing import Union
 from fastapi import APIRouter, Response, Header
 from fastapi.responses import JSONResponse
-from mds.database import mongo, casbin
-from mds.models.organization import Organization, list_organization
-from mds.models.auth import ParseAuthHeader, UserNotFound, TokenError
-from mds.database.config import MONGO_DATABASE, MONGO_COLLECTION
+from fairscape_mds.mds.database import mongo, casbin
+from fairscape_mds.mds.models.organization import Organization, list_organization
+from fairscape_mds.mds.models.auth import ParseAuthHeader, UserNotFound, TokenError
+from fairscape_mds.database.config import MONGO_DATABASE, MONGO_COLLECTION
 
 import base64
 

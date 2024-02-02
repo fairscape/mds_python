@@ -1,7 +1,7 @@
 from fastapi.responses import JSONResponse
 import json
 import requests
-from mds.database.computation_config import *
+from fairscape_mds.mds.database.computation_config import *
 
 
 def parse_request(req):
