@@ -2,10 +2,14 @@ from typing import Union
 from fastapi import APIRouter, Response, Header
 from fastapi.responses import JSONResponse
 
-from fairscape_mds.mds.database import mongo, casbin
 from fairscape_mds.mds.models.project import Project, list_project
 from fairscape_mds.mds.models.auth import ParseAuthHeader, UserNotFound, TokenError
-from fairscape_mds.mds.database.config import MONGO_DATABASE, MONGO_COLLECTION
+from fairscape_mds.mds.config import (
+    get_casbin_config,
+    get_casbin_enforcer,
+    get_mongo_config,
+    get_mongo_client
+) 
 
 router = APIRouter()
 

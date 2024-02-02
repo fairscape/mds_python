@@ -1,5 +1,6 @@
-from mds.config import (
-    get_mongo 
+from fairscape_mds.mds.config import (
+    get_minio_config,
+    get_minio_client,
 )
 from pydantic import BaseModel, ValidationError
 from enum import Enum

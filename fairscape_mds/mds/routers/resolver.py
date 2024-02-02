@@ -42,7 +42,7 @@ def resolve(
     NAAN: Annotated[str, Path(
         title="ARK Name Assigning Authority Number",
         # TODO import ark NAAN from config
-        default = "59852",
+        #default = "59852",
         )], 
     postfix: Annotated[str, Path(
         title="Persitant Identifier"

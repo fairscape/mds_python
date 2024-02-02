@@ -5,11 +5,8 @@ from pydantic import (
     constr
 )
 from typing import List, Union, Optional
-from mds.models.fairscape_base import *
-from mds.database.config import MONGO_DATABASE, MONGO_COLLECTION
+from fairscape_mds.mds.models.fairscape_base import *
 
-
-# from mds.models.compact.project import ProjectCompactView
 
 class Organization(FairscapeBaseModel, extra = Extra.allow):
     context: dict = Field(

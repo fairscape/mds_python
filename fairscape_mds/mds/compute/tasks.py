@@ -1,8 +1,15 @@
-from mds.models import Dataset, Software, Computation
-from mds.database import mongo, minio
-from mds.database.config import MONGO_DATABASE, MONGO_COLLECTION
+from fairscape_mds.mds.models import Dataset, Software, Computation
+from fairscape_mds.mds.config import (
+    get_minio_config,                                                                   
+    get_casbin_config,                                                               
+    get_casbin_enforcer,                      
+    get_mongo_config,                                     
+    get_mongo_client,    
+    MongoConfig,                                                   
+    CasbinConfig
+    )
 
-from mds.compute.main import app
+from fairscape_mds.mds.compute.main import app
 
 from typing import List, Optional, Union
 from pydantic import Extra

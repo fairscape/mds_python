@@ -23,7 +23,6 @@ from fairscape_mds.mds.config import (
         get_mongo_config,
         get_casbin_config
         )
-from fairscape_mds.mds.database.container_config import *
 
 root_url = "http://localhost:8000/"
 default_context = {

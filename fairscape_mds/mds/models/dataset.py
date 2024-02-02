@@ -12,7 +12,6 @@ from fairscape_mds.mds.models.utils import (
     delete_distribution_metadata
 )
 from fairscape_mds.mds.utilities.operation_status import OperationStatus
-from fairscape_mds.mds.database.config import MONGO_DATABASE, MONGO_COLLECTION
 
 class Dataset(FairscapeBaseModel, extra=Extra.allow):
     metadataType: Literal['evi:Dataset'] = Field(alias="@type")

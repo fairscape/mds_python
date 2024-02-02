@@ -20,7 +20,7 @@ from fairscape_mds.mds.config import (
     get_mongo_client,
 )
 
-from fairscape_mds.models.rocrate import (
+from fairscape_mds.mds.models.rocrate import (
     UploadExtractedCrate,
     UploadZippedCrate,
     DeleteExtractedCrate,

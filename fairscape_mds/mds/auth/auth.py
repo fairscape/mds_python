@@ -2,15 +2,15 @@ from fastapi.security import OAuth2PasswordBearer
 from fastapi import Depends, HTTPException, status
 from typing_extensions import Annotated
 
-from mds.config import (
+from fairscape_mds.mds.config import (
     get_mongo_config,
     get_mongo_client,
     get_jwt_secret
 )
-from mds.models.user import (
+from fairscape_mds.mds.models.user import (
     User
 )
-from mds.models.auth import (
+from fairscape_mds.mds.models.auth import (
     UserNotFound,
     TokenError,
     DecodeBearerAuth

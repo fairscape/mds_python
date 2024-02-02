@@ -9,7 +9,6 @@ from fairscape_mds.mds.config import (
     get_mongo_client,
 ) 
 
-from fairscape_mds.mds.database import mongo
 from fairscape_mds.mds.models.dataset import Dataset
 from fairscape_mds.mds.models.utils import list_dataset
 

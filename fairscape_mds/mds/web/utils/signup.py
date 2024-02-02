@@ -1,7 +1,7 @@
 import requests
 import json
 import re
-from mds.web.utils.signin import *
+from fairscape_mds.mds.web.utils.signin import *
 
 root_url = "http://localhost:8000/"
 

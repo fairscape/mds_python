@@ -12,15 +12,13 @@ from fairscape_mds.mds.config import (
 
 from fairscape_mds.mds.compute import create_job
 from fairscape_mds.mds.models.computation import Computation, list_computation, RegisterComputation
-from fairscape_mds.mds.database.container_config import *
-from fairscape_mds.mds.database.config import *
+from fairscape_mds.mds.utilities.operation_status import OperationStatus
+from fairscape_mds.mds.utilities.funcs import *
 from datetime import datetime
 import time
 import docker
 
 
-from mds.utilities.operation_status import OperationStatus
-from mds.utilities.funcs import *
 
 router = APIRouter()
 

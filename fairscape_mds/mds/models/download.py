@@ -16,13 +16,10 @@ from fairscape_mds.mds.models.fairscape_base import (
 from fairscape_mds.mds.models.dataset import Dataset
 from fairscape_mds.mds.utilities.operation_status import OperationStatus
 
-
-
 from fairscape_mds.mds.config import (
         get_minio_config,
         get_mongo_config,
 )
-from mds.database.config import MINIO_BUCKET, MONGO_DATABASE, MONGO_COLLECTION
 
 
 class Download(FairscapeBaseModel, extra=Extra.allow):

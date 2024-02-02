@@ -1,8 +1,14 @@
 from fastapi import APIRouter, Response
 from fastapi.responses import JSONResponse
-from fairscape_mds.mds.database import mongo
+
 from fairscape_mds.mds.models.evidencegraph import EvidenceGraph, list_evidencegraph
-from fairscape_mds.mds.database.config import MONGO_DATABASE, MONGO_COLLECTION
+from fairscape_mds.mds.config import (
+    get_casbin_enforcer,
+    get_mongo_config,
+    get_mongo_client,
+    MongoConfig,
+    CasbinConfig
+) 
 router = APIRouter()
 
 
