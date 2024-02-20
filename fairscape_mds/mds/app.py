@@ -104,8 +104,8 @@ app = FastAPI(
 
 
 # mounting templates
-app.mount("/static", StaticFiles(directory="/fairscape_mds/static"), name="static")
-templates = Jinja2Templates(directory="/fairscape_mds/templates")
+app.mount("/static", StaticFiles(directory="static"), name="static")
+templates = Jinja2Templates(directory="templates")
 
 
 @app.get('/', response_class=HTMLResponse, tags=["Root"])
