@@ -90,14 +90,13 @@ app = FastAPI(
     title="Fairscape Metadata Service (MDS)",
     description="",
     version="0.1.0",
-    #terms_of_service="http://example.com/terms/",
     contact={
         "name": "Max Levinson",
         "email": "mal8ch@virginia.edu",
     },
     license_info={
-        "name": "Apache 2.0",
-        "url": "https://www.apache.org/licenses/LICENSE-2.0.html",
+        "name": "MIT",
+        "url": "https://opensource.org/license/MIT"
     },
     openapi_tags=tags_metadata
 )
@@ -144,29 +143,5 @@ app.include_router(WebHomeRouter, tags=["webhome"])
 @app.get("/page/{page_name}", response_class=HTMLResponse)
 def show_page(request: Request, page_name: str):
     return templates.TemplateResponse("page/" + page_name + ".html", {"request": request})
-
-
-
-
-@app.post("/token")
-def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
-
-    mongo_db = mongo_client[mongo_config.db]
-    user_collection = mongo_db[mongo_config.user_collection]
-    session_collection = mongo_db[mongo_config.session_collection]
-
-
-    try:
-        session = LoginUserBasic(
-            user_collection, 
-            session_collection, 
-            form_data.username, 
-            form_data.password
-        ) 
-
-    except UserNotFound:
-        raise HTTPException(status_code=400, detail="Incorrect username or password")
-
-    return {"access_token": session.encode(), "token_type": "bearer"}
 
 

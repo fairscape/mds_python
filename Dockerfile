@@ -19,7 +19,7 @@ FROM builder as fairscape
 #  USER fair
 
 # copy source code
-COPY fairscape_mds/ /fairscape/fairscape_mds/
+COPY src/ /fairscape/src/
 WORKDIR /fairscape_mds
 
 RUN export PYTHONPATH=$PYTHONPATH:/fairscape_mds

@@ -42,4 +42,4 @@ requires-python = ">=3.8"
 Homepage = "https://fairscape.github.io"
                                             
 [project.scripts]
-fairscape-mds = "mds_python.__main__"
+fairscape-mds = "fairscape_mds.__main__"
