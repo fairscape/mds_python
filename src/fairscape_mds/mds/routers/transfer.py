@@ -23,7 +23,7 @@ async def data_download_create_metadata(download: Download):
 	create metadata record for a file	
 	"""
 
-    mongo_client = mongo.GetConfig()
+    mongo_client = get_mongo_client()
 
     # create metadata record for data download
     create_metadata_status = download.create_metadata(mongo_client)
@@ -53,8 +53,8 @@ def register_download(download = Form(...), file: UploadFile = File(...)):
     dl = Download(**json.loads(download))
 
 
-    mongo_client = mongo.GetConfig()
-    minio_client = minio.GetMinioConfig()
+    mongo_client = get_mongo_client()
+    minio_client = get_minio_client()
 
 
     registration_status = dl.register(
@@ -87,8 +87,8 @@ def register_download(download = Form(...), file: UploadFile = File(...)):
 async def data_download_upload(NAAN: str, download_id: str, file: UploadFile):
     data_download = Download.construct(id=f"ark:{NAAN}/{download_id}")
 
-    minio_client = minio.GetMinioConfig()
-    mongo_client = mongo.GetConfig()
+    minio_client = get_minio_client()
+    mongo_client = get_mongo_client()
 
     upload_status = data_download.create_upload(
         Object=file,
@@ -121,10 +121,10 @@ async def data_download_read(NAAN: str, download_id: str):
 	"""
 
     data_download_id = f"ark:{NAAN}/{download_id}"
-    data_download = DataDownload.construct(id=data_download_id)
+    data_download = Download.construct(id=data_download_id)
 
     # get the connection to the databases
-    mongo_client = mongo.GetConfig()
+    mongo_client = get_mongo_client()
     read_status = data_download.read_metadata(mongo_client)
 
     # if the metadata wasn't found successfully handle errors
@@ -156,11 +156,11 @@ async def data_download_read(NAAN: str, download_id: str):
 @router.get("/datadownload/ark:{NAAN}/{download_id}/download")
 async def data_download_read(NAAN: str, download_id: str):
     data_download_id = f"ark:{NAAN}/{download_id}"
-    data_download = DataDownload.construct(id=data_download_id)
+    data_download = Download.construct(id=data_download_id)
 
     # get the connection to the databases
-    mongo_client = mongo.GetConfig()
-    minio_client = minio.GetMinioConfig()
+    mongo_client = get_mongo_client()
+    minio_client = get_minio_client()
 
     read_status = data_download.read_metadata(mongo_client)
 
@@ -191,8 +191,8 @@ async def transfer_delete(NAAN: str, download_id: str):
     """
 	delete the data download, removing its content inside minio but leaving a record in mongo
 	"""
-    minio_client = minio.GetMinioConfig()
-    mongo_client = mongo.GetConfig()
+    minio_client = get_minio_client()
+    mongo_client = get_mongo_client()
 
     data_download = DataDownload.construct(id=f"ark:{NAAN}/{download_id}")
     delete_status = data_download.delete(mongo_client, minio_client)
@@ -220,7 +220,7 @@ async def transfer_delete(NAAN: str, download_id: str):
 
 @router.put("/datadownload/ark:{NAAN}/{download_id}")
 async def data_download_update(NAAN: str, download_id: str, data_download: Download):
-    mongo_client = mongo.GetConfig()
+    mongo_client = get_mongo_client()
 
     data_download.id = f"ark:{NAAN}/{download_id}"
     update_status = data_download.update(mongo_client)

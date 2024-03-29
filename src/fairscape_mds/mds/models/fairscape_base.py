@@ -18,7 +18,7 @@ from fairscape_mds.mds.utilities.utils import validate_ark
 from fairscape_mds.mds.utilities.operation_status import OperationStatus
 
 ARK_NAAN = "59852"
-IdentifierPattern = "ark[0-9]{5}\/.*"
+IdentifierPattern = "ark[0-9]{5}:\/.*"
 DEFAULT_LICENSE = " https://creativecommons.org/licenses/by/4.0/"
 
 default_context = {
@@ -27,7 +27,7 @@ default_context = {
 }
 
 
-class Identifier(BaseModel):
+class Identifier(BaseModel, extra='allow'):
     guid: str = Field(
         title="guid",
         alias="@id"
@@ -39,7 +39,7 @@ class Identifier(BaseModel):
     name: str
 
 
-class FairscapeBaseModel(BaseModel, extra='allow'):
+class FairscapeBaseModel(Identifier):
     """Refers to the Fairscape BaseModel inherited from Pydantic
 
     Args:
@@ -49,18 +49,14 @@ class FairscapeBaseModel(BaseModel, extra='allow'):
     model_config = ConfigDict(
         populate_by_name=True,
         validate_assignment=True,
+        extra='allow'
     )
     context: Dict[str, str] = Field(
         default=default_context,
         title="context",
         alias="@context"
     )
-    metadataType: str = Field(
-        title="metadataType",
-        alias="@type"
-    )
     url: Optional[str] = Field(default=None)
-    name: str = Field(max_length=200)
     keywords: List[str] = Field(default=[])
     description: str = Field(min_length=5)
     license: Optional[str] = Field(default=DEFAULT_LICENSE)
@@ -95,7 +91,7 @@ class FairscapeBaseModel(BaseModel, extra='allow'):
             insert_document = bson
 
         try:
-            if MongoCollection.find_one({"@id": self.id}):
+            if MongoCollection.find_one({"@id": self.guid}):
                 return OperationStatus(False, "document already exists", 400)
 
             create_request = MongoCollection.insert_one(insert_document)
@@ -167,15 +163,20 @@ class FairscapeBaseModel(BaseModel, extra='allow'):
         try:
             # run the query
             query = MongoCollection.find_one(
-                {'@id': self.id},
+                {'@id': self.guid},
                 projection=query_projection
             )
 
             # check that the results are no empty
             if query:
+                # If you use the model_construct it creates a new model without validating
+                # then after every setattr it trys to validate and fails
+                # so you need to update all at once which is what I changed it to
                 # update class with values from database
-                for k, value in query.items():
-                    setattr(self, k, value)
+                # for k, value in query.items():
+                #     setattr(self, k, value)
+                updated_instance = self.model_validate({**self.model_dump(), **query})
+                self.__dict__.update(updated_instance.model_dump())
                 return OperationStatus(True, "", 200)
             else:
                 return OperationStatus(False, "No record found", 404)
@@ -229,7 +230,7 @@ class FairscapeBaseModel(BaseModel, extra='allow'):
                     {k: value for k, value in self.dict(by_alias=True).items() if value is not None}
             }
 
-            update_result = MongoCollection.update_one({"@id": self.id}, new_values)
+            update_result = MongoCollection.update_one({"@id": self.guid}, new_values)
 
             if update_result.acknowledged and update_result.modified_count == 1:
                 return OperationStatus(True, "", 200)
@@ -293,7 +294,7 @@ class FairscapeBaseModel(BaseModel, extra='allow'):
 
         try:
             # make sure the object exists, return 404 otherwise
-            if MongoCollection.find_one({"@id": self.id}) is None:
+            if MongoCollection.find_one({"@id": self.guid}) is None:
                 return OperationStatus(False, "Object not found", 404)
 
             # perform delete one operation
@@ -338,7 +339,7 @@ class FairscapeBaseModel(BaseModel, extra='allow'):
 
         # TODO read update result output to determine success
         update_result = MongoCollection.update_one(
-            {"@id": self.id},
+            {"@id": self.guid},
             {"$addToSet": {Field: Item}}
         )
 
@@ -360,7 +361,7 @@ class FairscapeBaseModel(BaseModel, extra='allow'):
 
         # TODO read update result output to determine success
         update_result = MongoCollection.update_one(
-            {"@id": self.id},
+            {"@id": self.guid},
             {"$pull": {field:  {"@id": item_id} }}
         )
 
