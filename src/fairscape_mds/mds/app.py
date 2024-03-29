@@ -1,3 +1,4 @@
+import os
 from typing_extensions import Annotated
 from fastapi import FastAPI, Request, Depends
 from fastapi.responses import JSONResponse
@@ -28,11 +29,6 @@ from fairscape_mds.mds.config import (
     get_mongo_config,
     get_mongo_client
 ) 
-
-from fairscape_mds.mds.models.auth import (
-    Session,
-    LoginUserBasic
-)
 
 mongo_config = get_mongo_config()
 mongo_client = get_mongo_client()
@@ -102,8 +98,10 @@ app = FastAPI(
 )
 
 
+static_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'static')
+
 # mounting templates
-app.mount("/static", StaticFiles(directory="static"), name="static")
+app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
 templates = Jinja2Templates(directory="templates")
 
 
