@@ -46,6 +46,7 @@ class FairscapeBaseModel(BaseModel, extra='allow'):
         BaseModel (Default Pydantic): Every instance of the Fairscape BaseModel must contain
         an id, a type, and a name
     """
+    id: str = Field(None, alias="@id")
     model_config = ConfigDict(
         populate_by_name=True,
         validate_assignment=True,

@@ -54,12 +54,12 @@ def user_create(user: User):
     if create_status.success:
 
         # create permissions for casbin
-        mds.auth.casbin.createUser(
-            casbin_enforcer,
-            user.email,
-            user.guid
-        )
-        casbin_enforcer.save_policy()
+        # fairscape_mds.mds.auth.casbin.createUser(
+        #     casbin_enforcer,
+        #     user.email,
+        #     user.id
+        # )
+        # casbin_enforcer.save_policy()
         
 
         return JSONResponse(

@@ -9,7 +9,7 @@ from fairscape_mds.mds.models.user import User
 from fairscape_mds.mds.config import get_jwt_secret
 
 
-
+JWT_SECRET= get_jwt_secret()
 
 class Session(BaseModel):
     '''

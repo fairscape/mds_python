@@ -23,9 +23,10 @@ def software_create(software: Software, response: Response):
     - **name**: a name
     - **owner**: an existing user in its compact form with @id, @type, name, and email
     """
-    mongo_client = mongo.GetConfig()
-    mongo_db = mongo_client[MONGO_DATABASE]
-    mongo_collection = mongo_db[MONGO_COLLECTION]
+    mongo_client = get_mongo_client()
+    mongo_config = get_mongo_config()
+    mongo_db = mongo_client[mongo_config.db]
+    mongo_collection = mongo_db[mongo_config.identifier_collection]
 
     create_status = software.create(mongo_collection)
 
@@ -47,7 +48,7 @@ def software_create(software: Software, response: Response):
             summary="List all software",
             response_description="Retrieved list of software")
 def software_list(response: Response):
-    mongo_client = mongo.GetConfig()
+    mongo_client = get_mongo_client()
     mongo_db = mongo_client[MONGO_DATABASE]
     mongo_collection = mongo_db[MONGO_COLLECTION]
 
@@ -68,7 +69,7 @@ def software_get(NAAN: str, postfix: str, response: Response):
     - **NAAN**: Name Assigning Authority Number which uniquely identifies an organization e.g. 12345
     - **postfix**: a unique string
     """
-    mongo_client = mongo.GetConfig()
+    mongo_client = get_mongo_client()
     mongo_db = mongo_client[MONGO_DATABASE]
     mongo_collection = mongo_db[MONGO_COLLECTION]
 
@@ -91,7 +92,7 @@ def software_get(NAAN: str, postfix: str, response: Response):
             summary="Update a software",
             response_description="The updated software")
 def software_update(software: Software, response: Response):
-    mongo_client = mongo.GetConfig()
+    mongo_client = get_mongo_client()
     mongo_db = mongo_client[MONGO_DATABASE]
     mongo_collection = mongo_db[MONGO_COLLECTION]
 
@@ -123,7 +124,7 @@ def software_delete(NAAN: str, postfix: str):
     """
     software_id = f"ark:{NAAN}/{postfix}"
 
-    mongo_client = mongo.GetConfig()
+    mongo_client = get_mongo_client()
     mongo_db = mongo_client[MONGO_DATABASE]
     mongo_collection = mongo_db[MONGO_COLLECTION]
 

@@ -40,7 +40,7 @@ def deleteUserByID(
     return deleted_user
 
 
-class User(BaseModel, extra=Extra.allow):
+class User(FairscapeBaseModel, extra=Extra.allow):
     context: dict = Field( 
         default= {"@vocab": "https://schema.org/", "evi": "https://w3id.org/EVI#"},
         alias="@context" 
