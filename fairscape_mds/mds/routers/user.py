@@ -66,7 +66,7 @@ def user_create(user: User):
             status_code=201,
             content={
                 'created': {
-                    '@id': user.id, 
+                    '@id': user.guid, 
                     '@type': 'Person', 
                     'name': user.name
                 }
@@ -108,8 +108,7 @@ async def user_get(NAAN: str, postfix: str):
 
     user_id = f"ark:{NAAN}/{postfix}"
 
-    user = User.construct(id=user_id)
-
+    user = User.construct(guid=user_id)
     read_status = user.read(mongo_collection)
 
     if read_status.success:
