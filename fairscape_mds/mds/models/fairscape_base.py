@@ -171,7 +171,7 @@ class FairscapeBaseModel(Identifier):
             if query:
                 # If you use the model_construct it creates a new model without validating
                 # then after every setattr it trys to validate and fails
-                # so you need to update all at once
+                # so you need to update all at once which is what I changed it to
                 # update class with values from database
                 # for k, value in query.items():
                 #     setattr(self, k, value)
