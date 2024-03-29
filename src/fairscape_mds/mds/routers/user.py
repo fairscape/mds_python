@@ -9,27 +9,16 @@ from fastapi.responses import JSONResponse
 
 from fairscape_mds.mds.models.user import User, list_users
 from fairscape_mds.mds.config import (
-    get_casbin_enforcer,
     get_mongo_config,
     get_mongo_client,
     MongoConfig,
     CasbinConfig
 ) 
-from fairscape_mds.mds.models.auth import (
-    Session
-)
-import fairscape_mds.mds.auth.casbin
-from fairscape_mds.mds.auth.auth import (
-    get_current_user
-)
 
 router = APIRouter()
 
 mongo_config = get_mongo_config()
 mongo_client = get_mongo_client()
-
-casbin_enforcer = get_casbin_enforcer()
-casbin_enforcer.load_policy()
 
 
 @router.post('/user',
@@ -82,7 +71,7 @@ def user_create(user: User):
 @router.get('/user', status_code=200,
             summary="List all users",
             response_description="Retrieved list of users")
-def user_list(current_user: Annotated[User, Depends(get_current_user)]):
+def user_list():
 
     mongo_db = mongo_client[mongo_config.db]
     mongo_collection = mongo_db[mongo_config.user_collection]
@@ -126,7 +115,7 @@ async def user_get(NAAN: str, postfix: str):
             summary="Update a user",
             response_description="The updated user")
 def user_update(
-    current_user: Annotated[User, Depends(get_current_user)],
+    current_user: User,
     user: User
 ):
     mongo_db = mongo_client[mongo_config.db]

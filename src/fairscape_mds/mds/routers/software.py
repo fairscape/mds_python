@@ -5,7 +5,6 @@ from fairscape_mds.mds.models.software import Software, list_software
 from fairscape_mds.mds.config import (
         get_mongo_config,
         get_mongo_client,
-        get_casbin_enforcer
         )
 
 router = APIRouter()

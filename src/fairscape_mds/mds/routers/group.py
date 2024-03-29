@@ -4,8 +4,6 @@ from fastapi.responses import JSONResponse
 from fairscape_mds.mds.models.group import Group, list_groups
 
 from fairscape_mds.mds.config import (
-    get_casbin_config,
-    get_casbin_enforcer,
     get_mongo_config,
     get_mongo_client
 ) 
@@ -16,8 +14,6 @@ router = APIRouter()
 mongo_config = get_mongo_config()
 mongo_client = get_mongo_client()
 
-casbin_enforcer = get_casbin_enforcer()
-casbin_enforcer.load_policy()
 
 
 @router.post("/group",

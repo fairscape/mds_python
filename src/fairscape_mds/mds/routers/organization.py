@@ -7,11 +7,9 @@ from fairscape_mds.mds.models.organization import Organization, list_organizatio
 from fairscape_mds.mds.models.auth import ParseAuthHeader, UserNotFound, TokenError
 
 from fairscape_mds.mds.config import (
-    get_casbin_enforcer,
     get_mongo_config,
     get_mongo_client,
     MongoConfig,
-    CasbinConfig
 ) 
 
 
@@ -37,7 +35,6 @@ def organization_create(
     mongo_client = mongo.GetConfig()
     mongo_db = mongo_client[MONGO_DATABASE]
     mongo_collection = mongo_db[MONGO_COLLECTION]
-    #enforcer = casbin.GetEnforcer()
 
     try:
         calling_user = ParseAuthHeader(mongo_collection, Authorization)

@@ -9,11 +9,9 @@ from fastapi import (
 from fastapi.responses import JSONResponse
 
 from fairscape_mds.mds.config import (
-    get_casbin_enforcer,
     get_mongo_config,
     get_mongo_client,
     MongoConfig,
-    CasbinConfig
 ) 
 
 import logging
@@ -29,9 +27,6 @@ ResolverRouter = APIRouter()
 mongo_config = get_mongo_config()
 mongo_client = get_mongo_client()
 
-casbin_enforcer = get_casbin_enforcer()
-casbin_enforcer.load_policy()
-casbin_enforcer.load_policy()
 
 @ResolverRouter.get(
     "/ark:{NAAN}/{postfix}",

@@ -1,8 +1,6 @@
 from fairscape_mds.mds.models import Dataset, Software, Computation
 from fairscape_mds.mds.config import (
     get_minio_config,                                                                   
-    get_casbin_config,                                                               
-    get_casbin_enforcer,                      
     get_mongo_config,                                     
     get_mongo_client,    
     MongoConfig,                                                   

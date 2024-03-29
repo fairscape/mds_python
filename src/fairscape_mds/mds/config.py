@@ -118,30 +118,6 @@ def get_minio_client():
    minio_config = get_minio_config()
    return minio_config.CreateClient()
 
-
-@lru_cache()
-def get_casbin_config():
-    config_values = cached_dotenv()
-
-    return CasbinConfig(
-        policy_path= pathlib.Path(
-            config_values.get("CASBIN_POLICY")
-        ),
-        casbin_model_path= pathlib.Path(
-            config_values.get("CASBIN_MODEL")
-        )
-    )
-
-@lru_cache()
-def get_casbin_enforcer():
-    casbin_config = get_casbin_config()
-    return casbin_config.CreateClient()
- 
-@lru_cache()
-def get_jwt_secret():
-    config_values = cached_dotenv()
-    return config_values.get("JWT_SECRET")
-
 @lru_cache()
 def get_ark_naan():
     # TODO return entire config object

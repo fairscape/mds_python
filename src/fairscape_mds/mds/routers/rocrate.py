@@ -15,7 +15,6 @@ from fastapi.responses import (
 from fairscape_mds.mds.config import (
     get_minio_config,
     get_minio_client,
-    get_casbin_enforcer,
     get_mongo_config,
     get_mongo_client,
 )
@@ -45,9 +44,6 @@ rocrate_collection = mongo_db[mongo_config.rocrate_collection]
 identifier_collection = mongo_db[mongo_config.identifier_collection]
 minio_config= get_minio_config()
 minio_client = get_minio_client()
-
-casbin_enforcer = get_casbin_enforcer()
-casbin_enforcer.load_policy()
 
 
 @router.post("/rocrate/upload",
