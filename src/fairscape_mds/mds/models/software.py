@@ -26,28 +26,28 @@ class Software(FairscapeBaseModel, extra = Extra.allow):
         # self.usedBy = []
 
         # check that software does not already exist
-        if MongoCollection.find_one({"@id": self.id}) is not None:
+        if MongoCollection.find_one({"@id": self.guid}) is not None:
             return OperationStatus(False, "software already exists", 400)
 
         # check that owner exists
-        if MongoCollection.find_one({"@id": self.owner.id}) is None:
+        if MongoCollection.find_one({"@id": self.owner}) is None:
             return OperationStatus(False, "owner does not exist", 404)
 
         # embeded bson documents to enable Mongo queries
         software_dict = self.dict(by_alias=True)
 
         # embeded bson document for owner
-        software_dict["owner"] = SON([(key, value) for key, value in software_dict["owner"].items()])
+        #software_dict["owner"] = SON([(key, value) for key, value in software_dict["owner"].items()])
 
         # update operations for the owner user of the software
         add_software_update = {
-            "$push": {"software": SON([("@id", self.id), ("@type", "evi:Software"), ("name", self.name)])}
+            "$push": {"software": SON([("@id", self.guid), ("@type", "evi:Software"), ("name", self.name)])}
         }
 
         software_bulk_write = [
             pymongo.InsertOne(software_dict),
             # update owner model to have listed the software
-            pymongo.UpdateOne({"@id": self.owner.id}, add_software_update)
+            pymongo.UpdateOne({"@id": self.owner}, add_software_update)
         ]
 
         # perform the bulk write
@@ -91,19 +91,19 @@ class Software(FairscapeBaseModel, extra = Extra.allow):
 
         # create a bulk write operation
         # to remove a document from a list
-        pull_operation = {"$pull": {"software": {"@id": self.id}}}
+        pull_operation = {"$pull": {"software": {"@id": self.guid}}}
 
         # for ever member, remove the software from their list of software
         # bulk_edit = [pymongo.UpdateOne({"@id": member.id}, pull_operation) for member in self.members]
 
         # operations to modify the owner
         bulk_edit = [
-            pymongo.UpdateOne({"@id": self.owner.id}, pull_operation)
+            pymongo.UpdateOne({"@id": self.owner}, pull_operation)
         ]
 
         # operations to delete the software document
         bulk_edit.append(
-            pymongo.DeleteOne({"@id": self.id})
+            pymongo.DeleteOne({"@id": self.guid})
         )
 
         # run the transaction

@@ -29,12 +29,12 @@ def software_create(software: Software, response: Response):
 
     create_status = software.create(mongo_collection)
 
-    mongo_client.close()
+    #mongo_client.close()
 
     if create_status.success:
         return JSONResponse(
             status_code=201,
-            content={"created": {"@id": software.id, "@type": "evi:Software"}}
+            content={"created": {"@id": software.guid, "@type": "evi:Software"}}
         )
     else:
         return JSONResponse(
@@ -53,7 +53,7 @@ def software_list(response: Response):
 
     software = list_software(mongo_collection)
 
-    mongo_client.close()
+    #mongo_client.close()
 
     return software
 
@@ -74,11 +74,11 @@ def software_get(NAAN: str, postfix: str, response: Response):
 
     software_id = f"ark:{NAAN}/{postfix}"
 
-    software = Software.construct(id=software_id)
+    software = Software.construct(guid=software_id)
 
     read_status = software.read(mongo_collection)
 
-    mongo_client.close()
+    #mongo_client.close()
 
     if read_status.success:
         return software
@@ -102,7 +102,7 @@ def software_update(software: Software, response: Response):
     if update_status.success:
         return JSONResponse(
             status_code=200,
-            content={"updated": {"@id": software.id, "@type": "evi:Software"}}
+            content={"updated": {"@id": software.guid, "@type": "evi:Software"}}
         )
     else:
         return JSONResponse(

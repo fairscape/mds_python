@@ -36,7 +36,7 @@ def user_create(user: User):
     """
 
     mongo_db = mongo_client[mongo_config.db]
-    mongo_collection = mongo_db[mongo_config.user_collection]
+    mongo_collection = mongo_db[mongo_config.identifier_collection]
 
     create_status = user.create(mongo_collection)
 
@@ -74,7 +74,7 @@ def user_create(user: User):
 def user_list():
 
     mongo_db = mongo_client[mongo_config.db]
-    mongo_collection = mongo_db[mongo_config.user_collection]
+    mongo_collection = mongo_db[mongo_config.identifier_collection]
 
     users = list_users(mongo_collection)
 
@@ -93,7 +93,7 @@ async def user_get(NAAN: str, postfix: str):
     """
 
     mongo_db = mongo_client[mongo_config.db]
-    mongo_collection = mongo_db[mongo_config.user_collection]
+    mongo_collection = mongo_db[mongo_config.identifier_collection]
 
     user_id = f"ark:{NAAN}/{postfix}"
 
@@ -119,7 +119,7 @@ def user_update(
     user: User
 ):
     mongo_db = mongo_client[mongo_config.db]
-    mongo_collection = mongo_db[mongo_config.user_collection]
+    mongo_collection = mongo_db[mongo_config.identifier_collection]
 
     update_status = user.update(mongo_collection)
 
@@ -149,7 +149,7 @@ def user_delete(NAAN: str, postfix: str):
     user_id = f"ark:{NAAN}/{postfix}"
 
     mongo_db = mongo_client[mongo_config.db]
-    mongo_collection = mongo_db[mongo_config.user_collection]
+    mongo_collection = mongo_db[mongo_config.identifier_collection]
 
     user = User.model_construct(guid=user_id)
 
