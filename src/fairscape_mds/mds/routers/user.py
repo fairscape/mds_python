@@ -126,7 +126,7 @@ def user_update(
     if update_status.success:
         return JSONResponse(
             status_code=200,
-            content={"updated": {"@id": user.id, "@type": "Person", "name": user.name}}
+            content={"updated": {"@id": user.guid, "@type": "Person", "name": user.name}}
         )
 
     else:
@@ -151,7 +151,7 @@ def user_delete(NAAN: str, postfix: str):
     mongo_db = mongo_client[mongo_config.db]
     mongo_collection = mongo_db[mongo_config.user_collection]
 
-    user = User.construct(id=user_id)
+    user = User.model_construct(guid=user_id)
 
     delete_status = user.delete(mongo_collection)
 
@@ -161,8 +161,8 @@ def user_delete(NAAN: str, postfix: str):
             content={
                 "deleted": {
                     "@id": user_id, 
-                    "@type": "Person", 
-                    "name": user.name
+                    "@type": "Person"
+                    #"name": user.name can't call unless we know name at time of user construction
                 }
             }
         )
