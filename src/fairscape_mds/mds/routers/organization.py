@@ -14,13 +14,14 @@ from fairscape_mds.mds.config import (
 
 
 router = APIRouter()
-
+mongo_config = get_mongo_config()
+mongo_client = get_mongo_client()
 
 @router.post("/organization",
              summary="Create a organization",
              response_description="The created organization")
 def organization_create(
-    organization: Organization, 
+    organization: Organization,
     Authorization: Union[str, None] = Header(default=None)
     ):
     """
@@ -32,9 +33,8 @@ def organization_create(
     - **owner**: an existing user @id
     """
     
-    mongo_client = mongo.GetConfig()
-    mongo_db = mongo_client[MONGO_DATABASE]
-    mongo_collection = mongo_db[MONGO_COLLECTION]
+    mongo_db = mongo_client[mongo_config.db]
+    mongo_collection = mongo_db[mongo_config.session_collection]
 
     try:
         calling_user = ParseAuthHeader(mongo_collection, Authorization)
@@ -50,7 +50,7 @@ def organization_create(
         )
 
     # set the calling user as the owner
-    organization.owner = calling_user.id,
+    organization.owner = calling_user.guid,
     create_status = organization.create(mongo_client)
     mongo_client.close()
 
@@ -71,7 +71,6 @@ def organization_create(
             summary="List all organizations",
             response_description="Retrieved list of organizations")
 def organization_list(response: Response):
-    mongo_client = mongo.GetConfig()
     organization = list_organization(mongo_client)
     mongo_client.close()
 
@@ -93,9 +92,9 @@ def organization_get(
     """
     organization_id = f"ark:{NAAN}/{postfix}"
 
-    mongo_client = mongo.GetConfig()
-    mongo_db = mongo_client[MONGO_DATABASE]
-    mongo_collection = mongo_db[MONGO_COLLECTION]
+
+    mongo_db = mongo_client[mongo_config.db]
+    mongo_collection = mongo_db[mongo_config.identifier_collection]
     
     #enforcer = casbin.GetEnforcer()
 
@@ -137,9 +136,9 @@ def organization_update(
 
     #enforcer = casbin.GetEnforcer()
 
-    mongo_client = mongo.GetConfig()
-    mongo_db = mongo_client[MONGO_DATABASE]
-    mongo_collection = mongo_db[MONGO_COLLECTION]
+
+    mongo_db = mongo_client[mongo_config.db]
+    mongo_collection = mongo_db[mongo_config.identifier_collection]
 
     # decode the credentials and find the user
     try:
@@ -187,9 +186,8 @@ def organization_delete(
 
     #enforcer = casbin.GetEnforcer()
 
-    mongo_client = mongo.GetConfig()
-    mongo_db = mongo_client[MONGO_DATABASE]
-    mongo_collection = mongo_db[MONGO_COLLECTION]
+    mongo_db = mongo_client[mongo_config.db]
+    mongo_collection = mongo_db[mongo_config.identifier_collection]
 
 
     # decode the credentials and find the user
