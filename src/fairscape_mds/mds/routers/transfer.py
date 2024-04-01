@@ -31,7 +31,7 @@ async def data_download_create_metadata(download: Download):
             status_code=201,
             content={
                 "created": {
-                    "@id": download.id,
+                    "@id": download.guid,
                     "@type": "DataDownload",
                     "name": download.name
                 }
@@ -68,7 +68,7 @@ def register_download(download = Form(...), file: UploadFile = File(...)):
             status_code=201,
             content={
                 "created": {
-                    "@id": dl.id,
+                    "@id": dl.guid,
                     "@type": "Download",
                     "name": dl.name
                 }
@@ -83,7 +83,7 @@ def register_download(download = Form(...), file: UploadFile = File(...)):
 
 @router.post("/datadownload/ark:{NAAN}/{download_id}/upload")
 async def data_download_upload(NAAN: str, download_id: str, file: UploadFile):
-    data_download = Download.construct(id=f"ark:{NAAN}/{download_id}")
+    data_download = Download.model_construct(id=f"ark:{NAAN}/{download_id}")
 
     minio_client = get_minio_client()
     mongo_client = get_mongo_client()
@@ -97,7 +97,7 @@ async def data_download_upload(NAAN: str, download_id: str, file: UploadFile):
     if upload_status.success:
         return JSONResponse(
             status_code=201,
-            content={"updated": {"@id": data_download.id, "@type": "DataDownload", "name": data_download.name}}
+            content={"updated": {"@id": data_download.guid, "@type": "DataDownload", "name": data_download.name}}
         )
     else:
         return JSONResponse(
@@ -119,7 +119,7 @@ async def data_download_read(NAAN: str, download_id: str):
 	"""
 
     data_download_id = f"ark:{NAAN}/{download_id}"
-    data_download = Download.construct(id=data_download_id)
+    data_download = Download.model_construct(guid=data_download_id)
 
     # get the connection to the databases
     mongo_client = get_mongo_client()
@@ -132,7 +132,7 @@ async def data_download_read(NAAN: str, download_id: str):
             return JSONResponse(
                 status_code=404,
                 content={
-                    "@id": data_download.id,
+                    "@id": data_download.guid,
                     "error": "data download not found"
                 })
 
@@ -140,7 +140,7 @@ async def data_download_read(NAAN: str, download_id: str):
             return JSONResponse(
                 status_code=read_status.status_code,
                 content={
-                    "@id": data_download.id,
+                    "@id": data_download.guid,
                     "error": read_status.message
                 })
 
@@ -154,7 +154,7 @@ async def data_download_read(NAAN: str, download_id: str):
 @router.get("/datadownload/ark:{NAAN}/{download_id}/download")
 async def data_download_read(NAAN: str, download_id: str):
     data_download_id = f"ark:{NAAN}/{download_id}"
-    data_download = Download.construct(id=data_download_id)
+    data_download = Download.model_construct(guid=data_download_id)
 
     # get the connection to the databases
     mongo_client = get_mongo_client()
@@ -168,7 +168,7 @@ async def data_download_read(NAAN: str, download_id: str):
             return JSONResponse(
                 status_code=404,
                 content={
-                    "@id": data_download.id,
+                    "@id": data_download.guid,
                     "error": "data download not found"
                 })
 
@@ -176,7 +176,7 @@ async def data_download_read(NAAN: str, download_id: str):
             return JSONResponse(
                 status_code=read_status.status_code,
                 content={
-                    "@id": data_download.id,
+                    "@id": data_download.guid,
                     "error": read_status.message
                 })
 
@@ -192,13 +192,13 @@ async def transfer_delete(NAAN: str, download_id: str):
     minio_client = get_minio_client()
     mongo_client = get_mongo_client()
 
-    data_download = DataDownload.construct(id=f"ark:{NAAN}/{download_id}")
+    data_download = Download.model_construct(id=f"ark:{NAAN}/{download_id}")
     delete_status = data_download.delete(mongo_client, minio_client)
 
     if delete_status.success != True:
         return JSONResponse(
             content={
-                "@id": data_download.id,
+                "@id": data_download.guid,
                 "error": delete_status.message
             },
             status_code=delete_status.status_code
@@ -208,7 +208,7 @@ async def transfer_delete(NAAN: str, download_id: str):
         status_code=200,
         content={
             "deleted": {
-                "@id": data_download.id,
+                "@id": data_download.guid,
                 "@type": "DataDownload",
                 "name": data_download.name
             }
@@ -227,7 +227,7 @@ async def data_download_update(NAAN: str, download_id: str, data_download: Downl
         return JSONResponse(
             status_code=update_status.status_code,
             content={
-                "@id": data_download.id,
+                "@id": data_download.guid,
                 "error": update_status.message
             })
 
@@ -235,7 +235,7 @@ async def data_download_update(NAAN: str, download_id: str, data_download: Downl
         status_code=200,
         content={
             "updated": {
-                "@id": data_download.id,
+                "@id": data_download.guid,
                 "@type": "DataDownload",
                 "name": data_download.name
             }

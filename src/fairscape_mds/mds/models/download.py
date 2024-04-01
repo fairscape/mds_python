@@ -49,8 +49,8 @@ class Download(FairscapeBaseModel, extra=Extra.allow):
         mongo_collection = mongo_database[MONGO_COLLECTION]
 
         # check that the data download doesn't already exist
-        if mongo_collection.find_one({"@id": self.id}) != None:
-            return OperationStatus(False, f"dataDownload {self.id} already exists", 404)
+        if mongo_collection.find_one({"@id": self.guid}) != None:
+            return OperationStatus(False, f"dataDownload {self.guid} already exists", 404)
 
         # obtain creative work @id
         if type(self.encodesCreativeWork) == str:
@@ -80,7 +80,7 @@ class Download(FairscapeBaseModel, extra=Extra.allow):
             {"@id": creative_work.get("@id")},
             {"$addToSet": {
                 "distribution": SON(
-                    [("@id", self.id), ("@type", "DataDownload"), ("name", self.name), ("contentUrl", "")])}
+                    [("@id", self.guid), ("@type", "DataDownload"), ("name", self.name), ("contentUrl", "")])}
             })
 
         return OperationStatus(True, "", 201)
@@ -98,8 +98,8 @@ class Download(FairscapeBaseModel, extra=Extra.allow):
         mongo_collection = mongo_database[mongo_config.identifier_collection]
 
         # check that the data download doesn't already exist
-        if mongo_collection.find_one({"@id": self.id}) != None:
-            return OperationStatus(False, f"dataDownload {self.id} already exists", 404)
+        if mongo_collection.find_one({"@id": self.guid}) != None:
+            return OperationStatus(False, f"dataDownload {self.guid} already exists", 404)
 
         # obtain creative work @id
         if type(self.encodesCreativeWork) == str:
@@ -120,7 +120,7 @@ class Download(FairscapeBaseModel, extra=Extra.allow):
         }
 
         # TODO format the contentUrl
-        prefix, org, proj, creative_work_id, identifier  =self.id.split("/")
+        prefix, org, proj, creative_work_id, identifier  = self.guid.split("/")
 
         self.contentUrl = f"{org}/{proj}/{creative_work_id}/{self.name}"
 
@@ -132,7 +132,7 @@ class Download(FairscapeBaseModel, extra=Extra.allow):
             {"@id": creative_work.get("@id")},
             {"$addToSet": {
                 "distribution": SON(
-                    [("@id", self.id), ("@type", "DataDownload"), ("name", self.name), ("contentUrl", "")])}
+                    [("@id", self.guid), ("@type", "DataDownload"), ("name", self.name), ("contentUrl", "")])}
             })
 
         # TODO run sha256 as a background task
@@ -146,7 +146,7 @@ class Download(FairscapeBaseModel, extra=Extra.allow):
                 data=Object,
                 length=-1,
                 part_size=10 * 1024 * 1024,
-                #metadata={"identifier": self.id, "name": self.name}
+                #metadata={"identifier": self.guid, "name": self.name}
             )
 
             # get the size of the file from the stats
@@ -157,7 +157,7 @@ class Download(FairscapeBaseModel, extra=Extra.allow):
 
             # update the download metadata
             update_download_result = mongo_collection.update_one(
-                {"@id": self.id},
+                {"@id": self.guid},
                 {"$set": {
                     "uploadDate": str(result_stats.last_modified),
                     "contentSize": result_stats.size,
@@ -168,7 +168,7 @@ class Download(FairscapeBaseModel, extra=Extra.allow):
             update_dataset_result = mongo_collection.update_one(
                 {
                     "@id": creative_work.get("@id"),
-                    "distribution": {"$elemMatch": {"@id": self.id}}
+                    "distribution": {"$elemMatch": {"@id": self.guid}}
                 },
                 {"$set": {"distribution.$.contentUrl": self.contentUrl}}
             )
@@ -193,10 +193,10 @@ class Download(FairscapeBaseModel, extra=Extra.allow):
         with MongoClient.start_session(causal_consistency=True) as session:
 
             # check that the data download metadata record exists
-            data_download = mongo_collection.find_one({"@id": self.id}, session=session)
+            data_download = mongo_collection.find_one({"@id": self.guid}, session=session)
 
             if data_download == None:
-                return OperationStatus(False, f"dataDownload {self.id} not found", 404)
+                return OperationStatus(False, f"dataDownload {self.guid} not found", 404)
 
             # TODO handle when data is persisted incorrectly and return an error
             dataset_id = data_download.get("encodesCreativeWork", {}).get("@id")
@@ -226,7 +226,7 @@ class Download(FairscapeBaseModel, extra=Extra.allow):
                     data=Object.file,
                     length=-1,
                     part_size=10 * 1024 * 1024,
-                    # metadata={"@id": self.id, "name": self.name}
+                    # metadata={"@id": self.guid, "name": self.name}
                 )
 
                 # TODO check output of upload operation more thoroughly
@@ -242,13 +242,13 @@ class Download(FairscapeBaseModel, extra=Extra.allow):
             # TODO handle minio errors
             except Exception as minio_err:
 
-                mongo_collection.delete_one({"@id": self.id})
-                mongo_collection.update_one({"$pull": {"distribution": {"@id": self.id}}})
+                mongo_collection.delete_one({"@id": self.guid})
+                mongo_collection.update_one({"$pull": {"distribution": {"@id": self.guid}}})
                 return OperationStatus(False, f"minio error: {minio_err}", 500)
 
             # update the download metadata
             update_download_result = mongo_collection.update_one(
-                {"@id": self.id},
+                {"@id": self.guid},
                 {"$set": {
                     "contentUrl": upload_path,
                     "uploadDate": str(result_stats.last_modified),
@@ -262,7 +262,7 @@ class Download(FairscapeBaseModel, extra=Extra.allow):
             update_dataset_result = mongo_collection.update_one(
                 {
                     "@id": dataset_id,
-                    "distribution": {"$elemMatch": {"@id": self.id}}
+                    "distribution": {"$elemMatch": {"@id": self.guid}}
                 },
                 {"$set": {"distribution.$.contentUrl": upload_path}},
                 session=session
@@ -293,7 +293,7 @@ class Download(FairscapeBaseModel, extra=Extra.allow):
         bulk_update = [
             # TODO: update the metadata for the dataset record, i.e. status property for deleted versions
             # update the metadata for the download record
-            pymongo.UpdateOne({"@id": self.id}, {"contentUrl": ""})
+            pymongo.UpdateOne({"@id": self.guid}, {"contentUrl": ""})
         ]
 
         # run the bulk update
