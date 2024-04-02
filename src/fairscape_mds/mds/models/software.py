@@ -41,7 +41,7 @@ class Software(FairscapeBaseModel, extra = Extra.allow):
 
         # update operations for the owner user of the software
         add_software_update = {
-            "$push": {"software": SON([("@id", self.guid), ("@type", "evi:Software"), ("name", self.name)])}
+            "$push": {"software": self.guid}
         }
 
         software_bulk_write = [
