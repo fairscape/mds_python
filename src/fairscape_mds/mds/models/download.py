@@ -33,7 +33,7 @@ class Download(FairscapeBaseModel, extra=Extra.allow):
     metadataType: Literal['evi:DataDownload'] = Field(alias="@type")
     encodingFormat: str
     owner: constr(pattern=IdentifierPattern) = Field(...)
-    contentSize: Optional[str]
+    contentSize: Optional[int]
     contentUrl: Optional[str]
     encodesCreativeWork: constr(pattern=IdentifierPattern) = Field(...)
     sha256: Optional[str]
@@ -45,8 +45,9 @@ class Download(FairscapeBaseModel, extra=Extra.allow):
 
     def create_metadata(self, MongoClient: pymongo.MongoClient) -> OperationStatus: 
 
-        mongo_database = MongoClient[MONGO_DATABASE]
-        mongo_collection = mongo_database[MONGO_COLLECTION]
+        mongo_config = get_mongo_config()
+        mongo_database = MongoClient[mongo_config.db]
+        mongo_collection = mongo_database[mongo_config.identifier_collection]
 
         # check that the data download doesn't already exist
         if mongo_collection.find_one({"@id": self.guid}) != None:
@@ -64,11 +65,11 @@ class Download(FairscapeBaseModel, extra=Extra.allow):
             return OperationStatus(False, f"creative work {creative_work_id} not found", 404)
 
         # update format of creative work
-        self.encodesCreativeWork = {
-            "id": creative_work.get("@id"),
-            "@type": creative_work.get("@type"),
-            "name": creative_work.get("name")
-        }
+        # self.encodesCreativeWork = {
+        #     "id": creative_work.get("@id"),
+        #     "@type": creative_work.get("@type"),
+        #     "name": creative_work.get("name")
+        # } breaks validation
 
         self.contentUrl = f"{creative_work.get('name')}/{self.name}"
 
@@ -113,16 +114,16 @@ class Download(FairscapeBaseModel, extra=Extra.allow):
             return OperationStatus(False, f"creative work {creative_work_id} not found", 404)
 
         # update format of creative work
-        self.encodesCreativeWork = {
-            "id": creative_work.get("@id"),
-            "@type": creative_work.get("@type"),
-            "name": creative_work.get("name")
-        }
+        # self.encodesCreativeWork = {
+        #     "id": creative_work.get("@id"),
+        #     "@type": creative_work.get("@type"),
+        #     "name": creative_work.get("name")
+        # } Does not match schmea of thing
 
         # TODO format the contentUrl
-        prefix, org, proj, creative_work_id, identifier  = self.guid.split("/")
+        #prefix, org, proj, creative_work_id, identifier  = self.guid.split("/")
 
-        self.contentUrl = f"{org}/{proj}/{creative_work_id}/{self.name}"
+        #self.contentUrl = f"{org}/{proj}/{creative_work_id}/{self.name}"
 
         # TODO check success of operation
         insert_result = mongo_collection.insert_one(self.dict(by_alias=True))
@@ -324,11 +325,12 @@ class Download(FairscapeBaseModel, extra=Extra.allow):
         reads the object and returns a file reader from the minio client
         """
 
+        minio_config = get_minio_config()
         # lookup the url
         if self.contentUrl == "":
             return OperationStatus(False, "download has no contentUrl", 404)
 
-        with MinioClient.get_object(MINIO_BUCKET, self.contentUrl) as minio_object:
+        with MinioClient.get_object(minio_config.default_bucket, self.contentUrl) as minio_object:
             yield from minio_object
 
 

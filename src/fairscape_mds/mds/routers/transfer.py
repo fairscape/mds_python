@@ -61,7 +61,7 @@ def register_download(download = Form(...), file: UploadFile = File(...)):
         file.file
         )
 
-    mongo_client.close()
+    #mongo_client.close() causes problems on second call
 
     if registration_status.success:
         return JSONResponse(
