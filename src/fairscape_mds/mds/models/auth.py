@@ -6,6 +6,9 @@ import jwt
 
 from fairscape_mds.mds.utilities.operation_status import OperationStatus
 from fairscape_mds.mds.models.user import User
+from fairscape_mds.mds.config import (
+    get_jwt_secret
+)
 
 
 
@@ -67,7 +70,7 @@ class Session(BaseModel):
         return OperationStatus(True, "", 200)
 
     def encode(self) -> str:
-        return jwt.encode(self.dict(), JWT_SECRET, algorithm="HS256")
+        return jwt.encode(self.dict(), get_jwt_secret(), algorithm="HS256")
 
 
 class UserNotFound(Exception):
@@ -162,7 +165,7 @@ def DecodeBearerAuth(MongoCollection, AuthHeader: str) -> User:
     session_values = jwt.decode(stripped_header, jwtSecret, algorithms=["HS256"])
     sess = Session(**session_values)
 
-    user_values = MongoCollection.find_one({"email": sess.sub})
+    user_values = MongoCollection.find_one({"email": sess.sub, "@type":"Person"})
 
     if user_values is None:
         raise UserNotFound

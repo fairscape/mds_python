@@ -7,6 +7,11 @@ from pydantic import (
 from typing import List, Union, Optional
 from fairscape_mds.mds.models.fairscape_base import *
 
+from fairscape_mds.mds.config import (
+        get_mongo_config
+)
+
+mongo_config = get_mongo_config()
 
 class Organization(FairscapeBaseModel, extra = Extra.allow):
     context: dict = Field(
@@ -24,35 +29,33 @@ class Organization(FairscapeBaseModel, extra = Extra.allow):
 
     def create(self, MongoClient: pymongo.MongoClient) -> OperationStatus:
 
-        mongo_db = MongoClient[MONGO_DATABASE]
-        mongo_collection = mongo_db[MONGO_COLLECTION]
+        mongo_db = MongoClient[mongo_config.db]
+        mongo_collection = mongo_db[mongo_config.identifier_collection]
 
         # TODO initialize attributes of organization
         # projects: List[ProjectCompactView]
 
         # check that organization does not already exist
-        if mongo_collection.find_one({"@id": self.id}) is not None:
+        if mongo_collection.find_one({"@id": self.guid}) is not None:
             return OperationStatus(False, "organization already exists", 400)
 
         # check that owner exists
-        if mongo_collection.find_one({"@id": self.owner.id}) is None:
+        if mongo_collection.find_one({"@id": self.owner}) is None:
             return OperationStatus(False, "owner does not exist", 404)
 
         # embeded bson documents to enable Mongo queries
         organization_dict = self.dict(by_alias=True)
 
-        # embeded bson document for owner
-        organization_dict["owner"] = SON([(key, value) for key, value in organization_dict["owner"].items()])
 
         # update operations for the owner user of the organization
         add_organization_update = {
-            "$push": {"organizations": SON([("@id", self.id), ("@type", "Organization"), ("name", self.name)])}
+            "$push": {"organizations": self.guid}
         }
 
         organization_bulk_write = [
             pymongo.InsertOne(organization_dict),
             # update owner model to have listed the organization
-            pymongo.UpdateOne({"@id": self.owner.id}, add_organization_update)
+            pymongo.UpdateOne({"@id": self.owner}, add_organization_update)
         ]
 
         # perform the bulk write
@@ -89,8 +92,8 @@ class Organization(FairscapeBaseModel, extra = Extra.allow):
         #            }
         #    )
 
-        mongo_db = MongoClient[MONGO_DATABASE]
-        mongo_collection = mongo_db[MONGO_COLLECTION]
+        mongo_db = MongoClient[mongo_config.db]
+        mongo_collection = mongo_db[mongo_config.identifier_collection]
         return super().read(mongo_collection)
 
 
@@ -102,8 +105,8 @@ class Organization(FairscapeBaseModel, extra = Extra.allow):
         #        content={"error": "user not permitted to update organization"}
         #    )
 
-        mongo_db = MongoClient[MONGO_DATABASE]
-        mongo_collection = mongo_db[MONGO_COLLECTION]
+        mongo_db = MongoClient[mongo_config.db]
+        mongo_collection = mongo_db[mongo_config.identifier_collection]
 
         # TODO e.g. when organization is updated, it should be reflected in its owners profile
         return super().update(mongo_collection)
@@ -126,8 +129,8 @@ class Organization(FairscapeBaseModel, extra = Extra.allow):
         #    content={"error": "user not permitted to delete organization"}
         #)
 
-        mongo_db = MongoClient[MONGO_DATABASE]
-        mongo_collection = mongo_db[MONGO_COLLECTION]
+        mongo_db = MongoClient[mongo_config.db]
+        mongo_collection = mongo_db[mongo_config.identifier_collection]
 
         # check that record exists
         # also, if successfull, will unpack the data we need to build the update operation
@@ -141,19 +144,19 @@ class Organization(FairscapeBaseModel, extra = Extra.allow):
 
         # create a bulk write operation
         # to remove a document from a list
-        pull_operation = {"$pull": {"organizations": {"@id": self.id}}}
+        pull_operation = {"$pull": {"organizations": {"@id": self.guid}}}
 
         # for ever member, remove the organization from their list of organization
         # bulk_edit = [pymongo.UpdateOne({"@id": member.id}, pull_operation) for member in self.members]
 
         # operations to modify the owner
         bulk_edit = [
-            pymongo.UpdateOne({"@id": self.owner.id}, pull_operation)
+            pymongo.UpdateOne({"@id": self.owner}, pull_operation)
         ]
 
         # operations to delete the organization document
         bulk_edit.append(
-            pymongo.DeleteOne({"@id": self.id})
+            pymongo.DeleteOne({"@id": self.guid})
         )
 
         # run the transaction
@@ -171,8 +174,8 @@ class Organization(FairscapeBaseModel, extra = Extra.allow):
 
 def list_organization(MongoClient: pymongo.MongoClient):
 
-    mongo_db = MongoClient[MONGO_DATABASE]
-    mongo_collection = mongo_db[MONGO_COLLECTION]
+    mongo_db = MongoClient[mongo_config.db]
+    mongo_collection = mongo_db[mongo_config.identifier_collection]
     
     cursor = mongo_collection.find(
         filter={"@type": "Organization"},

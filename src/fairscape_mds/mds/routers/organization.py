@@ -34,7 +34,7 @@ def organization_create(
     """
     
     mongo_db = mongo_client[mongo_config.db]
-    mongo_collection = mongo_db[mongo_config.session_collection]
+    mongo_collection = mongo_db[mongo_config.identifier_collection]
 
     try:
         calling_user = ParseAuthHeader(mongo_collection, Authorization)
@@ -50,15 +50,14 @@ def organization_create(
         )
 
     # set the calling user as the owner
-    organization.owner = calling_user.guid,
+    organization.owner = calling_user.guid
     create_status = organization.create(mongo_client)
-    mongo_client.close()
 
     if create_status.success:
 
         return JSONResponse(
             status_code=201,
-            content={"created": {"@id": organization.id, "@type": "Organization"}}
+            content={"created": {"@id": organization.guid, "@type": "Organization"}}
         )
     else:
         return JSONResponse(
@@ -160,7 +159,7 @@ def organization_update(
     if update_status.success:
         return JSONResponse(
             status_code=200,
-            content={"updated": {"@id": organization.id, "@type": "Organization"}}
+            content={"updated": {"@id": organization.guid, "@type": "Organization"}}
         )
     else:
         return JSONResponse(

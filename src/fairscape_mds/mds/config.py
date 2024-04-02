@@ -17,7 +17,10 @@ import casbin
 import casbin_sqlalchemy_adapter
 from dotenv import dotenv_values
 
-
+@lru_cache()
+def get_jwt_secret():
+    config_values = cached_dotenv()
+    return config_values["JWT_SECRET"]
 
 @lru_cache()
 def cached_dotenv(env_path: str = '.env'):
