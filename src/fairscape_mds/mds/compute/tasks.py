@@ -4,7 +4,6 @@ from fairscape_mds.mds.config import (
     get_mongo_config,                                     
     get_mongo_client,    
     MongoConfig,                                                   
-    CasbinConfig
     )
 
 from fairscape_mds.mds.compute.main import app

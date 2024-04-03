@@ -13,8 +13,6 @@ from pymongo import MongoClient, ASCENDING
 import minio
 from functools import lru_cache
 
-import casbin
-import casbin_sqlalchemy_adapter
 from dotenv import dotenv_values
 
 
@@ -27,33 +25,52 @@ def cached_dotenv(env_path: str = '.env'):
     }
     return config
 
+@lru_cache()
+def get_mongo_config():
+    mds_config = get_fairscape_config()
+    return mds_config.mongo
 
 @lru_cache()
-def get_fairscape_config():
+def get_mongo_client():
+    mds_config = get_fairscape_config()
+    return mds_config.CreateMongoClient()
+
+@lru_cache()
+def get_minio_config():
+    mds_config = get_fairscape_config()
+    return mds_config.minio
+
+@lru_cache()
+def get_minio_client():
+    mds_config = get_fairscape_config()
+    return mds_config.CreateMinioClient()
     
-    config_values = cached_dotenv()
+
+@lru_cache()
+def get_fairscape_config(env_path: str = '../deploy/local.env'):    
+    config_values = cached_dotenv(env_path)
 
     server_mongo_config = MongoConfig.model_validate(
         {
-            'host': config_values.get('MONGO_HOST'), 
-            'port': config_values.get("MONGO_PORT"),
-            'user': config_values.get('MONGO_ACCESS_KEY'),
-            'password': config_values.get('MONGO_SECRET_KEY'),
-            'db': config_values.get('MONGO_DATABASE'),
-            'identifier_collection': config_values.get('MONGO_IDENTIFIER_COLLECTION'),
-            'user_collection': config_values.get('MONGO_USER_COLLECTION'),
-            'rocrate_collection': config_values.get('MONGO_ROCRATE_COLLECTION')
+            'host': config_values.get('FAIRSCAPE_MONGO_HOST'), 
+            'port': config_values.get("FAIRSCAPE_MONGO_PORT"),
+            'user': config_values.get('FAIRSCAPE_MONGO_ACCESS_KEY'),
+            'password': config_values.get('FAIRSCAPE_MONGO_SECRET_KEY'),
+            'db': config_values.get('FAIRSCAPE_MONGO_DATABASE'),
+            'identifier_collection': config_values.get('FAIRSCAPE_MONGO_IDENTIFIER_COLLECTION'),
+            'user_collection': config_values.get('FAIRSCAPE_MONGO_USER_COLLECTION'),
+            'rocrate_collection': config_values.get('FAIRSCAPE_MONGO_ROCRATE_COLLECTION')
         }
         )
 
     server_minio_config = MinioConfig(
-        host= config_values.get("MINIO_URI"),
-        port=config_values.get("MINIO_PORT"),
-        access_key = config_values.get("MINIO_ACCESS_KEY"),
-        secret_key = config_values.get("MINIO_SECRET_KEY"),
-        default_bucket= config_values.get("MINIO_DEFAULT_BUCKET"), 
-        rocrate_bucket=config_values.get("MINIO_ROCRATE_BUCKET"),
-        secure= bool(config_values.get("MINIO_SECURE")=="True"),
+        host= config_values.get("FAIRSCAPE_MINIO_URI"),
+        port=config_values.get("FAIRSCAPE_MINIO_PORT"),
+        access_key = config_values.get("FAIRSCAPE_MINIO_ACCESS_KEY"),
+        secret_key = config_values.get("FAIRSCAPE_MINIO_SECRET_KEY"),
+        default_bucket= config_values.get("FAIRSCAPE_MINIO_DEFAULT_BUCKET"), 
+        rocrate_bucket=config_values.get("FAIRSCAPE_MINIO_ROCRATE_BUCKET"),
+        secure= bool(config_values.get("FAIRSCAPE_MINIO_SECURE")=="True"),
     )
     
     return FairscapeConfig(
@@ -65,68 +82,10 @@ def get_fairscape_config():
 
 
 @lru_cache()
-def get_rdflib_config():
-    return None
-
-
-@lru_cache()
-def get_rdflib_client():
-    return None
-
- 
-@lru_cache()
-def get_mongo_config():
-
-    config_values = cached_dotenv()
-
-    return MongoConfig(
-        host= config_values['MONGO_HOST'],
-        port= config_values['MONGO_PORT'],
-        user= config_values['MONGO_ACCESS_KEY'],
-        password= config_values['MONGO_SECRET_KEY'],
-        db= config_values['MONGO_DATABASE'],
-        identifier_collection = config_values["MONGO_IDENTIFIER_COLLECTION"],
-        user_collection = config_values["MONGO_USER_COLLECTION"],
-        rocrate_collection = config_values["MONGO_ROCRATE_COLLECTION"]
-    )
-
-
-@lru_cache()
-def get_mongo_client():
-    mongo_config = get_mongo_config()
-    return mongo_config.CreateClient()
-
-
-@lru_cache()
-def get_minio_config():
-
-    config_values = cached_dotenv()
-
-    return MinioConfig(
-        host= config_values.get("MINIO_URI"),
-        port=config_values.get("MINIO_PORT"),
-        access_key = config_values.get("MINIO_ACCESS_KEY"),
-        secret_key = config_values.get("MINIO_SECRET_KEY"),
-        default_bucket= config_values.get("MINIO_DEFAULT_BUCKET"), 
-        rocrate_bucket=config_values.get("MINIO_ROCRATE_BUCKET"),
-        secure= bool(config_values.get("MINIO_SECURE")=="True"),
-    )
-
-
-@lru_cache()
-def get_minio_client():
-   minio_config = get_minio_config()
-   return minio_config.CreateClient()
-
-@lru_cache()
 def get_ark_naan():
     # TODO return entire config object
     config_values= cached_dotenv()
-    return config_values.get("ARK_NAAN", "59853")
-
-#MongoDep = Annotated[pymongo.MongoClient, Depends(common_parameters)]
-#CasbinDep = Annotated[casbin.Enforcer, Depends(get_casbin)]
-#MinioDep = Annotated[minio.MinioClient, Depends(get_minio)]
+    return config_values.get("FAIRSCAPE_ARK_NAAN", "59853")
 
 
 class MongoConfig(BaseModel):
@@ -149,8 +108,8 @@ class MongoConfig(BaseModel):
 
 
 class MinioConfig(BaseModel):
-    host: Optional[str] = Field(default="localhost")
-    port: Optional[str] = Field(default="9000")
+    host: str = Field(default="localhost")
+    port: str = Field(default="9000")
     secret_key: Optional[str] = Field(default="")
     access_key: Optional[str] = Field(default="")
     default_bucket: Optional[str] = Field(default="mds")
@@ -187,37 +146,13 @@ class RedisConfig(BaseModel):
 
 class K8sComputeConfig(BaseModel):
     redis: RedisConfig
-
-
-
-class DockerConfig(BaseModel):
-    pass
     
-
-class CasbinAdapterEnum(str, Enum):
-    """ Choices for supported Backends for Casbin Model Storage
-    """
-    sqlite = "sqlite"
-
-
-class CasbinConfig(BaseModel):
-    casbin_model_path: Optional[pathlib.Path] = Field(defaul= None) #=pathlib.Path("./deploy/casbin_model.conf"))
-    policy_path: Optional[pathlib.Path] = Field(default=pathlib.Path("casbin_policy.db"))
-    #backend: CasbinAdapterEnum
-
-    def CreateClient(self):
-        adapter = casbin_sqlalchemy_adapter.Adapter(f'sqlite:///{self.policy_path}') 
-        casbinEnforcer = casbin.Enforcer(str(self.casbin_model_path), adapter)
-        return casbinEnforcer
-
 
 class FairscapeConfig(BaseModel):
     host: Optional[str] = Field(default='0.0.0.0')
     port: Optional[int] = Field(default=8080)
     mongo: MongoConfig
     minio: MinioConfig
-#    compute: K8sComputeConfig
-#    casbin: CasbinConfig
 
 
     def CreateMongoClient(self):
@@ -225,7 +160,6 @@ class FairscapeConfig(BaseModel):
     
     def CreateMinioClient(self):
         return self.minio.CreateClient()
-
 
     def RunServer(self):
         uvicorn.run(
@@ -245,51 +179,50 @@ class FairscapeConfig(BaseModel):
 
 
 
-def setup_mongo():
-    ''' Initalize mongo database for fairscape server application
-    '''
+    def setup_mongo(self):
+        ''' Initalize mongo database for fairscape server application
+        '''
+        mongo_client = self.CreateMongoClient()
 
-    mongo_config = get_mongo_config()
-    mongo_client = mongo_config.CreateClient()
+        # create database if not created 
+        mongo_db = mongo_client[self.mongo.db]
+        
+        # create identifier collection
+        identifier_collection = mongo_db[self.mongo.identifier_collection]
 
-    # create database if not created 
-    mongo_db = mongo_client[mongo_config.db]
-    
-    # create identifier collection
-    identifier_collection = mongo_db[mongo_config.identifier_collection]
+        # create user collection
+        mongo_collection = mongo_db[self.mongo.user_collection]
 
-    # create user collection
-    mongo_collection = mongo_db[mongo_config.user_collection]
+        # create text index for 
+        # db.identifier.createIndex( { name: "text", description: "text" } )
+        identifier_collection.create_index([('description', 'text'), ('name', 'text')], name="description_text")
 
-    # create text index for 
-    # db.identifier.createIndex( { name: "text", description: "text" } )
-    identifier_collection.create_index([('description', 'text'), ('name', 'text')], name="description_text")
+        # create index for identifiers
+        identifier_collection.create_index([("@id", ASCENDING)])
 
-    # create index for identifiers
-    identifier_collection.create_index([("@id", ASCENDING)])
+        # TODO create index for provenance properties
 
-    # TODO create index for provenance properties
-    #
-
-    # TODO recency of metadata publication
-    #identifier_collection.create_index({})
+        # TODO recency of metadata publication
+        #identifier_collection.create_index([])
 
 
+    def setup_minio(self):
+        ''' Initalize minio buckets for fairscape server application
+        '''
+
+        minio_client = self.CreateMinioClient()
+
+        try:
+            # create default bucket
+            minio_client.make_bucket(self.minio.default_bucket)
+
+        except minio.S3Error as e:
+            pass
 
 
-def setup_minio():
-    ''' Initalize minio buckets for fairscape server application
-    '''
-
-    minio_config = get_minio_config()
-    minio_client = get_minio_client()
-
-    # create default bucket
-    print(minio_config.default_bucket)
-    minio_client.make_bucket(minio_config.default_bucket)
-
-    # create rocrate bucket
-    print(minio_config.rocrate_bucket)
-    minio_client.make_bucket(minio_config.rocrate_bucket)
-
+        try:
+            # create rocrate bucket
+            minio_client.make_bucket(self.minio.rocrate_bucket)
+        except minio.S3Error as e:
+            pass
 

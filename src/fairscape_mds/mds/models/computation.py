@@ -18,11 +18,6 @@ import uuid
 import pathlib
 import shutil
 
-from fairscape_mds.mds.config import (
-        get_minio_config,
-        get_mongo_config
-        )
-
 root_url = "http://localhost:8000/"
 default_context = {
     "@vocab": "https://schema.org/", 
@@ -311,8 +306,6 @@ class Computation(FairscapeBaseModel, extra = Extra.allow):
 
 
 def list_computation(mongo_collection: pymongo.collection.Collection):
-    mongo_config = get_mongo_config()
-
 
     cursor = mongo_collection.find(
         filter={"@type": "evi:Computation"},
@@ -333,8 +326,6 @@ def RegisterComputation(computation: Computation):
     mongo_client = mongo.GetConfig()
     mongo_db = mongo_client[MONGO_DATABASE]
     mongo_collection = mongo_db[MONGO_COLLECTION]
-
-    minio_client = GetMinioConfig()
 
     if computation.containerId == "":
         write_container_log(f"error: containerId does not exist")

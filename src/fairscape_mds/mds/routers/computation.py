@@ -1,6 +1,7 @@
 import pymongo
 from fastapi import APIRouter, Response, BackgroundTasks
 from fairscape_mds.mds.config import (
+    get_fairscape_config,
     get_minio_config,
     get_mongo_config,
     get_mongo_client,

@@ -16,11 +16,6 @@ from fairscape_mds.mds.models.fairscape_base import (
 from fairscape_mds.mds.models.dataset import Dataset
 from fairscape_mds.mds.utilities.operation_status import OperationStatus
 
-from fairscape_mds.mds.config import (
-        get_minio_config,
-        get_mongo_config,
-)
-
 
 class Download(FairscapeBaseModel, extra=Extra.allow):
     context: dict = Field(
@@ -43,10 +38,10 @@ class Download(FairscapeBaseModel, extra=Extra.allow):
     includedInDataCatalog: Optional[constr(pattern=IdentifierPattern)] = Field(default=None)
 
 
-    def create_metadata(self, MongoClient: pymongo.MongoClient) -> OperationStatus: 
+    def create_metadata(self, MongoClient: pymongo.MongoClient, mongo_config) -> OperationStatus: 
 
-        mongo_database = MongoClient[MONGO_DATABASE]
-        mongo_collection = mongo_database[MONGO_COLLECTION]
+        mongo_database = MongoClient[mongo_config.db]
+        mongo_collection = mongo_database[mongo_config.identifier_collection]
 
         # check that the data download doesn't already exist
         if mongo_collection.find_one({"@id": self.id}) != None:

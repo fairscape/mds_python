@@ -12,7 +12,6 @@ from fairscape_mds.mds.config import (
     get_mongo_config,
     get_mongo_client,
     MongoConfig,
-    CasbinConfig
 ) 
 
 router = APIRouter()
