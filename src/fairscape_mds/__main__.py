@@ -1,19 +1,19 @@
 import argparse
 import uvicorn
+import click
 from fairscape_mds.mds.config import (
+    get_fairscape_config,
     setup_minio,
     setup_mongo
 )
 
+@click.command()
+@click.option("--config", default=None, help="path to .env file for configuration")
+def run(config):
 
-parser = argparse.ArgumentParser()
-parser.add_argument("--host", default='0.0.0.0')
-parser.add_argument("--port", default='8080')
 
-
-if __name__ == '__main__':
-
-    args = parser.parse_args()
+    #load configuration
+    fairscape_config = get_fairscape_config() 
 
     # try to instantiate
     #try:
@@ -24,9 +24,7 @@ if __name__ == '__main__':
     #except Exception:
     #    pass
 
-    uvicorn.run(
-        'fairscape_mds.mds.app:app', 
-        host='0.0.0.0', 
-        port=8080, 
-        reload=True
-        )
+    fairscape_config.RunServer()
+
+if __name__ == '__main__':
+    run()
