@@ -13,6 +13,7 @@ def validate_type(value):
 
 class Item(BaseModel):
     type: str = Field(...)
+    _validate_type = validator('type', allow_reuse=True)(validate_type)
 
 class Property(BaseModel, extra = Extra.allow):
     description: str = Field(...)
@@ -45,19 +46,13 @@ class Property(BaseModel, extra = Extra.allow):
                 raise ValueError("Pattern must be a valid regular expression")
         return value
 
-    @validator('items')
-    def validate_items(cls, value):
-        if value is not None and 'type' in value:
-            validate_type(cls, value['type'])
-        return value
-
 class Schema(FairscapeBaseModel, extra=Extra.allow):
     context: dict = Field( 
         default= {"@vocab": "https://schema.org/", "evi": "https://w3id.org/EVI#"},
         alias="@context" 
     )
     metadataType: str = Field(alias="@type", default= "evi:Schema")
-    properties: Dict[str:Property]
+    properties: Dict[str, Property]
     type: Optional[str] = Field(default="object")
     additionalProperties: Optional[bool] = Field(default=True)
     required: Optional[List[str]] = []  

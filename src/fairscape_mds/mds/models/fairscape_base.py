@@ -298,7 +298,7 @@ class FairscapeBaseModel(Identifier):
                 return OperationStatus(False, "Object not found", 404)
 
             # perform delete one operation
-            delete_result = MongoCollection.delete_one({"@id": self.id})
+            delete_result = MongoCollection.delete_one({"@id": self.guid})
 
             # if deletion is successful, return success message
             if delete_result.acknowledged and delete_result.deleted_count == 1:
