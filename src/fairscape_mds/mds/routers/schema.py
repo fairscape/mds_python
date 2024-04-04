@@ -20,11 +20,21 @@ def schema_create(schema: Schema):
     """
     Create a schema with the following properties:
 
-    - **@id**: a unique identifier
-    - **@type**: Schema
-    - **name**: a name
-    - **description**: a description
-    - **properties**: a dictionary with {'property_name':{property_def}}
+    - **@context**: the JSON-LD context
+    - **@type**: the type of the metadata, typically "evi:Schema"
+    - **@id**: a unique identifier for the schema
+    - **name**: the name of the schema
+    - **description**: a brief description of the schema
+    - **properties**: a dictionary mapping property names to their definitions
+    - **type**: the type of the schema, usually "object" (optional)
+    - **additionalProperties**: whether additional properties are allowed (default: True)
+    - **required**: a list of required properties
+    - **separator**: the separator used in the schema (default: ",")
+    - **header**: whether the schema includes a header (default: False)
+    - **examples**: a list of example instances of the schema (optional)
+    - **url**: the URL of the schema (optional)
+    - **keywords**: a list of keywords associated with the schema (optional)
+    - **license**: the license of the schema (optional)
     """
 
     mongo_db = mongo_client[mongo_config.db]
@@ -78,7 +88,7 @@ async def schema_get(NAAN: str, postfix: str):
 
     schema_id = f"ark:{NAAN}/{postfix}"
 
-    schema = Schema.construct(guid=schema_id)
+    schema = Schema.model_construct(guid=schema_id)
     read_status = schema.read(mongo_collection)
 
     if read_status.success:
@@ -132,7 +142,7 @@ def schema_delete(NAAN: str, postfix: str):
     mongo_db = mongo_client[mongo_config.db]
     mongo_collection = mongo_db[mongo_config.schema_collection]
 
-    schema = Schema.construct(id=schema_id)
+    schema = Schema.model_construct(id=schema_id)
 
     delete_status = schema.delete(mongo_collection)
 
