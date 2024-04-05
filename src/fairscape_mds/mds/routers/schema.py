@@ -38,7 +38,7 @@ def schema_create(schema: Schema):
     """
 
     mongo_db = mongo_client[mongo_config.db]
-    mongo_collection = mongo_db[mongo_config.schema_collection]
+    mongo_collection = mongo_db[mongo_config.identifier_collection]
 
     create_status = schema.create(mongo_collection)
 
@@ -65,7 +65,7 @@ def schema_create(schema: Schema):
             response_description="Retrieved list of schemas")
 def schema_list():
     mongo_db = mongo_client[mongo_config.db]
-    mongo_collection = mongo_db[mongo_config.schema_collection]
+    mongo_collection = mongo_db[mongo_config.identifier_collection]
 
     schemas = list_schemas(mongo_collection)
 
@@ -84,7 +84,7 @@ async def schema_get(NAAN: str, postfix: str):
     """
 
     mongo_db = mongo_client[mongo_config.db]
-    mongo_collection = mongo_db[mongo_config.schema_collection]
+    mongo_collection = mongo_db[mongo_config.identifier_collection]
 
     schema_id = f"ark:{NAAN}/{postfix}"
 
@@ -110,14 +110,14 @@ def schema_update(
     schema: Schema
 ):
     mongo_db = mongo_client[mongo_config.db]
-    mongo_collection = mongo_db[mongo_config.schema_collection]
+    mongo_collection = mongo_db[mongo_config.identifier_collection]
 
     update_status = schema.update(mongo_collection)
 
     if update_status.success:
         return JSONResponse(
             status_code=200,
-            content={"updated": {"@id": schema.id, "@type": "Schema", "name": schema.name}}
+            content={"updated": {"@id": schema.guid, "@type": "Schema", "name": schema.name}}
         )
 
     else:
@@ -140,9 +140,9 @@ def schema_delete(NAAN: str, postfix: str):
     schema_id = f"ark:{NAAN}/{postfix}"
 
     mongo_db = mongo_client[mongo_config.db]
-    mongo_collection = mongo_db[mongo_config.schema_collection]
+    mongo_collection = mongo_db[mongo_config.identifier_collection]
 
-    schema = Schema.model_construct(id=schema_id)
+    schema = Schema.model_construct(guid=schema_id)
 
     delete_status = schema.delete(mongo_collection)
 
@@ -152,8 +152,7 @@ def schema_delete(NAAN: str, postfix: str):
             content={
                 "deleted": {
                     "@id": schema_id, 
-                    "@type": "Schema", 
-                    "name": schema.name
+                    "@type": "evi:Schema"
                 }
             }
         )
