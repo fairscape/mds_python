@@ -209,8 +209,8 @@ def deleteSoftware(
  
     deleteSoftwareResult = identifierCollection.delete_one({"@id": softwareGUID})
 
-    if deleteSoftwareResult != 1:
-        return OperationStatus(False, "software not deleted", 500)
+    #if deleteSoftwareResult. != 1:
+    #    return OperationStatus(False, "software not deleted", 500)
 
     updateUserResult = userCollection.update_one(
             {"@id": softwareInstance.get("owner")}, 
