@@ -8,7 +8,7 @@ from typing import List, Union, Optional
 from fairscape_mds.mds.models.fairscape_base import *
 
 
-class Project(FairscapeBaseModel, extra = Extra.allow):
+class Project(FairscapeEVIBaseModel, extra = Extra.allow):
     metadataType: str = Field(default="Project", alias="@type")
     owner: constr(pattern=IdentifierPattern) = Field(...)
     members: List[constr(pattern=IdentifierPattern)] = []

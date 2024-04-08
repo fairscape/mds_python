@@ -1,13 +1,20 @@
 from fastapi import APIRouter, Response
 from fastapi.responses import JSONResponse
 
-from fairscape_mds.mds.models.software import Software, list_software
+from fairscape_mds.mds.models.software import Software, listSoftware, createSoftware, deleteSoftware
 from fairscape_mds.mds.config import (
         get_mongo_config,
         get_mongo_client,
         )
 
 router = APIRouter()
+
+mongo_config = get_mongo_config()
+mongo_client = get_mongo_client()
+
+mongo_db = mongo_client[mongo_config.db]
+identifierCollection = mongo_db[mongo_config.identifier_collection]
+userCollection = mongo_db[mongo_config.user_collection]
 
 
 @router.post("/software",
@@ -22,19 +29,13 @@ def software_create(software: Software, response: Response):
     - **name**: a name
     - **owner**: an existing user in its compact form with @id, @type, name, and email
     """
-    mongo_client = get_mongo_client()
-    mongo_config = get_mongo_config()
-    mongo_db = mongo_client[mongo_config.db]
-    mongo_collection = mongo_db[mongo_config.identifier_collection]
 
-    create_status = software.create(mongo_collection)
-
-    mongo_client.close()
+    create_status = createSoftware(software, identifierCollection, userCollection)
 
     if create_status.success:
         return JSONResponse(
             status_code=201,
-            content={"created": {"@id": software.id, "@type": "evi:Software"}}
+            content={"created": software.model_dump(by_alias=True)}
         )
     else:
         return JSONResponse(
@@ -47,14 +48,7 @@ def software_create(software: Software, response: Response):
             summary="List all software",
             response_description="Retrieved list of software")
 def software_list(response: Response):
-    mongo_client = get_mongo_client()
-    mongo_db = mongo_client[MONGO_DATABASE]
-    mongo_collection = mongo_db[MONGO_COLLECTION]
-
-    software = list_software(mongo_collection)
-
-    mongo_client.close()
-
+    software = listSoftware(identifierCollection)
     return software
 
 
@@ -68,17 +62,12 @@ def software_get(NAAN: str, postfix: str, response: Response):
     - **NAAN**: Name Assigning Authority Number which uniquely identifies an organization e.g. 12345
     - **postfix**: a unique string
     """
-    mongo_client = get_mongo_client()
-    mongo_db = mongo_client[MONGO_DATABASE]
-    mongo_collection = mongo_db[MONGO_COLLECTION]
 
     software_id = f"ark:{NAAN}/{postfix}"
 
-    software = Software.construct(id=software_id)
+    software = Software.construct(guid=software_id)
 
-    read_status = software.read(mongo_collection)
-
-    mongo_client.close()
+    read_status = software.read(identifierCollection)
 
     if read_status.success:
         return software
@@ -91,13 +80,7 @@ def software_get(NAAN: str, postfix: str, response: Response):
             summary="Update a software",
             response_description="The updated software")
 def software_update(software: Software, response: Response):
-    mongo_client = get_mongo_client()
-    mongo_db = mongo_client[MONGO_DATABASE]
-    mongo_collection = mongo_db[MONGO_COLLECTION]
-
-    update_status = software.update(mongo_collection)
-
-    mongo_client.close()
+    update_status = software.update(identifier_collection)
 
     if update_status.success:
         return JSONResponse(
@@ -121,25 +104,21 @@ def software_delete(NAAN: str, postfix: str):
     - **NAAN**: Name Assigning Authority Number which uniquely identifies an organization e.g. 12345
     - **postfix**: a unique string
     """
-    software_id = f"ark:{NAAN}/{postfix}"
+    softwareGUID = f"ark:{NAAN}/{postfix}"
 
-    mongo_client = get_mongo_client()
-    mongo_db = mongo_client[MONGO_DATABASE]
-    mongo_collection = mongo_db[MONGO_COLLECTION]
+    deleteStatus = deleteSoftware(
+            softwareGUID, 
+            identifierCollection, 
+            userCollection
+            )
 
-    software = Software.construct(id=software_id)
-
-    delete_status = software.delete(mongo_collection)
-
-    mongo_client.close()
-
-    if delete_status.success:
+    if deleteStatus.success:
         return JSONResponse(
             status_code=200,
             content={"deleted": {"@id": software_id, "@type": "evi:Software", "name": software.name}}
         )
     else:
         return JSONResponse(
-            status_code=delete_status.status_code,
-            content={"error": f"{str(delete_status.message)}"}
+            status_code=deleteStatus.status_code,
+            content={"error": f"{str(deleteStatus.message)}"}
         )

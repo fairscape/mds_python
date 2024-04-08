@@ -8,7 +8,7 @@ from typing import List, Union, Optional
 from fairscape_mds.mds.models.fairscape_base import *
 
 
-class Organization(FairscapeBaseModel, extra = Extra.allow):
+class Organization(FairscapeEVIBaseModel, extra = Extra.allow):
     context: dict = Field(
         default={
             "@vocab": "https://schema.org/", 

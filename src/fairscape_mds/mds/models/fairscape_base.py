@@ -5,7 +5,6 @@ from pydantic import (
     Field,
     constr,
     Extra,
-    computed_field
 )
 from typing import (
     List,
@@ -57,13 +56,8 @@ class FairscapeBaseModel(Identifier):
         alias="@context"
     )
     url: Optional[str] = Field(default=None)
-    keywords: List[str] = Field(default=[])
-    description: str = Field(min_length=5)
-    license: Optional[str] = Field(default=DEFAULT_LICENSE)
 
 
-    #@computed_field(alias="@id")
-    #@property
     def generate_guid(self) -> str:
         # TODO url encode values
         # TODO add random hash digest
@@ -336,7 +330,6 @@ class FairscapeBaseModel(Identifier):
 
 
     def update_append(self, MongoCollection, Field: str, Item) -> OperationStatus:
-
         # TODO read update result output to determine success
         update_result = MongoCollection.update_one(
             {"@id": self.guid},
@@ -366,3 +359,10 @@ class FairscapeBaseModel(Identifier):
         )
 
         return OperationStatus(True, "", 200)
+
+
+
+class FairscapeEVIBaseModel(FairscapeBaseModel):
+    description: str = Field(min_length=5)
+    workLicense: Optional[str] = Field(default=DEFAULT_LICENSE, alias="license")
+    keywords: List[str] = Field(default=[])

@@ -8,12 +8,16 @@ from typing import Optional, List
 from fairscape_mds.mds.models.fairscape_base import *
 
 
-class Software(FairscapeBaseModel, extra = Extra.allow):
+
+
+
+
+class Software(FairscapeEVIBaseModel, extra = Extra.allow):
     metadataType: str = Field(default="evi:Software")
-    owner: constr(pattern=IdentifierPattern) = Field(...)
+    owner: str = Field(...)
     # author: str
     # citation: str
-    distribution: List[constr(pattern=IdentifierPattern)] = Field(default=[])
+    distribution: List[str] = Field(default=[])
     usedBy: List[constr(pattern=IdentifierPattern)] = Field(default=[])
     sourceOrganization: constr(pattern=IdentifierPattern) = Field(default=None)
     includedInDataCatalog: constr(pattern=IdentifierPattern) = Field(default=None)
@@ -21,12 +25,14 @@ class Software(FairscapeBaseModel, extra = Extra.allow):
 
 
     def create(self, MongoCollection: pymongo.collection.Collection) -> OperationStatus:
+        ''' create a software
+        '''
 
         # initialize empty list of computation for a software
         # self.usedBy = []
 
         # check that software does not already exist
-        if MongoCollection.find_one({"@id": self.id}) is not None:
+        if MongoCollection.find_one({"@id": self.guid}) is not None:
             return OperationStatus(False, "software already exists", 400)
 
         # check that owner exists
@@ -63,6 +69,8 @@ class Software(FairscapeBaseModel, extra = Extra.allow):
         return OperationStatus(True, "", 201)
 
     def read(self, MongoCollection: pymongo.collection.Collection) -> OperationStatus:
+        ''' read software into pydantic 
+        '''
         return super().read(MongoCollection)
 
     def update(self, MongoCollection: pymongo.collection.Collection) -> OperationStatus:
@@ -119,11 +127,105 @@ class Software(FairscapeBaseModel, extra = Extra.allow):
             return OperationStatus(False, f"{bulk_edit_result.bulk_api_result}", 500)
 
 
-def list_software(mongo_collection: pymongo.collection.Collection):
-    cursor = mongo_collection.find(
+
+def listSoftware(identifierCollection: pymongo.collection.Collection):
+    cursor = identifierCollection.find(
         filter={"@type": "evi:Software"},
         projection={"_id": False}
     )
     return {
-        "software": [{"@id": software.get("@id"), "@type": "evi:Software", "name": software.get("name")} for software in
-                     cursor]}
+        "software": [
+            {
+                "@id": software.get("@id"), 
+                "@type": "evi:Software", 
+                "name": software.get("name")
+            } for software in cursor
+            ]
+        }
+
+
+def createSoftware(
+        softwareInstance: Software, 
+        identifierCollection: pymongo.collection.Collection, 
+        userCollection: pymongo.collection.Collection
+        )-> OperationStatus:
+    ''' create a Software Record in mongo Database
+    '''
+    # check that software does not already exist
+    if identifierCollection.find_one({"@id": softwareInstance.guid}) is not None:
+        return OperationStatus(False, "software already exists", 400)
+
+    # check that owner exists
+    owner = userCollection.find_one({"@id": softwareInstance.owner})
+    if owner is None:
+        return OperationStatus(False, "owner does not exist", 404)
+
+    # embeded bson documents to enable Mongo queries
+    softwareDict = softwareInstance.model_dump(by_alias=True)
+
+    # update operations for the owner user of the software
+
+    insertResult = identifierCollection.insert_one(softwareDict)
+
+    if insertResult.inserted_id is None:
+        return OperationStatus(
+                False, 
+                "error creating software", 
+                500
+                )
+
+    userUpdateResult = userCollection.update_one(
+            {"@id":  softwareInstance.owner}, 
+            {"$push": {"software": softwareInstance.guid}}
+            )
+
+    if userUpdateResult.modified_count != 1:
+        return OperationStatus(
+                False, 
+                f"error updating user {softwareInstance.owner}\n" + 
+                f"matched_documents: {userUpdateResult.matched_count}\n" + 
+                f"modified_count: {userUpdateResult.modified_count}",
+                500)
+
+    # TODO update organization
+
+    # TODO update project
+
+
+    return OperationStatus(True, "", 201)
+
+
+def deleteSoftware(
+        softwareGUID: str, 
+        identifierCollection: pymongo.collection.Collection, 
+        userCollection: pymongo.collection.Collection
+        ) -> OperationStatus:
+    ''' Delete a Software from the mongo Database
+    '''
+    # check that software does not already exist
+    softwareInstance = identifierCollection.find_one({"@id": softwareGUID}) 
+    if softwareInstance is None:
+        return OperationStatus(False, "software not found", 404)
+ 
+    deleteSoftwareResult = identifierCollection.delete_one({"@id": softwareGUID})
+
+    if deleteSoftwareResult != 1:
+        return OperationStatus(False, "software not deleted", 500)
+
+    updateUserResult = userCollection.update_one(
+            {"@id": softwareInstance.get("owner")}, 
+            {"$pull": {"software": softwareGUID}}
+            )
+
+    if updateUserResult.modified_count != 1:
+        return OperationStatus(False, "user not updated", 500)
+
+    # TODO update organization
+
+    # TODO update project
+
+    # TODO update computations using Software
+
+    # TODO update RO-crates using Software
+
+    return OperationStatus(True, "", 201)

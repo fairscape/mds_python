@@ -36,7 +36,7 @@ from typing import (
 )
 
 from fairscape_mds.mds.config import get_ark_naan
-from fairscape_mds.mds.models.fairscape_base import FairscapeBaseModel
+from fairscape_mds.mds.models.fairscape_base import FairscapeBaseModel, FairscapeEVIBaseModel
 from fairscape_mds.mds.utilities.operation_status import OperationStatus
 
 
@@ -51,7 +51,7 @@ SOFTWARE_TYPE = "Software"
 COMPUTATION_TYPE = "Computation"
 ROCRATE_TYPE = "ROCrate"
 
-class ROCrateDataset(FairscapeBaseModel):
+class ROCrateDataset(FairscapeEVIBaseModel):
     guid: str = Field(alias="@id")
     metadataType: Optional[str] = Field(default="https://w3id.org/EVI#Dataset")
     additionalType: Optional[str] = Field(default=DATASET_TYPE)
@@ -152,31 +152,6 @@ class ROCrate(FairscapeBaseModel):
         description="Value for ROCrate S3 URI of zip location"
         )
     distribution: Optional[ROCrateDistribution] = Field(default=None)
-
-    # turning off automatically generated GUIDs
-    #@computed_field(alias="@id")
-    #@property
-    def generate_guid(self) -> str:
-
-        # remove trailing whitespace 
-        cleaned_name = re.sub('\s+$', '', self.name)
-
-        # remove restricted characters
-        url_name = re.sub('\W', '', cleaned_name.replace('', '-'))
-
-        # add md5 hash digest on remainder of metadata
-        sha_256_hash = hashlib.sha256()
-
-        # use a subset of properties for hash digest
-        digest_dict = {
-            "name": self.name,
-            "@graph": [model.model_dump_json(by_alias=True) for model in self.metadataGraph]
-        }
-        encoded = json.dumps(digest_dict, sort_keys=True).encode()
-        sha_256_hash.update(encoded)
-        digest_string = sha_256_hash.hexdigest()
-
-        return f"ark:{get_ark_naan()}/rocrate-{url_name}-{digest_string[0:10]}"
 
 
     def entailment(self):

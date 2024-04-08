@@ -3,8 +3,6 @@ import uvicorn
 import click
 from fairscape_mds.mds.config import (
     get_fairscape_config,
-    setup_minio,
-    setup_mongo
 )
 
 @click.command()
@@ -13,16 +11,16 @@ def run(config):
 
 
     #load configuration
-    fairscape_config = get_fairscape_config() 
+    fairscape_config = get_fairscape_config(config) 
 
     # try to instantiate
-    #try:
-    #    setup_minio()
-    #    print("setup_minio")
-    #    setup_mongo()
-    #    print("setup_mongo")
-    #except Exception:
-    #    pass
+    try:
+        fairscape_config.SetupMinio()
+        print("setup_minio")
+        fairscape_config.SetupMongo()
+        print("setup_mongo")
+    except Exception:
+        pass
 
     fairscape_config.RunServer()
 

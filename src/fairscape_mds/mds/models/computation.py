@@ -7,6 +7,7 @@ from fairscape_mds.mds.models.fairscape_base import *
 from fairscape_mds.mds.models.dataset import Dataset
 from fairscape_mds.mds.models.download import Download as DataDownload
 from fairscape_mds.mds.models.software import Software
+from fairscape_mds.mds.models.fairscape_base import *
 from fairscape_mds.mds.utilities.funcs import *
 from fairscape_mds.mds.utilities.utils import *
 
@@ -34,7 +35,7 @@ class JobRequirements(BaseModel):
     mem: ResourceTuple
 
 
-class Computation(FairscapeBaseModel, extra = Extra.allow):
+class Computation(FairscapeEVIBaseModel, extra = Extra.allow):
     metadataType: Literal['evi:Computation'] = Field(alias="@type")
     owner: constr(pattern=IdentifierPattern) 
     author: str

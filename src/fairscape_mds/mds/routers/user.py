@@ -7,7 +7,7 @@ from fastapi import (
 )
 from fastapi.responses import JSONResponse
 
-from fairscape_mds.mds.models.user import User, list_users
+from fairscape_mds.mds.models.user import User, listUsers, deleteUserByGUID
 from fairscape_mds.mds.config import (
     get_mongo_config,
     get_mongo_client,
@@ -18,6 +18,8 @@ router = APIRouter()
 
 mongo_config = get_mongo_config()
 mongo_client = get_mongo_client()
+mongo_db = mongo_client[mongo_config.db]
+userCollection = mongo_db[mongo_config.user_collection]
 
 
 @router.post('/user',
@@ -34,10 +36,8 @@ def user_create(user: User):
     - **password**: a password
     """
 
-    mongo_db = mongo_client[mongo_config.db]
-    mongo_collection = mongo_db[mongo_config.user_collection]
 
-    create_status = user.create(mongo_collection)
+    create_status = user.create(userCollection)
 
     if create_status.success:
 
@@ -71,12 +71,7 @@ def user_create(user: User):
             summary="List all users",
             response_description="Retrieved list of users")
 def user_list():
-
-    mongo_db = mongo_client[mongo_config.db]
-    mongo_collection = mongo_db[mongo_config.user_collection]
-
-    users = list_users(mongo_collection)
-
+    users = list_users(userCollection)
     return users
 
 
@@ -91,13 +86,10 @@ async def user_get(NAAN: str, postfix: str):
     - **postfix**: a unique string
     """
 
-    mongo_db = mongo_client[mongo_config.db]
-    mongo_collection = mongo_db[mongo_config.user_collection]
-
     user_id = f"ark:{NAAN}/{postfix}"
 
     user = User.construct(guid=user_id)
-    read_status = user.read(mongo_collection)
+    read_status = user.read(userCollection)
 
     if read_status.success:
         return user
@@ -110,17 +102,17 @@ async def user_get(NAAN: str, postfix: str):
         )
 
 
-@router.put("/user",
+@router.put("/user/ark:{NAAN}/{postfix}",
             summary="Update a user",
             response_description="The updated user")
 def user_update(
-    current_user: User,
     user: User
 ):
-    mongo_db = mongo_client[mongo_config.db]
-    mongo_collection = mongo_db[mongo_config.user_collection]
 
-    update_status = user.update(mongo_collection)
+    user_id = f"ark:{NAAN}/{postfix}"
+    user = User.construct(guid=user_id)
+
+    update_status = user.update(userCollection)
 
     if update_status.success:
         return JSONResponse(
@@ -147,26 +139,29 @@ def user_delete(NAAN: str, postfix: str):
     """
     user_id = f"ark:{NAAN}/{postfix}"
 
-    mongo_db = mongo_client[mongo_config.db]
-    mongo_collection = mongo_db[mongo_config.user_collection]
 
-    user = User.construct(id=user_id)
+    deleted_user = deleteUserByGUID(userCollection, user_id)
 
-    delete_status = user.delete(mongo_collection)
-
-    if delete_status.success:
+    if deleted_user is None:
+        return JSONResponse(
+            status_code=404,
+            content={"error": "user not found"}
+        )
+    else:
         return JSONResponse(
             status_code=200,
             content={
                 "deleted": {
-                    "@id": user_id, 
-                    "@type": "Person", 
-                    "name": user.name
-                }
+                    "@id": deleted_user.get("@id"),
+                    "@type": deleted_user.get("@type"),
+                    "name": deleted_user.get("name"),
+                    "email": deleted_user.get("email"),
+                    "datasets": deleted_user.get("datasets"),
+                    "software": deleted_user.get("software"),
+                    "datasets": deleted_user.get("datasets"),
+                    "computatations": deleted_user.get("computations"),
+                    "rocrates": deleted_user.get("rocrates"),
+                    "evidencegraphs": deleted_user.get("evidencegraphs")
+                    }
             }
-        )
-    else:
-        return JSONResponse(
-            status_code=delete_status.status_code,
-            content={"error": f"{str(delete_status.message)}"}
         )
