@@ -530,6 +530,7 @@ def GetMetadataFromCrate(MinioClient, BucketName, TransactionFolder, CratePath, 
 
         # parse file contents into dictionary
         try:
+            #TODO Come back and load into ROCrate Class
             ro_crate_dict = json.loads(ro_crate_json)
             ro_crate_dict['distribution'] = Distribution.dict(by_alias=True)
             ro_crate_dict['additionalType'] = ROCRATE_TYPE
