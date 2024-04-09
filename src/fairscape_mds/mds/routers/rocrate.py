@@ -18,7 +18,7 @@ from fairscape_mds.mds.config import (
     get_mongo_config,
     get_mongo_client,
 )
-
+from fairscape_mds.mds.models.utils import remove_ids
 from fairscape_mds.mds.models.rocrate import (
     UploadExtractedCrate,
     UploadZippedCrate,
@@ -28,7 +28,8 @@ from fairscape_mds.mds.models.rocrate import (
     StreamZippedROCrate,
     GetROCrateMetadata,
     PublishROCrateMetadata,
-    PublishProvMetadata
+    PublishProvMetadata,
+    ROCrate
 )
 
 import uuid
@@ -61,8 +62,9 @@ def rocrate_upload(file: UploadFile = File(...)):
     zip_foldername = str(Path(file.filename).stem)
 
 
+
     # upload the zipped ROCrate 
-    zipped_upload_status = UploadZippedCrate(
+    zipped_upload_status, crateDistribution = UploadZippedCrate(
         MinioClient=minio_client,
         ZippedObject=file.file,
         BucketName=minio_config.rocrate_bucket,
@@ -86,7 +88,8 @@ def rocrate_upload(file: UploadFile = File(...)):
         MinioClient=minio_client,
         ZippedObject=file.file,
         BucketName=minio_config.default_bucket,
-        TransactionFolder=transaction_folder
+        TransactionFolder=transaction_folder,
+        Distribution = crateDistribution
     )
 
     if not extracted_upload_status.success:
@@ -100,19 +103,21 @@ def rocrate_upload(file: UploadFile = File(...)):
 
 
     try:
+        # TODO Clean up how distribution is passed around
         # Get metadata from the unzipped crate
         crate = GetMetadataFromCrate(
             MinioClient=minio_client, 
             BucketName=minio_config.default_bucket,
             TransactionFolder=transaction_folder,
-            CratePath=zip_foldername
+            CratePath=zip_foldername, 
+            Distribution = crateDistribution
             )
 
         if crate is None:
             return JSONResponse(
                 status_code=400,
                 content={"error": "ROCrate Parsing Error"}
-            )
+        )
 
     # TODO handle exception more specifically
     except Exception: 
@@ -148,7 +153,6 @@ def rocrate_upload(file: UploadFile = File(...)):
     # TODO check mongo write success
     if not prov_metadata:
         pass
-
 
     rocrate_metadata = PublishROCrateMetadata(crate, rocrate_collection)
 
@@ -211,6 +215,31 @@ def rocrate_list():
         content=rocrate
     )
 
+@router.get("/rocrate/ark:{NAAN}/{postfix}",
+            summary="Retrieve metadata about a ROCrate",
+            response_description="JSON metadata describing the ROCrate")
+def dataset_get(NAAN: str, postfix: str):
+    """
+    Retrieves a dataset based on a given identifier:
+
+    - **NAAN**: Name Assigning Authority Number which uniquely identifies an organization e.g. 12345
+    - **postfix**: a unique string
+    """
+
+    rocrate_id = f"ark:{NAAN}/{postfix}"
+
+    crate = ROCrate.model_construct(guid=rocrate_id)
+    read_status = crate.read(rocrate_collection)
+
+    if read_status.success:
+        crate_dict = crate.dict(by_alias=True)
+        crate_dict = remove_ids(crate_dict)
+        return crate_dict
+    else:
+        return JSONResponse(
+            status_code=read_status.status_code,
+            content={"error": read_status.message}
+        )
 
 #@router.get("/rocrate/extracted/download/ark:{NAAN}/{postfix:path}",
 #            summary="Download extracted form of ROCrate using StreamingResponse",

@@ -32,7 +32,8 @@ from typing import (
     Union, 
     Dict, 
     List, 
-    Generator
+    Generator,
+    Tuple
 )
 
 from fairscape_mds.mds.config import get_ark_naan
@@ -129,9 +130,9 @@ class ROCrateComputation(FairscapeBaseModel):
 
 
 class ROCrateDistribution(BaseModel):
-    extractedROCrateBucket: Optional[str] = Field(default=None)
+    extractedROCrateBucket: Optional[List[str]] = Field(default=[])
     archivedROCrateBucket: Optional[str] = Field(default=None)
-    extractedObjectPath: Optional[List[str]] = Field(default=None)
+    extractedObjectPath: Optional[List[str]] = Field(default=[])
     archivedObjectPath: Optional[str] = Field(default=None)
 
 
@@ -338,7 +339,7 @@ def UploadZippedCrate(
         BucketName, 
         TransactionFolder: uuid.UUID, 
         Filename: str,
-        ) -> str:
+        ) -> Tuple[OperationStatus, ROCrateDistribution]:
 
     #source_filepath = Path(ZippedObject.filename).name
     upload_filepath = Path(str(TransactionFolder)) / Path(Filename)
@@ -361,21 +362,28 @@ def UploadZippedCrate(
         f"object_etag='{upload_result.etag}'"
         )
 
-    return upload_result.object_name
+    dist = ROCrateDistribution(
+        archivedObjectPath=str(upload_filepath),
+        archivedROCrateBucket=BucketName
+    )
+
+    return(OperationStatus(True, "", 200), dist)
 
 
 def UploadExtractedCrate(
         MinioClient, 
         ZippedObject, 
         BucketName: str, 
-        TransactionFolder: str
+        TransactionFolder: str,
+        Distribution: ROCrateDistribution
         ) -> OperationStatus:
     """Accepts zipped ROCrate, unzip and upload onto MinIO.
 
     Args:
         MinioClient (Any): MinIO client
         Object (Any): zipped ROCrate file
-        ROCrateBucketName (str): Name of S3 Bucket to upload zip archive of ROCrate
+        ROCrateBucketName (str): Name of S3 Bucket to upload zip archive of ROCrate,
+        Distribution (ROCrateDistribution): Distribution data for use within Fairscape
 
     Returns:
         OperationStatus: Message
@@ -405,6 +413,10 @@ def UploadExtractedCrate(
                     data=io.BytesIO(file_contents), 
                     length=len(file_contents)
                     )
+                
+                # Update Distribution information with where files are being stored. 
+                Distribution.extractedROCrateBucket.append(BucketName)
+                Distribution.extractedObjectPath.append(str(upload_filepath))
 
                 rocrate_logger.info(
                     "UploadExtractedCrate\t" +
@@ -485,7 +497,7 @@ def DeleteExtractedCrate(
     return OperationStatus(True, "", 200)
 
 
-def GetMetadataFromCrate(MinioClient, BucketName, TransactionFolder, CratePath):
+def GetMetadataFromCrate(MinioClient, BucketName, TransactionFolder, CratePath, Distribution):
     """Extract metadata from the unzipped ROCrate onto MinIO
     
     Args:
@@ -493,6 +505,7 @@ def GetMetadataFromCrate(MinioClient, BucketName, TransactionFolder, CratePath):
         BucketName (str): name for bucket to search for the crate metadata
         TransactionFolder (str): UUID for this transaction 
         CratePath (str): name of expanded crate path
+        Distribution (ROCrateDistribution): Distribution information for use within Fairscape
 
     Returns:
         ro_crate_json (dict): contents of the ro-crate-metadata.json file as a dictionary
@@ -518,6 +531,8 @@ def GetMetadataFromCrate(MinioClient, BucketName, TransactionFolder, CratePath):
         # parse file contents into dictionary
         try:
             ro_crate_dict = json.loads(ro_crate_json)
+            ro_crate_dict['distribution'] = Distribution.dict(by_alias=True)
+            ro_crate_dict['additionalType'] = ROCRATE_TYPE
             return ro_crate_dict
         except Exception as json_exception:
             rocrate_logger.debug(
@@ -648,6 +663,7 @@ def PublishROCrateMetadata(
     """ Insert ROCrate metadata into mongo rocrate collection
     """
 
+    # TODO Check if @id already exsists?
     #rocrate_json = rocrate.model_dump(by_alias=True)
     insert_result = rocrate_collection.insert_one(rocrate_json)
     if insert_result.inserted_id is None:
