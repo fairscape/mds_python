@@ -17,7 +17,7 @@ from fairscape_mds.mds.utilities.utils import validate_ark
 from fairscape_mds.mds.utilities.operation_status import OperationStatus
 
 ARK_NAAN = "59852"
-IdentifierPattern = "ark[0-9]{5}:\/.*"
+IdentifierPattern = "^ark[0-9]{5}:\\/[a-zA-Z0-9_\\-]*.$"
 DEFAULT_LICENSE = " https://creativecommons.org/licenses/by/4.0/"
 
 default_context = {
@@ -366,3 +366,5 @@ class FairscapeEVIBaseModel(FairscapeBaseModel):
     description: str = Field(min_length=5)
     workLicense: Optional[str] = Field(default=DEFAULT_LICENSE, alias="license")
     keywords: List[str] = Field(default=[])
+    published: bool = Field(default=True)
+

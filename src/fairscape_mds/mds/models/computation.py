@@ -25,6 +25,194 @@ default_context = {
     "evi": "https://w3id.org/EVI#"
 }
 
+
+class Computation(FairscapeEVIBaseModel, extra = Extra.allow):
+    metadataType: Literal['evi:Computation'] = Field(alias="@type")
+    url: str
+    owner: str
+    author: str
+    dateCreated: Optional[datetime] = Field(default=None)
+    dateFinished: Optional[datetime] = Field(default=None)
+    sourceOrganization: Optional[str] = Field(default=None)
+    includedInDataCatalog: Optional[str] = Field(default=None)
+    command: Optional[Union[str,List[str]]] = Field(default=None)
+    usedSoftware: str
+    usedDataset: List[str]
+    generated: List[str]
+
+def createComputation(
+        computationInstance: Computation, 
+        identifierCollection: pymongo.collection.Collection,
+        userCollection: pymongo.collection.Collection
+        ) -> OperationStatus:
+    ''' create a Computation and Link all related entities
+    '''
+
+    # check that computation does not already exist
+    if identifierCollection.find_one({"@id": computationInstance.guid}) is not None:
+        return OperationStatus(False, "computation already exists", 400)
+
+        # check that owner exists
+    if userCollection.find_one({"@id": computationInstance.owner}) is None:
+        return OperationStatus(False, f"owner {computationInstance.owner} does not exist", 404)
+
+
+    # check that software exists
+    if identifierCollection.find_one({"@id": computationInstance.usedSoftware}) is None:
+        return OperationStatus(False, f"software {computationInstance.usedSoftware} does not exist", 404)
+
+    # check that dataset exists
+    for dataset in computationInstance.usedDataset:
+        if identifierCollection.find_one({"@id": dataset}) is None:
+            return OperationStatus(False, f"dataset {dataset} does not exist", 404)
+
+    # check that generated exists
+    for generated in computationInstance.generated:
+        if identifierCollection.find_one({"@id": generated}) is None:
+            return OperationStatus(False, f"generated dataset {dataset} does not exist", 404)
+
+    # insert computation
+    computationMetadata = computationInstance.model_dump(by_alias=True)
+    insertComputationResult = identifierCollection.insert_one(computationMetadata)
+
+    # update user
+    updateUserResult = userCollection.update_one(
+            {"@id": computationInstance.owner},
+            {"$push": {"computations": computationInstance.guid}}
+            )
+
+    if updateUserResult.modified_count != 1:
+        return OperationStatus(False, f"failed to update user list of software", 500)
+
+    # update software
+    updateSoftwareResult = identifierCollection.update_one(
+            {"@id": computationInstance.usedSoftware},
+            {"$push": {"usedBy": computationInstance.guid}}
+            )
+
+    if updateSoftwareResult.modified_count != 1:
+        return OperationStatus(False, f"failed to update software with inverse property usedBy", 500)
+
+    # update each usedDataset if in collection
+    updateDatasetResult = identifierCollection.update_many(
+            {"@id": {"$in": computationInstance.usedDataset}},
+            {"$push": {"usedBy": computationInstance.guid}}
+            )
+
+    if updateDatasetResult.modified_count != len(computationInstance.usedDataset):
+        # find which datasets were matched
+        return OperationStatus(False, f"failed to update usedDataset with inverse property usedBy", 500)
+
+
+    # update generated
+    updateGeneratedResult = identifierCollection.update_many(
+            {"@id": {"$in": computationInstance.generated}},
+            {"$push": {"generatedBy": computationInstance.guid}}
+            )
+
+    if updateGeneratedResult.modified_count != len(computationInstance.generated):
+        # find which datasets were matched
+        return OperationStatus(False, f"failed to update generated Datasets with inverse property generatedBy", 500)
+
+
+    return OperationStatus(True, "", 201)
+
+
+def listComputation(identifierCollection: pymongo.collection.Collection):
+    ''' List all computations
+    '''
+
+    cursor = identifierCollection.find(
+        {"@type": "evi:Computation"},
+        projection={"_id": False}
+    )
+    computationList = [ 
+        {
+            "@id": computation.get("@id"), 
+            "@type": "evi:Computation", 
+            "name": computation.get("name")
+        } for computation in cursor
+    ]
+
+    return { "computations": computationList}
+
+
+def deleteComputation(
+        computationGUID: str,
+        identifierCollection: pymongo.collection.Collection,
+        userCollection: pymongo.collection.Collection 
+    ) -> tuple[Computation, OperationStatus]:
+    ''' Delete a computation and any triples from other relations
+    '''
+
+    # check that computation exists
+    computationMetadata = identifierCollection.find_one(
+            {"@id": computationGUID}, 
+            projection={"_id": False}
+            )
+
+    if computationMetadata is None:
+        return None, OperationStatus(False, "computation not found", 404)
+
+    computationInstance = Computation.model_validate(computationMetadata)
+    
+    # update user
+    updateUserResult = userCollection.update_one(
+            {"@id": computationInstance.owner},
+            {"$pull": {"computation": computationInstance.guid}}
+            )
+
+    # clear usedBy for software and dataset
+    updateUsedByResult = identifierCollection.update_many(
+            {"usedBy": {"$in": [computationInstance.guid] }},
+            {"$pull": {"usedBy": computationInstance.guid}}
+            )
+
+
+    # update generated
+    updateGeneratedResult = identifierCollection.update_many(
+            {"@id": {"$in": [computationInstance.generated]}},
+            {"$pull": {"generatedBy": computationInstance.guid}}
+            )
+    
+
+    # 'delete the computation document'
+    identifierCollection.update_one(
+            {"@id": computationGUID, "@type": "evi:Computation"} ,
+            {"active": False}
+            )
+
+
+    return computationInstance, OperationStatus(True, "", 201)
+
+
+def updateComputation(
+        computationGUID: str,
+        computationUpdate: dict,
+        identifierCollection: pymongo.collection.Collection
+    ) -> OperationStatus:
+    pass
+
+
+def getComputation(
+        computationGUID: str,
+        identifierCollection: pymongo.collection.Collection
+        )-> tuple[Computation, OperationStatus]:
+
+    computationMetadata = identifierCollection.find_one(
+            {
+                "@id": computationGUID, 
+                "@type": "evi:Computation"
+            }, projection={"_id": False}
+            )
+
+    if computationMetadata is None:
+        return None, OperationStatus(False, "computation not found", 404)
+
+    computationInstance = Computation.model_validate(computationMetadata)
+    return computationInstance, OperationStatus(True, "", 200)
+
+
 class ResourceTuple(BaseModel):
     requests: str
     limits: str
@@ -34,22 +222,18 @@ class JobRequirements(BaseModel):
     cpu: ResourceTuple
     mem: ResourceTuple
 
-
-class Computation(FairscapeEVIBaseModel, extra = Extra.allow):
+class ComputationModel(FairscapeEVIBaseModel, extra = Extra.allow):
     metadataType: Literal['evi:Computation'] = Field(alias="@type")
-    owner: constr(pattern=IdentifierPattern) 
+    url: str
+    owner: str
     author: str
-    dateCreated: Optional[datetime]
-    dateFinished: Optional[datetime]
-    # TODO check 
-    sourceOrganization: constr(pattern=IdentifierPattern)
-    sourceProject: constr(pattern=IdentifierPattern)
-    container: str
-    command: Optional[Union[str,List[str]]]
+    dateCreated: Optional[datetime] = Field(default=None)
+    dateFinished: Optional[datetime] = Field(default=None)
+    sourceOrganization: Optional[str] = Field(default=None)
+    includedInDataCatalog: Optional[str] = Field(default=None)
+    command: Optional[Union[str,List[str]]] = Field(default=None)
     usedSoftware: str
-    usedDataset: str 
-    containerId: Optional[str]
-    #requirements: Optional[JobRequirements]
+    usedDataset: List[str]
     generated: List[str]
 
 
@@ -305,16 +489,6 @@ class Computation(FairscapeEVIBaseModel, extra = Extra.allow):
             return OperationStatus(False, f"error starting container: {str(e)}", 500)
 
 
-
-def list_computation(mongo_collection: pymongo.collection.Collection):
-
-    cursor = mongo_collection.find(
-        filter={"@type": "evi:Computation"},
-        projection={"_id": False}
-    )
-    return {
-        "computations": [{"@id": computation.get("@id"), "@type": "evi:Computation", "name": computation.get("name")}
-                         for computation in cursor]}
 
 
 def RegisterComputation(computation: Computation):

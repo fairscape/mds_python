@@ -18,10 +18,9 @@ class Software(FairscapeEVIBaseModel, extra = Extra.allow):
     # author: str
     # citation: str
     distribution: List[str] = Field(default=[])
-    usedBy: List[constr(pattern=IdentifierPattern)] = Field(default=[])
-    sourceOrganization: constr(pattern=IdentifierPattern) = Field(default=None)
-    includedInDataCatalog: constr(pattern=IdentifierPattern) = Field(default=None)
-
+    usedBy: List[str] = Field(default=[])
+    sourceOrganization: Optional[str] = Field(default=None)
+    includedInDataCatalog: Optional[str] = Field(default=None)
 
 
     def create(self, MongoCollection: pymongo.collection.Collection) -> OperationStatus:
@@ -143,6 +142,18 @@ def listSoftware(identifierCollection: pymongo.collection.Collection):
             ]
         }
 
+def getSoftware(
+        softwareGUID: str, 
+        identifierCollection: pymongo.collection.Collection
+        ) -> tuple[Software, OperationStatus] :
+    
+    softwareMetadata = identifierCollection.find_one({"@id": softwareGUID}, projection={"_id": False})
+    if softwareMetadata is None:
+        return None, OperationStatus(False, "software not found", 404)
+    
+    softwareInstance = Software.model_validate(softwareMetadata)
+    return softwareInstance, OperationStatus(True, "", 200)
+
 
 def createSoftware(
         softwareInstance: Software, 
@@ -164,7 +175,6 @@ def createSoftware(
     softwareDict = softwareInstance.model_dump(by_alias=True)
 
     # update operations for the owner user of the software
-
     insertResult = identifierCollection.insert_one(softwareDict)
 
     if insertResult.inserted_id is None:
@@ -220,11 +230,65 @@ def deleteSoftware(
     if updateUserResult.modified_count != 1:
         return OperationStatus(False, "user not updated", 500)
 
-    # TODO update organization
+    # update organization
+    orgFilter = {
+            "@type": "Organization", 
+            "software": { 
+                "$elemMatch": {"$eq": softwareGUID}
+                }
+            }
 
-    # TODO update project
+    orgUpdate = {
+            "$pull": {
+                "software": softwareGUID
+                }
+            }
 
-    # TODO update computations using Software
+    orgUpdateResult = identifierCollection.update_many(
+            orgFilter,
+            orgUpdate
+            )
+
+    # TODO check update success
+
+    # update project
+    projectFilter = {
+            "@type": "Project", 
+            "software": { 
+                "$elemMatch": {"$eq": softwareGUID}
+                }
+            }
+
+    projectUpdate = {
+            "$pull": {
+                "software": softwareGUID
+                }
+            }
+
+    projectUpdateResult = identifierCollection.update_many(
+            projectFilter,
+            projectUpdate
+            )
+    # TODO check update success
+
+    # update computations using Software
+    computationFilter = {
+            "@type": "evi:Computation", 
+            "usedSoftware": { 
+                "$elemMatch": {"$eq": softwareGUID}
+                }
+            }
+
+    computationUpdate = {
+            "$pull": {
+                "usedSoftware": softwareGUID
+                }
+            }
+
+    computationUpdateResult = identifierCollection.update_many(
+            computationFilter,
+            computationUpdate
+            )
 
     # TODO update RO-crates using Software
 
