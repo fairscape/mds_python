@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Fairscape User Metadata</title>
+    <title>Fairscape Dataset Metadata</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
     <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs"></script>
     <style>
@@ -59,7 +59,7 @@
     <div id="main-content" class="container">
         <div class="row">
             <div class="col-lg-auto">
-                <h3>User Metadata: ark:99999/fake-user</h3>
+                <h3>Dataset Metadata: ark:99999/fake-dataset</h3>
             </div>
         </div>
 
@@ -93,126 +93,53 @@
                     <tbody>
                         <tr>
                             <td>Name</td>
-                            <td>fake user</td>
+                            <td>Fake Input Dataset Example</td>
                         </tr>
                         <tr>
                             <td>Persistant Identifier</td>
                             <td>
-                                <a href="https://fairscape.pods.uvarc.io/ark:99999/fake-user">ark:99999/fake-user</a>
+                                <a href="https://fairscape.pods.uvarc.io/ark:99999/fake-dataset">ark:99999/fake-dataset</a>
                             </td>
                         </tr>
                         <tr>
-                            <td>Email</td>
-                            <td>user@example.com</td>
+                            <td>Description</td>
+                            <td>Fake Input Dataset to show template working.</td>
                         </tr>
                         <tr>
-                            <td>Organizations</td>
+                            <td>Owner</td>
+                            <td>John Doe</td>
+                        </tr>
+                        <tr>
+                            <td>Author</td>
+                            <td>Roy Kniestroy</td>
+                        </tr>
+                        <tr>
+                            <td>Source Organization</td>
                             <td>
-                                <!-- Dropdown element -->
-                                <div class="accordion" id="accordionOrganizations">
-                                    <div class="accordion-item">
-                                        <h2 class="accordion-header">
-                                            <button class="accordion-button" type="button" data-bs-toggle="collapse"
-                                                data-bs-target="#collapseOrganizations" aria-expanded="false"
-                                                aria-controls="collapseOrganizations">
-                                                Organizations
-                                            </button>
-                                        </h2>
-                                        <div id="collapseOrganizations" class="accordion-collapse collapse"
-                                            data-bs-parent="#accordionOrganizations">
-                                            <div class="accordion-body">
-                                                <ul>
-                                                    
-                                                    <li>Org1</li>
-                                                    
-                                                    <li>Org2</li>
-                                                    
-                                                </ul>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                                <a href="https://fairscape.pods.uvarc.io/ark:99999/fake-org">ark:99999/fake-org</a>
                             </td>
                         </tr>
                         <tr>
-                            <td>Projects</td>
+                            <td>usedBy</td>
                             <td>
                                 <!-- Dropdown element -->
-                                <div class="accordion" id="accordionProjects">
+                                <div class="accordion" id="accordionusedBy">
                                     <div class="accordion-item">
                                         <h2 class="accordion-header">
                                             <button class="accordion-button" type="button" data-bs-toggle="collapse"
-                                                data-bs-target="#collapseProjects" aria-expanded="false"
-                                                aria-controls="collapseProjects">
-                                                Projects
+                                                data-bs-target="#collapseusedBy" aria-expanded="false"
+                                                aria-controls="collapseusedBy">
+                                                usedBy
                                             </button>
                                         </h2>
-                                        <div id="collapseProjects" class="accordion-collapse collapse"
-                                            data-bs-parent="#accordionProjects">
-                                            <div class="accordion-body">
-                                                <ul>
-                                                    
-                                                    <li>Project1</li>
-                                                    
-                                                    <li>Project2</li>
-                                                    
-                                                </ul>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Datasets</td>
-                            <td>
-                                <!-- Dropdown element -->
-                                <div class="accordion" id="accordionDatasets">
-                                    <div class="accordion-item">
-                                        <h2 class="accordion-header">
-                                            <button class="accordion-button" type="button" data-bs-toggle="collapse"
-                                                data-bs-target="#collapseDatasets" aria-expanded="false"
-                                                aria-controls="collapseDatasets">
-                                                Datasets
-                                            </button>
-                                        </h2>
-                                        <div id="collapseDatasets" class="accordion-collapse collapse"
-                                            data-bs-parent="#accordionDatasets">
-                                            <div class="accordion-body">
-                                                <ul>
-                                                    
-                                                    <li><a href="https://fairscape.pods.uvarc.io/ark:99999/fake-dataset">ark:99999/fake-dataset</a></li>
-                                                    
-                                                    <li>Dataset2</li>
-                                                    
-                                                </ul>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Software</td>
-                            <td>
-                                <!-- Dropdown element -->
-                                <div class="accordion" id="accordionSoftware">
-                                    <div class="accordion-item">
-                                        <h2 class="accordion-header">
-                                            <button class="accordion-button" type="button" data-bs-toggle="collapse"
-                                                data-bs-target="#collapseSoftware" aria-expanded="false"
-                                                aria-controls="collapseSoftware">
-                                                Software
-                                            </button>
-                                        </h2>
-                                        <div id="collapseSoftware" class="accordion-collapse collapse"
-                                            data-bs-parent="#accordionSoftware">
+                                        <div id="collapseusedBy" class="accordion-collapse collapse"
+                                            data-bs-parent="#accordionusedBy">
                                             <div class="accordion-body">
                                                 <ul>
                                                     
                                                     <li><a href="https://fairscape.pods.uvarc.io/ark:99999/fake-software">ark:99999/fake-software</a></li>
                                                     
-                                                    <li>Software2</li>
+                                                    <li><a href="https://fairscape.pods.uvarc.io/ark:99999/fake-computation">ark:99999/fake-computation</a></li>
                                                     
                                                 </ul>
                                             </div>
@@ -222,26 +149,26 @@
                             </td>
                         </tr>
                         <tr>
-                            <td>ROCrate</td>
+                            <td>Distributions</td>
                             <td>
                                 <!-- Dropdown element -->
-                                <div class="accordion" id="accordionROCrate">
+                                <div class="accordion" id="accordionDistributions">
                                     <div class="accordion-item">
                                         <h2 class="accordion-header">
                                             <button class="accordion-button" type="button" data-bs-toggle="collapse"
-                                                data-bs-target="#collapseROCrate" aria-expanded="false"
-                                                aria-controls="collapseROCrate">
-                                                ROCrate
+                                                data-bs-target="#collapseDistributions" aria-expanded="false"
+                                                aria-controls="collapseDistributions">
+                                                Distributions
                                             </button>
                                         </h2>
-                                        <div id="collapseROCrate" class="accordion-collapse collapse"
-                                            data-bs-parent="#accordionROCrate">
+                                        <div id="collapseDistributions" class="accordion-collapse collapse"
+                                            data-bs-parent="#accordionDistributions">
                                             <div class="accordion-body">
                                                 <ul>
                                                     
-                                                    <li>ROCrate1</li>
+                                                    <li><a href="https://example.com/data/download">https://example.com/data/download</a></li>
                                                     
-                                                    <li>ROCrate2</li>
+                                                    <li><a href="https://example.com/data/mirror">https://example.com/data/mirror</a></li>
                                                     
                                                 </ul>
                                             </div>
@@ -250,34 +177,10 @@
                                 </div>
                             </td>
                         </tr>
-                        <tr>
-                            <td>Computations</td>
-                            <td>
-                                <!-- Dropdown element -->
-                                <div class="accordion" id="accordionComputations">
-                                    <div class="accordion-item">
-                                        <h2 class="accordion-header">
-                                            <button class="accordion-button" type="button" data-bs-toggle="collapse"
-                                                data-bs-target="#collapseComputations" aria-expanded="false"
-                                                aria-controls="collapseComputations">
-                                                Computations
-                                            </button>
-                                        </h2>
-                                        <div id="collapseComputations" class="accordion-collapse collapse"
-                                            data-bs-parent="#accordionComputations">
-                                            <div class="accordion-body">
-                                                <ul>
-                                                    
-                                                    <li>Computation1</li>
-                                                    
-                                                    <li>Computation2</li>
-                                                    
-                                                </ul>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </td>
+                        <td>includedInDataCatalog</td>
+                        <td>
+                            <a href="https://fairscape.pods.uvarc.io/ark:99999/fake-catalog">ark:99999/fake-catalog</a>
+                        </td>
                         </tr>
                     </tbody>
                 </table>
@@ -287,41 +190,31 @@
         <!-- Raw JSON-LD of the user -->
         <div class="row" id="json-ld-container">
             <pre>{
-  "@id": "ark:99999/fake-user",
-  "@type": "Person",
-  "name": "fake user",
+  "@id": "ark:99999/fake-dataset",
+  "@type": "EVI:Dataset",
+  "name": "Fake Input Dataset Example",
   "@context": {
     "@vocab": "https://schema.org/",
     "evi": "https://w3id.org/EVI#"
   },
   "url": null,
-  "email": "user@example.com",
-  "password": "password123",
-  "organizations": [
-    "Org1",
-    "Org2"
+  "description": "Fake Input Dataset to show template working.",
+  "license": " https://creativecommons.org/licenses/by/4.0/",
+  "keywords": [],
+  "owner": "John Doe",
+  "distribution": [
+    "https://example.com/data/download",
+    "https://example.com/data/mirror"
   ],
-  "projects": [
-    "Project1",
-    "Project2"
-  ],
-  "datasets": [
-    "ark:99999/fake-dataset",
-    "Dataset2"
-  ],
-  "rocrates": [
-    "ROCrate1",
-    "ROCrate2"
-  ],
-  "software": [
+  "includedInDataCatalog": "ark:99999/fake-catalog",
+  "sourceOrganization": "ark:99999/fake-org",
+  "author": "Roy Kniestroy",
+  "dateCreated": "2024-04-10 13:09:13.707722",
+  "dateModified": "2024-04-10 13:09:13.707725",
+  "usedBy": [
     "ark:99999/fake-software",
-    "Software2"
-  ],
-  "computations": [
-    "Computation1",
-    "Computation2"
-  ],
-  "evidencegraphs": []
+    "ark:99999/fake-computation"
+  ]
 }</pre>
         </div>
 
