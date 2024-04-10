@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="en">
+
+{% include './development notebooks/vizualization/head_template.html' %}
+
+<body>
+    <div id="main-content" class="container">
+        <div class="row">
+            <div class="col-lg-auto">
+                <h3>User Metadata: {{ user.guid }}</h3>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Button Group for Selecting Content -->
+            <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
+                <input type="radio" onclick="showMetadata();" class="btn-check" name="btnradio" id="btn-metadata"
+                    autocomplete="off" checked>
+                <label class="btn btn-outline-primary" for="btn-metadata">Metadata</label>
+
+                <input type="radio" onclick="showJSON();" class="btn-check" name="btnradio" id="btn-json"
+                    autocomplete="off">
+                <label class="btn btn-outline-primary" for="btn-json">JSON-LD</label>
+
+                <input type="radio" onclick="showMermaid()" class="btn-check" name="btnradio" id="btn-mermaid"
+                    autocomplete="off">
+                <label class="btn btn-outline-primary" for="btn-mermaid">Evidence Graph</label>
+            </div>
+        </div>
+
+        <!-- Table of all properties -->
+        <div class="row" id="metadata-container">
+            <div class="container">
+                <table class="table table-hover table-striped">
+                    <thead>
+                        <tr>
+                            <th scope="col">Property</th>
+                            <th scope="col">Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Name</td>
+                            <td>{{ user.name }}</td>
+                        </tr>
+                        <tr>
+                            <td>Persistant Identifier</td>
+                            <td>
+                                <a href="https://fairscape.pods.uvarc.io/{{ user.guid }}">
+                                    {{ user.guid }}
+                                </a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Email</td>
+                            <td>{{ user.email }}</td>
+                        </tr>
+                        <tr>
+                            <td>Organizations</td>
+                            <td>
+                                <!-- Dropdown element -->
+                                <div class="accordion" id="accordionOrganizations">
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                                data-bs-target="#collapseOrganizations" aria-expanded="false"
+                                                aria-controls="collapseOrganizations">
+                                                Organizations
+                                            </button>
+                                        </h2>
+                                        <div id="collapseOrganizations" class="accordion-collapse collapse"
+                                            data-bs-parent="#accordionOrganizations">
+                                            <div class="accordion-body">
+                                                <ul>
+                                                    {% for organization in user.organizations %}
+                                                    <li>{{ organization }}</li>
+                                                    {% else %}
+                                                    <li>No organizations available</li>
+                                                    {% endfor %}
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Projects</td>
+                            <td>
+                                <!-- Dropdown element -->
+                                <div class="accordion" id="accordionProjects">
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                                data-bs-target="#collapseProjects" aria-expanded="false"
+                                                aria-controls="collapseProjects">
+                                                Projects
+                                            </button>
+                                        </h2>
+                                        <div id="collapseProjects" class="accordion-collapse collapse"
+                                            data-bs-parent="#accordionProjects">
+                                            <div class="accordion-body">
+                                                <ul>
+                                                    {% for project in user.projects %}
+                                                    <li>{{ project }}</li>
+                                                    {% else %}
+                                                    <li>No projects available</li>
+                                                    {% endfor %}
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Datasets</td>
+                            <td>
+                                <!-- Dropdown element -->
+                                <div class="accordion" id="accordionDatasets">
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                                data-bs-target="#collapseDatasets" aria-expanded="false"
+                                                aria-controls="collapseDatasets">
+                                                Datasets
+                                            </button>
+                                        </h2>
+                                        <div id="collapseDatasets" class="accordion-collapse collapse"
+                                            data-bs-parent="#accordionDatasets">
+                                            <div class="accordion-body">
+                                                <ul>
+                                                    {% for dataset in user.datasets %}
+                                                    <li>{{ dataset }}</li>
+                                                    {% else %}
+                                                    <li>No datasets available</li>
+                                                    {% endfor %}
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Software</td>
+                            <td>
+                                <!-- Dropdown element -->
+                                <div class="accordion" id="accordionSoftware">
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                                data-bs-target="#collapseSoftware" aria-expanded="false"
+                                                aria-controls="collapseSoftware">
+                                                Software
+                                            </button>
+                                        </h2>
+                                        <div id="collapseSoftware" class="accordion-collapse collapse"
+                                            data-bs-parent="#accordionSoftware">
+                                            <div class="accordion-body">
+                                                <ul>
+                                                    {% for software in user.software %}
+                                                    <li>{{ software }}</li>
+                                                    {% else %}
+                                                    <li>No software available</li>
+                                                    {% endfor %}
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>ROCrate</td>
+                            <td>
+                                <!-- Dropdown element -->
+                                <div class="accordion" id="accordionROCrate">
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                                data-bs-target="#collapseROCrate" aria-expanded="false"
+                                                aria-controls="collapseROCrate">
+                                                ROCrate
+                                            </button>
+                                        </h2>
+                                        <div id="collapseROCrate" class="accordion-collapse collapse"
+                                            data-bs-parent="#accordionROCrate">
+                                            <div class="accordion-body">
+                                                <ul>
+                                                    {% for rocrate in user.rocrates %}
+                                                    <li>{{ rocrate }}</li>
+                                                    {% else %}
+                                                    <li>No ROCrates available</li>
+                                                    {% endfor %}
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Computations</td>
+                            <td>
+                                <!-- Dropdown element -->
+                                <div class="accordion" id="accordionComputations">
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                                data-bs-target="#collapseComputations" aria-expanded="false"
+                                                aria-controls="collapseComputations">
+                                                Computations
+                                            </button>
+                                        </h2>
+                                        <div id="collapseComputations" class="accordion-collapse collapse"
+                                            data-bs-parent="#accordionComputations">
+                                            <div class="accordion-body">
+                                                <ul>
+                                                    {% for computation in user.computations %}
+                                                    <li>{{ computation }}</li>
+                                                    {% else %}
+                                                    <li>No computations available</li>
+                                                    {% endfor %}
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Raw JSON-LD of the user -->
+        <div class="row" id="json-ld-container">
+            <pre>{{ json.dumps(user.dict(by_alias = True), indent=2) }}</pre>
+        </div>
+
+        <!-- Mermaid graph -->
+        <div class="row" id="mermaid-container">
+            <!--
+            %%{
+              init: {
+                'theme': 'base',
+                'themeVariables': {
+                  'fontFamily': 'verdana',
+                  'fontSize': '20px',
+                  'primaryColor': '#4dbdc9'
+                }
+              }
+            }%%
+            -->
+            <pre class="mermaid" id="mermaid-text">
+            %%{
+              init: {
+                'theme': 'neutral',
+                'themeVariables': {
+                  'fontFamily': 'verdana',
+                  'fontSize': '20px',
+                  'primaryColor': '#4dbdc9'
+                }
+              }
+            }%%
+            flowchart LR
+            subgraph ark:59852/3.cm4ai_chromatin_mda-mb-468_untreated_coembedfold1_initialrun0.1alpha
+              id0([coembedding_emd.tsv
+                    coembedding output file])
+              id1[cellmaps_coembedding]
+              id2[\Merged Embedding/]
+            end
+    
+            subgraph ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha
+              id3([Simulated Samples file])
+              id4([Simulated unique file])
+              id5([
+                    cellmaps_imagedownloader 
+                    output file])
+              id6([cellmaps_imagedownloader
+                    output file])
+              id7([B2AI_1_untreated_G1_R2_red.jpg
+                    red channel image])
+              id8[cellmaps_imagedownloader]
+              id9[\IF Image Loader/]
+              id10([etc.])
+            end
+    
+            subgraph ark:59852/2.cm4ai_chromatin_mda-mb-468_untreated_imageembedfold1_initialrun0.1alpha
+              id11([cellmaps_image_embedding
+                output file])
+              id12([Densenet model file])
+              id13[cellmaps_image_embedding]
+              id14[\IF Image Embedding/]
+            end
+            idNone([APMS Embedding])
+            id1 -->|usedSoftware| id2
+            id2 -->|usedDataset| id11
+            id2 -->|usedDataset| id12
+            id2 -->|usedDataset| idNone
+            id0 -->|generatedBy| id2
+            id8 -->|usedSoftware| id9
+            id9 -->|usedDataset| id4
+            id9 -->|usedDataset| id3
+            id10 -->|generatedBy| id9
+            id5 -->|generatedBy| id9
+            id6 -->|generatedBy| id9
+            id7 -->|generatedBy| id9
+            id13 -->|usedSoftware| id14
+            id14 -->|usedDataset| id10
+            id14 -->|usedDataset| id5
+            id14 -->|usedDataset| id6
+            id14 -->|usedDataset| id7
+            id11 -->|generatedBy| id14
+            id12 -->|generatedBy| id14
+            </pre>
+
+            <script type="module">
+                // Example of using the render function
+                import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+                mermaid.initialize({
+                    startOnLoad: true,
+
+                });
+            </script>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function showMetadata() {
+            document.getElementById("metadata-container").style.display = "block";
+            document.getElementById("json-ld-container").style.display = "none";
+            document.getElementById("mermaid-container").style.display = "none";
+        }
+
+        function showJSON() {
+            document.getElementById("metadata-container").style.display = "none";
+            document.getElementById("json-ld-container").style.display = "block";
+            document.getElementById("mermaid-container").style.display = "none";
+        }
+
+        function showMermaid() {
+            document.getElementById("metadata-container").style.display = "none";
+            document.getElementById("json-ld-container").style.display = "none";
+            document.getElementById("mermaid-container").style.display = "block";
+        }
+
+        mermaid.initialize({ startOnLoad: true });
+    </script>
+</body>
+
+</html>
