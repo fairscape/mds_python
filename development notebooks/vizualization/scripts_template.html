@@ -18,6 +18,45 @@
         document.getElementById("mermaid-container").style.display = "block";
     }
 
+    function showSerialization(elementId) {
+        var formats = ['json-text', 'rdf-xml-text', 'turtle-text'];
+        var copyBtn = document.getElementById('copy-btn');
+        formats.forEach(function (format) {
+            document.getElementById(format).style.display = 'none';
+        });
+        document.getElementById(elementId).style.display = 'block';
+
+        // Update the copy button based on the selected serialization
+        if (elementId === 'json-text') {
+            copyBtn.onclick = function () { copyContent('json-text'); };
+            copyBtn.title = 'Copy JSON-LD';
+            copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copy JSON-LD';
+        } else if (elementId === 'rdf-xml-text') {
+            copyBtn.onclick = function () { copyContent('rdf-xml-text'); };
+            copyBtn.title = 'Copy RDF/XML';
+            copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copy RDF/XML';
+        } else if (elementId === 'turtle-text') {
+            copyBtn.onclick = function () { copyContent('turtle-text'); };
+            copyBtn.title = 'Copy Turtle';
+            copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copy Turtle';
+        }
+    }
+
+    // Call showSerialization with the default format on page load
+    showSerialization('json-text');
+
+
+    function copyContent(elementId) {
+        var content = document.getElementById(elementId);
+        navigator.clipboard.writeText(content.textContent).then(function () {
+            alert("Content copied to clipboard.");
+        }, function () {
+            alert("Failed to copy content to clipboard.");
+        });
+    }
+
+
+
     mermaid.initialize({ startOnLoad: true });
 
     function copyJSON() {
