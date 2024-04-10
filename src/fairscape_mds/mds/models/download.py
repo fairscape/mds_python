@@ -1,6 +1,12 @@
-from typing import Optional, Union, Literal
+from typing import (
+    Optional, 
+    Union, 
+    Literal,
+    List
+)
 from datetime import datetime
 from pydantic import (
+    BaseModel,
     Extra,
     Field,
     constr
@@ -36,6 +42,7 @@ class Download(FairscapeBaseModel, extra=Extra.allow):
     version: Optional[str] = Field(default="0.1.0")
     sourceOrganization: Optional[constr(pattern=IdentifierPattern)] = Field(default=None)
     includedInDataCatalog: Optional[constr(pattern=IdentifierPattern)] = Field(default=None)
+    published: bool
 
 
     def create_metadata(self, MongoClient: pymongo.MongoClient, mongo_config) -> OperationStatus: 
@@ -334,6 +341,45 @@ class Download(FairscapeBaseModel, extra=Extra.allow):
         pass
 
 
+class DownloadCreateModel(BaseModel, extra=Extra.allow):
+    guid: str = Field(
+        title="guid",
+        alias="@id"
+    )
+    name: str
+    description: str
+    keywords: List[str]
+    url: Optional[str] = Field(default=None)
+    author: Optional[str] = Field(default=None)
+    citation: Optional[str] = Field(default=None)
+    owner: str
+    includedInDataCatalog: Optional[str] = Field(default=None)
+    sourceOrganization: Optional[str] = Field(default=None)
+    dateCreated: Optional[datetime] = Field(default_factory=datetime.now)
+    encodingFormat: str
+    contentSize: Optional[str]
+    encodesCreativeWork: str = Field(...)
+    sha256: Optional[str]
+    version: Optional[str] = Field(default="0.1.0")
+    uploadDate: Optional[datetime] = Field(default_factory=datetime.now)
+
+    def convert(self)-> Download:
+
+        return Download(
+                guid=self.guid,
+                name=self.name,
+                description=self.description,
+                keywords=self.keywords,
+                url= self.url,
+                author=self.author,
+                owner=self.owner,
+                distribution=[],
+                includedInDataCatalog=self.includedInDataCatalog,
+                sourceOrganization=self.sourceOrganization,
+                dateCreated=self.dateCreated,
+                usedBy=self.usedBy,
+                published=True
+                )
 
 def list_download(MongoCollection):
     """

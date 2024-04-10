@@ -52,7 +52,7 @@ def createComputation(
     if identifierCollection.find_one({"@id": computationInstance.guid}) is not None:
         return OperationStatus(False, "computation already exists", 400)
 
-        # check that owner exists
+    # check that owner exists
     if userCollection.find_one({"@id": computationInstance.owner}) is None:
         return OperationStatus(False, f"owner {computationInstance.owner} does not exist", 404)
 
@@ -107,7 +107,7 @@ def createComputation(
     # update generated
     updateGeneratedResult = identifierCollection.update_many(
             {"@id": {"$in": computationInstance.generated}},
-            {"$push": {"generatedBy": computationInstance.guid}}
+            {"$set": {"generatedBy": computationInstance.guid}}
             )
 
     if updateGeneratedResult.modified_count != len(computationInstance.generated):
@@ -159,7 +159,7 @@ def deleteComputation(
     # update user
     updateUserResult = userCollection.update_one(
             {"@id": computationInstance.owner},
-            {"$pull": {"computation": computationInstance.guid}}
+            {"$pull": {"computations": computationInstance.guid}}
             )
 
     # clear usedBy for software and dataset
@@ -169,17 +169,17 @@ def deleteComputation(
             )
 
 
-    # update generated
+    # update generatedBy to no longer have evidence graph edges
     updateGeneratedResult = identifierCollection.update_many(
-            {"@id": {"$in": [computationInstance.generated]}},
-            {"$pull": {"generatedBy": computationInstance.guid}}
+            {"generatedBy": computationInstance.guid},
+            {"$set": {"generatedBy": None}}
             )
     
 
     # 'delete the computation document'
     identifierCollection.update_one(
-            {"@id": computationGUID, "@type": "evi:Computation"} ,
-            {"active": False}
+            {"@id": computationGUID, "@type": "evi:Computation"},
+            {"$set": {"published": False}}
             )
 
 
