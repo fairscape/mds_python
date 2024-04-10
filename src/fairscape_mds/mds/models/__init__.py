@@ -1,6 +1,11 @@
 from fairscape_mds.mds.models.user import User, listUsers
 from fairscape_mds.mds.models.group import Group, list_groups
-from fairscape_mds.mds.models.dataset import Dataset, listDatasets
+from fairscape_mds.mds.models.dataset import (
+        Dataset, 
+        listDatasets, 
+        deleteDataset, 
+        createDataset
+)
 from fairscape_mds.mds.models.software import Software, listSoftware, createSoftware, deleteSoftware
 from fairscape_mds.mds.models.computation import (
         Computation, 
@@ -18,7 +23,7 @@ from fairscape_mds.mds.models.evidencegraph import EvidenceGraph, list_evidenceg
 __all__ = [ 
     'User', 'listUsers', 
     'Group', 'list_groups',
-    'Dataset', 'listDatasets', 
+    'Dataset', 'listDatasets', 'deleteDataset', 'createDataset',
     'Software', 'listSoftware', 'createSoftware', 'deleteSoftware',
     'Computation', 'listComputation', 'getComputation', 'deleteComputation', 'getComputation', 'updateComputation',
     'Organization', 

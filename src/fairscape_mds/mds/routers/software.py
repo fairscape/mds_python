@@ -1,7 +1,13 @@
 from fastapi import APIRouter, Response
 from fastapi.responses import JSONResponse
 
-from fairscape_mds.mds.models.software import Software, listSoftware, createSoftware, deleteSoftware
+from fairscape_mds.mds.models.software import (
+        Software, 
+        listSoftware, 
+        createSoftware, 
+        deleteSoftware,
+        getSoftware
+        )
 from fairscape_mds.mds.config import (
         get_mongo_config,
         get_mongo_client,
@@ -63,17 +69,17 @@ def software_get(NAAN: str, postfix: str, response: Response):
     - **postfix**: a unique string
     """
 
-    software_id = f"ark:{NAAN}/{postfix}"
+    softwareGUID = f"ark:{NAAN}/{postfix}"
 
-    software = Software.construct(guid=software_id)
-
-    read_status = software.read(identifierCollection)
+    software, read_status = getSoftware(softwareGUID, identifierCollection)
 
     if read_status.success:
         return software
     else:
-        return JSONResponse(status_code=read_status.status_code,
-                            content={"error": read_status.message})
+        return JSONResponse(
+                status_code=read_status.status_code,
+                content={"error": read_status.message}
+                )
 
 
 @router.put("/software",
@@ -85,7 +91,7 @@ def software_update(software: Software, response: Response):
     if update_status.success:
         return JSONResponse(
             status_code=200,
-            content={"updated": {"@id": software.id, "@type": "evi:Software"}}
+            content={"updated": {"@id": software.guid, "@type": "evi:Software"}}
         )
     else:
         return JSONResponse(
@@ -115,7 +121,7 @@ def software_delete(NAAN: str, postfix: str):
     if deleteStatus.success:
         return JSONResponse(
             status_code=200,
-            content={"deleted": {"@id": software_id, "@type": "evi:Software", "name": software.name}}
+            content={"deleted": {"@id": softwareGUID, "@type": "evi:Software"}}
         )
     else:
         return JSONResponse(

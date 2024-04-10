@@ -12,36 +12,17 @@ from fairscape_mds.mds.models.utils import (
     delete_distribution_metadata
 )
 from fairscape_mds.mds.utilities.operation_status import OperationStatus
+ 
 
-
-class CreateDatasetModel(BaseModel):
-    name: str
-    url: Optional[str] = Field(default=None)
-    owner: str = Field(...)
-    author: Optional[str] = Field(default=None)
-    keywords: List[str]
-    description: str
-    includedInDataCatalog: Optional[str] = Field(default=None)
-    sourceOrganization: Optional[str] = Field(default=None)
-    dateCreated: Optional[datetime] = Field(default_factory=datetime.now)
-    dateModified: Optional[datetime] = Field(default_factory=datetime.now)
-    usedBy: Optional[List[str]] = Field(alias="evi:usedBy", default=[])
-
-
-    def create(
-        self, 
-        IdentifierCollection: pymongo.collection.Collection, 
-        UserCollection: pymongo.collection.Collection
-    ) -> OperationStatus:
-
-        # turn into Dataset Read model
-
-        pass
-    
 
 class Dataset(FairscapeEVIBaseModel, extra=Extra.allow):
     owner: str = Field(...)
-    distribution: Optional[List[str]] = Field(defualt=[])
+    metadataType: str = Field(
+        title="metadataType",
+        alias="@type",
+        default="evi:Dataset"
+    )
+    distribution: Optional[List[str]] = Field(default=[])
     includedInDataCatalog: Optional[str] = Field(default=None)
     sourceOrganization: Optional[str] = Field(default=None)
     author: Optional[str] = Field(default=None)
@@ -59,6 +40,41 @@ class Dataset(FairscapeEVIBaseModel, extra=Extra.allow):
         # TODO e.g. when dataset is updated, it should be reflected in its owners profile
         return super().update(MongoCollection)
 
+
+class DatasetCreateModel(BaseModel, extra=Extra.allow):
+    guid: str = Field(
+        title="guid",
+        alias="@id"
+    )
+    name: str
+    description: str
+    keywords: List[str]
+    owner: str = Field(...)
+    includedInDataCatalog: Optional[str] = Field(default=None)
+    sourceOrganization: Optional[str] = Field(default=None)
+    author: Optional[str] = Field(default=None)
+    dateCreated: Optional[datetime] = Field(default_factory=datetime.now)
+    dateModified: Optional[datetime] = Field(default_factory=datetime.now)
+    usedBy: Optional[List[str]] = Field(default=[])
+    generatedBy: Optional[str] = Field(default=None)
+
+
+    def convert(self)-> Dataset:
+
+        return Dataset(
+                guid=self.guid,
+                name=self.name,
+                description=self.description,
+                keywords=self.keywords,
+                owner=self.owner,
+                distribution=[],
+                includedInDataCatalog=self.includedInDataCatalog,
+                sourceOrganization=self.sourceOrganization,
+                author=self.author,
+                dateCreated=self.dateCreated,
+                dateModified=self.dateModified,
+                published=True
+                )
 
 
 
@@ -155,7 +171,7 @@ def createDataset(
         return OperationStatus(False, "dataset already exists", 400)
     
     # check that owner exists
-    if userCollection.find_one({"@id": self.owner}) is None:
+    if userCollection.find_one({"@id": datasetInstance.owner}) is None:
         return OperationStatus(False, "owner does not exist", 404)
 
     # if generatedBy is an ark
@@ -186,7 +202,7 @@ def createDataset(
 
     # update operations for the owner user of the dataset
     updateResult = userCollection.update_one(
-        {"@id": self.owner}, 
+        {"@id": datasetInstance.owner}, 
         {"$push": {"datasets": datasetInstance.guid}}
         )
 
@@ -225,10 +241,17 @@ def deleteDataset(
         projection={"_id": False}
         ) 
 
+
+
     if datasetMetadata is None:
         return None, OperationStatus(False, "dataset not found", 404)
 
+
     datasetInstance = Dataset.model_validate(datasetMetadata)
+
+    # if dataset has been deleted already
+    if not datasetInstance.published:
+        return datasetInstance, OperationStatus(False, "dataset has been deleted", 400)
 
     pullOperation = {"$pull": {"datasets": datasetGUID}}
 
@@ -242,20 +265,20 @@ def deleteDataset(
         return datasetInstance, OperationStatus(False, "failed to update owner", 500)
 
     # update the project to remove the dataset
-    if self.includedInDataCatalog is not None:
+    if datasetInstance.includedInDataCatalog is not None:
         updateProject = identifierCollection.update_one(
             {"@id": datasetInstance.includedInDataCatalog}, 
             pull_operation, 
             )
 
-    if self.sourceOrganization is not None:
+    if datasetInstance.sourceOrganization is not None:
         update_organization = IdentifierCollection.update_one(
             {"@id": datasetInstance.sourceOrganization},
             pull_operation, 
             )
 
     # TODO delete all distributions 
-    if len(self.distribution) != 0:
+    if len(datasetInstance.distribution) != 0:
         distributionGUIDS= datasetInstance.distribution
         #delete_status = delete_distribution_metadata(distribution_identifiers)
         
@@ -263,7 +286,7 @@ def deleteDataset(
     # delete the distribution
     updateDataset = identifierCollection.update_one(
             {"@id": datasetGUID, "@type": "evi:Dataset"},
-            {"$set":{"published": False, "distributions": []}}
+            {"$set":{"published": False, "distribution": []}}
             )
         
     if updateDataset.modified_count != 1:

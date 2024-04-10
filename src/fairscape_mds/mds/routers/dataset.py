@@ -7,7 +7,7 @@ from fairscape_mds.mds.config import (
     get_mongo_client,
 ) 
 
-from fairscape_mds.mds.models.dataset import Dataset, listDatasets
+from fairscape_mds.mds.models.dataset import Dataset, listDatasets, deleteDataset, createDataset, DatasetCreateModel
 
 router = APIRouter()
 mongo_config = get_mongo_config()
@@ -21,7 +21,7 @@ user_collection = mongo_db[mongo_config.user_collection]
 @router.post("/dataset",
              summary="Create a dataset",
              response_description="The created dataset")
-def dataset_create(dataset: Dataset):
+def dataset_create(dataset: DatasetCreateModel):
     """
     Create a dataset with the following properties:
 
@@ -31,8 +31,10 @@ def dataset_create(dataset: Dataset):
     - **owner**: an existing user in its compact form with @id, @type, name, and email
     """
 
+    datasetInstance = dataset.convert()
     
-    create_status = dataset.create(
+    create_status = createDataset(
+            datasetInstance,
             identifier_collection,
             user_collection
             )
@@ -111,23 +113,24 @@ def dataset_delete(NAAN: str, postfix: str):
     - **NAAN**: Name Assigning Authority Number which uniquely identifies an organization e.g. 12345
     - **postfix**: a unique string
     """
-    dataset_id = f"ark:{NAAN}/{postfix}"
+    datasetGUID = f"ark:{NAAN}/{postfix}"
 
-    dataset = Dataset.construct(guid=dataset_id)
-
-    delete_status = dataset.delete(
+    datasetMetadata, deleteStatus = deleteDataset(
+            datasetGUID,
             identifier_collection,
             user_collection
             )
 
-    if delete_status.success:
+    if deleteStatus.success:
         return JSONResponse(
             status_code=200,
-            content={"deleted": {"@id": dataset_id, "@type": "evi:Dataset", "name": dataset.name}}
+            content={
+                "deleted": datasetMetadata.model_dump(by_alias=True, include=['guid', 'name', 'description', 'metadataType'])
+                }
         )
 
     else:
         return JSONResponse(
-            status_code=delete_status.status_code,
-            content={"error": f"{str(delete_status.message)}"}
+            status_code=deleteStatus.status_code,
+            content={"error": f"{str(deleteStatus.message)}"}
         )

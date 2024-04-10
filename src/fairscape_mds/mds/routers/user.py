@@ -71,7 +71,7 @@ def user_create(user: User):
             summary="List all users",
             response_description="Retrieved list of users")
 def user_list():
-    users = list_users(userCollection)
+    users = listUsers(userCollection)
     return users
 
 
