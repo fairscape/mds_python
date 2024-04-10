@@ -128,7 +128,7 @@
 
         <!-- Raw JSON-LD of the user -->
         <div class="row" id="json-ld-container">
-            <pre>{{ json.dumps(software.dict(by_alias = True), indent=2) }}</pre>
+            <pre>{{ json.dumps(software.dict(by_alias = True), indent=2, default=str) }}</pre>
         </div>
 
         <!-- Mermaid graph -->
