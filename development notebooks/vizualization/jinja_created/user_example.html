@@ -1,13 +1,65 @@
 <!doctype html>
 <html lang="en">
 
-{% include './development notebooks/vizualization/head_template.html' %}
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Fairscape User Metadata</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs"></script>
+    <style>
+        body {
+            background-color: #f8f9fa;
+            /* Light grey background */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        h3 {
+            color: #007bff;
+        }
+
+        .container {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+
+        .accordion-button {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .accordion-button:not(.collapsed) {
+            background-color: #0056b3;
+            color: white;
+        }
+
+        .table {
+            margin-top: 20px;
+        }
+
+        .table thead th {
+            background-color: #007bff;
+            color: white;
+        }
+
+        #mermaid-container {
+            display: block;
+        }
+
+        #json-ld-container {
+            display: none;
+        }
+    </style>
+</head>
 
 <body>
     <div id="main-content" class="container">
         <div class="row">
             <div class="col-lg-auto">
-                <h3>User Metadata: {{ user.guid }}</h3>
+                <h3>User Metadata: ark:99999/fake-id</h3>
             </div>
         </div>
 
@@ -41,17 +93,17 @@
                     <tbody>
                         <tr>
                             <td>Name</td>
-                            <td>{{ user.name }}</td>
+                            <td>fake user</td>
                         </tr>
                         <tr>
                             <td>Persistant Identifier</td>
                             <td>
-                                {{ user.guid | add_link }}
+                                <a href="https://fairscape.pods.uvarc.io/ark:99999/fake-id">ark:99999/fake-id</a>
                             </td>
                         </tr>
                         <tr>
                             <td>Email</td>
-                            <td>{{ user.email }}</td>
+                            <td>user@example.com</td>
                         </tr>
                         <tr>
                             <td>Organizations</td>
@@ -70,11 +122,11 @@
                                             data-bs-parent="#accordionOrganizations">
                                             <div class="accordion-body">
                                                 <ul>
-                                                    {% for organization in user.organizations %}
-                                                    <li>{{ organization | add_link }}</li>
-                                                    {% else %}
-                                                    <li>No organizations available</li>
-                                                    {% endfor %}
+                                                    
+                                                    <li>Org1</li>
+                                                    
+                                                    <li>Org2</li>
+                                                    
                                                 </ul>
                                             </div>
                                         </div>
@@ -99,11 +151,11 @@
                                             data-bs-parent="#accordionProjects">
                                             <div class="accordion-body">
                                                 <ul>
-                                                    {% for project in user.projects %}
-                                                    <li>{{ project | add_link }}</li>
-                                                    {% else %}
-                                                    <li>No projects available</li>
-                                                    {% endfor %}
+                                                    
+                                                    <li>Project1</li>
+                                                    
+                                                    <li>Project2</li>
+                                                    
                                                 </ul>
                                             </div>
                                         </div>
@@ -128,11 +180,11 @@
                                             data-bs-parent="#accordionDatasets">
                                             <div class="accordion-body">
                                                 <ul>
-                                                    {% for dataset in user.datasets %}
-                                                    <li>{{ dataset | add_link }}</li>
-                                                    {% else %}
-                                                    <li>No datasets available</li>
-                                                    {% endfor %}
+                                                    
+                                                    <li>Dataset1</li>
+                                                    
+                                                    <li>Dataset2</li>
+                                                    
                                                 </ul>
                                             </div>
                                         </div>
@@ -157,11 +209,11 @@
                                             data-bs-parent="#accordionSoftware">
                                             <div class="accordion-body">
                                                 <ul>
-                                                    {% for software in user.software %}
-                                                    <li>{{ software | add_link }}</li>
-                                                    {% else %}
-                                                    <li>No software available</li>
-                                                    {% endfor %}
+                                                    
+                                                    <li>Software1</li>
+                                                    
+                                                    <li>Software2</li>
+                                                    
                                                 </ul>
                                             </div>
                                         </div>
@@ -186,11 +238,11 @@
                                             data-bs-parent="#accordionROCrate">
                                             <div class="accordion-body">
                                                 <ul>
-                                                    {% for rocrate in user.rocrates %}
-                                                    <li>{{ rocrate | add_link }}</li>
-                                                    {% else %}
-                                                    <li>No ROCrates available</li>
-                                                    {% endfor %}
+                                                    
+                                                    <li>ROCrate1</li>
+                                                    
+                                                    <li>ROCrate2</li>
+                                                    
                                                 </ul>
                                             </div>
                                         </div>
@@ -215,11 +267,11 @@
                                             data-bs-parent="#accordionComputations">
                                             <div class="accordion-body">
                                                 <ul>
-                                                    {% for computation in user.computations %}
-                                                    <li>{{ computation | add_link }}</li>
-                                                    {% else %}
-                                                    <li>No computations available</li>
-                                                    {% endfor %}
+                                                    
+                                                    <li>Computation1</li>
+                                                    
+                                                    <li>Computation2</li>
+                                                    
                                                 </ul>
                                             </div>
                                         </div>
@@ -234,7 +286,43 @@
 
         <!-- Raw JSON-LD of the user -->
         <div class="row" id="json-ld-container">
-            <pre>{{ json.dumps(user.dict(by_alias = True), indent=2) }}</pre>
+            <pre>{
+  "@id": "ark:99999/fake-id",
+  "@type": "Person",
+  "name": "fake user",
+  "@context": {
+    "@vocab": "https://schema.org/",
+    "evi": "https://w3id.org/EVI#"
+  },
+  "url": null,
+  "email": "user@example.com",
+  "password": "password123",
+  "organizations": [
+    "Org1",
+    "Org2"
+  ],
+  "projects": [
+    "Project1",
+    "Project2"
+  ],
+  "datasets": [
+    "Dataset1",
+    "Dataset2"
+  ],
+  "rocrates": [
+    "ROCrate1",
+    "ROCrate2"
+  ],
+  "software": [
+    "Software1",
+    "Software2"
+  ],
+  "computations": [
+    "Computation1",
+    "Computation2"
+  ],
+  "evidencegraphs": []
+}</pre>
         </div>
 
         <!-- Mermaid graph -->

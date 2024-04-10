@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Fairscape Software Metadata</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs"></script>
+    <style>
+        body {
+            background-color: #f8f9fa;
+            /* Light grey background */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        h3 {
+            color: #007bff;
+        }
+
+        .container {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+
+        .accordion-button {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .accordion-button:not(.collapsed) {
+            background-color: #0056b3;
+            color: white;
+        }
+
+        .table {
+            margin-top: 20px;
+        }
+
+        .table thead th {
+            background-color: #007bff;
+            color: white;
+        }
+
+        #mermaid-container {
+            display: block;
+        }
+
+        #json-ld-container {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="main-content" class="container">
+        <div class="row">
+            <div class="col-lg-auto">
+                <h3>Software Metadata: ark:99999/fake-software</h3>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Button Group for Selecting Content -->
+            <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
+                <input type="radio" onclick="showMetadata();" class="btn-check" name="btnradio" id="btn-metadata"
+                    autocomplete="off" checked>
+                <label class="btn btn-outline-primary" for="btn-metadata">Metadata</label>
+
+                <input type="radio" onclick="showJSON();" class="btn-check" name="btnradio" id="btn-json"
+                    autocomplete="off">
+                <label class="btn btn-outline-primary" for="btn-json">JSON-LD</label>
+
+                <input type="radio" onclick="showMermaid()" class="btn-check" name="btnradio" id="btn-mermaid"
+                    autocomplete="off">
+                <label class="btn btn-outline-primary" for="btn-mermaid">Evidence Graph</label>
+            </div>
+        </div>
+
+        <!-- Table of all properties -->
+        <div class="row" id="metadata-container">
+            <div class="container">
+                <table class="table table-hover table-striped">
+                    <thead>
+                        <tr>
+                            <th scope="col">Property</th>
+                            <th scope="col">Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Name</td>
+                            <td>Software Example</td>
+                        </tr>
+                        <tr>
+                            <td>Persistant Identifier</td>
+                            <td>
+                                <a href="https://fairscape.pods.uvarc.io/ark:99999/fake-software">ark:99999/fake-software</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Description</td>
+                            <td>Fake Software to show template working.</td>
+                        </tr>
+                        <tr>
+                            <td>Owner</td>
+                            <td>John Doe</td>
+                        </tr>
+                        <tr>
+                            <td>Associated Organization</td>
+                            <td>
+                                <a href="https://fairscape.pods.uvarc.io/ark:99999/fake-org">ark:99999/fake-org</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>usedBy</td>
+                            <td>
+                                <!-- Dropdown element -->
+                                <div class="accordion" id="accordionusedBy">
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                                data-bs-target="#collapseusedBy" aria-expanded="false"
+                                                aria-controls="collapseusedBy">
+                                                usedBy
+                                            </button>
+                                        </h2>
+                                        <div id="collapseusedBy" class="accordion-collapse collapse"
+                                            data-bs-parent="#accordionusedBy">
+                                            <div class="accordion-body">
+                                                <ul>
+                                                    
+                                                    <li><a href="https://fairscape.pods.uvarc.io/ark:99999/fake-software">ark:99999/fake-software</a></li>
+                                                    
+                                                    <li><a href="https://fairscape.pods.uvarc.io/ark:99999/fake-computation">ark:99999/fake-computation</a></li>
+                                                    
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Distributions</td>
+                            <td>
+                                <!-- Dropdown element -->
+                                <div class="accordion" id="accordionDistributions">
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                                data-bs-target="#collapseDistributions" aria-expanded="false"
+                                                aria-controls="collapseDistributions">
+                                                Distributions
+                                            </button>
+                                        </h2>
+                                        <div id="collapseDistributions" class="accordion-collapse collapse"
+                                            data-bs-parent="#accordionDistributions">
+                                            <div class="accordion-body">
+                                                <ul>
+                                                    
+                                                    <li><a href="https://example.com/software/download">https://example.com/software/download</a></li>
+                                                    
+                                                    <li><a href="https://example.com/software/mirror">https://example.com/software/mirror</a></li>
+                                                    
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Raw JSON-LD of the user -->
+        <div class="row" id="json-ld-container">
+            <pre>{
+  "@id": "ark:99999/fake-software",
+  "metadataType": "evi:Software",
+  "name": "Software Example",
+  "@context": {
+    "@vocab": "https://schema.org/",
+    "evi": "https://w3id.org/EVI#"
+  },
+  "url": null,
+  "description": "Fake Software to show template working.",
+  "license": " https://creativecommons.org/licenses/by/4.0/",
+  "keywords": [],
+  "owner": "John Doe",
+  "distribution": [
+    "https://example.com/software/download",
+    "https://example.com/software/mirror"
+  ],
+  "usedBy": [
+    "ark:99999/fake-software",
+    "ark:99999/fake-computation"
+  ],
+  "sourceOrganization": "ark:99999/fake-org",
+  "includedInDataCatalog": "ark:99999/fake-catalog"
+}</pre>
+        </div>
+
+        <!-- Mermaid graph -->
+        <div class="row" id="mermaid-container">
+            <!--
+            %%{
+              init: {
+                'theme': 'base',
+                'themeVariables': {
+                  'fontFamily': 'verdana',
+                  'fontSize': '20px',
+                  'primaryColor': '#4dbdc9'
+                }
+              }
+            }%%
+            -->
+            <pre class="mermaid" id="mermaid-text">
+            %%{
+              init: {
+                'theme': 'neutral',
+                'themeVariables': {
+                  'fontFamily': 'verdana',
+                  'fontSize': '20px',
+                  'primaryColor': '#4dbdc9'
+                }
+              }
+            }%%
+            flowchart LR
+            subgraph ark:59852/3.cm4ai_chromatin_mda-mb-468_untreated_coembedfold1_initialrun0.1alpha
+              id0([coembedding_emd.tsv
+                    coembedding output file])
+              id1[cellmaps_coembedding]
+              id2[\Merged Embedding/]
+            end
+    
+            subgraph ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha
+              id3([Simulated Samples file])
+              id4([Simulated unique file])
+              id5([
+                    cellmaps_imagedownloader 
+                    output file])
+              id6([cellmaps_imagedownloader
+                    output file])
+              id7([B2AI_1_untreated_G1_R2_red.jpg
+                    red channel image])
+              id8[cellmaps_imagedownloader]
+              id9[\IF Image Loader/]
+              id10([etc.])
+            end
+    
+            subgraph ark:59852/2.cm4ai_chromatin_mda-mb-468_untreated_imageembedfold1_initialrun0.1alpha
+              id11([cellmaps_image_embedding
+                output file])
+              id12([Densenet model file])
+              id13[cellmaps_image_embedding]
+              id14[\IF Image Embedding/]
+            end
+            idNone([APMS Embedding])
+            id1 -->|usedSoftware| id2
+            id2 -->|usedDataset| id11
+            id2 -->|usedDataset| id12
+            id2 -->|usedDataset| idNone
+            id0 -->|generatedBy| id2
+            id8 -->|usedSoftware| id9
+            id9 -->|usedDataset| id4
+            id9 -->|usedDataset| id3
+            id10 -->|generatedBy| id9
+            id5 -->|generatedBy| id9
+            id6 -->|generatedBy| id9
+            id7 -->|generatedBy| id9
+            id13 -->|usedSoftware| id14
+            id14 -->|usedDataset| id10
+            id14 -->|usedDataset| id5
+            id14 -->|usedDataset| id6
+            id14 -->|usedDataset| id7
+            id11 -->|generatedBy| id14
+            id12 -->|generatedBy| id14
+            </pre>
+
+            <script type="module">
+                // Example of using the render function
+                import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+                mermaid.initialize({
+                    startOnLoad: true,
+
+                });
+            </script>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function showMetadata() {
+            document.getElementById("metadata-container").style.display = "block";
+            document.getElementById("json-ld-container").style.display = "none";
+            document.getElementById("mermaid-container").style.display = "none";
+        }
+
+        function showJSON() {
+            document.getElementById("metadata-container").style.display = "none";
+            document.getElementById("json-ld-container").style.display = "block";
+            document.getElementById("mermaid-container").style.display = "none";
+        }
+
+        function showMermaid() {
+            document.getElementById("metadata-container").style.display = "none";
+            document.getElementById("json-ld-container").style.display = "none";
+            document.getElementById("mermaid-container").style.display = "block";
+        }
+
+        mermaid.initialize({ startOnLoad: true });
+    </script>
+</body>
+
+</html>
