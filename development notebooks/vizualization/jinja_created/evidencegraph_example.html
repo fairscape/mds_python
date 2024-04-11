@@ -103,7 +103,7 @@
     <div id="main-content" class="container">
         <div class="row">
             <div class="col-lg-auto">
-                <h3>Evidence Graph Metadata: ark:99999/fake-compuattion</h3>
+                <h3>Evidence Graph Metadata: ark:99999/fake-evidencegraph</h3>
             </div>
         </div>
 
@@ -116,11 +116,11 @@
 
                 <input type="radio" onclick="showJSON();" class="btn-check" name="btnradio" id="btn-json"
                     autocomplete="off">
-                <label class="btn btn-outline-primary" for="btn-json">JSON-LD</label>
+                <label class="btn btn-outline-primary" for="btn-json">Serialization/label>
 
-                <input type="radio" onclick="showMermaid()" class="btn-check" name="btnradio" id="btn-mermaid"
-                    autocomplete="off">
-                <label class="btn btn-outline-primary" for="btn-mermaid">Evidence Graph</label>
+                    <input type="radio" onclick="showMermaid()" class="btn-check" name="btnradio" id="btn-mermaid"
+                        autocomplete="off">
+                    <label class="btn btn-outline-primary" for="btn-mermaid">Evidence Graph</label>
             </div>
         </div>
 
@@ -142,7 +142,7 @@
                         <tr>
                             <td>Persistant Identifier</td>
                             <td>
-                                <a href="https://fairscape.pods.uvarc.io/ark:99999/fake-compuattion">ark:99999/fake-compuattion</a>
+                                <a href="https://fairscape.pods.uvarc.io/ark:99999/fake-evidencegraph">ark:99999/fake-evidencegraph</a>
                             </td>
                         </tr>
                         <tr>
@@ -176,7 +176,7 @@
             </div>
             <div class="json-wrapper">
                 <pre id="json-text">{
-  "@id": "ark:99999/fake-compuattion",
+  "@id": "ark:99999/fake-evidencegraph",
   "@type": "evi:Computation",
   "name": "Fake Input Compuation Example",
   "@context": {
@@ -194,36 +194,36 @@
                 </button>
                 <pre id="rdf-xml-text" style="display: none;"><?xml version="1.0" encoding="utf-8"?>
 <rdf:RDF
-   xmlns:ns1="https://w3id.org/EVI#@"
-   xmlns:ns2="https://w3id.org/EVI#"
+   xmlns:ns1="https://w3id.org/EVI#"
+   xmlns:ns2="https://w3id.org/EVI#@"
    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
 >
   <rdf:Description rdf:about="https://w3id.org/EVI#dataset">
-    <ns1:id rdf:datatype="http://www.w3.org/2001/XMLSchema#string">ark:99999/fake-compuattion</ns1:id>
-    <ns1:type rdf:datatype="http://www.w3.org/2001/XMLSchema#string">evi:Computation</ns1:type>
-    <ns2:name rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Fake Input Compuation Example</ns2:name>
-    <ns1:context rdf:datatype="http://www.w3.org/2001/XMLSchema#string">{'@vocab': 'https://schema.org/', 'evi': 'https://w3id.org/EVI#'}</ns1:context>
-    <ns2:url rdf:datatype="http://www.w3.org/2001/XMLSchema#string">None</ns2:url>
-    <ns2:description rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Fake Input Compuation to show template working.</ns2:description>
-    <ns2:license rdf:datatype="http://www.w3.org/2001/XMLSchema#string"> https://creativecommons.org/licenses/by/4.0/</ns2:license>
-    <ns2:keywords rdf:datatype="http://www.w3.org/2001/XMLSchema#string">[]</ns2:keywords>
-    <ns2:owner rdf:datatype="http://www.w3.org/2001/XMLSchema#string">ark:99999/A-Person</ns2:owner>
+    <ns2:id rdf:datatype="http://www.w3.org/2001/XMLSchema#string">ark:99999/fake-evidencegraph</ns2:id>
+    <ns2:type rdf:datatype="http://www.w3.org/2001/XMLSchema#string">evi:Computation</ns2:type>
+    <ns1:name rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Fake Input Compuation Example</ns1:name>
+    <ns2:context rdf:datatype="http://www.w3.org/2001/XMLSchema#string">{'@vocab': 'https://schema.org/', 'evi': 'https://w3id.org/EVI#'}</ns2:context>
+    <ns1:url rdf:datatype="http://www.w3.org/2001/XMLSchema#string">None</ns1:url>
+    <ns1:description rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Fake Input Compuation to show template working.</ns1:description>
+    <ns1:license rdf:datatype="http://www.w3.org/2001/XMLSchema#string"> https://creativecommons.org/licenses/by/4.0/</ns1:license>
+    <ns1:keywords rdf:datatype="http://www.w3.org/2001/XMLSchema#string">[]</ns1:keywords>
+    <ns1:owner rdf:datatype="http://www.w3.org/2001/XMLSchema#string">ark:99999/A-Person</ns1:owner>
   </rdf:Description>
 </rdf:RDF>
 </pre>
-                <pre id="turtle-text" style="display: none;">@prefix ns1: <https://w3id.org/EVI#@> .
-@prefix ns2: <https://w3id.org/EVI#> .
+                <pre id="turtle-text" style="display: none;">@prefix ns1: <https://w3id.org/EVI#> .
+@prefix ns2: <https://w3id.org/EVI#@> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-ns2:dataset ns1:context "{'@vocab': 'https://schema.org/', 'evi': 'https://w3id.org/EVI#'}"^^xsd:string ;
-    ns1:id "ark:99999/fake-compuattion"^^xsd:string ;
-    ns1:type "evi:Computation"^^xsd:string ;
-    ns2:description "Fake Input Compuation to show template working."^^xsd:string ;
-    ns2:keywords "[]"^^xsd:string ;
-    ns2:license " https://creativecommons.org/licenses/by/4.0/"^^xsd:string ;
-    ns2:name "Fake Input Compuation Example"^^xsd:string ;
-    ns2:owner "ark:99999/A-Person"^^xsd:string ;
-    ns2:url "None"^^xsd:string .
+ns1:dataset ns2:context "{'@vocab': 'https://schema.org/', 'evi': 'https://w3id.org/EVI#'}"^^xsd:string ;
+    ns2:id "ark:99999/fake-evidencegraph"^^xsd:string ;
+    ns2:type "evi:Computation"^^xsd:string ;
+    ns1:description "Fake Input Compuation to show template working."^^xsd:string ;
+    ns1:keywords "[]"^^xsd:string ;
+    ns1:license " https://creativecommons.org/licenses/by/4.0/"^^xsd:string ;
+    ns1:name "Fake Input Compuation Example"^^xsd:string ;
+    ns1:owner "ark:99999/A-Person"^^xsd:string ;
+    ns1:url "None"^^xsd:string .
 
 </pre>
             </div>
