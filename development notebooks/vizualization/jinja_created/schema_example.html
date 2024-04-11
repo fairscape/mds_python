@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Fairscape User Metadata</title>
+    <title>Fairscape Dataset Metadata</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs"></script>
@@ -103,7 +103,7 @@
     <div id="main-content" class="container">
         <div class="row">
             <div class="col-lg-auto">
-                <h3>User Metadata: ark:99999/fake-user</h3>
+                <h3>Schema Metadata: ark:59852/schema-apms-music-embedding-izNjXSs</h3>
             </div>
         </div>
 
@@ -137,39 +137,112 @@
                     <tbody>
                         <tr>
                             <td>Name</td>
-                            <td>fake user</td>
+                            <td>APMS Embedding Schema</td>
                         </tr>
                         <tr>
                             <td>Persistant Identifier</td>
                             <td>
-                                <a href="https://fairscape.pods.uvarc.io/ark:99999/fake-user">ark:99999/fake-user</a>
+                                <a href="https://fairscape.pods.uvarc.io/ark:59852/schema-apms-music-embedding-izNjXSs">ark:59852/schema-apms-music-embedding-izNjXSs</a>
                             </td>
                         </tr>
                         <tr>
-                            <td>Email</td>
-                            <td>user@example.com</td>
+                            <td>Description</td>
+                            <td>Tabular format for APMS music embeddings from PPI networks from the music pipeline from the B2AI Cellmaps for AI project</td>
                         </tr>
                         <tr>
-                            <td>Organizations</td>
+                            <td>Properties</td>
                             <td>
-                                <!-- Dropdown element -->
-                                <div class="accordion" id="accordionOrganizations">
+                                <!-- Dropdown element for each property -->
+                                
+                                <div class="accordion" id="accordionExperiment-Identifier">
                                     <div class="accordion-item">
                                         <h2 class="accordion-header">
                                             <button class="accordion-button" type="button" data-bs-toggle="collapse"
-                                                data-bs-target="#collapseOrganizations" aria-expanded="false"
-                                                aria-controls="collapseOrganizations">
-                                                Organizations
+                                                data-bs-target="#collapseExperiment-Identifier"
+                                                aria-expanded="true"
+                                                aria-controls="collapseExperiment-Identifier">
+                                                Experiment-Identifier
                                             </button>
                                         </h2>
-                                        <div id="collapseOrganizations" class="accordion-collapse collapse"
-                                            data-bs-parent="#accordionOrganizations">
+                                        <div id="collapseExperiment-Identifier"
+                                            class="accordion-collapse collapse"
+                                            data-bs-parent="#accordionExperiment-Identifier">
+                                            <div class="accordion-body">
+                                                <strong>Description:</strong> Identifier for the APMS experiment responsible for generating the raw PPI used to create this embedding vector<br>
+                                                <strong>Type:</strong> string<br>
+                                                <strong>Index:</strong> 0
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                <div class="accordion" id="accordionGene-Symbol">
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                                data-bs-target="#collapseGene-Symbol"
+                                                aria-expanded="true"
+                                                aria-controls="collapseGene-Symbol">
+                                                Gene-Symbol
+                                            </button>
+                                        </h2>
+                                        <div id="collapseGene-Symbol"
+                                            class="accordion-collapse collapse"
+                                            data-bs-parent="#accordionGene-Symbol">
+                                            <div class="accordion-body">
+                                                <strong>Description:</strong> Gene Symbol for the APMS bait protien<br>
+                                                <strong>Type:</strong> string<br>
+                                                <strong>Index:</strong> 1
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                <div class="accordion" id="accordionMUSIC-APMS-Embedding">
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                                data-bs-target="#collapseMUSIC-APMS-Embedding"
+                                                aria-expanded="true"
+                                                aria-controls="collapseMUSIC-APMS-Embedding">
+                                                MUSIC-APMS-Embedding
+                                            </button>
+                                        </h2>
+                                        <div id="collapseMUSIC-APMS-Embedding"
+                                            class="accordion-collapse collapse"
+                                            data-bs-parent="#accordionMUSIC-APMS-Embedding">
+                                            <div class="accordion-body">
+                                                <strong>Description:</strong> Embedding Vector values for genes determined by running node2vec on APMS PPI networks. Vector has 1024 values for each bait protien<br>
+                                                <strong>Type:</strong> array<br>
+                                                <strong>Index:</strong> 2::
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Required</td>
+                            <td>
+                                <!-- Dropdown element -->
+                                <div class="accordion" id="accordionrequired">
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                                data-bs-target="#collapserequired" aria-expanded="false"
+                                                aria-controls="collapserequired">
+                                                required
+                                            </button>
+                                        </h2>
+                                        <div id="collapserequired" class="accordion-collapse collapse"
+                                            data-bs-parent="#accordionrequired">
                                             <div class="accordion-body">
                                                 <ul>
                                                     
-                                                    <li>Org1</li>
+                                                    <li>Experiment Identifier</li>
                                                     
-                                                    <li>Org2</li>
+                                                    <li>Gene Symbol</li>
+                                                    
+                                                    <li>MUSIC APMS Embedding</li>
                                                     
                                                 </ul>
                                             </div>
@@ -179,156 +252,14 @@
                             </td>
                         </tr>
                         <tr>
-                            <td>Projects</td>
-                            <td>
-                                <!-- Dropdown element -->
-                                <div class="accordion" id="accordionProjects">
-                                    <div class="accordion-item">
-                                        <h2 class="accordion-header">
-                                            <button class="accordion-button" type="button" data-bs-toggle="collapse"
-                                                data-bs-target="#collapseProjects" aria-expanded="false"
-                                                aria-controls="collapseProjects">
-                                                Projects
-                                            </button>
-                                        </h2>
-                                        <div id="collapseProjects" class="accordion-collapse collapse"
-                                            data-bs-parent="#accordionProjects">
-                                            <div class="accordion-body">
-                                                <ul>
-                                                    
-                                                    <li>Project1</li>
-                                                    
-                                                    <li>Project2</li>
-                                                    
-                                                </ul>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Datasets</td>
-                            <td>
-                                <!-- Dropdown element -->
-                                <div class="accordion" id="accordionDatasets">
-                                    <div class="accordion-item">
-                                        <h2 class="accordion-header">
-                                            <button class="accordion-button" type="button" data-bs-toggle="collapse"
-                                                data-bs-target="#collapseDatasets" aria-expanded="false"
-                                                aria-controls="collapseDatasets">
-                                                Datasets
-                                            </button>
-                                        </h2>
-                                        <div id="collapseDatasets" class="accordion-collapse collapse"
-                                            data-bs-parent="#accordionDatasets">
-                                            <div class="accordion-body">
-                                                <ul>
-                                                    
-                                                    <li><a href="https://fairscape.pods.uvarc.io/ark:99999/fake-dataset">ark:99999/fake-dataset</a></li>
-                                                    
-                                                    <li>Dataset2</li>
-                                                    
-                                                </ul>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Software</td>
-                            <td>
-                                <!-- Dropdown element -->
-                                <div class="accordion" id="accordionSoftware">
-                                    <div class="accordion-item">
-                                        <h2 class="accordion-header">
-                                            <button class="accordion-button" type="button" data-bs-toggle="collapse"
-                                                data-bs-target="#collapseSoftware" aria-expanded="false"
-                                                aria-controls="collapseSoftware">
-                                                Software
-                                            </button>
-                                        </h2>
-                                        <div id="collapseSoftware" class="accordion-collapse collapse"
-                                            data-bs-parent="#accordionSoftware">
-                                            <div class="accordion-body">
-                                                <ul>
-                                                    
-                                                    <li><a href="https://fairscape.pods.uvarc.io/ark:99999/fake-software">ark:99999/fake-software</a></li>
-                                                    
-                                                    <li>Software2</li>
-                                                    
-                                                </ul>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>ROCrate</td>
-                            <td>
-                                <!-- Dropdown element -->
-                                <div class="accordion" id="accordionROCrate">
-                                    <div class="accordion-item">
-                                        <h2 class="accordion-header">
-                                            <button class="accordion-button" type="button" data-bs-toggle="collapse"
-                                                data-bs-target="#collapseROCrate" aria-expanded="false"
-                                                aria-controls="collapseROCrate">
-                                                ROCrate
-                                            </button>
-                                        </h2>
-                                        <div id="collapseROCrate" class="accordion-collapse collapse"
-                                            data-bs-parent="#accordionROCrate">
-                                            <div class="accordion-body">
-                                                <ul>
-                                                    
-                                                    <li>ROCrate1</li>
-                                                    
-                                                    <li>ROCrate2</li>
-                                                    
-                                                </ul>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Computations</td>
-                            <td>
-                                <!-- Dropdown element -->
-                                <div class="accordion" id="accordionComputations">
-                                    <div class="accordion-item">
-                                        <h2 class="accordion-header">
-                                            <button class="accordion-button" type="button" data-bs-toggle="collapse"
-                                                data-bs-target="#collapseComputations" aria-expanded="false"
-                                                aria-controls="collapseComputations">
-                                                Computations
-                                            </button>
-                                        </h2>
-                                        <div id="collapseComputations" class="accordion-collapse collapse"
-                                            data-bs-parent="#accordionComputations">
-                                            <div class="accordion-body">
-                                                <ul>
-                                                    
-                                                    <li>Computation1</li>
-                                                    
-                                                    <li>Computation2</li>
-                                                    
-                                                </ul>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </td>
+                            <td>Separator</td>
+                            <td>,</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
         </div>
 
-        <!-- Raw JSON-LD of the user -->
         <div class="row" id="json-ld-container">
             <div class="serialization-btn-group" style="margin-top: 20px; text-align: center;">
                 <div class="btn-group" role="group" aria-label="Serialization options" style="width: 50%;">
@@ -347,41 +278,67 @@
             </div>
             <div class="json-wrapper">
                 <pre id="json-text">{
-  "@id": "ark:99999/fake-user",
-  "@type": "Person",
-  "name": "fake user",
+  "@id": "ark:59852/schema-apms-music-embedding-izNjXSs",
+  "@type": "evi:Schema",
+  "name": "APMS Embedding Schema",
   "@context": {
     "@vocab": "https://schema.org/",
-    "evi": "https://w3id.org/EVI#"
+    "EVI": "https://w3,org/EVI#"
   },
   "url": null,
-  "email": "user@example.com",
-  "password": "password123",
-  "organizations": [
-    "Org1",
-    "Org2"
+  "properties": {
+    "Experiment Identifier": {
+      "description": "Identifier for the APMS experiment responsible for generating the raw PPI used to create this embedding vector",
+      "index": 0,
+      "type": "string",
+      "value-url": null,
+      "pattern": "^APMS_[0-9]*$",
+      "items": null,
+      "min-items": null,
+      "max-items": null,
+      "unique-items": null
+    },
+    "Gene Symbol": {
+      "description": "Gene Symbol for the APMS bait protien",
+      "index": 1,
+      "type": "string",
+      "value-url": null,
+      "pattern": "^[A-Za-z0-9\\-]*$",
+      "items": null,
+      "min-items": null,
+      "max-items": null,
+      "unique-items": null,
+      "valueURL": "http://edamontology.org/data_1026"
+    },
+    "MUSIC APMS Embedding": {
+      "description": "Embedding Vector values for genes determined by running node2vec on APMS PPI networks. Vector has 1024 values for each bait protien",
+      "index": "2::",
+      "type": "array",
+      "value-url": null,
+      "pattern": null,
+      "items": {
+        "type": "number"
+      },
+      "min-items": null,
+      "max-items": null,
+      "unique-items": null,
+      "maxItems": 1024,
+      "minItems": 1024,
+      "uniqueItems": false
+    }
+  },
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "Experiment Identifier",
+    "Gene Symbol",
+    "MUSIC APMS Embedding"
   ],
-  "projects": [
-    "Project1",
-    "Project2"
-  ],
-  "datasets": [
-    "ark:99999/fake-dataset",
-    "Dataset2"
-  ],
-  "rocrates": [
-    "ROCrate1",
-    "ROCrate2"
-  ],
-  "software": [
-    "ark:99999/fake-software",
-    "Software2"
-  ],
-  "computations": [
-    "Computation1",
-    "Computation2"
-  ],
-  "evidencegraphs": []
+  "separator": ",",
+  "header": false,
+  "examples": [],
+  "description": "Tabular format for APMS music embeddings from PPI networks from the music pipeline from the B2AI Cellmaps for AI project",
+  "seperator": ","
 }</pre>
                 <button id="copy-btn" class="copy-btn" title="Copy JSON-LD">
                     <i class="fas fa-copy"></i> Copy JSON-LD
@@ -393,20 +350,20 @@
    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
 >
   <rdf:Description rdf:about="https://w3id.org/EVI#dataset">
-    <ns2:id rdf:datatype="http://www.w3.org/2001/XMLSchema#string">ark:99999/fake-user</ns2:id>
-    <ns2:type rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Person</ns2:type>
-    <ns1:name rdf:datatype="http://www.w3.org/2001/XMLSchema#string">fake user</ns1:name>
-    <ns2:context rdf:datatype="http://www.w3.org/2001/XMLSchema#string">{'@vocab': 'https://schema.org/', 'evi': 'https://w3id.org/EVI#'}</ns2:context>
+    <ns2:id rdf:datatype="http://www.w3.org/2001/XMLSchema#string">ark:59852/schema-apms-music-embedding-izNjXSs</ns2:id>
+    <ns2:type rdf:datatype="http://www.w3.org/2001/XMLSchema#string">evi:Schema</ns2:type>
+    <ns1:name rdf:datatype="http://www.w3.org/2001/XMLSchema#string">APMS Embedding Schema</ns1:name>
+    <ns2:context rdf:datatype="http://www.w3.org/2001/XMLSchema#string">{'@vocab': 'https://schema.org/', 'EVI': 'https://w3,org/EVI#'}</ns2:context>
     <ns1:url rdf:datatype="http://www.w3.org/2001/XMLSchema#string">None</ns1:url>
-    <ns1:email rdf:datatype="http://www.w3.org/2001/XMLSchema#string">user@example.com</ns1:email>
-    <ns1:password rdf:datatype="http://www.w3.org/2001/XMLSchema#string">password123</ns1:password>
-    <ns1:organizations rdf:datatype="http://www.w3.org/2001/XMLSchema#string">['Org1', 'Org2']</ns1:organizations>
-    <ns1:projects rdf:datatype="http://www.w3.org/2001/XMLSchema#string">['Project1', 'Project2']</ns1:projects>
-    <ns1:datasets rdf:datatype="http://www.w3.org/2001/XMLSchema#string">['ark:99999/fake-dataset', 'Dataset2']</ns1:datasets>
-    <ns1:rocrates rdf:datatype="http://www.w3.org/2001/XMLSchema#string">['ROCrate1', 'ROCrate2']</ns1:rocrates>
-    <ns1:software rdf:datatype="http://www.w3.org/2001/XMLSchema#string">['ark:99999/fake-software', 'Software2']</ns1:software>
-    <ns1:computations rdf:datatype="http://www.w3.org/2001/XMLSchema#string">['Computation1', 'Computation2']</ns1:computations>
-    <ns1:evidencegraphs rdf:datatype="http://www.w3.org/2001/XMLSchema#string">[]</ns1:evidencegraphs>
+    <ns1:properties rdf:datatype="http://www.w3.org/2001/XMLSchema#string">{'Experiment Identifier': {'description': 'Identifier for the APMS experiment responsible for generating the raw PPI used to create this embedding vector', 'index': 0, 'type': 'string', 'value-url': None, 'pattern': '^APMS_[0-9]*$', 'items': None, 'min-items': None, 'max-items': None, 'unique-items': None}, 'Gene Symbol': {'description': 'Gene Symbol for the APMS bait protien', 'index': 1, 'type': 'string', 'value-url': None, 'pattern': '^[A-Za-z0-9\\-]*$', 'items': None, 'min-items': None, 'max-items': None, 'unique-items': None, 'valueURL': 'http://edamontology.org/data_1026'}, 'MUSIC APMS Embedding': {'description': 'Embedding Vector values for genes determined by running node2vec on APMS PPI networks. Vector has 1024 values for each bait protien', 'index': '2::', 'type': 'array', 'value-url': None, 'pattern': None, 'items': {'type': 'number'}, 'min-items': None, 'max-items': None, 'unique-items': None, 'maxItems': 1024, 'minItems': 1024, 'uniqueItems': False}}</ns1:properties>
+    <ns1:type rdf:datatype="http://www.w3.org/2001/XMLSchema#string">object</ns1:type>
+    <ns1:additionalProperties rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">true</ns1:additionalProperties>
+    <ns1:required rdf:datatype="http://www.w3.org/2001/XMLSchema#string">['Experiment Identifier', 'Gene Symbol', 'MUSIC APMS Embedding']</ns1:required>
+    <ns1:separator rdf:datatype="http://www.w3.org/2001/XMLSchema#string">,</ns1:separator>
+    <ns1:header rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">false</ns1:header>
+    <ns1:examples rdf:datatype="http://www.w3.org/2001/XMLSchema#string">[]</ns1:examples>
+    <ns1:description rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Tabular format for APMS music embeddings from PPI networks from the music pipeline from the B2AI Cellmaps for AI project</ns1:description>
+    <ns1:seperator rdf:datatype="http://www.w3.org/2001/XMLSchema#string">,</ns1:seperator>
   </rdf:Description>
 </rdf:RDF>
 </pre>
@@ -414,27 +371,30 @@
 @prefix ns2: <https://w3id.org/EVI#@> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-ns1:dataset ns2:context "{'@vocab': 'https://schema.org/', 'evi': 'https://w3id.org/EVI#'}"^^xsd:string ;
-    ns2:id "ark:99999/fake-user"^^xsd:string ;
-    ns2:type "Person"^^xsd:string ;
-    ns1:computations "['Computation1', 'Computation2']"^^xsd:string ;
-    ns1:datasets "['ark:99999/fake-dataset', 'Dataset2']"^^xsd:string ;
-    ns1:email "user@example.com"^^xsd:string ;
-    ns1:evidencegraphs "[]"^^xsd:string ;
-    ns1:name "fake user"^^xsd:string ;
-    ns1:organizations "['Org1', 'Org2']"^^xsd:string ;
-    ns1:password "password123"^^xsd:string ;
-    ns1:projects "['Project1', 'Project2']"^^xsd:string ;
-    ns1:rocrates "['ROCrate1', 'ROCrate2']"^^xsd:string ;
-    ns1:software "['ark:99999/fake-software', 'Software2']"^^xsd:string ;
+ns1:dataset ns2:context "{'@vocab': 'https://schema.org/', 'EVI': 'https://w3,org/EVI#'}"^^xsd:string ;
+    ns2:id "ark:59852/schema-apms-music-embedding-izNjXSs"^^xsd:string ;
+    ns2:type "evi:Schema"^^xsd:string ;
+    ns1:additionalProperties true ;
+    ns1:description "Tabular format for APMS music embeddings from PPI networks from the music pipeline from the B2AI Cellmaps for AI project"^^xsd:string ;
+    ns1:examples "[]"^^xsd:string ;
+    ns1:header false ;
+    ns1:name "APMS Embedding Schema"^^xsd:string ;
+    ns1:properties "{'Experiment Identifier': {'description': 'Identifier for the APMS experiment responsible for generating the raw PPI used to create this embedding vector', 'index': 0, 'type': 'string', 'value-url': None, 'pattern': '^APMS_[0-9]*$', 'items': None, 'min-items': None, 'max-items': None, 'unique-items': None}, 'Gene Symbol': {'description': 'Gene Symbol for the APMS bait protien', 'index': 1, 'type': 'string', 'value-url': None, 'pattern': '^[A-Za-z0-9\\\\-]*$', 'items': None, 'min-items': None, 'max-items': None, 'unique-items': None, 'valueURL': 'http://edamontology.org/data_1026'}, 'MUSIC APMS Embedding': {'description': 'Embedding Vector values for genes determined by running node2vec on APMS PPI networks. Vector has 1024 values for each bait protien', 'index': '2::', 'type': 'array', 'value-url': None, 'pattern': None, 'items': {'type': 'number'}, 'min-items': None, 'max-items': None, 'unique-items': None, 'maxItems': 1024, 'minItems': 1024, 'uniqueItems': False}}"^^xsd:string ;
+    ns1:required "['Experiment Identifier', 'Gene Symbol', 'MUSIC APMS Embedding']"^^xsd:string ;
+    ns1:separator ","^^xsd:string ;
+    ns1:seperator ","^^xsd:string ;
+    ns1:type "object"^^xsd:string ;
     ns1:url "None"^^xsd:string .
 
 </pre>
             </div>
 
-            <!-- Mermaid graph -->
-            <div class="row" id="mermaid-container">
-                <!--
+        </div>
+
+
+        <!-- Mermaid graph -->
+        <div class="row" id="mermaid-container">
+            <!--
             %%{
               init: {
                 'theme': 'base',
@@ -446,7 +406,7 @@ ns1:dataset ns2:context "{'@vocab': 'https://schema.org/', 'evi': 'https://w3id.
               }
             }%%
             -->
-                <pre class="mermaid" id="mermaid-text">
+            <pre class="mermaid" id="mermaid-text">
             %%{
               init: {
                 'theme': 'neutral',
@@ -509,17 +469,17 @@ ns1:dataset ns2:context "{'@vocab': 'https://schema.org/', 'evi': 'https://w3id.
             id12 -->|generatedBy| id14
             </pre>
 
-                <script type="module">
-                    // Example of using the render function
-                    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
-                    mermaid.initialize({
-                        startOnLoad: true,
+            <script type="module">
+                // Example of using the render function
+                import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+                mermaid.initialize({
+                    startOnLoad: true,
 
-                    });
-                </script>
-            </div>
+                });
+            </script>
         </div>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     function showMetadata() {
         document.getElementById("metadata-container").style.display = "block";
