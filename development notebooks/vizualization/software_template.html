@@ -128,13 +128,29 @@
 
         <!-- Raw JSON-LD of the software -->
         <div class="row" id="json-ld-container">
-            <div class="json-wrapper">
-                <pre id="json-text">{{ json.dumps(software.dict(by_alias=True), default = str, indent=2) }}</pre>
-                <button onclick="copyJSON()" class="copy-btn" title="Copy JSON">
-                    <i class="fas fa-copy"></i>
-                </button>
+            <div class="serialization-btn-group" style="margin-top: 20px; text-align: center;">
+                <div class="btn-group" role="group" aria-label="Serialization options" style="width: 50%;">
+                    <input type="radio" onclick="showSerialization('json-text')" class="btn-check" name="serialization"
+                        id="serialization-json" autocomplete="off" checked>
+                    <label class="btn btn-sm btn-outline-info" for="serialization-json">JSON-LD</label>
+
+                    <input type="radio" onclick="showSerialization('rdf-xml-text')" class="btn-check"
+                        name="serialization" id="serialization-rdf" autocomplete="off">
+                    <label class="btn btn-sm btn-outline-info" for="serialization-rdf">RDF/XML</label>
+
+                    <input type="radio" onclick="showSerialization('turtle-text')" class="btn-check"
+                        name="serialization" id="serialization-turtle" autocomplete="off">
+                    <label class="btn btn-sm btn-outline-info" for="serialization-turtle">Turtle</label>
+                </div>
             </div>
-        </div>
+            <div class="json-wrapper">
+                <pre id="json-text">{{ json }}</pre>
+                <button id="copy-btn" class="copy-btn" title="Copy JSON-LD">
+                    <i class="fas fa-copy"></i> Copy JSON-LD
+                </button>
+                <pre id="rdf-xml-text" style="display: none;">{{ rdf_xml }}</pre>
+                <pre id="turtle-text" style="display: none;">{{ turtle }}</pre>
+            </div>
 
         <!-- Mermaid graph -->
         <div class="row" id="mermaid-container">

@@ -82,6 +82,20 @@
         .copy-btn:hover {
             color: #0056b3;
         }
+
+        .serialization-btn-group {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            /* Adjust the spacing between buttons */
+            margin-top: 10px;
+            /* Space below the top-level buttons */
+        }
+
+        .serialization-btn-group .btn-check {
+            width: 100px;
+            /* Adjust the width of the buttons */
+        }
     </style>
 </head>
 
@@ -210,6 +224,21 @@
 
         <!-- Raw JSON-LD of the software -->
         <div class="row" id="json-ld-container">
+            <div class="serialization-btn-group" style="margin-top: 20px; text-align: center;">
+                <div class="btn-group" role="group" aria-label="Serialization options" style="width: 50%;">
+                    <input type="radio" onclick="showSerialization('json-text')" class="btn-check" name="serialization"
+                        id="serialization-json" autocomplete="off" checked>
+                    <label class="btn btn-sm btn-outline-info" for="serialization-json">JSON-LD</label>
+
+                    <input type="radio" onclick="showSerialization('rdf-xml-text')" class="btn-check"
+                        name="serialization" id="serialization-rdf" autocomplete="off">
+                    <label class="btn btn-sm btn-outline-info" for="serialization-rdf">RDF/XML</label>
+
+                    <input type="radio" onclick="showSerialization('turtle-text')" class="btn-check"
+                        name="serialization" id="serialization-turtle" autocomplete="off">
+                    <label class="btn btn-sm btn-outline-info" for="serialization-turtle">Turtle</label>
+                </div>
+            </div>
             <div class="json-wrapper">
                 <pre id="json-text">{
   "@id": "ark:99999/fake-software",
@@ -235,11 +264,52 @@
   "sourceOrganization": "ark:99999/fake-org",
   "includedInDataCatalog": "ark:99999/fake-catalog"
 }</pre>
-                <button onclick="copyJSON()" class="copy-btn" title="Copy JSON">
-                    <i class="fas fa-copy"></i>
+                <button id="copy-btn" class="copy-btn" title="Copy JSON-LD">
+                    <i class="fas fa-copy"></i> Copy JSON-LD
                 </button>
+                <pre id="rdf-xml-text" style="display: none;"><?xml version="1.0" encoding="utf-8"?>
+<rdf:RDF
+   xmlns:ns1="https://w3id.org/EVI#@"
+   xmlns:ns2="https://w3id.org/EVI#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+>
+  <rdf:Description rdf:about="https://w3id.org/EVI#dataset">
+    <ns1:id rdf:datatype="http://www.w3.org/2001/XMLSchema#string">ark:99999/fake-software</ns1:id>
+    <ns2:metadataType rdf:datatype="http://www.w3.org/2001/XMLSchema#string">evi:Software</ns2:metadataType>
+    <ns2:name rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Software Example</ns2:name>
+    <ns1:context rdf:datatype="http://www.w3.org/2001/XMLSchema#string">{'@vocab': 'https://schema.org/', 'evi': 'https://w3id.org/EVI#'}</ns1:context>
+    <ns2:url rdf:datatype="http://www.w3.org/2001/XMLSchema#string">None</ns2:url>
+    <ns2:description rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Fake Software to show template working.</ns2:description>
+    <ns2:license rdf:datatype="http://www.w3.org/2001/XMLSchema#string"> https://creativecommons.org/licenses/by/4.0/</ns2:license>
+    <ns2:keywords rdf:datatype="http://www.w3.org/2001/XMLSchema#string">[]</ns2:keywords>
+    <ns2:owner rdf:datatype="http://www.w3.org/2001/XMLSchema#string">John Doe</ns2:owner>
+    <ns2:distribution rdf:datatype="http://www.w3.org/2001/XMLSchema#string">['https://example.com/software/download', 'https://example.com/software/mirror']</ns2:distribution>
+    <ns2:usedBy rdf:datatype="http://www.w3.org/2001/XMLSchema#string">['ark:99999/fake-software', 'ark:99999/fake-computation']</ns2:usedBy>
+    <ns2:sourceOrganization rdf:datatype="http://www.w3.org/2001/XMLSchema#string">ark:99999/fake-org</ns2:sourceOrganization>
+    <ns2:includedInDataCatalog rdf:datatype="http://www.w3.org/2001/XMLSchema#string">ark:99999/fake-catalog</ns2:includedInDataCatalog>
+  </rdf:Description>
+</rdf:RDF>
+</pre>
+                <pre id="turtle-text" style="display: none;">@prefix ns1: <https://w3id.org/EVI#@> .
+@prefix ns2: <https://w3id.org/EVI#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+ns2:dataset ns1:context "{'@vocab': 'https://schema.org/', 'evi': 'https://w3id.org/EVI#'}"^^xsd:string ;
+    ns1:id "ark:99999/fake-software"^^xsd:string ;
+    ns2:description "Fake Software to show template working."^^xsd:string ;
+    ns2:distribution "['https://example.com/software/download', 'https://example.com/software/mirror']"^^xsd:string ;
+    ns2:includedInDataCatalog "ark:99999/fake-catalog"^^xsd:string ;
+    ns2:keywords "[]"^^xsd:string ;
+    ns2:license " https://creativecommons.org/licenses/by/4.0/"^^xsd:string ;
+    ns2:metadataType "evi:Software"^^xsd:string ;
+    ns2:name "Software Example"^^xsd:string ;
+    ns2:owner "John Doe"^^xsd:string ;
+    ns2:sourceOrganization "ark:99999/fake-org"^^xsd:string ;
+    ns2:url "None"^^xsd:string ;
+    ns2:usedBy "['ark:99999/fake-software', 'ark:99999/fake-computation']"^^xsd:string .
+
+</pre>
             </div>
-        </div>
 
         <!-- Mermaid graph -->
         <div class="row" id="mermaid-container">
@@ -347,6 +417,45 @@
         document.getElementById("json-ld-container").style.display = "none";
         document.getElementById("mermaid-container").style.display = "block";
     }
+
+    function showSerialization(elementId) {
+        var formats = ['json-text', 'rdf-xml-text', 'turtle-text'];
+        var copyBtn = document.getElementById('copy-btn');
+        formats.forEach(function (format) {
+            document.getElementById(format).style.display = 'none';
+        });
+        document.getElementById(elementId).style.display = 'block';
+
+        // Update the copy button based on the selected serialization
+        if (elementId === 'json-text') {
+            copyBtn.onclick = function () { copyContent('json-text'); };
+            copyBtn.title = 'Copy JSON-LD';
+            copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copy JSON-LD';
+        } else if (elementId === 'rdf-xml-text') {
+            copyBtn.onclick = function () { copyContent('rdf-xml-text'); };
+            copyBtn.title = 'Copy RDF/XML';
+            copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copy RDF/XML';
+        } else if (elementId === 'turtle-text') {
+            copyBtn.onclick = function () { copyContent('turtle-text'); };
+            copyBtn.title = 'Copy Turtle';
+            copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copy Turtle';
+        }
+    }
+
+    // Call showSerialization with the default format on page load
+    showSerialization('json-text');
+
+
+    function copyContent(elementId) {
+        var content = document.getElementById(elementId);
+        navigator.clipboard.writeText(content.textContent).then(function () {
+            alert("Content copied to clipboard.");
+        }, function () {
+            alert("Failed to copy content to clipboard.");
+        });
+    }
+
+
 
     mermaid.initialize({ startOnLoad: true });
 

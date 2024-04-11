@@ -82,6 +82,20 @@
         .copy-btn:hover {
             color: #0056b3;
         }
+
+        .serialization-btn-group {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            /* Adjust the spacing between buttons */
+            margin-top: 10px;
+            /* Space below the top-level buttons */
+        }
+
+        .serialization-btn-group .btn-check {
+            width: 100px;
+            /* Adjust the width of the buttons */
+        }
     </style>
 </head>
 
@@ -316,6 +330,21 @@
 
         <!-- Raw JSON-LD of the user -->
         <div class="row" id="json-ld-container">
+            <div class="serialization-btn-group" style="margin-top: 20px; text-align: center;">
+                <div class="btn-group" role="group" aria-label="Serialization options" style="width: 50%;">
+                    <input type="radio" onclick="showSerialization('json-text')" class="btn-check" name="serialization"
+                        id="serialization-json" autocomplete="off" checked>
+                    <label class="btn btn-sm btn-outline-info" for="serialization-json">JSON-LD</label>
+
+                    <input type="radio" onclick="showSerialization('rdf-xml-text')" class="btn-check"
+                        name="serialization" id="serialization-rdf" autocomplete="off">
+                    <label class="btn btn-sm btn-outline-info" for="serialization-rdf">RDF/XML</label>
+
+                    <input type="radio" onclick="showSerialization('turtle-text')" class="btn-check"
+                        name="serialization" id="serialization-turtle" autocomplete="off">
+                    <label class="btn btn-sm btn-outline-info" for="serialization-turtle">Turtle</label>
+                </div>
+            </div>
             <div class="json-wrapper">
                 <pre id="json-text">{
   "@id": "ark:99999/fake-user",
@@ -354,15 +383,58 @@
   ],
   "evidencegraphs": []
 }</pre>
-                <button onclick="copyJSON()" class="copy-btn" title="Copy JSON">
-                    <i class="fas fa-copy"></i>
+                <button id="copy-btn" class="copy-btn" title="Copy JSON-LD">
+                    <i class="fas fa-copy"></i> Copy JSON-LD
                 </button>
-            </div>
-        </div>
+                <pre id="rdf-xml-text" style="display: none;"><?xml version="1.0" encoding="utf-8"?>
+<rdf:RDF
+   xmlns:ns1="https://w3id.org/EVI#@"
+   xmlns:ns2="https://w3id.org/EVI#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+>
+  <rdf:Description rdf:about="https://w3id.org/EVI#dataset">
+    <ns1:id rdf:datatype="http://www.w3.org/2001/XMLSchema#string">ark:99999/fake-user</ns1:id>
+    <ns1:type rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Person</ns1:type>
+    <ns2:name rdf:datatype="http://www.w3.org/2001/XMLSchema#string">fake user</ns2:name>
+    <ns1:context rdf:datatype="http://www.w3.org/2001/XMLSchema#string">{'@vocab': 'https://schema.org/', 'evi': 'https://w3id.org/EVI#'}</ns1:context>
+    <ns2:url rdf:datatype="http://www.w3.org/2001/XMLSchema#string">None</ns2:url>
+    <ns2:email rdf:datatype="http://www.w3.org/2001/XMLSchema#string">user@example.com</ns2:email>
+    <ns2:password rdf:datatype="http://www.w3.org/2001/XMLSchema#string">password123</ns2:password>
+    <ns2:organizations rdf:datatype="http://www.w3.org/2001/XMLSchema#string">['Org1', 'Org2']</ns2:organizations>
+    <ns2:projects rdf:datatype="http://www.w3.org/2001/XMLSchema#string">['Project1', 'Project2']</ns2:projects>
+    <ns2:datasets rdf:datatype="http://www.w3.org/2001/XMLSchema#string">['ark:99999/fake-dataset', 'Dataset2']</ns2:datasets>
+    <ns2:rocrates rdf:datatype="http://www.w3.org/2001/XMLSchema#string">['ROCrate1', 'ROCrate2']</ns2:rocrates>
+    <ns2:software rdf:datatype="http://www.w3.org/2001/XMLSchema#string">['ark:99999/fake-software', 'Software2']</ns2:software>
+    <ns2:computations rdf:datatype="http://www.w3.org/2001/XMLSchema#string">['Computation1', 'Computation2']</ns2:computations>
+    <ns2:evidencegraphs rdf:datatype="http://www.w3.org/2001/XMLSchema#string">[]</ns2:evidencegraphs>
+  </rdf:Description>
+</rdf:RDF>
+</pre>
+                <pre id="turtle-text" style="display: none;">@prefix ns1: <https://w3id.org/EVI#@> .
+@prefix ns2: <https://w3id.org/EVI#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-        <!-- Mermaid graph -->
-        <div class="row" id="mermaid-container">
-            <!--
+ns2:dataset ns1:context "{'@vocab': 'https://schema.org/', 'evi': 'https://w3id.org/EVI#'}"^^xsd:string ;
+    ns1:id "ark:99999/fake-user"^^xsd:string ;
+    ns1:type "Person"^^xsd:string ;
+    ns2:computations "['Computation1', 'Computation2']"^^xsd:string ;
+    ns2:datasets "['ark:99999/fake-dataset', 'Dataset2']"^^xsd:string ;
+    ns2:email "user@example.com"^^xsd:string ;
+    ns2:evidencegraphs "[]"^^xsd:string ;
+    ns2:name "fake user"^^xsd:string ;
+    ns2:organizations "['Org1', 'Org2']"^^xsd:string ;
+    ns2:password "password123"^^xsd:string ;
+    ns2:projects "['Project1', 'Project2']"^^xsd:string ;
+    ns2:rocrates "['ROCrate1', 'ROCrate2']"^^xsd:string ;
+    ns2:software "['ark:99999/fake-software', 'Software2']"^^xsd:string ;
+    ns2:url "None"^^xsd:string .
+
+</pre>
+            </div>
+
+            <!-- Mermaid graph -->
+            <div class="row" id="mermaid-container">
+                <!--
             %%{
               init: {
                 'theme': 'base',
@@ -374,7 +446,7 @@
               }
             }%%
             -->
-            <pre class="mermaid" id="mermaid-text">
+                <pre class="mermaid" id="mermaid-text">
             %%{
               init: {
                 'theme': 'neutral',
@@ -437,17 +509,17 @@
             id12 -->|generatedBy| id14
             </pre>
 
-            <script type="module">
-                // Example of using the render function
-                import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
-                mermaid.initialize({
-                    startOnLoad: true,
+                <script type="module">
+                    // Example of using the render function
+                    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+                    mermaid.initialize({
+                        startOnLoad: true,
 
-                });
-            </script>
+                    });
+                </script>
+            </div>
         </div>
-    </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     function showMetadata() {
         document.getElementById("metadata-container").style.display = "block";
@@ -466,6 +538,45 @@
         document.getElementById("json-ld-container").style.display = "none";
         document.getElementById("mermaid-container").style.display = "block";
     }
+
+    function showSerialization(elementId) {
+        var formats = ['json-text', 'rdf-xml-text', 'turtle-text'];
+        var copyBtn = document.getElementById('copy-btn');
+        formats.forEach(function (format) {
+            document.getElementById(format).style.display = 'none';
+        });
+        document.getElementById(elementId).style.display = 'block';
+
+        // Update the copy button based on the selected serialization
+        if (elementId === 'json-text') {
+            copyBtn.onclick = function () { copyContent('json-text'); };
+            copyBtn.title = 'Copy JSON-LD';
+            copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copy JSON-LD';
+        } else if (elementId === 'rdf-xml-text') {
+            copyBtn.onclick = function () { copyContent('rdf-xml-text'); };
+            copyBtn.title = 'Copy RDF/XML';
+            copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copy RDF/XML';
+        } else if (elementId === 'turtle-text') {
+            copyBtn.onclick = function () { copyContent('turtle-text'); };
+            copyBtn.title = 'Copy Turtle';
+            copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copy Turtle';
+        }
+    }
+
+    // Call showSerialization with the default format on page load
+    showSerialization('json-text');
+
+
+    function copyContent(elementId) {
+        var content = document.getElementById(elementId);
+        navigator.clipboard.writeText(content.textContent).then(function () {
+            alert("Content copied to clipboard.");
+        }, function () {
+            alert("Failed to copy content to clipboard.");
+        });
+    }
+
+
 
     mermaid.initialize({ startOnLoad: true });
 
