@@ -7,7 +7,7 @@
     <div id="main-content" class="container">
         <div class="row">
             <div class="col-lg-auto">
-                <h3>Schema Metadata: {{ schema.guid }}</h3>
+                <h3>ROCrate Metadata: {{ rocrate.guid }}</h3>
             </div>
         </div>
 
@@ -41,39 +41,51 @@
                     <tbody>
                         <tr>
                             <td>Name</td>
-                            <td>{{ schema.name }}</td>
+                            <td>{{ rocrate.name }}</td>
                         </tr>
                         <tr>
                             <td>Persistant Identifier</td>
                             <td>
-                                {{ schema.guid | add_link }}
+                                {{ rocrate.guid | add_link }}
                             </td>
                         </tr>
                         <tr>
                             <td>Description</td>
-                            <td>{{ schema.description }}</td>
+                            <td>{{ rocrate.description }}</td>
                         </tr>
                         <tr>
-                            <td>Properties</td>
+                            <td>Source Organization</td>
                             <td>
-                                {% for property_name, property_details in schema.properties.items() %}
-                                <div class="accordion" id="accordion{{ property_name | replace(' ', '-') }}">
+                                {% if rocrate.sourceOrganization %}
+                                {{ rocrate.sourceOrganization | add_link }}
+                                {% else %}
+                                No source organization available
+                                {% endif %}
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>Contains</td>
+                            <td>
+                                {% for metadata in rocrate.metadataGraph %}
+                                <div class="accordion" id="accordion{{ metadata.name | replace(' ', '-') }}">
                                     <div class="accordion-item">
                                         <h2 class="accordion-header">
                                             <button class="accordion-button" type="button" data-bs-toggle="collapse"
-                                                data-bs-target="#collapse{{ property_name | replace(' ', '-') }}"
+                                                data-bs-target="#collapse{{ metadata.name | replace(' ', '-') }}"
                                                 aria-expanded="true"
-                                                aria-controls="collapse{{ property_name | replace(' ', '-') }}">
-                                                {{ property_name }}
+                                                aria-controls="collapse{{ metadata.name | replace(' ', '-') }}">
+                                                {{ metadata.name }}
                                             </button>
                                         </h2>
-                                        <div id="collapse{{ property_name | replace(' ', '-') }}"
+                                        <div id="collapse{{ metadata.name | replace(' ', '-') }}"
                                             class="accordion-collapse collapse"
-                                            data-bs-parent="#accordion{{ property_name | replace(' ', '-') }}">
+                                            data-bs-parent="#accordion{{ metadata.name | replace(' ', '-') }}">
                                             <div class="accordion-body">
-                                                <strong>Description:</strong> {{ property_details.description }}<br>
-                                                <strong>Type:</strong> {{ property_details.type }}<br>
-                                                <strong>Index:</strong> {{ property_details.index }}
+                                                <strong>Name:</strong> {{ metadata.name }}<br>
+                                                <strong>Description:</strong> {{ metadata.description }}<br>
+                                                <strong>Type:</strong> {{ metadata.metadataType }}<br>
+                                                <strong>Keywords:</strong> {{ metadata.keywords }}<br>
                                             </div>
                                         </div>
                                     </div>
@@ -82,36 +94,34 @@
                             </td>
                         </tr>
                         <tr>
-                            <td>Required</td>
+                            <td>Distributions</td>
                             <td>
-                                <div class="accordion" id="accordionrequired">
+                                <div class="accordion" id="accordionDistributions">
                                     <div class="accordion-item">
                                         <h2 class="accordion-header">
                                             <button class="accordion-button" type="button" data-bs-toggle="collapse"
-                                                data-bs-target="#collapserequired" aria-expanded="false"
-                                                aria-controls="collapserequired">
-                                                required
+                                                data-bs-target="#collapseDistributions" aria-expanded="false"
+                                                aria-controls="collapseDistributions">
+                                                Distributions
                                             </button>
                                         </h2>
-                                        <div id="collapserequired" class="accordion-collapse collapse"
-                                            data-bs-parent="#accordionrequired">
+                                        <div id="collapseDistributions" class="accordion-collapse collapse"
+                                            data-bs-parent="#accordionDistributions">
                                             <div class="accordion-body">
                                                 <ul>
-                                                    {% for d in schema.required %}
+                                                    {% if rocrate.distribution %}
+                                                    {% for d in rocrate.distribution %}
                                                     <li>{{ d | add_link }}</li>
-                                                    {% else %}
-                                                    <li></li>
                                                     {% endfor %}
+                                                    {% else %}
+                                                    <li>No distributions available</li>
+                                                    {% endif %}
                                                 </ul>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </td>
-                        </tr>
-                        <tr>
-                            <td>Separator</td>
-                            <td>{{ schema.separator }}</td>
                         </tr>
                     </tbody>
                 </table>

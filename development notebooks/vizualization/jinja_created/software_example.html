@@ -269,44 +269,44 @@
                 </button>
                 <pre id="rdf-xml-text" style="display: none;"><?xml version="1.0" encoding="utf-8"?>
 <rdf:RDF
-   xmlns:ns1="https://w3id.org/EVI#@"
-   xmlns:ns2="https://w3id.org/EVI#"
+   xmlns:ns1="https://w3id.org/EVI#"
+   xmlns:ns2="https://w3id.org/EVI#@"
    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
 >
   <rdf:Description rdf:about="https://w3id.org/EVI#dataset">
-    <ns1:id rdf:datatype="http://www.w3.org/2001/XMLSchema#string">ark:99999/fake-software</ns1:id>
-    <ns2:metadataType rdf:datatype="http://www.w3.org/2001/XMLSchema#string">evi:Software</ns2:metadataType>
-    <ns2:name rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Software Example</ns2:name>
-    <ns1:context rdf:datatype="http://www.w3.org/2001/XMLSchema#string">{'@vocab': 'https://schema.org/', 'evi': 'https://w3id.org/EVI#'}</ns1:context>
-    <ns2:url rdf:datatype="http://www.w3.org/2001/XMLSchema#string">None</ns2:url>
-    <ns2:description rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Fake Software to show template working.</ns2:description>
-    <ns2:license rdf:datatype="http://www.w3.org/2001/XMLSchema#string"> https://creativecommons.org/licenses/by/4.0/</ns2:license>
-    <ns2:keywords rdf:datatype="http://www.w3.org/2001/XMLSchema#string">[]</ns2:keywords>
-    <ns2:owner rdf:datatype="http://www.w3.org/2001/XMLSchema#string">John Doe</ns2:owner>
-    <ns2:distribution rdf:datatype="http://www.w3.org/2001/XMLSchema#string">['https://example.com/software/download', 'https://example.com/software/mirror']</ns2:distribution>
-    <ns2:usedBy rdf:datatype="http://www.w3.org/2001/XMLSchema#string">['ark:99999/fake-software', 'ark:99999/fake-computation']</ns2:usedBy>
-    <ns2:sourceOrganization rdf:datatype="http://www.w3.org/2001/XMLSchema#string">ark:99999/fake-org</ns2:sourceOrganization>
-    <ns2:includedInDataCatalog rdf:datatype="http://www.w3.org/2001/XMLSchema#string">ark:99999/fake-catalog</ns2:includedInDataCatalog>
+    <ns2:id rdf:datatype="http://www.w3.org/2001/XMLSchema#string">ark:99999/fake-software</ns2:id>
+    <ns1:metadataType rdf:datatype="http://www.w3.org/2001/XMLSchema#string">evi:Software</ns1:metadataType>
+    <ns1:name rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Software Example</ns1:name>
+    <ns2:context rdf:datatype="http://www.w3.org/2001/XMLSchema#string">{'@vocab': 'https://schema.org/', 'evi': 'https://w3id.org/EVI#'}</ns2:context>
+    <ns1:url rdf:datatype="http://www.w3.org/2001/XMLSchema#string">None</ns1:url>
+    <ns1:description rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Fake Software to show template working.</ns1:description>
+    <ns1:license rdf:datatype="http://www.w3.org/2001/XMLSchema#string"> https://creativecommons.org/licenses/by/4.0/</ns1:license>
+    <ns1:keywords rdf:datatype="http://www.w3.org/2001/XMLSchema#string">[]</ns1:keywords>
+    <ns1:owner rdf:datatype="http://www.w3.org/2001/XMLSchema#string">John Doe</ns1:owner>
+    <ns1:distribution rdf:datatype="http://www.w3.org/2001/XMLSchema#string">['https://example.com/software/download', 'https://example.com/software/mirror']</ns1:distribution>
+    <ns1:usedBy rdf:datatype="http://www.w3.org/2001/XMLSchema#string">['ark:99999/fake-software', 'ark:99999/fake-computation']</ns1:usedBy>
+    <ns1:sourceOrganization rdf:datatype="http://www.w3.org/2001/XMLSchema#string">ark:99999/fake-org</ns1:sourceOrganization>
+    <ns1:includedInDataCatalog rdf:datatype="http://www.w3.org/2001/XMLSchema#string">ark:99999/fake-catalog</ns1:includedInDataCatalog>
   </rdf:Description>
 </rdf:RDF>
 </pre>
-                <pre id="turtle-text" style="display: none;">@prefix ns1: <https://w3id.org/EVI#@> .
-@prefix ns2: <https://w3id.org/EVI#> .
+                <pre id="turtle-text" style="display: none;">@prefix ns1: <https://w3id.org/EVI#> .
+@prefix ns2: <https://w3id.org/EVI#@> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-ns2:dataset ns1:context "{'@vocab': 'https://schema.org/', 'evi': 'https://w3id.org/EVI#'}"^^xsd:string ;
-    ns1:id "ark:99999/fake-software"^^xsd:string ;
-    ns2:description "Fake Software to show template working."^^xsd:string ;
-    ns2:distribution "['https://example.com/software/download', 'https://example.com/software/mirror']"^^xsd:string ;
-    ns2:includedInDataCatalog "ark:99999/fake-catalog"^^xsd:string ;
-    ns2:keywords "[]"^^xsd:string ;
-    ns2:license " https://creativecommons.org/licenses/by/4.0/"^^xsd:string ;
-    ns2:metadataType "evi:Software"^^xsd:string ;
-    ns2:name "Software Example"^^xsd:string ;
-    ns2:owner "John Doe"^^xsd:string ;
-    ns2:sourceOrganization "ark:99999/fake-org"^^xsd:string ;
-    ns2:url "None"^^xsd:string ;
-    ns2:usedBy "['ark:99999/fake-software', 'ark:99999/fake-computation']"^^xsd:string .
+ns1:dataset ns2:context "{'@vocab': 'https://schema.org/', 'evi': 'https://w3id.org/EVI#'}"^^xsd:string ;
+    ns2:id "ark:99999/fake-software"^^xsd:string ;
+    ns1:description "Fake Software to show template working."^^xsd:string ;
+    ns1:distribution "['https://example.com/software/download', 'https://example.com/software/mirror']"^^xsd:string ;
+    ns1:includedInDataCatalog "ark:99999/fake-catalog"^^xsd:string ;
+    ns1:keywords "[]"^^xsd:string ;
+    ns1:license " https://creativecommons.org/licenses/by/4.0/"^^xsd:string ;
+    ns1:metadataType "evi:Software"^^xsd:string ;
+    ns1:name "Software Example"^^xsd:string ;
+    ns1:owner "John Doe"^^xsd:string ;
+    ns1:sourceOrganization "ark:99999/fake-org"^^xsd:string ;
+    ns1:url "None"^^xsd:string ;
+    ns1:usedBy "['ark:99999/fake-software', 'ark:99999/fake-computation']"^^xsd:string .
 
 </pre>
             </div>

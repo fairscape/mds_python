@@ -1,0 +1,648 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Fairscape ROCrate Metadata</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs"></script>
+    <style>
+        body {
+            background-color: #f8f9fa;
+            /* Light grey background */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        h3 {
+            color: #007bff;
+        }
+
+        .container {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+
+        .accordion-button {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .accordion-button:not(.collapsed) {
+            background-color: #0056b3;
+            color: white;
+        }
+
+        .table {
+            margin-top: 20px;
+        }
+
+        .table thead th {
+            background-color: #007bff;
+            color: white;
+        }
+
+        #mermaid-container {
+            display: block;
+        }
+
+        #json-ld-container {
+            display: none;
+        }
+
+        .json-wrapper {
+            position: relative;
+            padding: 20px;
+            margin-top: 20px;
+            /* Adds space below the banner */
+            background-color: #f9f9f9;
+            /* Slightly different background color */
+            border: 1px solid #ddd;
+            /* Adds a border */
+            border-radius: 5px;
+            /* Adds rounded corners */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            /* Adds shading */
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            color: #007bff;
+            cursor: pointer;
+        }
+
+        .copy-btn:hover {
+            color: #0056b3;
+        }
+
+        .serialization-btn-group {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            /* Adjust the spacing between buttons */
+            margin-top: 10px;
+            /* Space below the top-level buttons */
+        }
+
+        .serialization-btn-group .btn-check {
+            width: 100px;
+            /* Adjust the width of the buttons */
+        }
+    </style>
+</head>
+
+<body>
+    <div id="main-content" class="container">
+        <div class="row">
+            <div class="col-lg-auto">
+                <h3>ROCrate Metadata: ark:59852/rocrate-name-for-pipeline-run-PucM24Z</h3>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Button Group for Selecting Content -->
+            <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
+                <input type="radio" onclick="showMetadata();" class="btn-check" name="btnradio" id="btn-metadata"
+                    autocomplete="off" checked>
+                <label class="btn btn-outline-primary" for="btn-metadata">Metadata</label>
+
+                <input type="radio" onclick="showJSON();" class="btn-check" name="btnradio" id="btn-json"
+                    autocomplete="off">
+                <label class="btn btn-outline-primary" for="btn-json">JSON-LD</label>
+
+                <input type="radio" onclick="showMermaid()" class="btn-check" name="btnradio" id="btn-mermaid"
+                    autocomplete="off">
+                <label class="btn btn-outline-primary" for="btn-mermaid">Evidence Graph</label>
+            </div>
+        </div>
+
+        <!-- Table of all properties -->
+        <div class="row" id="metadata-container">
+            <div class="container">
+                <table class="table table-hover table-striped">
+                    <thead>
+                        <tr>
+                            <th scope="col">Property</th>
+                            <th scope="col">Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Name</td>
+                            <td>Name for pipeline run</td>
+                        </tr>
+                        <tr>
+                            <td>Persistant Identifier</td>
+                            <td>
+                                <a href="https://fairscape.pods.uvarc.io/ark:59852/rocrate-name-for-pipeline-run-PucM24Z">ark:59852/rocrate-name-for-pipeline-run-PucM24Z</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Description</td>
+                            <td>Name of lab or group. Ex: Ideker Name of funding source or project Name of release. Example: 0.1 alpha Name of cell line. Ex: U2OS Name of treatment, Ex: untreated Name of gene set. Example chromatin Name for pipeline run AP-MS Embedding AP-MS embedding</td>
+                        </tr>
+                        <tr>
+                            <td>Source Organization</td>
+                            <td>
+                                
+                                No source organization available
+                                
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>Contains</td>
+                            <td>
+                                
+                                <div class="accordion" id="accordioncellmaps_ppi_embedding">
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                                data-bs-target="#collapsecellmaps_ppi_embedding"
+                                                aria-expanded="true"
+                                                aria-controls="collapsecellmaps_ppi_embedding">
+                                                cellmaps_ppi_embedding
+                                            </button>
+                                        </h2>
+                                        <div id="collapsecellmaps_ppi_embedding"
+                                            class="accordion-collapse collapse"
+                                            data-bs-parent="#accordioncellmaps_ppi_embedding">
+                                            <div class="accordion-body">
+                                                <strong>Name:</strong> cellmaps_ppi_embedding<br>
+                                                <strong>Description:</strong> Name of lab or group. Ex: Ideker Name of funding source or project Name of release. Example: 0.1 alpha Name of cell line. Ex: U2OS Name of treatment, Ex: untreated Name of gene set. Example chromatin Name for pipeline run AP-MS Embedding AP-MS embedding A tool to generate embeddings from networks<br>
+                                                <strong>Type:</strong> https://w3id.org/EVI#Software<br>
+                                                <strong>Keywords:</strong> ['Name of lab or group. Ex: Ideker', 'Name of funding source or project', 'Name of release. Example: 0.1 alpha', 'Name of cell line. Ex: U2OS', 'Name of treatment, Ex: untreated', 'Name of gene set. Example chromatin', 'Name for pipeline run', 'AP-MS Embedding', 'AP-MS', 'embedding', 'tools', 'cellmaps_ppi_embedding']<br>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                <div class="accordion" id="accordioncellmaps_ppi_embedding-output-file">
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                                data-bs-target="#collapsecellmaps_ppi_embedding-output-file"
+                                                aria-expanded="true"
+                                                aria-controls="collapsecellmaps_ppi_embedding-output-file">
+                                                cellmaps_ppi_embedding output file
+                                            </button>
+                                        </h2>
+                                        <div id="collapsecellmaps_ppi_embedding-output-file"
+                                            class="accordion-collapse collapse"
+                                            data-bs-parent="#accordioncellmaps_ppi_embedding-output-file">
+                                            <div class="accordion-body">
+                                                <strong>Name:</strong> cellmaps_ppi_embedding output file<br>
+                                                <strong>Description:</strong> Name of lab or group. Ex: Ideker Name of funding source or project Name of release. Example: 0.1 alpha Name of cell line. Ex: U2OS Name of treatment, Ex: untreated Name of gene set. Example chromatin Name for pipeline run AP-MS Embedding AP-MS embedding file<br>
+                                                <strong>Type:</strong> https://w3id.org/EVI#Dataset<br>
+                                                <strong>Keywords:</strong> ['Name of lab or group. Ex: Ideker', 'Name of funding source or project', 'Name of release. Example: 0.1 alpha', 'Name of cell line. Ex: U2OS', 'Name of treatment, Ex: untreated', 'Name of gene set. Example chromatin', 'Name for pipeline run', 'AP-MS Embedding', 'AP-MS', 'embedding', 'tools', 'cellmaps_ppi_embedding', 'file']<br>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                <div class="accordion" id="accordionAP-MS-Embedding">
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                                data-bs-target="#collapseAP-MS-Embedding"
+                                                aria-expanded="true"
+                                                aria-controls="collapseAP-MS-Embedding">
+                                                AP-MS Embedding
+                                            </button>
+                                        </h2>
+                                        <div id="collapseAP-MS-Embedding"
+                                            class="accordion-collapse collapse"
+                                            data-bs-parent="#accordionAP-MS-Embedding">
+                                            <div class="accordion-body">
+                                                <strong>Name:</strong> AP-MS Embedding<br>
+                                                <strong>Description:</strong> Name of lab or group. Ex: Ideker Name of funding source or project Name of release. Example: 0.1 alpha Name of cell line. Ex: U2OS Name of treatment, Ex: untreated Name of gene set. Example chromatin Name for pipeline run AP-MS Embedding AP-MS embedding run of cellmaps_ppi_embedding<br>
+                                                <strong>Type:</strong> https://w3id.org/EVI#Computation<br>
+                                                <strong>Keywords:</strong> ['Name of lab or group. Ex: Ideker', 'Name of funding source or project', 'Name of release. Example: 0.1 alpha', 'Name of cell line. Ex: U2OS', 'Name of treatment, Ex: untreated', 'Name of gene set. Example chromatin', 'Name for pipeline run', 'AP-MS Embedding', 'AP-MS', 'embedding', 'tools', 'cellmaps_ppi_embedding', 'file', 'computation']<br>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Distributions</td>
+                            <td>
+                                <div class="accordion" id="accordionDistributions">
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                                data-bs-target="#collapseDistributions" aria-expanded="false"
+                                                aria-controls="collapseDistributions">
+                                                Distributions
+                                            </button>
+                                        </h2>
+                                        <div id="collapseDistributions" class="accordion-collapse collapse"
+                                            data-bs-parent="#accordionDistributions">
+                                            <div class="accordion-body">
+                                                <ul>
+                                                    
+                                                    <li>No distributions available</li>
+                                                    
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="row" id="json-ld-container">
+            <div class="serialization-btn-group" style="margin-top: 20px; text-align: center;">
+                <div class="btn-group" role="group" aria-label="Serialization options" style="width: 50%;">
+                    <input type="radio" onclick="showSerialization('json-text')" class="btn-check" name="serialization"
+                        id="serialization-json" autocomplete="off" checked>
+                    <label class="btn btn-sm btn-outline-info" for="serialization-json">JSON-LD</label>
+
+                    <input type="radio" onclick="showSerialization('rdf-xml-text')" class="btn-check"
+                        name="serialization" id="serialization-rdf" autocomplete="off">
+                    <label class="btn btn-sm btn-outline-info" for="serialization-rdf">RDF/XML</label>
+
+                    <input type="radio" onclick="showSerialization('turtle-text')" class="btn-check"
+                        name="serialization" id="serialization-turtle" autocomplete="off">
+                    <label class="btn btn-sm btn-outline-info" for="serialization-turtle">Turtle</label>
+                </div>
+            </div>
+            <div class="json-wrapper">
+                <pre id="json-text">{
+  "@id": "ark:59852/rocrate-name-for-pipeline-run-PucM24Z",
+  "@type": "EVI:Dataset",
+  "name": "Name for pipeline run",
+  "@context": {
+    "@vocab": "https://schema.org/",
+    "EVI": "https://w3id.org/EVI#"
+  },
+  "url": null,
+  "additionalType": "ROCrate",
+  "sourceOrganization": null,
+  "@graph": [
+    {
+      "@id": "a8337b1e-a7b4-4cfc-b334-b6ef781b6c04:software::2.ppi_embedding",
+      "metadataType": "https://w3id.org/EVI#Software",
+      "name": "cellmaps_ppi_embedding",
+      "@context": {
+        "@vocab": "https://schema.org/",
+        "evi": "https://w3id.org/EVI#"
+      },
+      "url": "https://github.com/idekerlab/cellmaps_ppi_embedding",
+      "additionalType": "Software",
+      "author": "Cell Maps team",
+      "dateModified": "2024-03-15",
+      "version": "0.2.0",
+      "description": "Name of lab or group. Ex: Ideker Name of funding source or project Name of release. Example: 0.1 alpha Name of cell line. Ex: U2OS Name of treatment, Ex: untreated Name of gene set. Example chromatin Name for pipeline run AP-MS Embedding AP-MS embedding A tool to generate embeddings from networks",
+      "associatedPublication": null,
+      "additionalDocumentation": null,
+      "format": "py",
+      "usedByComputation": [],
+      "contentUrl": "https://github.com/idekerlab/cellmaps_ppi_embedding",
+      "keywords": [
+        "Name of lab or group. Ex: Ideker",
+        "Name of funding source or project",
+        "Name of release. Example: 0.1 alpha",
+        "Name of cell line. Ex: U2OS",
+        "Name of treatment, Ex: untreated",
+        "Name of gene set. Example chromatin",
+        "Name for pipeline run",
+        "AP-MS Embedding",
+        "AP-MS",
+        "embedding",
+        "tools",
+        "cellmaps_ppi_embedding"
+      ]
+    },
+    {
+      "@id": "f916fa2f-c16b-4436-bb53-7085c5f672fb:dataset::2.ppi_embedding",
+      "metadataType": "https://w3id.org/EVI#Dataset",
+      "name": "cellmaps_ppi_embedding output file",
+      "@context": {
+        "@vocab": "https://schema.org/",
+        "evi": "https://w3id.org/EVI#"
+      },
+      "url": null,
+      "description": "Name of lab or group. Ex: Ideker Name of funding source or project Name of release. Example: 0.1 alpha Name of cell line. Ex: U2OS Name of treatment, Ex: untreated Name of gene set. Example chromatin Name for pipeline run AP-MS Embedding AP-MS embedding file",
+      "license": " https://creativecommons.org/licenses/by/4.0/",
+      "keywords": [
+        "Name of lab or group. Ex: Ideker",
+        "Name of funding source or project",
+        "Name of release. Example: 0.1 alpha",
+        "Name of cell line. Ex: U2OS",
+        "Name of treatment, Ex: untreated",
+        "Name of gene set. Example chromatin",
+        "Name for pipeline run",
+        "AP-MS Embedding",
+        "AP-MS",
+        "embedding",
+        "tools",
+        "cellmaps_ppi_embedding",
+        "file"
+      ],
+      "additionalType": "Dataset",
+      "author": "cellmaps_ppi_embedding",
+      "datePublished": "2024-03-15",
+      "version": "0.2.0",
+      "associatedPublication": null,
+      "additionalDocumentation": null,
+      "format": "tsv",
+      "schema": "https://raw.githubusercontent.com/fairscape/cm4ai-schemas/main/v0.1.0/cm4ai_schema_apms_embedding.json",
+      "generatedBy": [],
+      "derivedFrom": [],
+      "usedByComputation": [],
+      "contentUrl": "file:///home/cm4ai/testrun/2.ppi_embedding/ppi_emd.tsv",
+      "usedBy": []
+    },
+    {
+      "@id": "78347c9c-2d5d-409b-8c57-82ef4eb77fab:computation::2.ppi_embedding",
+      "metadataType": "https://w3id.org/EVI#Computation",
+      "name": "AP-MS Embedding",
+      "@context": {
+        "@vocab": "https://schema.org/",
+        "evi": "https://w3id.org/EVI#"
+      },
+      "url": null,
+      "additionalType": "Computation",
+      "runBy": "cm4ai",
+      "dateCreated": "2024-03-15",
+      "associatedPublication": null,
+      "additionalDocumentation": null,
+      "command": "{'outdir': 'testrun', 'cm4ai_apms': '/home/cm4ai/challenges/pipeline/data/cm4ai_chromatin_mda-mb-468_untreated_apms_0.1_alpha/apms.tsv', 'cm4ai_image': '/home/cm4ai/challenges/pipeline/data/cm4ai_chromatin_mda-mb-468_untreated_ifimage_0.1_alpha/MDA-MB-468_untreated_antibody_gene_table.tsv', 'slurm': False, 'samples': None, 'unique': None, 'edgelist': None, 'baitlist': None, 'model_path': 'https://github.com/CellProfiling/densenet/releases/download/v0.1.0/external_crop512_focal_slov_hardlog_class_densenet121_dropout_i768_aug2_5folds_fold0_final.pth', 'fold': [1, 2], 'proteinatlasxml': 'https://www.proteinatlas.org/download/proteinatlas.xml.gz', 'ppi_cutoffs': [0.001, 0.002, 0.003, 0.004, 0.005, 0.006, 0.007, 0.008, 0.009, 0.01, 0.02, 0.03, 0.04, 0.05, 0.1], 'example_provenance': False, 'example_registered_provenance': False, 'provenance': 'pipe_prov.json', 'fake': True, 'logconf': None, 'verbose': 1, 'program': '/home/cm4ai/miniconda/envs/cm4ai/bin/cellmaps_pipelinecmd.py', 'version': '0.1.0a20'}",
+      "usedSoftware": [
+        "a8337b1e-a7b4-4cfc-b334-b6ef781b6c04:software::2.ppi_embedding"
+      ],
+      "usedDataset": [
+        "ark:59852/rocrate-name-for-pipeline-run-xDiHP0K"
+      ],
+      "generated": [
+        "f916fa2f-c16b-4436-bb53-7085c5f672fb:dataset::2.ppi_embedding"
+      ],
+      "keywords": [
+        "Name of lab or group. Ex: Ideker",
+        "Name of funding source or project",
+        "Name of release. Example: 0.1 alpha",
+        "Name of cell line. Ex: U2OS",
+        "Name of treatment, Ex: untreated",
+        "Name of gene set. Example chromatin",
+        "Name for pipeline run",
+        "AP-MS Embedding",
+        "AP-MS",
+        "embedding",
+        "tools",
+        "cellmaps_ppi_embedding",
+        "file",
+        "computation"
+      ],
+      "description": "Name of lab or group. Ex: Ideker Name of funding source or project Name of release. Example: 0.1 alpha Name of cell line. Ex: U2OS Name of treatment, Ex: untreated Name of gene set. Example chromatin Name for pipeline run AP-MS Embedding AP-MS embedding run of cellmaps_ppi_embedding"
+    }
+  ],
+  "contentURL": null,
+  "distribution": null,
+  "description": "Name of lab or group. Ex: Ideker Name of funding source or project Name of release. Example: 0.1 alpha Name of cell line. Ex: U2OS Name of treatment, Ex: untreated Name of gene set. Example chromatin Name for pipeline run AP-MS Embedding AP-MS embedding",
+  "keywords": [
+    "Name of lab or group. Ex: Ideker",
+    "Name of funding source or project",
+    "Name of release. Example: 0.1 alpha",
+    "Name of cell line. Ex: U2OS",
+    "Name of treatment, Ex: untreated",
+    "Name of gene set. Example chromatin",
+    "Name for pipeline run",
+    "AP-MS Embedding",
+    "AP-MS",
+    "embedding"
+  ],
+  "isPartOf": [
+    {
+      "@id": "ark:59852/org-name-of-lab-or-group.-ex:-ideker-PucM24Z",
+      "@type": "Organization",
+      "name": "Name of lab or group. Ex: Ideker"
+    },
+    {
+      "@id": "ark:59852/project-name-of-funding-source-or-project-PucM24Z",
+      "@type": "Project",
+      "name": "Name of funding source or project"
+    }
+  ]
+}</pre>
+                <button id="copy-btn" class="copy-btn" title="Copy JSON-LD">
+                    <i class="fas fa-copy"></i> Copy JSON-LD
+                </button>
+                <pre id="rdf-xml-text" style="display: none;"><?xml version="1.0" encoding="utf-8"?>
+<rdf:RDF
+   xmlns:ns1="https://w3id.org/EVI#"
+   xmlns:ns2="https://w3id.org/EVI#@"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+>
+  <rdf:Description rdf:about="https://w3id.org/EVI#dataset">
+    <ns2:id rdf:datatype="http://www.w3.org/2001/XMLSchema#string">ark:59852/rocrate-name-for-pipeline-run-PucM24Z</ns2:id>
+    <ns2:type rdf:datatype="http://www.w3.org/2001/XMLSchema#string">EVI:Dataset</ns2:type>
+    <ns1:name rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Name for pipeline run</ns1:name>
+    <ns2:context rdf:datatype="http://www.w3.org/2001/XMLSchema#string">{'@vocab': 'https://schema.org/', 'EVI': 'https://w3id.org/EVI#'}</ns2:context>
+    <ns1:url rdf:datatype="http://www.w3.org/2001/XMLSchema#string">None</ns1:url>
+    <ns1:additionalType rdf:datatype="http://www.w3.org/2001/XMLSchema#string">ROCrate</ns1:additionalType>
+    <ns1:sourceOrganization rdf:datatype="http://www.w3.org/2001/XMLSchema#string">None</ns1:sourceOrganization>
+    <ns2:graph rdf:datatype="http://www.w3.org/2001/XMLSchema#string">[{'@id': 'a8337b1e-a7b4-4cfc-b334-b6ef781b6c04:software::2.ppi_embedding', 'metadataType': 'https://w3id.org/EVI#Software', 'name': 'cellmaps_ppi_embedding', '@context': {'@vocab': 'https://schema.org/', 'evi': 'https://w3id.org/EVI#'}, 'url': 'https://github.com/idekerlab/cellmaps_ppi_embedding', 'additionalType': 'Software', 'author': 'Cell Maps team', 'dateModified': '2024-03-15', 'version': '0.2.0', 'description': 'Name of lab or group. Ex: Ideker Name of funding source or project Name of release. Example: 0.1 alpha Name of cell line. Ex: U2OS Name of treatment, Ex: untreated Name of gene set. Example chromatin Name for pipeline run AP-MS Embedding AP-MS embedding A tool to generate embeddings from networks', 'associatedPublication': None, 'additionalDocumentation': None, 'format': 'py', 'usedByComputation': [], 'contentUrl': 'https://github.com/idekerlab/cellmaps_ppi_embedding', 'keywords': ['Name of lab or group. Ex: Ideker', 'Name of funding source or project', 'Name of release. Example: 0.1 alpha', 'Name of cell line. Ex: U2OS', 'Name of treatment, Ex: untreated', 'Name of gene set. Example chromatin', 'Name for pipeline run', 'AP-MS Embedding', 'AP-MS', 'embedding', 'tools', 'cellmaps_ppi_embedding']}, {'@id': 'f916fa2f-c16b-4436-bb53-7085c5f672fb:dataset::2.ppi_embedding', 'metadataType': 'https://w3id.org/EVI#Dataset', 'name': 'cellmaps_ppi_embedding output file', '@context': {'@vocab': 'https://schema.org/', 'evi': 'https://w3id.org/EVI#'}, 'url': None, 'description': 'Name of lab or group. Ex: Ideker Name of funding source or project Name of release. Example: 0.1 alpha Name of cell line. Ex: U2OS Name of treatment, Ex: untreated Name of gene set. Example chromatin Name for pipeline run AP-MS Embedding AP-MS embedding file', 'license': ' https://creativecommons.org/licenses/by/4.0/', 'keywords': ['Name of lab or group. Ex: Ideker', 'Name of funding source or project', 'Name of release. Example: 0.1 alpha', 'Name of cell line. Ex: U2OS', 'Name of treatment, Ex: untreated', 'Name of gene set. Example chromatin', 'Name for pipeline run', 'AP-MS Embedding', 'AP-MS', 'embedding', 'tools', 'cellmaps_ppi_embedding', 'file'], 'additionalType': 'Dataset', 'author': 'cellmaps_ppi_embedding', 'datePublished': '2024-03-15', 'version': '0.2.0', 'associatedPublication': None, 'additionalDocumentation': None, 'format': 'tsv', 'schema': 'https://raw.githubusercontent.com/fairscape/cm4ai-schemas/main/v0.1.0/cm4ai_schema_apms_embedding.json', 'generatedBy': [], 'derivedFrom': [], 'usedByComputation': [], 'contentUrl': 'file:///home/cm4ai/testrun/2.ppi_embedding/ppi_emd.tsv', 'usedBy': []}, {'@id': '78347c9c-2d5d-409b-8c57-82ef4eb77fab:computation::2.ppi_embedding', 'metadataType': 'https://w3id.org/EVI#Computation', 'name': 'AP-MS Embedding', '@context': {'@vocab': 'https://schema.org/', 'evi': 'https://w3id.org/EVI#'}, 'url': None, 'additionalType': 'Computation', 'runBy': 'cm4ai', 'dateCreated': '2024-03-15', 'associatedPublication': None, 'additionalDocumentation': None, 'command': "{'outdir': 'testrun', 'cm4ai_apms': '/home/cm4ai/challenges/pipeline/data/cm4ai_chromatin_mda-mb-468_untreated_apms_0.1_alpha/apms.tsv', 'cm4ai_image': '/home/cm4ai/challenges/pipeline/data/cm4ai_chromatin_mda-mb-468_untreated_ifimage_0.1_alpha/MDA-MB-468_untreated_antibody_gene_table.tsv', 'slurm': False, 'samples': None, 'unique': None, 'edgelist': None, 'baitlist': None, 'model_path': 'https://github.com/CellProfiling/densenet/releases/download/v0.1.0/external_crop512_focal_slov_hardlog_class_densenet121_dropout_i768_aug2_5folds_fold0_final.pth', 'fold': [1, 2], 'proteinatlasxml': 'https://www.proteinatlas.org/download/proteinatlas.xml.gz', 'ppi_cutoffs': [0.001, 0.002, 0.003, 0.004, 0.005, 0.006, 0.007, 0.008, 0.009, 0.01, 0.02, 0.03, 0.04, 0.05, 0.1], 'example_provenance': False, 'example_registered_provenance': False, 'provenance': 'pipe_prov.json', 'fake': True, 'logconf': None, 'verbose': 1, 'program': '/home/cm4ai/miniconda/envs/cm4ai/bin/cellmaps_pipelinecmd.py', 'version': '0.1.0a20'}", 'usedSoftware': ['a8337b1e-a7b4-4cfc-b334-b6ef781b6c04:software::2.ppi_embedding'], 'usedDataset': ['ark:59852/rocrate-name-for-pipeline-run-xDiHP0K'], 'generated': ['f916fa2f-c16b-4436-bb53-7085c5f672fb:dataset::2.ppi_embedding'], 'keywords': ['Name of lab or group. Ex: Ideker', 'Name of funding source or project', 'Name of release. Example: 0.1 alpha', 'Name of cell line. Ex: U2OS', 'Name of treatment, Ex: untreated', 'Name of gene set. Example chromatin', 'Name for pipeline run', 'AP-MS Embedding', 'AP-MS', 'embedding', 'tools', 'cellmaps_ppi_embedding', 'file', 'computation'], 'description': 'Name of lab or group. Ex: Ideker Name of funding source or project Name of release. Example: 0.1 alpha Name of cell line. Ex: U2OS Name of treatment, Ex: untreated Name of gene set. Example chromatin Name for pipeline run AP-MS Embedding AP-MS embedding run of cellmaps_ppi_embedding'}]</ns2:graph>
+    <ns1:contentURL rdf:datatype="http://www.w3.org/2001/XMLSchema#string">None</ns1:contentURL>
+    <ns1:distribution rdf:datatype="http://www.w3.org/2001/XMLSchema#string">None</ns1:distribution>
+    <ns1:description rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Name of lab or group. Ex: Ideker Name of funding source or project Name of release. Example: 0.1 alpha Name of cell line. Ex: U2OS Name of treatment, Ex: untreated Name of gene set. Example chromatin Name for pipeline run AP-MS Embedding AP-MS embedding</ns1:description>
+    <ns1:keywords rdf:datatype="http://www.w3.org/2001/XMLSchema#string">['Name of lab or group. Ex: Ideker', 'Name of funding source or project', 'Name of release. Example: 0.1 alpha', 'Name of cell line. Ex: U2OS', 'Name of treatment, Ex: untreated', 'Name of gene set. Example chromatin', 'Name for pipeline run', 'AP-MS Embedding', 'AP-MS', 'embedding']</ns1:keywords>
+    <ns1:isPartOf rdf:datatype="http://www.w3.org/2001/XMLSchema#string">[{'@id': 'ark:59852/org-name-of-lab-or-group.-ex:-ideker-PucM24Z', '@type': 'Organization', 'name': 'Name of lab or group. Ex: Ideker'}, {'@id': 'ark:59852/project-name-of-funding-source-or-project-PucM24Z', '@type': 'Project', 'name': 'Name of funding source or project'}]</ns1:isPartOf>
+  </rdf:Description>
+</rdf:RDF>
+</pre>
+                <pre id="turtle-text" style="display: none;">@prefix ns1: <https://w3id.org/EVI#> .
+@prefix ns2: <https://w3id.org/EVI#@> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+ns1:dataset ns2:context "{'@vocab': 'https://schema.org/', 'EVI': 'https://w3id.org/EVI#'}"^^xsd:string ;
+    ns2:graph "[{'@id': 'a8337b1e-a7b4-4cfc-b334-b6ef781b6c04:software::2.ppi_embedding', 'metadataType': 'https://w3id.org/EVI#Software', 'name': 'cellmaps_ppi_embedding', '@context': {'@vocab': 'https://schema.org/', 'evi': 'https://w3id.org/EVI#'}, 'url': 'https://github.com/idekerlab/cellmaps_ppi_embedding', 'additionalType': 'Software', 'author': 'Cell Maps team', 'dateModified': '2024-03-15', 'version': '0.2.0', 'description': 'Name of lab or group. Ex: Ideker Name of funding source or project Name of release. Example: 0.1 alpha Name of cell line. Ex: U2OS Name of treatment, Ex: untreated Name of gene set. Example chromatin Name for pipeline run AP-MS Embedding AP-MS embedding A tool to generate embeddings from networks', 'associatedPublication': None, 'additionalDocumentation': None, 'format': 'py', 'usedByComputation': [], 'contentUrl': 'https://github.com/idekerlab/cellmaps_ppi_embedding', 'keywords': ['Name of lab or group. Ex: Ideker', 'Name of funding source or project', 'Name of release. Example: 0.1 alpha', 'Name of cell line. Ex: U2OS', 'Name of treatment, Ex: untreated', 'Name of gene set. Example chromatin', 'Name for pipeline run', 'AP-MS Embedding', 'AP-MS', 'embedding', 'tools', 'cellmaps_ppi_embedding']}, {'@id': 'f916fa2f-c16b-4436-bb53-7085c5f672fb:dataset::2.ppi_embedding', 'metadataType': 'https://w3id.org/EVI#Dataset', 'name': 'cellmaps_ppi_embedding output file', '@context': {'@vocab': 'https://schema.org/', 'evi': 'https://w3id.org/EVI#'}, 'url': None, 'description': 'Name of lab or group. Ex: Ideker Name of funding source or project Name of release. Example: 0.1 alpha Name of cell line. Ex: U2OS Name of treatment, Ex: untreated Name of gene set. Example chromatin Name for pipeline run AP-MS Embedding AP-MS embedding file', 'license': ' https://creativecommons.org/licenses/by/4.0/', 'keywords': ['Name of lab or group. Ex: Ideker', 'Name of funding source or project', 'Name of release. Example: 0.1 alpha', 'Name of cell line. Ex: U2OS', 'Name of treatment, Ex: untreated', 'Name of gene set. Example chromatin', 'Name for pipeline run', 'AP-MS Embedding', 'AP-MS', 'embedding', 'tools', 'cellmaps_ppi_embedding', 'file'], 'additionalType': 'Dataset', 'author': 'cellmaps_ppi_embedding', 'datePublished': '2024-03-15', 'version': '0.2.0', 'associatedPublication': None, 'additionalDocumentation': None, 'format': 'tsv', 'schema': 'https://raw.githubusercontent.com/fairscape/cm4ai-schemas/main/v0.1.0/cm4ai_schema_apms_embedding.json', 'generatedBy': [], 'derivedFrom': [], 'usedByComputation': [], 'contentUrl': 'file:///home/cm4ai/testrun/2.ppi_embedding/ppi_emd.tsv', 'usedBy': []}, {'@id': '78347c9c-2d5d-409b-8c57-82ef4eb77fab:computation::2.ppi_embedding', 'metadataType': 'https://w3id.org/EVI#Computation', 'name': 'AP-MS Embedding', '@context': {'@vocab': 'https://schema.org/', 'evi': 'https://w3id.org/EVI#'}, 'url': None, 'additionalType': 'Computation', 'runBy': 'cm4ai', 'dateCreated': '2024-03-15', 'associatedPublication': None, 'additionalDocumentation': None, 'command': \"{'outdir': 'testrun', 'cm4ai_apms': '/home/cm4ai/challenges/pipeline/data/cm4ai_chromatin_mda-mb-468_untreated_apms_0.1_alpha/apms.tsv', 'cm4ai_image': '/home/cm4ai/challenges/pipeline/data/cm4ai_chromatin_mda-mb-468_untreated_ifimage_0.1_alpha/MDA-MB-468_untreated_antibody_gene_table.tsv', 'slurm': False, 'samples': None, 'unique': None, 'edgelist': None, 'baitlist': None, 'model_path': 'https://github.com/CellProfiling/densenet/releases/download/v0.1.0/external_crop512_focal_slov_hardlog_class_densenet121_dropout_i768_aug2_5folds_fold0_final.pth', 'fold': [1, 2], 'proteinatlasxml': 'https://www.proteinatlas.org/download/proteinatlas.xml.gz', 'ppi_cutoffs': [0.001, 0.002, 0.003, 0.004, 0.005, 0.006, 0.007, 0.008, 0.009, 0.01, 0.02, 0.03, 0.04, 0.05, 0.1], 'example_provenance': False, 'example_registered_provenance': False, 'provenance': 'pipe_prov.json', 'fake': True, 'logconf': None, 'verbose': 1, 'program': '/home/cm4ai/miniconda/envs/cm4ai/bin/cellmaps_pipelinecmd.py', 'version': '0.1.0a20'}\", 'usedSoftware': ['a8337b1e-a7b4-4cfc-b334-b6ef781b6c04:software::2.ppi_embedding'], 'usedDataset': ['ark:59852/rocrate-name-for-pipeline-run-xDiHP0K'], 'generated': ['f916fa2f-c16b-4436-bb53-7085c5f672fb:dataset::2.ppi_embedding'], 'keywords': ['Name of lab or group. Ex: Ideker', 'Name of funding source or project', 'Name of release. Example: 0.1 alpha', 'Name of cell line. Ex: U2OS', 'Name of treatment, Ex: untreated', 'Name of gene set. Example chromatin', 'Name for pipeline run', 'AP-MS Embedding', 'AP-MS', 'embedding', 'tools', 'cellmaps_ppi_embedding', 'file', 'computation'], 'description': 'Name of lab or group. Ex: Ideker Name of funding source or project Name of release. Example: 0.1 alpha Name of cell line. Ex: U2OS Name of treatment, Ex: untreated Name of gene set. Example chromatin Name for pipeline run AP-MS Embedding AP-MS embedding run of cellmaps_ppi_embedding'}]"^^xsd:string ;
+    ns2:id "ark:59852/rocrate-name-for-pipeline-run-PucM24Z"^^xsd:string ;
+    ns2:type "EVI:Dataset"^^xsd:string ;
+    ns1:additionalType "ROCrate"^^xsd:string ;
+    ns1:contentURL "None"^^xsd:string ;
+    ns1:description "Name of lab or group. Ex: Ideker Name of funding source or project Name of release. Example: 0.1 alpha Name of cell line. Ex: U2OS Name of treatment, Ex: untreated Name of gene set. Example chromatin Name for pipeline run AP-MS Embedding AP-MS embedding"^^xsd:string ;
+    ns1:distribution "None"^^xsd:string ;
+    ns1:isPartOf "[{'@id': 'ark:59852/org-name-of-lab-or-group.-ex:-ideker-PucM24Z', '@type': 'Organization', 'name': 'Name of lab or group. Ex: Ideker'}, {'@id': 'ark:59852/project-name-of-funding-source-or-project-PucM24Z', '@type': 'Project', 'name': 'Name of funding source or project'}]"^^xsd:string ;
+    ns1:keywords "['Name of lab or group. Ex: Ideker', 'Name of funding source or project', 'Name of release. Example: 0.1 alpha', 'Name of cell line. Ex: U2OS', 'Name of treatment, Ex: untreated', 'Name of gene set. Example chromatin', 'Name for pipeline run', 'AP-MS Embedding', 'AP-MS', 'embedding']"^^xsd:string ;
+    ns1:name "Name for pipeline run"^^xsd:string ;
+    ns1:sourceOrganization "None"^^xsd:string ;
+    ns1:url "None"^^xsd:string .
+
+</pre>
+            </div>
+
+        </div>
+
+
+        <!-- Mermaid graph -->
+        <div class="row" id="mermaid-container">
+            <!--
+            %%{
+              init: {
+                'theme': 'base',
+                'themeVariables': {
+                  'fontFamily': 'verdana',
+                  'fontSize': '20px',
+                  'primaryColor': '#4dbdc9'
+                }
+              }
+            }%%
+            -->
+            <pre class="mermaid" id="mermaid-text">
+            %%{
+              init: {
+                'theme': 'neutral',
+                'themeVariables': {
+                  'fontFamily': 'verdana',
+                  'fontSize': '20px',
+                  'primaryColor': '#4dbdc9'
+                }
+              }
+            }%%
+            flowchart LR
+            subgraph ark:59852/3.cm4ai_chromatin_mda-mb-468_untreated_coembedfold1_initialrun0.1alpha
+              id0([coembedding_emd.tsv
+                    coembedding output file])
+              id1[cellmaps_coembedding]
+              id2[\Merged Embedding/]
+            end
+    
+            subgraph ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha
+              id3([Simulated Samples file])
+              id4([Simulated unique file])
+              id5([
+                    cellmaps_imagedownloader 
+                    output file])
+              id6([cellmaps_imagedownloader
+                    output file])
+              id7([B2AI_1_untreated_G1_R2_red.jpg
+                    red channel image])
+              id8[cellmaps_imagedownloader]
+              id9[\IF Image Loader/]
+              id10([etc.])
+            end
+    
+            subgraph ark:59852/2.cm4ai_chromatin_mda-mb-468_untreated_imageembedfold1_initialrun0.1alpha
+              id11([cellmaps_image_embedding
+                output file])
+              id12([Densenet model file])
+              id13[cellmaps_image_embedding]
+              id14[\IF Image Embedding/]
+            end
+            idNone([APMS Embedding])
+            id1 -->|usedSoftware| id2
+            id2 -->|usedDataset| id11
+            id2 -->|usedDataset| id12
+            id2 -->|usedDataset| idNone
+            id0 -->|generatedBy| id2
+            id8 -->|usedSoftware| id9
+            id9 -->|usedDataset| id4
+            id9 -->|usedDataset| id3
+            id10 -->|generatedBy| id9
+            id5 -->|generatedBy| id9
+            id6 -->|generatedBy| id9
+            id7 -->|generatedBy| id9
+            id13 -->|usedSoftware| id14
+            id14 -->|usedDataset| id10
+            id14 -->|usedDataset| id5
+            id14 -->|usedDataset| id6
+            id14 -->|usedDataset| id7
+            id11 -->|generatedBy| id14
+            id12 -->|generatedBy| id14
+            </pre>
+
+            <script type="module">
+                // Example of using the render function
+                import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+                mermaid.initialize({
+                    startOnLoad: true,
+
+                });
+            </script>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    function showMetadata() {
+        document.getElementById("metadata-container").style.display = "block";
+        document.getElementById("json-ld-container").style.display = "none";
+        document.getElementById("mermaid-container").style.display = "none";
+    }
+
+    function showJSON() {
+        document.getElementById("metadata-container").style.display = "none";
+        document.getElementById("json-ld-container").style.display = "block";
+        document.getElementById("mermaid-container").style.display = "none";
+    }
+
+    function showMermaid() {
+        document.getElementById("metadata-container").style.display = "none";
+        document.getElementById("json-ld-container").style.display = "none";
+        document.getElementById("mermaid-container").style.display = "block";
+    }
+
+    function showSerialization(elementId) {
+        var formats = ['json-text', 'rdf-xml-text', 'turtle-text'];
+        var copyBtn = document.getElementById('copy-btn');
+        formats.forEach(function (format) {
+            document.getElementById(format).style.display = 'none';
+        });
+        document.getElementById(elementId).style.display = 'block';
+
+        // Update the copy button based on the selected serialization
+        if (elementId === 'json-text') {
+            copyBtn.onclick = function () { copyContent('json-text'); };
+            copyBtn.title = 'Copy JSON-LD';
+            copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copy JSON-LD';
+        } else if (elementId === 'rdf-xml-text') {
+            copyBtn.onclick = function () { copyContent('rdf-xml-text'); };
+            copyBtn.title = 'Copy RDF/XML';
+            copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copy RDF/XML';
+        } else if (elementId === 'turtle-text') {
+            copyBtn.onclick = function () { copyContent('turtle-text'); };
+            copyBtn.title = 'Copy Turtle';
+            copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copy Turtle';
+        }
+    }
+
+    // Call showSerialization with the default format on page load
+    showSerialization('json-text');
+
+
+    function copyContent(elementId) {
+        var content = document.getElementById(elementId);
+        navigator.clipboard.writeText(content.textContent).then(function () {
+            alert("Content copied to clipboard.");
+        }, function () {
+            alert("Failed to copy content to clipboard.");
+        });
+    }
+
+
+
+    mermaid.initialize({ startOnLoad: true });
+
+    function copyJSON() {
+        var jsonContent = document.getElementById("json-text");
+        navigator.clipboard.writeText(jsonContent.innerText).then(function () {
+            alert("JSON copied to clipboard!");
+        }, function (err) {
+            console.error("Could not copy text: ", err);
+        });
+    }
+</script>
+</body>
+
+</html>
