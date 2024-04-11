@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="en">
+
+{% include './development notebooks/vizualization/head_template.html' %}
+
+<body>
+    <div id="main-content" class="container">
+        <div class="row">
+            <div class="col-lg-auto">
+                <h3>Computation Metadata: {{ computation.guid }}</h3>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Button Group for Selecting Content -->
+            <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
+                <input type="radio" onclick="showMetadata();" class="btn-check" name="btnradio" id="btn-metadata"
+                    autocomplete="off" checked>
+                <label class="btn btn-outline-primary" for="btn-metadata">Metadata</label>
+
+                <input type="radio" onclick="showJSON();" class="btn-check" name="btnradio" id="btn-json"
+                    autocomplete="off">
+                <label class="btn btn-outline-primary" for="btn-json">JSON-LD</label>
+
+                <input type="radio" onclick="showMermaid()" class="btn-check" name="btnradio" id="btn-mermaid"
+                    autocomplete="off">
+                <label class="btn btn-outline-primary" for="btn-mermaid">Evidence Graph</label>
+            </div>
+        </div>
+
+        <!-- Table of all properties -->
+        <div class="row" id="metadata-container">
+            <div class="container">
+                <table class="table table-hover table-striped">
+                    <thead>
+                        <tr>
+                            <th scope="col">Property</th>
+                            <th scope="col">Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Name</td>
+                            <td>{{ computation.name }}</td>
+                        </tr>
+                        <tr>
+                            <td>Persistant Identifier</td>
+                            <td>
+                                {{ computation.guid | add_link }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Description</td>
+                            <td>{{ computation.description }}</td>
+                        </tr>
+                        <tr>
+                            <td>Owner</td>
+                            <td>{{ computation.owner | add_link }}</td>
+                        </tr>
+                        <tr>
+                            <td>Author</td>
+                            <td>{{ computation.author | add_link }}</td>
+                        </tr>
+                        <tr>
+                            <td>Source Organization</td>
+                            <td>
+                                {{ computation.sourceOrganization | add_link }}
+                            </td>
+                        </tr>
+                        <!-- <tr>
+                            <td>usedDataset</td>
+                            <td>
+
+                                <div class="accordion" id="accordionusedBy">
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                                data-bs-target="#collapseusedBy" aria-expanded="false"
+                                                aria-controls="collapseusedBy">
+                                                usedBy
+                                            </button>
+                                        </h2>
+                                        <div id="collapseusedBy" class="accordion-collapse collapse"
+                                            data-bs-parent="#accordionusedBy">
+                                            <div class="accordion-body">
+                                                <ul>
+                                                    {% for d in computation.usedDataset %}
+                                                    <li>{{ d | add_link }}</li>
+                                                    {% else %}
+                                                    <li></li>
+                                                    {% endfor %}
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr> -->
+                        <tr>
+                            <td>usedDataset</td>
+                            <td>
+                                {{ computation.usedDataset| add_link }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>usedSoftware</td>
+                            <td>
+                                {{ computation.usedSoftware | add_link }}
+                            </td>
+                        </tr>
+                        <td>
+                            Command
+                        </td>
+                        <td>
+                            {{ computation.command| add_link }}
+                        </td>
+                        </tr>
+                        <tr>
+                            <td>generated</td>
+                            <td>
+                                <!-- Dropdown element -->
+                                <div class="accordion" id="accordiongenerated">
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                                data-bs-target="#collapsegenerated" aria-expanded="false"
+                                                aria-controls="collapsegenerated">
+                                                generated
+                                            </button>
+                                        </h2>
+                                        <div id="collapsegenerated" class="accordion-collapse collapse"
+                                            data-bs-parent="#accordiongenerated">
+                                            <div class="accordion-body">
+                                                <ul>
+                                                    {% for d in computation.generated %}
+                                                    <li>{{ d | add_link }}</li>
+                                                    {% else %}
+                                                    <li>No software available</li>
+                                                    {% endfor %}
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        <td>
+                            Container Id
+                        </td>
+                        <td>
+                            {{ computation.containerId| add_link }}
+                        </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="row" id="json-ld-container">
+            <div class="serialization-btn-group" style="margin-top: 20px; text-align: center;">
+                <div class="btn-group" role="group" aria-label="Serialization options" style="width: 50%;">
+                    <input type="radio" onclick="showSerialization('json-text')" class="btn-check" name="serialization"
+                        id="serialization-json" autocomplete="off" checked>
+                    <label class="btn btn-sm btn-outline-info" for="serialization-json">JSON-LD</label>
+
+                    <input type="radio" onclick="showSerialization('rdf-xml-text')" class="btn-check"
+                        name="serialization" id="serialization-rdf" autocomplete="off">
+                    <label class="btn btn-sm btn-outline-info" for="serialization-rdf">RDF/XML</label>
+
+                    <input type="radio" onclick="showSerialization('turtle-text')" class="btn-check"
+                        name="serialization" id="serialization-turtle" autocomplete="off">
+                    <label class="btn btn-sm btn-outline-info" for="serialization-turtle">Turtle</label>
+                </div>
+            </div>
+            <div class="json-wrapper">
+                <pre id="json-text">{{ json }}</pre>
+                <button id="copy-btn" class="copy-btn" title="Copy JSON-LD">
+                    <i class="fas fa-copy"></i> Copy JSON-LD
+                </button>
+                <pre id="rdf-xml-text" style="display: none;">{{ rdf_xml }}</pre>
+                <pre id="turtle-text" style="display: none;">{{ turtle }}</pre>
+            </div>
+
+        </div>
+
+
+        <!-- Mermaid graph -->
+        <div class="row" id="mermaid-container">
+            <!--
+            %%{
+              init: {
+                'theme': 'base',
+                'themeVariables': {
+                  'fontFamily': 'verdana',
+                  'fontSize': '20px',
+                  'primaryColor': '#4dbdc9'
+                }
+              }
+            }%%
+            -->
+            <pre class="mermaid" id="mermaid-text">
+            %%{
+              init: {
+                'theme': 'neutral',
+                'themeVariables': {
+                  'fontFamily': 'verdana',
+                  'fontSize': '20px',
+                  'primaryColor': '#4dbdc9'
+                }
+              }
+            }%%
+            flowchart LR
+            subgraph ark:59852/3.cm4ai_chromatin_mda-mb-468_untreated_coembedfold1_initialrun0.1alpha
+              id0([coembedding_emd.tsv
+                    coembedding output file])
+              id1[cellmaps_coembedding]
+              id2[\Merged Embedding/]
+            end
+    
+            subgraph ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha
+              id3([Simulated Samples file])
+              id4([Simulated unique file])
+              id5([
+                    cellmaps_imagedownloader 
+                    output file])
+              id6([cellmaps_imagedownloader
+                    output file])
+              id7([B2AI_1_untreated_G1_R2_red.jpg
+                    red channel image])
+              id8[cellmaps_imagedownloader]
+              id9[\IF Image Loader/]
+              id10([etc.])
+            end
+    
+            subgraph ark:59852/2.cm4ai_chromatin_mda-mb-468_untreated_imageembedfold1_initialrun0.1alpha
+              id11([cellmaps_image_embedding
+                output file])
+              id12([Densenet model file])
+              id13[cellmaps_image_embedding]
+              id14[\IF Image Embedding/]
+            end
+            idNone([APMS Embedding])
+            id1 -->|usedSoftware| id2
+            id2 -->|usedDataset| id11
+            id2 -->|usedDataset| id12
+            id2 -->|usedDataset| idNone
+            id0 -->|generatedBy| id2
+            id8 -->|usedSoftware| id9
+            id9 -->|usedDataset| id4
+            id9 -->|usedDataset| id3
+            id10 -->|generatedBy| id9
+            id5 -->|generatedBy| id9
+            id6 -->|generatedBy| id9
+            id7 -->|generatedBy| id9
+            id13 -->|usedSoftware| id14
+            id14 -->|usedDataset| id10
+            id14 -->|usedDataset| id5
+            id14 -->|usedDataset| id6
+            id14 -->|usedDataset| id7
+            id11 -->|generatedBy| id14
+            id12 -->|generatedBy| id14
+            </pre>
+
+            <script type="module">
+                // Example of using the render function
+                import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+                mermaid.initialize({
+                    startOnLoad: true,
+
+                });
+            </script>
+        </div>
+    </div>
+    {% include './development notebooks/vizualization/scripts_template.html' %}
+</body>
+
+</html>
