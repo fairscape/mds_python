@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+
+{% include './development notebooks/vizualization/head_template.html' %}
+
+<body>
+    <div id="main-content" class="container">
+        <div class="row">
+            <div class="col-lg-auto">
+                <h3>Software Metadata: {{ software.guid }}</h3>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Button Group for Selecting Content -->
+            <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
+                <input type="radio" onclick="showMetadata();" class="btn-check" name="btnradio" id="btn-metadata"
+                    autocomplete="off" checked>
+                <label class="btn btn-outline-primary" for="btn-metadata">Metadata</label>
+
+                <input type="radio" onclick="showJSON();" class="btn-check" name="btnradio" id="btn-json"
+                    autocomplete="off">
+                <label class="btn btn-outline-primary" for="btn-json">Serialization</label>
+
+                <input type="radio" onclick="showMermaid()" class="btn-check" name="btnradio" id="btn-mermaid"
+                    autocomplete="off">
+                <label class="btn btn-outline-primary" for="btn-mermaid">Evidence Graph</label>
+            </div>
+        </div>
+
+        <!-- Table of all properties -->
+        <div class="row" id="metadata-container">
+            <div class="container">
+                <table class="table table-hover table-striped">
+                    <thead>
+                        <tr>
+                            <th scope="col">Property</th>
+                            <th scope="col">Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Name</td>
+                            <td>{{ software.name }}</td>
+                        </tr>
+                        <tr>
+                            <td>Persistant Identifier</td>
+                            <td>
+                                {{ software.guid | add_link }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Description</td>
+                            <td>{{ software.description }}</td>
+                        </tr>
+                        <tr>
+                            <td>Owner</td>
+                            <td>{{ software.owner | add_link }}</td>
+                        </tr>
+                        <tr>
+                            <td>Associated Organization</td>
+                            <td>
+                                {{ software.sourceOrganization | add_link }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>usedBy</td>
+                            <td>
+                                <!-- Dropdown element -->
+                                <div class="accordion" id="accordionusedBy">
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                                data-bs-target="#collapseusedBy" aria-expanded="false"
+                                                aria-controls="collapseusedBy">
+                                                usedBy
+                                            </button>
+                                        </h2>
+                                        <div id="collapseusedBy" class="accordion-collapse collapse"
+                                            data-bs-parent="#accordionusedBy">
+                                            <div class="accordion-body">
+                                                <ul>
+                                                    {% for d in software.usedBy %}
+                                                    <li>{{ d | add_link }}</li>
+                                                    {% else %}
+                                                    <li></li>
+                                                    {% endfor %}
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Distributions</td>
+                            <td>
+                                <!-- Dropdown element -->
+                                <div class="accordion" id="accordionDistributions">
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                                data-bs-target="#collapseDistributions" aria-expanded="false"
+                                                aria-controls="collapseDistributions">
+                                                Distributions
+                                            </button>
+                                        </h2>
+                                        <div id="collapseDistributions" class="accordion-collapse collapse"
+                                            data-bs-parent="#accordionDistributions">
+                                            <div class="accordion-body">
+                                                <ul>
+                                                    {% for d in software.distribution %}
+                                                    <li>{{ d | add_link }}</li>
+                                                    {% else %}
+                                                    <li>No distributions available</li>
+                                                    {% endfor %}
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Raw JSON-LD of the software -->
+        <div class="row" id="json-ld-container">
+            <div class="serialization-btn-group" style="margin-top: 20px; text-align: center;">
+                <div class="btn-group" role="group" aria-label="Serialization options" style="width: 50%;">
+                    <input type="radio" onclick="showSerialization('json-text')" class="btn-check" name="serialization"
+                        id="serialization-json" autocomplete="off" checked>
+                    <label class="btn btn-sm btn-outline-info" for="serialization-json">JSON-LD</label>
+
+                    <input type="radio" onclick="showSerialization('rdf-xml-text')" class="btn-check"
+                        name="serialization" id="serialization-rdf" autocomplete="off">
+                    <label class="btn btn-sm btn-outline-info" for="serialization-rdf">RDF/XML</label>
+
+                    <input type="radio" onclick="showSerialization('turtle-text')" class="btn-check"
+                        name="serialization" id="serialization-turtle" autocomplete="off">
+                    <label class="btn btn-sm btn-outline-info" for="serialization-turtle">Turtle</label>
+                </div>
+            </div>
+            <div class="json-wrapper">
+                <pre id="json-text">{{ json }}</pre>
+                <button id="copy-btn" class="copy-btn" title="Copy JSON-LD">
+                    <i class="fas fa-copy"></i> Copy JSON-LD
+                </button>
+                <pre id="rdf-xml-text" style="display: none;">{{ rdf_xml }}</pre>
+                <pre id="turtle-text" style="display: none;">{{ turtle }}</pre>
+            </div>
+        </div>
+
+        <!-- Mermaid graph -->
+        <div class="row" id="mermaid-container">
+            <pre class="mermaid" id="mermaid-text">
+                {{ evidencegraph }}
+            </pre>
+
+        </div>
+    </div>
+    {% include './development notebooks/vizualization/scripts_template.html' %}
+</body>
+
+</html>
