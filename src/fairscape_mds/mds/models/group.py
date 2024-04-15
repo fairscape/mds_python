@@ -7,7 +7,7 @@ import pymongo
 from bson.son import SON
 
 
-class Group(FairscapeBaseModel, extra=Extra.allow):
+class Group(FairscapeEVIBaseModel, extra=Extra.allow):
     context: dict = Field(
         default={
             "@vocab": "https://schema.org/", 

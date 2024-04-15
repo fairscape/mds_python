@@ -12,6 +12,7 @@ from urllib.parse import quote_plus
 from pymongo import MongoClient, ASCENDING
 import minio
 from functools import lru_cache
+import uvicorn
 
 from dotenv import dotenv_values
 
@@ -179,7 +180,7 @@ class FairscapeConfig(BaseModel):
 
 
 
-    def setup_mongo(self):
+    def SetupMongo(self):
         ''' Initalize mongo database for fairscape server application
         '''
         mongo_client = self.CreateMongoClient()
@@ -206,7 +207,7 @@ class FairscapeConfig(BaseModel):
         #identifier_collection.create_index([])
 
 
-    def setup_minio(self):
+    def SetupMinio(self):
         ''' Initalize minio buckets for fairscape server application
         '''
 

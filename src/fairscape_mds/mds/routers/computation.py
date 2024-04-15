@@ -8,12 +8,18 @@ from fairscape_mds.mds.config import (
 ) 
 
 from fairscape_mds.mds.compute import create_job
-from fairscape_mds.mds.models.computation import Computation, list_computation, RegisterComputation
+from fairscape_mds.mds.models.computation import (
+        Computation,
+        createComputation,
+        listComputation,
+        getComputation,
+        updateComputation,
+        deleteComputation
+        )
 from fairscape_mds.mds.utilities.operation_status import OperationStatus
 from fairscape_mds.mds.utilities.funcs import *
 from datetime import datetime
 import time
-import docker
 
 
 
@@ -21,6 +27,10 @@ router = APIRouter()
 
 mongo_config = get_mongo_config()
 mongo_client = get_mongo_client()
+
+mongo_db = mongo_client[mongo_config.db]
+identifierCollection = mongo_db[mongo_config.identifier_collection]
+userCollection = mongo_db[mongo_config.user_collection]
 
 
 @router.post("/computation",
@@ -35,46 +45,18 @@ def computation_create(computation: Computation, response: Response):
     - **name**: a name
     - **owner**: an existing user in its compact form with @id, @type, name, and email
     """
-    mongo_db = mongo_client[mongo_config.db]
-    mongo_collection = mongo_db[mongo_config.identifier_collection]
 
-    create_status = computation.create(mongo_collection)
+    createStatus = createComputation(computation, identifierCollection, userCollection)
 
-    if create_status.success:
+    if createStatus.success:
         return JSONResponse(
             status_code=201,
-            content={"created": {"@id": computation.id, "@type": "evi:Computation"}}
+            content={"created": {"@id": computation.guid, "@type": "evi:Computation", "name": computation.name}}
         )
     else:
         return JSONResponse(
-            status_code=create_status.status_code,
-            content={"error": create_status.message}
-        )
-
-
-@router.put("/computation/execute/ark:{NAAN}/{postfix}")
-def computation_execute(NAAN: str, postfix: str):
-
-    mongo_db = mongo_client[mongo_config.db]
-    mongo_collection = mongo_db[mongo_config.identifier_collection]
-
-    computation_id = f"ark:{NAAN}/{postfix}"
-
-    computation = Computation.construct(id=computation_id)
-    read_status = computation.read(mongo_collection)
-    
-    if read_status.success != True: 
-        mongo_client.close()
-        return JSONResponse(
-            status_code=read_status.status_code,
-            content={"error": read_status.message}
-            )
-
-    res = create_job(computation_id)
- 
-    return JSONResponse(
-            status_code=201,
-            content={"message": "launched kubernetes job"}
+            status_code=createStatus.status_code,
+            content={"error": createStatus.message}
         )
 
 
@@ -82,13 +64,8 @@ def computation_execute(NAAN: str, postfix: str):
             summary="List all computations",
             response_description="Retrieved list of computations")
 def computation_list(response: Response):
-    mongo_db = mongo_client[mongo_config.db]
-    mongo_collection = mongo_db[mongo_config.identifier_collection]
 
-    computation = list_computation(mongo_collection)
-
-    mongo_client.close()
-
+    computation = listComputation(identifierCollection)
     return computation
 
 
@@ -102,22 +79,17 @@ def computation_get(NAAN: str, postfix: str, response: Response):
     - **NAAN**: Name Assigning Authority Number which uniquely identifies an organization e.g. 12345
     - **postfix**: a unique string
     """
-    mongo_db = mongo_client[mongo_config.db]
-    mongo_collection = mongo_db[mongo_config.identifier_collection]
+    computationGUID = f"ark:{NAAN}/{postfix}"
 
-    computation_id = f"ark:{NAAN}/{postfix}"
-
-    computation = Computation.construct(id=computation_id)
-
-    read_status = computation.read(mongo_collection)
-
-    mongo_client.close()
+    computation, read_status = getComputation(computationGUID, identifierCollection)
 
     if read_status.success:
         return computation
     else:
-        return JSONResponse(status_code=read_status.status_code,
-                            content={"error": read_status.message})
+        return JSONResponse(
+                status_code=read_status.status_code,
+                content={"error": read_status.message}
+                )
 
 
 @router.put("/computation",
@@ -156,121 +128,18 @@ def computation_delete(NAAN: str, postfix: str):
     - **postfix**: a unique string
     """
 
-    mongo_db = mongo_client[mongo_config.db]
-    mongo_collection = mongo_db[mongo_config.identifier_collection]
-    computation_id = f"ark:{NAAN}/{postfix}"
+    computationGUID = f"ark:{NAAN}/{postfix}"
 
-    computation = Computation.construct(id=computation_id)
+    computationInstance, deleteStatus = deleteComputation(computationGUID, identifierCollection, userCollection)
 
-    delete_status = computation.delete(mongo_collection)
-
-    mongo_client.close()
-
-    if delete_status.success:
+    if deleteStatus.success:
         return JSONResponse(
             status_code=200,
-            content={"deleted": {"@id": computation_id, "@type": "evi:Computation", "name": computation.name}}
+            content={"deleted": computationInstance.model_dump(by_alias=True)}
         )
     else:
         return JSONResponse(
-            status_code=delete_status.status_code,
-            content={"error": f"{str(delete_status.message)}"}
+            status_code=deleteStatus.status_code,
+            content={"error": f"{str(deleteStatus.message)}"}
         )
 
-
-# def run_custom_container(self, MongoClient: pymongo.MongoClient, compute_resources) -> OperationStatus:
-#     dateCreated = datetime.fromtimestamp(time.time()).strftime("%A, %B %d, %Y %I:%M:%S")
-#
-#     dataset_ids = compute_resources[DATASET_KEY]
-#     script_id = compute_resources[SCRIPT_KEY]
-#
-#     usedDatasets = []
-#     usedSoftware = {}
-#
-#     # Locate and download the dataset(s)
-#     if dataset_ids and isinstance(dataset_ids, list):
-#         for dataset_id in dataset_ids:
-#             r = requests.get(ROOT_URL + f"dataset/{dataset_id}")
-#             dataset_download_id, dataset_file_location, dataset_file_name = get_distribution_attr(dataset_id, r)
-#
-#             # Download the content of the dataset
-#             data_download_dataset_download = requests.get(ROOT_URL + f"datadownload/{dataset_download_id}/download")
-#             dataset_content = data_download_dataset_download.content
-#             # print(dataset_content)
-#
-#             with open('/home/sadnan/compute-test/data/' + dataset_file_name, 'wb') as binary_data_file:
-#                 binary_data_file.write(dataset_content)
-#
-#     if script_id:
-#         r = requests.get(ROOT_URL + f"software/{script_id}")
-#         script_download_id, script_file_location, script_file_name = get_distribution_attr(script_id, r)
-#
-#         # Download the content of the script
-#         data_download_software_read = requests.get(ROOT_URL + f"datadownload/{script_download_id}/download")
-#         script_content = data_download_software_read.content
-#
-#         with open('/home/sadnan/compute-test/' + script_file_name, 'wb') as binary_data_file:
-#             binary_data_file.write(script_content)
-#
-#     client = docker.from_env()
-#
-#     container = client.containers.run(
-#         image=IMAGE,
-#         command=COMMAND,
-#         auto_remove=True,
-#         working_dir=MOUNT_VOL,
-#         volumes={
-#             SOURCE_VOL: {'bind': MOUNT_VOL, 'mode': 'rw'},
-#             DATA_VOL: {'bind': MOUNT_DATA_VOL, 'mode': 'rw'},
-#             OUTPUT_VOL: {'bind': MOUNT_OUTPUT_VOL, 'mode': 'rw'},
-#         }
-#     )
-#     # output = to_str(container).attach(stdout=True, stream=True, logs=True)
-#     # for line in output:
-#     #    print(to_str(line))
-#
-#     dateFinished = datetime.fromtimestamp(time.time()).strftime("%A, %B %d, %Y %I:%M:%S")
-#
-#     if container.decode('utf-8') == b'':
-#         return OperationStatus(False, f"error running the container", 400)
-#
-#     # update computation with metadata
-#     with MongoClient.start_session(causal_consistency=True) as session:
-#         mongo_database = MongoClient[MONGO_DATABASE]
-#         mongo_collection = mongo_database[MONGO_COLLECTION]
-#
-#         for dataset_id in dataset_ids:
-#             dataset_metadata = mongo_collection.find_one({"@id": dataset_id}, session=session)
-#             if dataset_metadata is None:
-#                 return OperationStatus(False, f"dataset {dataset_id} not found", 404)
-#
-#             dataset_compact = {
-#                 "@id": dataset_metadata.get("@id"),
-#                 "@type": dataset_metadata.get('@type'),
-#                 "name": dataset_metadata.get('name')
-#             }
-#             usedDatasets.append(dataset_compact)
-#
-#         script_metadata = mongo_collection.find_one({"@id": script_id}, session=session)
-#         if script_metadata == None:
-#             return OperationStatus(False, f"script {script_id} not found", 404)
-#
-#         script_compact = {
-#             "@id": script_metadata.get("@id"),
-#             "@type": script_metadata.get('@type'),
-#             "name": script_metadata.get('name')
-#         }
-#         usedSoftware = script_compact
-#
-#         update_computation_upon_execution = mongo_collection.update_one(
-#             {"@id": self.id},
-#             {"$set": {
-#                 "dateCreated": dateCreated,
-#                 "dateFinished": dateFinished,
-#                 "usedSoftware": usedSoftware,
-#                 "usedDataset": usedDatasets,
-#             }},
-#             session=session
-#         ),
-#
-#     return OperationStatus(True, "", 201)

@@ -24,7 +24,7 @@ def listUsers(mongo_collection: pymongo.collection.Collection):
     pass
 
 
-def deleteUserByID(
+def deleteUserByGUID(
     mongo_collection: pymongo.collection.Collection, 
     user_id: str
     )-> dict:
@@ -51,6 +51,7 @@ class User(FairscapeBaseModel, extra=Extra.allow):
     organizations: Optional[List[str]] = []
     projects: Optional[List[str]] = []
     datasets: Optional[List[str]] = []
+    downloads: Optional[List[str]] = []
     rocrates: Optional[List[str]] = []
     software: Optional[List[str]] = []
     computations: Optional[List[str]] = []
@@ -80,8 +81,8 @@ class User(FairscapeBaseModel, extra=Extra.allow):
         return super().delete(MongoCollection)
 
 
-def list_users(mongo_collection: pymongo.collection.Collection):
-    cursor = mongo_collection.find(
+def listUsers(identifierCollection: pymongo.collection.Collection):
+    cursor = identifierCollection.find(
         filter={"@type": "Person"},
         projection={"_id": False}
     )

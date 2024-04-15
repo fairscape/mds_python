@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Fairscape Software Metadata</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs"></script>
+    <style>
+        body {
+            background-color: #f8f9fa;
+            /* Light grey background */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        h3 {
+            color: #007bff;
+        }
+
+        .container {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+
+        .accordion-button {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .accordion-button:not(.collapsed) {
+            background-color: #0056b3;
+            color: white;
+        }
+
+        .table {
+            margin-top: 20px;
+        }
+
+        .table thead th {
+            background-color: #007bff;
+            color: white;
+        }
+
+        #mermaid-container {
+            display: block;
+        }
+
+        #json-ld-container {
+            display: none;
+        }
+
+        .json-wrapper {
+            position: relative;
+            padding: 20px;
+            margin-top: 20px;
+            /* Adds space below the banner */
+            background-color: #f9f9f9;
+            /* Slightly different background color */
+            border: 1px solid #ddd;
+            /* Adds a border */
+            border-radius: 5px;
+            /* Adds rounded corners */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            /* Adds shading */
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            color: #007bff;
+            cursor: pointer;
+        }
+
+        .copy-btn:hover {
+            color: #0056b3;
+        }
+
+        .serialization-btn-group {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            /* Adjust the spacing between buttons */
+            margin-top: 10px;
+            /* Space below the top-level buttons */
+        }
+
+        .serialization-btn-group .btn-check {
+            width: 100px;
+            /* Adjust the width of the buttons */
+        }
+    </style>
+</head>
+
+<body>
+    <div id="main-content" class="container">
+        <div class="row">
+            <div class="col-lg-auto">
+                <h3>Software Metadata: ark:99999/fake-software</h3>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Button Group for Selecting Content -->
+            <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
+                <input type="radio" onclick="showMetadata();" class="btn-check" name="btnradio" id="btn-metadata"
+                    autocomplete="off" checked>
+                <label class="btn btn-outline-primary" for="btn-metadata">Metadata</label>
+
+                <input type="radio" onclick="showJSON();" class="btn-check" name="btnradio" id="btn-json"
+                    autocomplete="off">
+                <label class="btn btn-outline-primary" for="btn-json">Serialization</label>
+
+                <input type="radio" onclick="showMermaid()" class="btn-check" name="btnradio" id="btn-mermaid"
+                    autocomplete="off">
+                <label class="btn btn-outline-primary" for="btn-mermaid">Evidence Graph</label>
+            </div>
+        </div>
+
+        <!-- Table of all properties -->
+        <div class="row" id="metadata-container">
+            <div class="container">
+                <table class="table table-hover table-striped">
+                    <thead>
+                        <tr>
+                            <th scope="col">Property</th>
+                            <th scope="col">Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Name</td>
+                            <td>Software Example</td>
+                        </tr>
+                        <tr>
+                            <td>Persistant Identifier</td>
+                            <td>
+                                <a href="https://fairscape.pods.uvarc.io/ark:99999/fake-software">ark:99999/fake-software</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Description</td>
+                            <td>Fake Software to show template working.</td>
+                        </tr>
+                        <tr>
+                            <td>Owner</td>
+                            <td>John Doe</td>
+                        </tr>
+                        <tr>
+                            <td>Associated Organization</td>
+                            <td>
+                                <a href="https://fairscape.pods.uvarc.io/ark:99999/fake-org">ark:99999/fake-org</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>usedBy</td>
+                            <td>
+                                <!-- Dropdown element -->
+                                <div class="accordion" id="accordionusedBy">
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                                data-bs-target="#collapseusedBy" aria-expanded="false"
+                                                aria-controls="collapseusedBy">
+                                                usedBy
+                                            </button>
+                                        </h2>
+                                        <div id="collapseusedBy" class="accordion-collapse collapse"
+                                            data-bs-parent="#accordionusedBy">
+                                            <div class="accordion-body">
+                                                <ul>
+                                                    
+                                                    <li><a href="https://fairscape.pods.uvarc.io/ark:99999/fake-software">ark:99999/fake-software</a></li>
+                                                    
+                                                    <li><a href="https://fairscape.pods.uvarc.io/ark:99999/fake-computation">ark:99999/fake-computation</a></li>
+                                                    
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Distributions</td>
+                            <td>
+                                <!-- Dropdown element -->
+                                <div class="accordion" id="accordionDistributions">
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                                data-bs-target="#collapseDistributions" aria-expanded="false"
+                                                aria-controls="collapseDistributions">
+                                                Distributions
+                                            </button>
+                                        </h2>
+                                        <div id="collapseDistributions" class="accordion-collapse collapse"
+                                            data-bs-parent="#accordionDistributions">
+                                            <div class="accordion-body">
+                                                <ul>
+                                                    
+                                                    <li><a href="https://example.com/software/download">https://example.com/software/download</a></li>
+                                                    
+                                                    <li><a href="https://example.com/software/mirror">https://example.com/software/mirror</a></li>
+                                                    
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Raw JSON-LD of the software -->
+        <div class="row" id="json-ld-container">
+            <div class="serialization-btn-group" style="margin-top: 20px; text-align: center;">
+                <div class="btn-group" role="group" aria-label="Serialization options" style="width: 50%;">
+                    <input type="radio" onclick="showSerialization('json-text')" class="btn-check" name="serialization"
+                        id="serialization-json" autocomplete="off" checked>
+                    <label class="btn btn-sm btn-outline-info" for="serialization-json">JSON-LD</label>
+
+                    <input type="radio" onclick="showSerialization('rdf-xml-text')" class="btn-check"
+                        name="serialization" id="serialization-rdf" autocomplete="off">
+                    <label class="btn btn-sm btn-outline-info" for="serialization-rdf">RDF/XML</label>
+
+                    <input type="radio" onclick="showSerialization('turtle-text')" class="btn-check"
+                        name="serialization" id="serialization-turtle" autocomplete="off">
+                    <label class="btn btn-sm btn-outline-info" for="serialization-turtle">Turtle</label>
+                </div>
+            </div>
+            <div class="json-wrapper">
+                <pre id="json-text">{
+  "@id": "ark:99999/fake-software",
+  "metadataType": "evi:Software",
+  "name": "Software Example",
+  "@context": {
+    "@vocab": "https://schema.org/",
+    "evi": "https://w3id.org/EVI#"
+  },
+  "url": null,
+  "description": "Fake Software to show template working.",
+  "license": " https://creativecommons.org/licenses/by/4.0/",
+  "keywords": [],
+  "owner": "John Doe",
+  "distribution": [
+    "https://example.com/software/download",
+    "https://example.com/software/mirror"
+  ],
+  "usedBy": [
+    "ark:99999/fake-software",
+    "ark:99999/fake-computation"
+  ],
+  "sourceOrganization": "ark:99999/fake-org",
+  "includedInDataCatalog": "ark:99999/fake-catalog"
+}</pre>
+                <button id="copy-btn" class="copy-btn" title="Copy JSON-LD">
+                    <i class="fas fa-copy"></i> Copy JSON-LD
+                </button>
+                <pre id="rdf-xml-text" style="display: none;"><?xml version="1.0" encoding="utf-8"?>
+<rdf:RDF
+   xmlns:ns1="https://w3id.org/EVI#"
+   xmlns:ns2="https://w3id.org/EVI#@"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+>
+  <rdf:Description rdf:about="https://w3id.org/EVI#dataset">
+    <ns2:id rdf:datatype="http://www.w3.org/2001/XMLSchema#string">ark:99999/fake-software</ns2:id>
+    <ns1:metadataType rdf:datatype="http://www.w3.org/2001/XMLSchema#string">evi:Software</ns1:metadataType>
+    <ns1:name rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Software Example</ns1:name>
+    <ns2:context rdf:datatype="http://www.w3.org/2001/XMLSchema#string">{'@vocab': 'https://schema.org/', 'evi': 'https://w3id.org/EVI#'}</ns2:context>
+    <ns1:url rdf:datatype="http://www.w3.org/2001/XMLSchema#string">None</ns1:url>
+    <ns1:description rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Fake Software to show template working.</ns1:description>
+    <ns1:license rdf:datatype="http://www.w3.org/2001/XMLSchema#string"> https://creativecommons.org/licenses/by/4.0/</ns1:license>
+    <ns1:keywords rdf:datatype="http://www.w3.org/2001/XMLSchema#string">[]</ns1:keywords>
+    <ns1:owner rdf:datatype="http://www.w3.org/2001/XMLSchema#string">John Doe</ns1:owner>
+    <ns1:distribution rdf:datatype="http://www.w3.org/2001/XMLSchema#string">['https://example.com/software/download', 'https://example.com/software/mirror']</ns1:distribution>
+    <ns1:usedBy rdf:datatype="http://www.w3.org/2001/XMLSchema#string">['ark:99999/fake-software', 'ark:99999/fake-computation']</ns1:usedBy>
+    <ns1:sourceOrganization rdf:datatype="http://www.w3.org/2001/XMLSchema#string">ark:99999/fake-org</ns1:sourceOrganization>
+    <ns1:includedInDataCatalog rdf:datatype="http://www.w3.org/2001/XMLSchema#string">ark:99999/fake-catalog</ns1:includedInDataCatalog>
+  </rdf:Description>
+</rdf:RDF>
+</pre>
+                <pre id="turtle-text" style="display: none;">@prefix ns1: <https://w3id.org/EVI#> .
+@prefix ns2: <https://w3id.org/EVI#@> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+ns1:dataset ns2:context "{'@vocab': 'https://schema.org/', 'evi': 'https://w3id.org/EVI#'}"^^xsd:string ;
+    ns2:id "ark:99999/fake-software"^^xsd:string ;
+    ns1:description "Fake Software to show template working."^^xsd:string ;
+    ns1:distribution "['https://example.com/software/download', 'https://example.com/software/mirror']"^^xsd:string ;
+    ns1:includedInDataCatalog "ark:99999/fake-catalog"^^xsd:string ;
+    ns1:keywords "[]"^^xsd:string ;
+    ns1:license " https://creativecommons.org/licenses/by/4.0/"^^xsd:string ;
+    ns1:metadataType "evi:Software"^^xsd:string ;
+    ns1:name "Software Example"^^xsd:string ;
+    ns1:owner "John Doe"^^xsd:string ;
+    ns1:sourceOrganization "ark:99999/fake-org"^^xsd:string ;
+    ns1:url "None"^^xsd:string ;
+    ns1:usedBy "['ark:99999/fake-software', 'ark:99999/fake-computation']"^^xsd:string .
+
+</pre>
+            </div>
+        </div>
+
+        <!-- Mermaid graph -->
+        <div class="row" id="mermaid-container">
+            <pre class="mermaid" id="mermaid-text">
+                {"fake_data": {"lots_of_data": "is here"}}
+            </pre>
+
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    function showMetadata() {
+        document.getElementById("metadata-container").style.display = "block";
+        document.getElementById("json-ld-container").style.display = "none";
+        document.getElementById("mermaid-container").style.display = "none";
+    }
+
+    function showJSON() {
+        document.getElementById("metadata-container").style.display = "none";
+        document.getElementById("json-ld-container").style.display = "block";
+        document.getElementById("mermaid-container").style.display = "none";
+    }
+
+    function showMermaid() {
+        document.getElementById("metadata-container").style.display = "none";
+        document.getElementById("json-ld-container").style.display = "none";
+        document.getElementById("mermaid-container").style.display = "block";
+    }
+
+    function showSerialization(elementId) {
+        var formats = ['json-text', 'rdf-xml-text', 'turtle-text'];
+        var copyBtn = document.getElementById('copy-btn');
+        formats.forEach(function (format) {
+            document.getElementById(format).style.display = 'none';
+        });
+        document.getElementById(elementId).style.display = 'block';
+
+        // Update the copy button based on the selected serialization
+        if (elementId === 'json-text') {
+            copyBtn.onclick = function () { copyContent('json-text'); };
+            copyBtn.title = 'Copy JSON-LD';
+            copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copy JSON-LD';
+        } else if (elementId === 'rdf-xml-text') {
+            copyBtn.onclick = function () { copyContent('rdf-xml-text'); };
+            copyBtn.title = 'Copy RDF/XML';
+            copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copy RDF/XML';
+        } else if (elementId === 'turtle-text') {
+            copyBtn.onclick = function () { copyContent('turtle-text'); };
+            copyBtn.title = 'Copy Turtle';
+            copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copy Turtle';
+        }
+    }
+
+    // Call showSerialization with the default format on page load
+    showSerialization('json-text');
+
+
+    function copyContent(elementId) {
+        var content = document.getElementById(elementId);
+        navigator.clipboard.writeText(content.textContent).then(function () {
+            alert("Content copied to clipboard.");
+        }, function () {
+            alert("Failed to copy content to clipboard.");
+        });
+    }
+
+
+
+    mermaid.initialize({ startOnLoad: true });
+
+    function copyJSON() {
+        var jsonContent = document.getElementById("json-text");
+        navigator.clipboard.writeText(jsonContent.innerText).then(function () {
+            alert("JSON copied to clipboard!");
+        }, function (err) {
+            console.error("Could not copy text: ", err);
+        });
+    }
+</script>
+</body>
+
+</html>

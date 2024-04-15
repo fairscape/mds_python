@@ -8,7 +8,7 @@ from typing import List, Union
 from fairscape_mds.mds.models.fairscape_base import *
 
 
-class EvidenceGraph(FairscapeBaseModel, extra = Extra.allow):
+class EvidenceGraph(FairscapeEVIBaseModel, extra = Extra.allow):
     metadataType: str = Field(default="evi:EvidenceGraph", alias="@type")
     owner: constr(pattern=IdentifierPattern)
 

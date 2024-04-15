@@ -7,19 +7,21 @@ from fairscape_mds.mds.config import (
     get_mongo_client,
 ) 
 
-from fairscape_mds.mds.models.dataset import Dataset
-from fairscape_mds.mds.models.utils import list_dataset
+from fairscape_mds.mds.models.dataset import Dataset, listDatasets, deleteDataset, createDataset, DatasetCreateModel
 
 router = APIRouter()
 mongo_config = get_mongo_config()
 mongo_client = get_mongo_client()
 
+mongo_db = mongo_client[mongo_config.db]
+identifier_collection = mongo_db[mongo_config.identifier_collection]
+user_collection = mongo_db[mongo_config.user_collection]
 
 
 @router.post("/dataset",
              summary="Create a dataset",
              response_description="The created dataset")
-def dataset_create(dataset: Dataset):
+def dataset_create(dataset: DatasetCreateModel):
     """
     Create a dataset with the following properties:
 
@@ -28,15 +30,19 @@ def dataset_create(dataset: Dataset):
     - **name**: a name
     - **owner**: an existing user in its compact form with @id, @type, name, and email
     """
-    mongo_client = mongo.GetConfig()
-    create_status = dataset.create(mongo_client)
 
-    mongo_client.close()
+    datasetInstance = dataset.convert()
+    
+    create_status = createDataset(
+            datasetInstance,
+            identifier_collection,
+            user_collection
+            )
 
     if create_status.success:
         return JSONResponse(
             status_code=201,
-            content={"created": {"@id": dataset.id, "@type": "evi:Dataset"}}
+            content={"created": {"@id": dataset.guid, "@type": "evi:Dataset", "name": dataset.name}}
         )
     else:
         return JSONResponse(
@@ -49,15 +55,8 @@ def dataset_create(dataset: Dataset):
             summary="List all datasets",
             response_description="Retrieved list of datasets")
 def dataset_list():
-    mongo_client = mongo.GetConfig()
-    mongo_db = mongo_client[MONGO_DATABASE]
-    mongo_collection = mongo_db[MONGO_COLLECTION]
-
-    dataset = list_dataset(mongo_collection)
-
-    mongo_client.close()
-
-    return dataset
+    datasets = listDatasets(identifier_collection)
+    return datasets
 
 
 @router.get("/dataset/ark:{NAAN}/{postfix}",
@@ -70,17 +69,12 @@ def dataset_get(NAAN: str, postfix: str):
     - **NAAN**: Name Assigning Authority Number which uniquely identifies an organization e.g. 12345
     - **postfix**: a unique string
     """
-    mongo_client = mongo.GetConfig()
-    mongo_db = mongo_client[MONGO_DATABASE]
-    mongo_collection = mongo_db[MONGO_COLLECTION]
 
     dataset_id = f"ark:{NAAN}/{postfix}"
 
-    dataset = Dataset.construct(id=dataset_id)
+    dataset = Dataset.construct(guid=dataset_id)
 
-    read_status = dataset.read(mongo_collection)
-
-    mongo_client.close()
+    read_status = dataset.read(identifier_collection)
 
     if read_status.success:
         return dataset
@@ -95,13 +89,7 @@ def dataset_get(NAAN: str, postfix: str):
             summary="Update a dataset",
             response_description="The updated dataset")
 def dataset_update(dataset: Dataset):
-    mongo_client = mongo.GetConfig()
-    mongo_db = mongo_client[MONGO_DATABASE]
-    mongo_collection = mongo_db[MONGO_COLLECTION]
-
-    update_status = dataset.update(mongo_collection)
-
-    mongo_client.close()
+    update_status = dataset.update(identifier_collection)
 
     if update_status.success:
         return JSONResponse(
@@ -125,26 +113,24 @@ def dataset_delete(NAAN: str, postfix: str):
     - **NAAN**: Name Assigning Authority Number which uniquely identifies an organization e.g. 12345
     - **postfix**: a unique string
     """
-    dataset_id = f"ark:{NAAN}/{postfix}"
+    datasetGUID = f"ark:{NAAN}/{postfix}"
 
-    mongo_client = mongo.GetConfig()
-    mongo_db = mongo_client[MONGO_DATABASE]
-    mongo_collection = mongo_db[MONGO_COLLECTION]
+    datasetMetadata, deleteStatus = deleteDataset(
+            datasetGUID,
+            identifier_collection,
+            user_collection
+            )
 
-    dataset = Dataset.construct(id=dataset_id)
-
-    delete_status = dataset.delete(mongo_collection)
-
-    mongo_client.close()
-
-    if delete_status.success:
+    if deleteStatus.success:
         return JSONResponse(
             status_code=200,
-            content={"deleted": {"@id": dataset_id, "@type": "evi:Dataset", "name": dataset.name}}
+            content={
+                "deleted": datasetMetadata.model_dump(by_alias=True, include=['guid', 'name', 'description', 'metadataType'])
+                }
         )
 
     else:
         return JSONResponse(
-            status_code=delete_status.status_code,
-            content={"error": f"{str(delete_status.message)}"}
+            status_code=deleteStatus.status_code,
+            content={"error": f"{str(deleteStatus.message)}"}
         )
