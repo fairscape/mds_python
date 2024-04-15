@@ -7,26 +7,26 @@ from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 from fastapi.security import OAuth2PasswordRequestForm
 
-from fairscape_mds.mds.routers.user import router as UserRouter
-from fairscape_mds.mds.routers.schema import router as SchemaRouter
-from fairscape_mds.mds.routers.group import router as GroupRouter
-from fairscape_mds.mds.routers.software import router as SoftwareRouter
-from fairscape_mds.mds.routers.dataset import router as DatasetRouter
-from fairscape_mds.mds.routers.rocrate import router as ROCrateRouter
-from fairscape_mds.mds.routers.computation import router as ComputationRouter
-from fairscape_mds.mds.routers.project import router as ProjectRouter
-from fairscape_mds.mds.routers.organization import router as OrganizationRouter
-from fairscape_mds.mds.routers.evidencegraph import router as EvidenceGraphRouter
-from fairscape_mds.mds.routers.transfer import router as TransferRouter
-from fairscape_mds.mds.routers.resolver import ResolverRouter
+from fairscape_mds.routers.user import router as UserRouter
+from fairscape_mds.routers.schema import router as SchemaRouter
+from fairscape_mds.routers.group import router as GroupRouter
+from fairscape_mds.routers.software import router as SoftwareRouter
+from fairscape_mds.routers.dataset import router as DatasetRouter
+from fairscape_mds.routers.rocrate import router as ROCrateRouter
+from fairscape_mds.routers.computation import router as ComputationRouter
+from fairscape_mds.routers.project import router as ProjectRouter
+from fairscape_mds.routers.organization import router as OrganizationRouter
+from fairscape_mds.routers.evidencegraph import router as EvidenceGraphRouter
+from fairscape_mds.routers.transfer import router as TransferRouter
+from fairscape_mds.routers.resolver import ResolverRouter
 
-from fairscape_mds.mds.web.routers.index import router as WebIndexRouter
-from fairscape_mds.mds.web.routers.signin import router as WebSigninRouter
-from fairscape_mds.mds.web.routers.signup import router as WebSignupRouter
-from fairscape_mds.mds.web.routers.home import router as WebHomeRouter
+from fairscape_mds.web.routers.index import router as WebIndexRouter
+from fairscape_mds.web.routers.signin import router as WebSigninRouter
+from fairscape_mds.web.routers.signup import router as WebSignupRouter
+from fairscape_mds.web.routers.home import router as WebHomeRouter
 
 
-from fairscape_mds.mds.config import (
+from fairscape_mds.config import (
     get_mongo_config,
     get_mongo_client
 ) 
@@ -103,10 +103,10 @@ app = FastAPI(
 )
 
 
-static_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'static')
+#static_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'static')
 
 # mounting templates
-app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
+app.mount("/static", StaticFiles(directory='static'), name="static")
 templates = Jinja2Templates(directory="templates")
 
 

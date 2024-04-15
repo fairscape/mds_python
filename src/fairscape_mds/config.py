@@ -164,7 +164,7 @@ class FairscapeConfig(BaseModel):
 
     def RunServer(self):
         uvicorn.run(
-            'fairscape_mds.mds.app:app', 
+            'fairscape_mds.app:app', 
             host=self.host, 
             port=self.port, 
             reload=True
