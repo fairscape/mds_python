@@ -8,6 +8,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.security import OAuth2PasswordRequestForm
 
 from fairscape_mds.mds.routers.user import router as UserRouter
+from fairscape_mds.mds.routers.schema import router as SchemaRouter
 from fairscape_mds.mds.routers.group import router as GroupRouter
 from fairscape_mds.mds.routers.software import router as SoftwareRouter
 from fairscape_mds.mds.routers.dataset import router as DatasetRouter
@@ -77,6 +78,10 @@ tags_metadata = [
     {
         "name": "compute",
         "description": "Operations with Performing Computation.",
+    },
+        {
+        "name": "schema",
+        "description": "Operations with Schemas.",
     }
 
 ]
@@ -131,6 +136,7 @@ app.include_router(OrganizationRouter, tags=["organization"])
 app.include_router(EvidenceGraphRouter, tags=["evidencegraph"])
 app.include_router(TransferRouter, tags=["transfer"])
 app.include_router(ResolverRouter, tags=["resolver"])
+app.include_router(SchemaRouter, tags=["schema"])
 
 # Routes for Web pages
 app.include_router(WebIndexRouter, tags=["webindex"])
