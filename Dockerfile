@@ -1,23 +1,28 @@
-FROM python:3.9-slim as builder
+FROM python:3.12-slim as builder
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends gcc
 
+RUN python3 -m pip install --upgrade pip
+
+WORKDIR fairscape/
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 
 FROM builder as fairscape
 
-#RUN addgroup --system fair && adduser --system --group fair
-#USER fair
+# add users to run fairscape server
+#  RUN addgroup --system fair && adduser --system --group fair
+# add permission to file path 
+#  RUN chgrp -R fair /fairscape
+# switch to limited user
+#  USER fair
 
-COPY mds /mds/mds
-COPY static /mds/static
-COPY templates /mds/templates
-COPY main.py /mds/main.py
+# copy source code
+COPY src/ /fairscape/src/
+WORKDIR fairscape/src/
 
-WORKDIR /mds
+RUN export PYTHONPATH=$PYTHONPATH:/fairscape_mds
 
-RUN export PYTHONPATH=$PYTHONPATH:/mds
-
-CMD ["python3", "main.py"]
+# run using uvicorn
+CMD ["uvicorn", "fairscape_mds.mds.app:app", "--host", "0.0.0.0", "--port", "80"]

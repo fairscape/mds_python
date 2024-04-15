@@ -1,0 +1,261 @@
+<html>
+	<head>
+		<meta charset="utf-8" />
+    		<meta name="viewport" content="width=device-width" />
+    		<title>Fairscape Resolver</title>
+		
+		<!--example metadata-->
+		<script type="application/ld+json">
+				{'@id': 'ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_apmsloader_initialrun0.1alpha',
+ '@context': {'EVI': 'https://w3id.org/EVI#', '@vocab': 'https://schema.org/'},
+ '@type': 'Dataset',
+ 'name': 'Initial integration run',
+ 'description': 'Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run AP-MS Edgelist',
+ 'keywords': ['Ideker Lab',
+  'CM4AI',
+  '0.1 alpha',
+  'MDA-MB-468',
+  'untreated',
+  'chromatin',
+  'Initial integration run',
+  'AP-MS edgelist download'],
+ 'isPartOf': [{'@id': 'ark:/Ideker_Lab',
+   '@type': 'Organization',
+   'name': 'Ideker Lab'},
+  {'@id': 'ark:/Ideker_Lab/CM4AI', '@type': 'Project', 'name': 'CM4AI'}],
+ '@graph': [{'@id': 'ark:59852/de648062-1a9c-4171-a71a-55a92939731f',
+   'conformsTo': {'@id': 'https://w3id.org/ro/crate/1.1'},
+   'about': {'@id': 'ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_apmsloader_initialrun0.1alpha'},
+   'isPartOf': {'@id': 'ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_apmsloader_initialrun0.1alpha',
+    'name': '1.cm4ai_chromatin_mda-mb-468_untreated_apmsloader_initialrun0.1alpha'},
+   'contentUrl': 'file:///ro-crate-metadata.json',
+   '@type': 'https://w3id.org/EVI#Dataset',
+   'additionalType': 'Dataset',
+   'keywords': ['cm4ai', 'alpha', 'data release', 'b2ai'],
+   'usedBy': []},
+  {'@id': 'ark:59852/f8ceefbc-fa52-495a-ac5f-5ccaafb9bcad',
+   '@context': {'@vocab': 'https://schema.org/',
+    'evi': 'https://w3id.org/EVI#'},
+   'metadataType': 'https://w3id.org/EVI#Dataset',
+   'url': None,
+   'name': 'cellmaps_ppidownloader output file',
+   'keywords': ['cm4ai', 'alpha', 'data release', 'b2ai'],
+   'description': 'Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run AP-MS Edgelist AP-MS gene node attributes file',
+   'author': 'Ideker Lab Cell Maps team',
+   'datePublished': '2023-08-31',
+   'version': '0.1.0a6',
+   'associatedPublication': None,
+   'additionalDocumentation': None,
+   'format': 'tsv',
+   'schema': {},
+   'generatedBy': ['ark:59852/7ab9bf7e-a52d-47b0-881e-c835150d5f6a'],
+   'derivedFrom': [],
+   'usedBy': [],
+   'contentUrl': 'file:///ppi_gene_node_attributes.tsv',
+   '@type': 'https://w3id.org/EVI#Dataset',
+   'additionalType': 'Dataset',
+   'isPartOf': {'@id': 'ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_apmsloader_initialrun0.1alpha',
+    'name': '1.cm4ai_chromatin_mda-mb-468_untreated_apmsloader_initialrun0.1alpha'}},
+  {'@id': 'ark:59852/6790af66-db21-4273-a0cf-34993a4dd7b8',
+   '@context': {'@vocab': 'https://schema.org/',
+    'evi': 'https://w3id.org/EVI#'},
+   'metadataType': 'https://w3id.org/EVI#Software',
+   'url': 'https://github.com/idekerlab/cellmaps_ppidownloader',
+   'name': 'cellmaps_ppidownloader',
+   'keywords': ['cm4ai', 'alpha', 'data release', 'b2ai'],
+   'description': 'Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run AP-MS Edgelist A tool to download AP-MS data for Cell Maps pipeline',
+   'author': 'Ideker Lab Cell Maps team',
+   'dateModified': '2023-08-31',
+   'version': '0.1.0a6',
+   'associatedPublication': None,
+   'additionalDocumentation': None,
+   'format': 'py',
+   'contentUrl': 'https://github.com/idekerlab/cellmaps_ppidownloader',
+   '@type': 'https://w3id.org/EVI#Software',
+   'additionalType': 'Software',
+   'isPartOf': {'@id': 'ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_apmsloader_initialrun0.1alpha',
+    'name': '1.cm4ai_chromatin_mda-mb-468_untreated_apmsloader_initialrun0.1alpha'},
+   'usedBy': ['ark:59852/7ab9bf7e-a52d-47b0-881e-c835150d5f6a']},
+  {'@id': 'ark:59852/7ab9bf7e-a52d-47b0-881e-c835150d5f6a',
+   '@context': {'@vocab': 'https://schema.org/',
+    'evi': 'https://w3id.org/EVI#'},
+   'metadataType': 'https://w3id.org/EVI#Computation',
+   'url': None,
+   'name': 'AP-MS Loader',
+   'keywords': ['cm4ai', 'alpha', 'data release', 'b2ai'],
+   'description': 'Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run AP-MS Edgelist run of cellmaps_ppidownloader',
+   'runBy': 'cchuras',
+   'dateCreated': '2023-08-31',
+   'associatedPublication': None,
+   'additionalDocumentation': None,
+   'command': "{'outdir': '0.1pipeline/1.cm4ai_chromatin_mda-mb-468_untreated_apmsloader_initialrun0.1alpha', 'cm4ai_table': '0.1rocrates/cm4ai_chromatin_mda-mb-468_untreated_apms_0.1_alpha/apms.tsv', 'edgelist': None, 'edgelist_geneid_one_col': 'GeneID1', 'edgelist_symbol_one_col': 'Symbol1', 'edgelist_geneid_two_col': 'GeneID2', 'edgelist_symbol_two_col': 'Symbol2', 'baitlist': None, 'baitlist_symbol_col': 'GeneSymbol', 'baitlist_geneid_col': 'GeneID', 'baitlist_numinteractors_col': '# Interactors', 'provenance': 'ppiprovenance.json', 'logconf': None, 'skip_logging': False, 'verbose': 0, 'program': '/cellar/users/cchuras/miniconda3/envs/py38/bin/cellmaps_ppidownloadercmd.py', 'version': '0.1.0a6'}",
+   'usedSoftware': ['ark:59852/6790af66-db21-4273-a0cf-34993a4dd7b8'],
+   'usedDataset': ['ark:59852/62cbb46e-1d3d-4f72-b7e9-c7c140aa9367'],
+   'generated': ['ark:59852/f8ceefbc-fa52-495a-ac5f-5ccaafb9bcad'],
+   '@type': 'https://w3id.org/EVI#Computation',
+   'additionalType': 'Computation',
+   'isPartOf': {'@id': 'ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_apmsloader_initialrun0.1alpha',
+    'name': '1.cm4ai_chromatin_mda-mb-468_untreated_apmsloader_initialrun0.1alpha'}},
+  {'@id': 'ark:59852/62cbb46e-1d3d-4f72-b7e9-c7c140aa9367',
+   '@context': {'@vocab': 'https://schema.org/',
+    'evi': 'https://w3id.org/EVI#'},
+   'metadataType': 'https://w3id.org/EVI#Dataset',
+   'url': None,
+   'name': 'cellmaps_ppidownloader input file',
+   'keywords': ['cm4ai', 'alpha', 'data release', 'b2ai'],
+   'description': 'Ideker Lab CM4AI 0.1 alpha MDA-MB-468 untreated chromatin Initial integration run AP-MS Edgelist AP-MS gene node attributes file',
+   'author': 'Ideker Lab Cell Maps team',
+   'datePublished': '2023-08-31',
+   'version': '0.1.0a6',
+   'associatedPublication': None,
+   'additionalDocumentation': None,
+   'format': 'tsv',
+   'schema': {},
+   'generatedBy': [],
+   'derivedFrom': [],
+   'usedBy': ['ark:59852/7ab9bf7e-a52d-47b0-881e-c835150d5f6a',
+    'ark:59852/7ab9bf7e-a52d-47b0-881e-c835150d5f6a'],
+   'contentUrl': None,
+   '@type': 'https://w3id.org/EVI#Dataset',
+   'additionalType': 'Dataset',
+   'isPartOf': {'@id': 'ark:59852/1.cm4ai_chromatin_mda-mb-468_untreated_apmsloader_initialrun0.1alpha',
+    'name': '1.cm4ai_chromatin_mda-mb-468_untreated_apmsloader_initialrun0.1alpha'}}]}
+
+		</script>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+
+    <style>
+      .main-content {
+        width: 100%;
+        background: whitesmoke;
+      }
+      .guid-header {
+        background: blue;
+        display: grid;
+        grid-template-columns: [left-margin] 10%  [item] auto [right-margin] 10%;
+        grid-template-rows: auto;
+      }
+
+      .guid-header-item {
+        grid-column: item;
+        display: grid;
+        grid-template-columns: [key] 30% [value] auto;
+      }
+
+      .guid-header-key {
+        grid-column: key;
+
+      }
+
+      .guid-header-value {
+        grid-column: value;
+
+      }
+
+
+      .guid-property {
+        width: 100%;
+        display: grid;
+        grid-template-columns: [left-margin] 10% [key] 30% [value] auto [right-margin] 10%;
+        grid-template-rows: auto;
+
+        /*grid-template-areas: 
+          "left-margin key value right-margin" 
+          */
+      }
+      .guid-property-key {
+          grid-column:  key;
+          background: red;
+      }
+
+      .guid-property-value {
+        grid-column: value;
+        background: green
+      }
+
+      .list-value {
+        background: purple;
+
+      }
+    </style>
+
+	</head>
+	<body>
+    <div class="main-content">
+			<div class="guid-header">
+        <div class="guid-header-item">
+          <div class="guid-header-key">
+            GUID
+          </div>
+          <div class="guid-header-value">
+            ark:59852/de648062-1a9c-4171-a71a-55a92939731f
+          </div>
+        </div>
+
+        <div class="guid-header-item">
+          <div class="guid-header-key">
+            Name
+          </div>
+          <div class="guid-header-value">
+            Example Gui
+          </div>
+        </div>
+
+        <div class="guid-header-item">
+          <div class="guid-header-key">
+            Author
+          </div>
+          <div class="guid-header-value">
+            Max Levinson
+          </div>
+        </div>
+
+			</div>
+
+			<div class="guid-body">
+
+				<div class="guid-property">
+					<div class="guid-property-key">hasPart</div>
+					<div class="guid-property-value">
+
+							<div class="guid-contains">
+
+								<div class="list-value">
+                  <a href="https://fairscape.pods.uvarc.io/ark:59852/de648062-1a9c-4171-a71a-55a92939731f">
+                    ark:59852/de648062-1a9c-4171-a71a-55a92939731f
+                  </a>
+								</div>
+
+								<div class="list-value">
+                  <a href="https://fairscape.pods.uvarc.io/ark:59852/de648062-1a9c-4171-a71a-55a92939731f">
+                    ark:59852/de648062-1a9c-4171-a71a-55a92939731f
+                  </a>
+								</div>
+
+							</div>
+
+
+
+            </div>
+          </div>
+
+          <div class="guid-property">
+            <div class="guid-property-key">hasPart</div>
+            <div class="guid-property-value">Fairscape</div>
+          </div>
+
+          <div class="guid-property"></div>
+          <div class="guid-property"></div>
+          <div class="guid-property"></div>
+          <div class="guid-property"></div>
+
+				</div>
+
+			</div>
+
+		</div>
+
+	</body>
+</html>

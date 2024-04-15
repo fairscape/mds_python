@@ -2,6 +2,8 @@
 casbin.db
 casbin_policy.db
 
+*.DS_Store
+
 # music source code
 tests/music_pipeline/MuSIC
 tests/data/*
