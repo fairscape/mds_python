@@ -1,7 +1,14 @@
 from fastapi import APIRouter, Response
 from fastapi.responses import JSONResponse
 
-from fairscape_mds.mds.models.software import Software, listSoftware, createSoftware, deleteSoftware
+from fairscape_mds.mds.models.software import (
+        Software, 
+        SoftwareCreateModel,
+        listSoftware, 
+        createSoftware, 
+        deleteSoftware,
+        getSoftware
+        )
 from fairscape_mds.mds.config import (
         get_mongo_config,
         get_mongo_client,
@@ -20,7 +27,7 @@ userCollection = mongo_db[mongo_config.user_collection]
 @router.post("/software",
              summary="Create a software",
              response_description="The created software")
-def software_create(software: Software, response: Response):
+def software_create(software: SoftwareCreateModel, response: Response):
     """
     Create a software with the following properties:
 
@@ -30,12 +37,14 @@ def software_create(software: Software, response: Response):
     - **owner**: an existing user in its compact form with @id, @type, name, and email
     """
 
-    create_status = createSoftware(software, identifierCollection, userCollection)
+    softwareInstance = software.convert()
+    create_status = createSoftware(softwareInstance, identifierCollection, userCollection)
 
     if create_status.success:
         return JSONResponse(
             status_code=201,
-            content={"created": software.model_dump(by_alias=True)}
+            content={"created": softwareInstance.model_dump(by_alias=True, include=['guid', 'name', 'description', 'metadataType', 'author'])
+                }
         )
     else:
         return JSONResponse(
@@ -63,17 +72,17 @@ def software_get(NAAN: str, postfix: str, response: Response):
     - **postfix**: a unique string
     """
 
-    software_id = f"ark:{NAAN}/{postfix}"
+    softwareGUID = f"ark:{NAAN}/{postfix}"
 
-    software = Software.construct(guid=software_id)
-
-    read_status = software.read(identifierCollection)
+    software, read_status = getSoftware(softwareGUID, identifierCollection)
 
     if read_status.success:
         return software
     else:
-        return JSONResponse(status_code=read_status.status_code,
-                            content={"error": read_status.message})
+        return JSONResponse(
+                status_code=read_status.status_code,
+                content={"error": read_status.message}
+                )
 
 
 @router.put("/software",
@@ -85,12 +94,12 @@ def software_update(software: Software, response: Response):
     if update_status.success:
         return JSONResponse(
             status_code=200,
-            content={"updated": {"@id": software.id, "@type": "evi:Software"}}
+            content={"updated": {"@id": software.guid, "@type": "evi:Software"}}
         )
     else:
         return JSONResponse(
             status_code=update_status.status_code,
-            content={"error": update_status.message}
+            content={"deleted": software.model_dump(by_alias=True, include=['guid', 'name', 'description', 'metadataType', 'author'])}
         )
 
 
@@ -106,7 +115,7 @@ def software_delete(NAAN: str, postfix: str):
     """
     softwareGUID = f"ark:{NAAN}/{postfix}"
 
-    deleteStatus = deleteSoftware(
+    softwareInstance, deleteStatus = deleteSoftware(
             softwareGUID, 
             identifierCollection, 
             userCollection
@@ -115,7 +124,7 @@ def software_delete(NAAN: str, postfix: str):
     if deleteStatus.success:
         return JSONResponse(
             status_code=200,
-            content={"deleted": {"@id": software_id, "@type": "evi:Software", "name": software.name}}
+            content={"deleted": softwareInstance.model_dump(by_alias=True, include=['guid', 'name', 'description', 'metadataType', 'author'])}
         )
     else:
         return JSONResponse(

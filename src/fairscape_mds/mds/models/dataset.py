@@ -12,103 +12,24 @@ from fairscape_mds.mds.models.utils import (
     delete_distribution_metadata
 )
 from fairscape_mds.mds.utilities.operation_status import OperationStatus
+ 
 
-
-class CreateDatasetModel(BaseModel):
-    name: str
-    url: Optional[str] = Field(default=None)
-    owner: str = Field(...)
-    author: Optional[str] = Field(default=None)
-    keywords: List[str]
-    description: str
-    includedInDataCatalog: Optional[str] = Field(default=None)
-    sourceOrganization: Optional[str] = Field(default=None)
-    dateCreated: Optional[datetime] = Field(default_factory=datetime.now)
-    dateModified: Optional[datetime] = Field(default_factory=datetime.now)
-    usedBy: Optional[List[str]] = Field(alias="evi:usedBy", default=[])
-
-
-    def create(
-        self, 
-        IdentifierCollection: pymongo.collection.Collection, 
-        UserCollection: pymongo.collection.Collection
-    ) -> OperationStatus:
-
-        # turn into Dataset Read model
-
-        pass
-    
 
 class Dataset(FairscapeEVIBaseModel, extra=Extra.allow):
     owner: str = Field(...)
-    distribution: Optional[List[str]] = []
+    metadataType: str = Field(
+        title="metadataType",
+        alias="@type",
+        default="evi:Dataset"
+    )
+    distribution: Optional[List[str]] = Field(default=[])
     includedInDataCatalog: Optional[str] = Field(default=None)
     sourceOrganization: Optional[str] = Field(default=None)
     author: Optional[str] = Field(default=None)
     dateCreated: Optional[datetime] = Field(default_factory=datetime.now)
     dateModified: Optional[datetime] = Field(default_factory=datetime.now)
-    usedBy: Optional[List[str]] = []
-
-
-    def create(
-        self, 
-        IdentifierCollection: pymongo.collection.Collection, 
-        UserCollection: pymongo.collection.Collection
-    ) -> OperationStatus:
-
-        # TODO initialize attributes of dataset
-        self.distribution = []
-        # self.dateCreated = ""
-        # self.dateModified = ""
-        # self.activity = []
-
-        # check that dataset does not already exist
-        if IdentifierCollection.find_one({"@id": self.guid}) is not None:
-            return OperationStatus(False, "dataset already exists", 400)
-
-
-        # check that owner exists
-        if UserCollection.find_one({"@id": self.owner}) is None:
-            return OperationStatus(False, "owner does not exist", 404)
-
-        # embeded bson documents to enable Mongo queries
-        dataset_dict = self.model_dump(by_alias=True)
-
-        # embeded bson document for owner
-        #dataset_dict["owner"] = SON([
-        #    (key, value) for key, value in dataset_dict["owner"].items()
-        #    ])
-
-
-        # use a session and transaction to enable rollbacks on errors 
-        insert_result = IdentifierCollection.insert_one(
-            dataset_dict
-            )
-
-
-        # check the insert one results
-        if insert_result.inserted_id is None:
-            return OperationStatus(False, f"error inserting document: {str(dataset_dict)}", 500)
-        
-
-        # update operations for the owner user of the dataset
-        add_dataset_update = {
-            "$push": {"datasets": self.guid}
-                #SON([("@id", self.guid), ("@type", "evi:Dataset"), ("name", self.name)])}
-        }
-
-        # update owner model to have listed the dataset
-        update_result = UserCollection.update_one(
-            {"@id": self.owner}, 
-            add_dataset_update,
-            )
-
-        # check that the update operation succeeded
-        if update_result.modified_count != 1:
-            IdentifierCollection.delete_one({"@id": self.guid})
-            return OperationStatus(False, f"error updating user on dataset create", 500)
- 
-        return OperationStatus(True, "", 201)
+    usedBy: Optional[List[str]] = Field(default=[])
+    generatedBy: Optional[str] = Field(default=None)
 
 
     def read(self, MongoCollection: pymongo.collection.Collection) -> OperationStatus:
@@ -120,95 +41,268 @@ class Dataset(FairscapeEVIBaseModel, extra=Extra.allow):
         return super().update(MongoCollection)
 
 
-    def delete(
-        self, 
-        IdentifierCollection: pymongo.collection.Collection, 
-        UserCollection: pymongo.collection.Collection
-    ) -> OperationStatus:
-        """Delete the dataset. Update each user who is an owner of the dataset.
-
-        Args:
-            MongoCollection (pymongo.collection.Collection): _description_
-
-        Returns:
-            OperationStatus: _description_
-        """
-
-        # check that record exists
-        # also, if successfull, will unpack the data we need to build the update operation
-        read_status = self.read(IdentifierCollection)
-
-        if not read_status.success:
-            if read_status.status_code == 404:
-                return OperationStatus(False, "dataset not found", 404)
-            else:
-                return read_status
+class DatasetCreateModel(BaseModel, extra=Extra.allow):
+    guid: str = Field(
+        title="guid",
+        alias="@id"
+    )
+    name: str
+    description: str
+    keywords: List[str]
+    owner: str = Field(...)
+    includedInDataCatalog: Optional[str] = Field(default=None)
+    sourceOrganization: Optional[str] = Field(default=None)
+    author: Optional[str] = Field(default=None)
+    dateCreated: Optional[datetime] = Field(default_factory=datetime.now)
+    dateModified: Optional[datetime] = Field(default_factory=datetime.now)
+    usedBy: Optional[List[str]] = Field(default=[])
+    generatedBy: Optional[str] = Field(default=None)
 
 
-        # create a bulk write operation
-        # to remove a document from a list
-        pull_operation = {"$pull": {"datasets": self.guid}}
+    def convert(self)-> Dataset:
 
-        #  update the owner to remove the dataset
-        update_owner = UserCollection.update_one(
-            {"@id": self.owner}, 
-            pull_operation, 
+        return Dataset(
+                guid=self.guid,
+                name=self.name,
+                description=self.description,
+                keywords=self.keywords,
+                owner=self.owner,
+                distribution=[],
+                includedInDataCatalog=self.includedInDataCatalog,
+                sourceOrganization=self.sourceOrganization,
+                author=self.author,
+                dateCreated=self.dateCreated,
+                dateModified=self.dateModified,
+                published=True
+                )
+
+
+
+def updateEVIUsedBy(
+    datasetInstance: Dataset,
+    identifierCollection: pymongo.collection.Collection
+        ):
+    if len(datasetInstance.usedBy) != 0:
+        # for every used by 
+        for computationGUID in list(filter(lambda x: 'ark:' in x, test_list)):
+            # 
+            computationMetadata = identifierCollection.find_one(
+                    {
+                        "@id": computationGUID, 
+                        "@type": "evi:Computation"
+                        } 
+                    )
+            
+            if computationMetadata is None:
+                return OperationStatus(
+                        False, 
+                        f"dataset property usedBy {computationGUID} computation not found", 
+                        404
+                        )
+        
+            # is this dataset listed as an output of the existing computation
+            if computationGUID not in computationMetadata.get("usedDataset"):
+                updateComputationResult = identifierCollection.update_one({
+                    "@id": computationGUID, 
+                    "@type": "evi:Computation"
+                    },
+                    {"$push": {"usedDataset": computationGUID}}
+                )
+            
+                # check updating result
+                if updateComputationResult.modified_count != 1:
+                    return OperationStatus(
+                            False,
+                            f"failed to update computation specified by dataset.usedBy {datasetInstance.usedBy}",
+                            500
+                            )
+
+    return None
+
+
+def updateEVIGeneratedBy(
+    datasetInstance: Dataset,
+    identifierCollection: pymongo.collection.Collection
+    ):
+    # must check that generatedBy is an ark
+    if 'ark:' in datasetInstance.generatedBy:
+        computationMetadata = identifierCollection.find_one(
+                {
+                    "@id": datasetInstance.generatedBy, 
+                    "@type": "evi:Computation"
+                    } 
+                )
+        
+        if computationMetadata is None:
+            return OperationStatus(
+                    False, 
+                    f"dataset property generatedBy {datasetInstance.generatedBy} computation not found", 
+                    404
+                    )
+
+        # is this dataset listed as an output of the existing computation
+        if datasetInstance.guid not in computationMetadata.get("generated"):
+            updateComputationResult = identifierCollection.update_one({
+                "@id": datasetInstance.generatedBy, 
+                "@type": "evi:Computation"
+                },
+                {"$push": {"generated": datasetInstance.guid}}
+            )
+
+            # check updating result
+            if updateComputationResult.modified_count != 1:
+                return OperationStatus(
+                        False,
+                        f"failed to update computation specified by dataset.generatedBy {datasetInstance.generatedBy}",
+                        500
+                        )
+
+    return None
+
+
+
+def createDataset(
+    datasetInstance: Dataset,
+    identifierCollection: pymongo.collection.Collection,
+    userCollection: pymongo.collection.Collection
+    )-> OperationStatus:
+    # check that dataset does not already exist
+    if identifierCollection.find_one({"@id": datasetInstance.guid}) is not None:
+        return OperationStatus(False, "dataset already exists", 400)
+    
+    # check that owner exists
+    if userCollection.find_one({"@id": datasetInstance.owner}) is None:
+        return OperationStatus(False, "owner does not exist", 404)
+
+    # if generatedBy is an ark
+    # make sure it exists in the database as a computation
+    #if datasetInstance.generatedBy is not None:
+    #    updateGeneratedByResult = updateEVIGeneratedBy(datasetInstance, identifierCollection)
+
+    #    if updateGeneratedByResult:
+    #        return updateGeneratedByResult
+    
+    #if datasetInstance.usedBy is not None:
+    #    updateUsedByResult = updateEVIUsedBy(datasetInstance, identifierCollection)
+
+    #    if updateUsedByResult:
+    #        return updateUsedByResult
+
+
+    # insert dataset
+    datasetMetadata = datasetInstance.model_dump(by_alias=True)
+    insertResult = identifierCollection.insert_one(
+        datasetMetadata
         )
 
-        if update_owner.modified_count != 1:
-            return OperationStatus(False, "failed to update owner", 500)
+    # check the insert one results
+    if insertResult.inserted_id is None:
+        return OperationStatus(False, f"error inserting document: {str(datasetMetadata)}", 500)
+        
 
-        # update the project to remove the dataset
-        if self.includedInDataCatalog is not None:
-            update_project = IdentifierCollection.update_one(
-                {"@id": self.includedInDataCatalog}, 
-                pull_operation, 
-                )
+    # update operations for the owner user of the dataset
+    updateResult = userCollection.update_one(
+        {"@id": datasetInstance.owner}, 
+        {"$push": {"datasets": datasetInstance.guid}}
+        )
 
-            if update_project.modified_count == 0:
-                return OperationStatus(False, "", 500)
+    # check that the update operation succeeded
+    if updateResult.modified_count != 1:
+        identifierCollection.delete_one({"@id": datasetInstance.guid})
+        return OperationStatus(False, f"error updating user on dataset create", 500)
+    
+    # TODO update organization
 
-            # update the organization to remove the dataset
-        if self.sourceOrganization is not None:
-            update_organization = IdentifierCollection.update_one(
-                {"@id": self.sourceOrganization},
-                pull_operation, 
-                )
-            if update_organization.modified_count != 1:
-                return OperationStatus(False, "", 500)
+    # TODO update project 
+ 
+    return OperationStatus(True, "", 201)
 
-        # TODO delete all distributions 
-        if len(self.distribution) != 0:
-            distribution_identifiers = [ dist['@id'] for dist in self.distribution ]
-            delete_status = delete_distribution_metadata(distribution_identifiers)
-            
 
-        # delete the distribution
-        delete_dataset = IdentifierCollection.delete_one({"@id": self.guid})
-            
-        if delete_dataset.deleted_count != 1:
-            return OperationStatus(False, "", 500)
+def deleteDataset(
+    datasetGUID: str,
+    identifierCollection: pymongo.collection.Collection, 
+    userCollection: pymongo.collection.Collection
+) -> tuple[Dataset, OperationStatus]:
+    """Delete the dataset. Update each user who is an owner of the dataset.
 
-        return OperationStatus(True, "", 200)
+    Args:
+        MongoCollection (pymongo.collection.Collection): _description_
 
-def DeleteDataset(
-    identifier_collection: Collection, 
-    user_collection: Collection,
-    dataset_id: str
-):
+    Returns:
+        OperationStatus: _description_
     """
-    """
-    pass
+
+    # check that record exists
+    # also, if successfull, will unpack the data we need to build the update operation
+    datasetMetadata = identifierCollection.find_one({
+        "@id": datasetGUID,
+        "@type": "evi:Dataset"
+        },
+        projection={"_id": False}
+        ) 
 
 
-def DeleteDownload(
+
+    if datasetMetadata is None:
+        return None, OperationStatus(False, "dataset not found", 404)
+
+
+    datasetInstance = Dataset.model_validate(datasetMetadata)
+
+    # if dataset has been deleted already
+    if not datasetInstance.published:
+        return datasetInstance, OperationStatus(False, "dataset has been deleted", 400)
+
+    pullOperation = {"$pull": {"datasets": datasetGUID}}
+
+    #  update the owner to remove the dataset
+    updateOwner = userCollection.update_one(
+        {"@id": datasetInstance.owner}, 
+        pullOperation
+    )
+
+    if updateOwner.modified_count != 1:
+        return datasetInstance, OperationStatus(False, "failed to update owner", 500)
+
+    # update the project to remove the dataset
+    if datasetInstance.includedInDataCatalog is not None:
+        updateProject = identifierCollection.update_one(
+            {"@id": datasetInstance.includedInDataCatalog}, 
+            pull_operation, 
+            )
+
+    if datasetInstance.sourceOrganization is not None:
+        update_organization = IdentifierCollection.update_one(
+            {"@id": datasetInstance.sourceOrganization},
+            pull_operation, 
+            )
+
+    # TODO delete all distributions 
+    if len(datasetInstance.distribution) != 0:
+        distributionGUIDS= datasetInstance.distribution
+        #delete_status = delete_distribution_metadata(distribution_identifiers)
+        
+
+    # delete the distribution
+    updateDataset = identifierCollection.update_one(
+            {"@id": datasetGUID, "@type": "evi:Dataset"},
+            {"$set":{"published": False, "distribution": []}}
+            )
+        
+    if updateDataset.modified_count != 1:
+        return datasetInstance, OperationStatus(False, "", 500)
+
+    return datasetInstance, OperationStatus(True, "", 200)
+
+
+def deleteDownload(
     identifier_collection: Collection,
     user_collection: Collection,
     minio_client,
     download_identifier,
-):
-    """
-    """
+) -> tuple[Dataset, OperationStatus]:
+    '''
+    '''
     pass
 
 

@@ -5,7 +5,6 @@ from datetime import datetime
 from pathlib import Path
 from fairscape_mds.mds.models.fairscape_base import *
 from fairscape_mds.mds.models.dataset import Dataset
-from fairscape_mds.mds.models.download import Download as DataDownload
 from fairscape_mds.mds.models.software import Software
 from fairscape_mds.mds.models.fairscape_base import *
 from fairscape_mds.mds.utilities.funcs import *
@@ -25,6 +24,194 @@ default_context = {
     "evi": "https://w3id.org/EVI#"
 }
 
+
+class Computation(FairscapeEVIBaseModel, extra = Extra.allow):
+    metadataType: Literal['evi:Computation'] = Field(alias="@type")
+    url: str
+    owner: str
+    author: str
+    dateCreated: Optional[datetime] = Field(default=None)
+    dateFinished: Optional[datetime] = Field(default=None)
+    sourceOrganization: Optional[str] = Field(default=None)
+    includedInDataCatalog: Optional[str] = Field(default=None)
+    command: Optional[Union[str,List[str]]] = Field(default=None)
+    usedSoftware: str
+    usedDataset: List[str]
+    generated: List[str]
+
+def createComputation(
+        computationInstance: Computation, 
+        identifierCollection: pymongo.collection.Collection,
+        userCollection: pymongo.collection.Collection
+        ) -> OperationStatus:
+    ''' create a Computation and Link all related entities
+    '''
+
+    # check that computation does not already exist
+    if identifierCollection.find_one({"@id": computationInstance.guid}) is not None:
+        return OperationStatus(False, "computation already exists", 400)
+
+    # check that owner exists
+    if userCollection.find_one({"@id": computationInstance.owner}) is None:
+        return OperationStatus(False, f"owner {computationInstance.owner} does not exist", 404)
+
+
+    # check that software exists
+    if identifierCollection.find_one({"@id": computationInstance.usedSoftware}) is None:
+        return OperationStatus(False, f"software {computationInstance.usedSoftware} does not exist", 404)
+
+    # check that dataset exists
+    for dataset in computationInstance.usedDataset:
+        if identifierCollection.find_one({"@id": dataset}) is None:
+            return OperationStatus(False, f"dataset {dataset} does not exist", 404)
+
+    # check that generated exists
+    for generated in computationInstance.generated:
+        if identifierCollection.find_one({"@id": generated}) is None:
+            return OperationStatus(False, f"generated dataset {dataset} does not exist", 404)
+
+    # insert computation
+    computationMetadata = computationInstance.model_dump(by_alias=True)
+    insertComputationResult = identifierCollection.insert_one(computationMetadata)
+
+    # update user
+    updateUserResult = userCollection.update_one(
+            {"@id": computationInstance.owner},
+            {"$push": {"computations": computationInstance.guid}}
+            )
+
+    if updateUserResult.modified_count != 1:
+        return OperationStatus(False, f"failed to update user list of software", 500)
+
+    # update software
+    updateSoftwareResult = identifierCollection.update_one(
+            {"@id": computationInstance.usedSoftware},
+            {"$push": {"usedBy": computationInstance.guid}}
+            )
+
+    if updateSoftwareResult.modified_count != 1:
+        return OperationStatus(False, f"failed to update software with inverse property usedBy", 500)
+
+    # update each usedDataset if in collection
+    updateDatasetResult = identifierCollection.update_many(
+            {"@id": {"$in": computationInstance.usedDataset}},
+            {"$push": {"usedBy": computationInstance.guid}}
+            )
+
+    if updateDatasetResult.modified_count != len(computationInstance.usedDataset):
+        # find which datasets were matched
+        return OperationStatus(False, f"failed to update usedDataset with inverse property usedBy", 500)
+
+
+    # update generated
+    updateGeneratedResult = identifierCollection.update_many(
+            {"@id": {"$in": computationInstance.generated}},
+            {"$set": {"generatedBy": computationInstance.guid}}
+            )
+
+    if updateGeneratedResult.modified_count != len(computationInstance.generated):
+        # find which datasets were matched
+        return OperationStatus(False, f"failed to update generated Datasets with inverse property generatedBy", 500)
+
+
+    return OperationStatus(True, "", 201)
+
+
+def listComputation(identifierCollection: pymongo.collection.Collection):
+    ''' List all computations
+    '''
+
+    cursor = identifierCollection.find(
+        {"@type": "evi:Computation"},
+        projection={"_id": False}
+    )
+    computationList = [ 
+        {
+            "@id": computation.get("@id"), 
+            "@type": "evi:Computation", 
+            "name": computation.get("name")
+        } for computation in cursor
+    ]
+
+    return { "computations": computationList}
+
+
+def deleteComputation(
+        computationGUID: str,
+        identifierCollection: pymongo.collection.Collection,
+        userCollection: pymongo.collection.Collection 
+    ) -> tuple[Computation, OperationStatus]:
+    ''' Delete a computation and any triples from other relations
+    '''
+
+    # check that computation exists
+    computationMetadata = identifierCollection.find_one(
+            {"@id": computationGUID}, 
+            projection={"_id": False}
+            )
+
+    if computationMetadata is None:
+        return None, OperationStatus(False, "computation not found", 404)
+
+    computationInstance = Computation.model_validate(computationMetadata)
+    
+    # update user
+    updateUserResult = userCollection.update_one(
+            {"@id": computationInstance.owner},
+            {"$pull": {"computations": computationInstance.guid}}
+            )
+
+    # clear usedBy for software and dataset
+    updateUsedByResult = identifierCollection.update_many(
+            {"usedBy": {"$in": [computationInstance.guid] }},
+            {"$pull": {"usedBy": computationInstance.guid}}
+            )
+
+
+    # update generatedBy to no longer have evidence graph edges
+    updateGeneratedResult = identifierCollection.update_many(
+            {"generatedBy": computationInstance.guid},
+            {"$set": {"generatedBy": None}}
+            )
+    
+
+    # 'delete the computation document'
+    identifierCollection.update_one(
+            {"@id": computationGUID, "@type": "evi:Computation"},
+            {"$set": {"published": False}}
+            )
+
+
+    return computationInstance, OperationStatus(True, "", 201)
+
+
+def updateComputation(
+        computationGUID: str,
+        computationUpdate: dict,
+        identifierCollection: pymongo.collection.Collection
+    ) -> OperationStatus:
+    pass
+
+
+def getComputation(
+        computationGUID: str,
+        identifierCollection: pymongo.collection.Collection
+        )-> tuple[Computation, OperationStatus]:
+
+    computationMetadata = identifierCollection.find_one(
+            {
+                "@id": computationGUID, 
+                "@type": "evi:Computation"
+            }, projection={"_id": False}
+            )
+
+    if computationMetadata is None:
+        return None, OperationStatus(False, "computation not found", 404)
+
+    computationInstance = Computation.model_validate(computationMetadata)
+    return computationInstance, OperationStatus(True, "", 200)
+
+
 class ResourceTuple(BaseModel):
     requests: str
     limits: str
@@ -34,22 +221,18 @@ class JobRequirements(BaseModel):
     cpu: ResourceTuple
     mem: ResourceTuple
 
-
-class Computation(FairscapeEVIBaseModel, extra = Extra.allow):
+class ComputationModel(FairscapeEVIBaseModel, extra = Extra.allow):
     metadataType: Literal['evi:Computation'] = Field(alias="@type")
-    owner: constr(pattern=IdentifierPattern) 
+    url: str
+    owner: str
     author: str
-    dateCreated: Optional[datetime]
-    dateFinished: Optional[datetime]
-    # TODO check 
-    sourceOrganization: constr(pattern=IdentifierPattern)
-    sourceProject: constr(pattern=IdentifierPattern)
-    container: str
-    command: Optional[Union[str,List[str]]]
+    dateCreated: Optional[datetime] = Field(default=None)
+    dateFinished: Optional[datetime] = Field(default=None)
+    sourceOrganization: Optional[str] = Field(default=None)
+    includedInDataCatalog: Optional[str] = Field(default=None)
+    command: Optional[Union[str,List[str]]] = Field(default=None)
     usedSoftware: str
-    usedDataset: str 
-    containerId: Optional[str]
-    #requirements: Optional[JobRequirements]
+    usedDataset: List[str]
     generated: List[str]
 
 
@@ -306,142 +489,4 @@ class Computation(FairscapeEVIBaseModel, extra = Extra.allow):
 
 
 
-def list_computation(mongo_collection: pymongo.collection.Collection):
 
-    cursor = mongo_collection.find(
-        filter={"@type": "evi:Computation"},
-        projection={"_id": False}
-    )
-    return {
-        "computations": [{"@id": computation.get("@id"), "@type": "evi:Computation", "name": computation.get("name")}
-                         for computation in cursor]}
-
-
-def RegisterComputation(computation: Computation):
-    """
-    Given a computation ID first await the success or failure of the container in the ongoing computation.
-    If successfull register all datasets in the output folder for the supplied computation, 
-    and append the computation metadata with status of the containers execution and logs if applicable
-    """
-
-    mongo_client = mongo.GetConfig()
-    mongo_db = mongo_client[MONGO_DATABASE]
-    mongo_collection = mongo_db[MONGO_COLLECTION]
-
-    if computation.containerId == "":
-        write_container_log(f"error: containerId does not exist")
-
-    client = docker.from_env()
-
-    # stores the container state  in a dict
-    container_state = {}
-
-    # keeps track of the 'Running = True/False' state
-    is_container_running = True
-
-    while is_container_running:
-        try:
-            container = client.containers.get(container_id=computation.containerId)
-            container_state = container.attrs["State"]
-            is_container_running = container_state["Running"]
-        except docker.errors.NotFound as nfe:
-            write_container_log(f"error: unable to retrieve container with {computation.containerId} : {nfe}")
-
-        print(container_state)
-        write_container_log(json.dumps(container_state))
-        # delay 1 sec
-        time.sleep(1)
-
-    status = container_state["Status"]
-    exit_code = container_state["ExitCode"]
-    date_created = container_state["StartedAt"]
-    date_finished = container_state["FinishedAt"]
-
-    job_path = pathlib.Path(f"/tmp/{computation.name}")
-    output_directory = job_path / "output"
-
-    # container exited gracefully
-    if status == "exited" and exit_code == 0:
-        generates = []
-        # get all output files
-        for output_file in Path(output_directory).rglob('*'):
-            if output_file.is_file():
-                print(output_file.name)
-                file_parent = output_file.parent
-                file_name = output_file.name
-                file_name_prefix = output_file.stem
-                file_extension = ''.join(output_file.suffixes)  # includes .tar.gz
-                dataset = Dataset(**{
-                    "@id": f"ark:99999/{str(uuid.uuid4())}",
-                    "@type": "evi:Dataset",
-                    # TODO find the best way to represent name as it represents the directory in MINio
-                    "name": f"output-{file_name_prefix}",
-                    "owner": computation.owner,
-                    "generatedBy": computation.id
-                })
-
-                create_status = dataset.create(mongo_client)
-
-                if create_status.success:
-                    generates.append({"@id": dataset.id, "@type": dataset.type, "name": dataset.name})
-
-                data_download = DataDownload(**{
-                    "@id": f"ark:99999/{str(uuid.uuid4())}",
-                    "@type": "DataDownload",
-                    "name": file_name,
-                    "encodingFormat": file_extension,
-                    "encodesCreativeWork": dataset.id
-                })
-
-                #create_status = data_download.create_metadata(mongo_collection)
-
-                with open(output_file, "rb") as output_file_object:
-                    upload_status = data_download.register(mongo_collection, minio_client, output_file_object)
-                    if upload_status.success != True:
-                        print('could not upload file file', output_file_object.name, upload_status.message)
-                        return JSONResponse(
-                            status_code=500,
-                            content={"error": f"unable to upload object: {output_file}"}
-                        )
-
-        # Update computation with info from the custom container
-        session = mongo_client.start_session(causal_consistency=True)
-
-        mongo_database = mongo_client[MONGO_DATABASE]
-        mongo_collection = mongo_database[MONGO_COLLECTION]
-
-        container = client.containers.get(container_id=computation.containerId)
-        logs = container.logs()
-        print(logs)
-
-        # update computation with the container-start and end time
-        update_computation_result = mongo_collection.update_one(
-            {"@id": computation.id},
-            {"$set": {
-                "dateCreated": date_created,
-                "dateFinished": date_finished,
-                "generates": generates,
-                "logs": to_str(logs)
-            }},
-            session=session
-        )
-
-        if update_computation_result.matched_count != 1 and update_computation_result.modified_count != 1:
-            write_container_log(f"error: unable to update container id")
-
-    else:
-        write_container_log(f"error: container exited unexpectedly")
-
-    # remove the container
-    container.remove()
-    write_container_log(f"message: container {computation.containerId} removed successfully")
-
-    # clean up directories and files
-    dir_to_clean = pathlib.Path(job_path)
-    write_container_log(f"message: cleaning compute job directory: {dir_to_clean}")
-    if dir_to_clean.exists() and dir_to_clean.is_dir():
-       shutil.rmtree(dir_to_clean)
-       write_container_log(f"message: compute job directory: {dir_to_clean} removed successfully")
-    else:
-       write_container_log(f"message: error removing compute job directory: {dir_to_clean}")
-    print('Run Custom Container: All done')
