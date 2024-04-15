@@ -1,9 +1,12 @@
 import requests
 import json
 import re
-from fairscape_mds.mds.web.utils.signin import *
+from fairscape_mds.web.utils.signin import *
+from fairscape_mds.config import get_fairscape_config
 
-root_url = "http://localhost:8000/"
+fairscapeConfig = get_fairscape_config()
+root_url = 'http:\\{fairscapeConfig.host}'
+
 
 
 def email_exists(email: str):

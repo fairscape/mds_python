@@ -15,14 +15,18 @@ from bson import SON
 from fastapi.encoders import jsonable_encoder
 import pymongo
 
-from fairscape_mds.mds.models.fairscape_base import (
+from fairscape_mds.models.fairscape_base import (
     FairscapeBaseModel,
     FairscapeEVIBaseModel,
     IdentifierPattern
 )
-from fairscape_mds.mds.models.dataset import Dataset
-from fairscape_mds.mds.utilities.operation_status import OperationStatus
-from fairscape_mds.mds.config import get_minio_config, get_minio_client, get_fairscape_config
+from fairscape_mds.models.dataset import Dataset
+from fairscape_mds.utilities.operation_status import OperationStatus
+from fairscape_mds.config import (
+    get_minio_config, 
+    get_minio_client, 
+    get_fairscape_config
+    )
 
 fairscapeConfig = get_fairscape_config()
 fairscapeHost = fairscapeConfig.host

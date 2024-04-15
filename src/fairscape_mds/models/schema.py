@@ -1,8 +1,8 @@
 from typing import Optional
 from pydantic import Extra
 import re
-from fairscape_mds.mds.models.fairscape_base import *
-from fairscape_mds.mds.utilities.operation_status import OperationStatus
+from fairscape_mds.models.fairscape_base import *
+from fairscape_mds.utilities.operation_status import OperationStatus
 
 def validate_type(value):
     valid_types = {'integer', 'number', 'string', 'array','boolean'}

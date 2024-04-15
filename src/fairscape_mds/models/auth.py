@@ -4,8 +4,8 @@ import base64
 import datetime
 import jwt
 
-from fairscape_mds.mds.utilities.operation_status import OperationStatus
-from fairscape_mds.mds.models.user import User
+from fairscape_mds.utilities.operation_status import OperationStatus
+from fairscape_mds.models.user import User
 
 
 

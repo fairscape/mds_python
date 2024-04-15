@@ -13,8 +13,8 @@ from typing import (
     Union
 )
 import pymongo
-from fairscape_mds.mds.utilities.utils import validate_ark
-from fairscape_mds.mds.utilities.operation_status import OperationStatus
+from fairscape_mds.utilities.utils import validate_ark
+from fairscape_mds.utilities.operation_status import OperationStatus
 
 ARK_NAAN = "59852"
 IdentifierPattern = "^ark[0-9]{5}:\\/[a-zA-Z0-9_\\-]*.$"

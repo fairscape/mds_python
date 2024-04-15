@@ -3,12 +3,11 @@ from pydantic import Extra
 from typing import List, Union, Optional, Literal
 from datetime import datetime
 from pathlib import Path
-from fairscape_mds.mds.models.fairscape_base import *
-from fairscape_mds.mds.models.dataset import Dataset
-from fairscape_mds.mds.models.software import Software
-from fairscape_mds.mds.models.fairscape_base import *
-from fairscape_mds.mds.utilities.funcs import *
-from fairscape_mds.mds.utilities.utils import *
+from fairscape_mds.models.fairscape_base import *
+from fairscape_mds.models.dataset import Dataset
+from fairscape_mds.models.software import Software
+from fairscape_mds.utilities.funcs import *
+from fairscape_mds.utilities.utils import *
 
 from pydantic import BaseModel
 import requests
@@ -18,7 +17,6 @@ import uuid
 import pathlib
 import shutil
 
-root_url = "http://localhost:8000/"
 default_context = {
     "@vocab": "https://schema.org/", 
     "evi": "https://w3id.org/EVI#"

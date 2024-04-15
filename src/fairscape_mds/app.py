@@ -9,7 +9,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 
 from fairscape_mds.routers.user import router as UserRouter
 from fairscape_mds.routers.schema import router as SchemaRouter
-from fairscape_mds.routers.group import router as GroupRouter
+#from fairscape_mds.routers.group import router as GroupRouter
 from fairscape_mds.routers.software import router as SoftwareRouter
 from fairscape_mds.routers.dataset import router as DatasetRouter
 from fairscape_mds.routers.rocrate import router as ROCrateRouter
@@ -106,7 +106,7 @@ app = FastAPI(
 #static_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'static')
 
 # mounting templates
-app.mount("/static", StaticFiles(directory='static'), name="static")
+app.mount("/static", StaticFiles(directory='fairscape_mds/static'), name="static")
 templates = Jinja2Templates(directory="templates")
 
 
@@ -126,7 +126,7 @@ async def healthcheck():
 
 # Routes for the API
 app.include_router(UserRouter, tags=["user"])
-app.include_router(GroupRouter, tags=["group"])
+#app.include_router(GroupRouter, tags=["group"])
 app.include_router(SoftwareRouter, tags=["software"])
 app.include_router(DatasetRouter, tags=["dataset"])
 app.include_router(ROCrateRouter, tags=["rocrate"])

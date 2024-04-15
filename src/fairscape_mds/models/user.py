@@ -2,9 +2,9 @@ from typing import Optional
 
 from pydantic import Extra
 
-from fairscape_mds.mds.models.fairscape_base import *
-from fairscape_mds.mds.utilities.operation_status import OperationStatus
-from fairscape_mds.mds.utilities.utils import validate_email
+from fairscape_mds.models.fairscape_base import *
+from fairscape_mds.utilities.operation_status import OperationStatus
+from fairscape_mds.utilities.utils import validate_email
 
 
 def getUserByID():

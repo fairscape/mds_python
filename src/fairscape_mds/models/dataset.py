@@ -7,11 +7,8 @@ from typing import Optional, List, Union, Literal
 from datetime import datetime
 from pymongo.collection import Collection
 
-from fairscape_mds.mds.models.fairscape_base import *
-from fairscape_mds.mds.models.utils import (
-    delete_distribution_metadata
-)
-from fairscape_mds.mds.utilities.operation_status import OperationStatus
+from fairscape_mds.models.fairscape_base import *
+from fairscape_mds.utilities.operation_status import OperationStatus
  
 
 

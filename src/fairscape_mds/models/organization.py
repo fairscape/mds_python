@@ -5,7 +5,7 @@ from pydantic import (
     constr
 )
 from typing import List, Union, Optional
-from fairscape_mds.mds.models.fairscape_base import *
+from fairscape_mds.models.fairscape_base import *
 
 
 class Organization(FairscapeEVIBaseModel, extra = Extra.allow):
