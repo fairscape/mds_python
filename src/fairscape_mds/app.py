@@ -20,12 +20,6 @@ from fairscape_mds.routers.evidencegraph import router as EvidenceGraphRouter
 from fairscape_mds.routers.transfer import router as TransferRouter
 from fairscape_mds.routers.resolver import ResolverRouter
 
-from fairscape_mds.web.routers.index import router as WebIndexRouter
-from fairscape_mds.web.routers.signin import router as WebSigninRouter
-from fairscape_mds.web.routers.signup import router as WebSignupRouter
-from fairscape_mds.web.routers.home import router as WebHomeRouter
-
-
 from fairscape_mds.config import (
     get_mongo_config,
     get_mongo_client
@@ -139,10 +133,10 @@ app.include_router(ResolverRouter, tags=["resolver"])
 app.include_router(SchemaRouter, tags=["schema"])
 
 # Routes for Web pages
-app.include_router(WebIndexRouter, tags=["webindex"])
+#app.include_router(WebIndexRouter, tags=["webindex"])
 #app.include_router(WebSigninRouter, tags=["websignin"])
 #app.include_router(WebSignupRouter, tags=["websignup"])
-app.include_router(WebHomeRouter, tags=["webhome"])
+#app.include_router(WebHomeRouter, tags=["webhome"])
 
 @app.get("/page/{page_name}", response_class=HTMLResponse)
 def show_page(request: Request, page_name: str):
