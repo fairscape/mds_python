@@ -2,9 +2,9 @@ from typing import Union
 from fastapi import APIRouter, Response, Header
 from fastapi.responses import JSONResponse
 
-from fairscape_mds.mds.models.project import Project, list_project
-from fairscape_mds.mds.models.auth import ParseAuthHeader, UserNotFound, TokenError
-from fairscape_mds.mds.config import (
+from fairscape_mds.models.project import Project, list_project
+from fairscape_mds.models.auth import ParseAuthHeader, UserNotFound, TokenError
+from fairscape_mds.config import (
     get_mongo_config,
     get_mongo_client
 ) 

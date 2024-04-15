@@ -1,14 +1,13 @@
 import pymongo
 from fastapi import APIRouter, Response, BackgroundTasks
-from fairscape_mds.mds.config import (
+from fairscape_mds.config import (
     get_fairscape_config,
     get_minio_config,
     get_mongo_config,
     get_mongo_client,
 ) 
 
-from fairscape_mds.mds.compute import create_job
-from fairscape_mds.mds.models.computation import (
+from fairscape_mds.models.computation import (
         Computation,
         createComputation,
         listComputation,
@@ -16,8 +15,8 @@ from fairscape_mds.mds.models.computation import (
         updateComputation,
         deleteComputation
         )
-from fairscape_mds.mds.utilities.operation_status import OperationStatus
-from fairscape_mds.mds.utilities.funcs import *
+from fairscape_mds.utilities.operation_status import OperationStatus
+from fairscape_mds.utilities.funcs import *
 from datetime import datetime
 import time
 

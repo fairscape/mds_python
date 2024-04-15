@@ -12,14 +12,14 @@ from fastapi.responses import (
 #    StreamingResponse, 
 #    FileResponse
 )
-from fairscape_mds.mds.config import (
+from fairscape_mds.config import (
     get_minio_config,
     get_minio_client,
     get_mongo_config,
     get_mongo_client,
 )
-from fairscape_mds.mds.models.utils import remove_ids
-from fairscape_mds.mds.models.rocrate import (
+from fairscape_mds.models.utils import remove_ids
+from fairscape_mds.models.rocrate import (
     UploadExtractedCrate,
     UploadZippedCrate,
     DeleteExtractedCrate,

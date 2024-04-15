@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Response
 from fastapi.responses import JSONResponse
 
-from fairscape_mds.mds.models.software import (
+from fairscape_mds.models.software import (
         Software, 
         SoftwareCreateModel,
         listSoftware, 
@@ -9,7 +9,7 @@ from fairscape_mds.mds.models.software import (
         deleteSoftware,
         getSoftware
         )
-from fairscape_mds.mds.config import (
+from fairscape_mds.config import (
         get_mongo_config,
         get_mongo_client,
         )

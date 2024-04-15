@@ -1,14 +1,12 @@
 from typing_extensions import Annotated
-
 from fastapi import (
     APIRouter,
     Header,
     Depends
 )
 from fastapi.responses import JSONResponse
-
-from fairscape_mds.mds.models.user import User, listUsers, deleteUserByGUID
-from fairscape_mds.mds.config import (
+from fairscape_mds.models.user import User, listUsers, deleteUserByGUID
+from fairscape_mds.config import (
     get_mongo_config,
     get_mongo_client,
     MongoConfig,

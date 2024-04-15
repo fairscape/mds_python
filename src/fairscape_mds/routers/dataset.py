@@ -1,13 +1,19 @@
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 
-from fairscape_mds.mds.config import (
+from fairscape_mds.config import (
     get_minio_config,
     get_mongo_config,
     get_mongo_client,
 ) 
 
-from fairscape_mds.mds.models.dataset import Dataset, listDatasets, deleteDataset, createDataset, DatasetCreateModel
+from fairscape_mds.models.dataset import (
+        Dataset, 
+        listDatasets, 
+        deleteDataset, 
+        createDataset, 
+        DatasetCreateModel
+        )
 
 router = APIRouter()
 mongo_config = get_mongo_config()

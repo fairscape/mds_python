@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Header, Depends
 from fastapi.responses import JSONResponse
 
-from fairscape_mds.mds.models.schema import Schema, list_schemas
-from fairscape_mds.mds.config import (
+from fairscape_mds.models.schema import Schema, list_schemas
+from fairscape_mds.config import (
     get_mongo_config,
     get_mongo_client
 )

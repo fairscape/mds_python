@@ -3,10 +3,10 @@ from fastapi import APIRouter, Response, Header
 from fastapi.responses import JSONResponse
 import base64
 
-from fairscape_mds.mds.models.organization import Organization, list_organization
-from fairscape_mds.mds.models.auth import ParseAuthHeader, UserNotFound, TokenError
+from fairscape_mds.models.organization import Organization, list_organization
+from fairscape_mds.models.auth import ParseAuthHeader, UserNotFound, TokenError
 
-from fairscape_mds.mds.config import (
+from fairscape_mds.config import (
     get_mongo_config,
     get_mongo_client,
     MongoConfig,
