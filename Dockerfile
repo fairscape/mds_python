@@ -3,7 +3,7 @@ FROM python:3.12-slim as builder
 RUN apt-get update && \
     apt-get install -y --no-install-recommends gcc
 
-RUN python3 -m pip install upgrade pip
+RUN python3 -m pip install --upgrade pip
 
 WORKDIR fairscape/
 COPY requirements.txt .
@@ -20,7 +20,7 @@ FROM builder as fairscape
 
 # copy source code
 COPY src/ /fairscape/src/
-WORKDIR /fairscape_mds
+WORKDIR fairscape/src/
 
 RUN export PYTHONPATH=$PYTHONPATH:/fairscape_mds
 
