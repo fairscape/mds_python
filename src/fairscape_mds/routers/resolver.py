@@ -81,9 +81,7 @@ def find_metadata(collections, naan, postfix):
         ark_metadata = collection.find_one({"@id": f"ark:{naan}/{postfix}"}, projection={"_id": 0, "@graph._id": 0})
         if ark_metadata:
             return ark_metadata
-
     return
-
 
 templates = Jinja2Templates(directory="fairscape_mds/templates/page")
 templates.env.filters['add_link'] = add_link
