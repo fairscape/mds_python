@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 
-{% include './development notebooks/vizualization/head_template.html' %}
+{% include 'head_template.html' %}
 
 <body>
     <div id="main-content" class="container">
@@ -46,7 +46,7 @@
                         <tr>
                             <td>Persistant Identifier</td>
                             <td>
-                                {{ evidencegraph.guid | add_link }}
+                                {{ evidencegraph.guid | add_link | safe }}
                             </td>
                         </tr>
                         <tr>
@@ -55,7 +55,7 @@
                         </tr>
                         <tr>
                             <td>Owner</td>
-                            <td>{{ evidencegraph.owner | add_link }}</td>
+                            <td>{{ evidencegraph.owner | add_link | safe }}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -97,7 +97,7 @@
             </pre>
         </div>
     </div>
-    {% include './development notebooks/vizualization/scripts_template.html' %}
+    {% include 'scripts_template.html' %}
 </body>
 
 </html>

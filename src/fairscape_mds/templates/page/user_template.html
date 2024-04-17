@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 
-{% include './development notebooks/vizualization/head_template.html' %}
+{% include 'head_template.html' %}
 
 <body>
     <div id="main-content" class="container">
@@ -42,7 +42,7 @@
                         <tr>
                             <td>Persistant Identifier</td>
                             <td>
-                                {{ user.guid | add_link }}
+                                {{ user.guid | add_link | safe }}
                             </td>
                         </tr>
                         <tr>
@@ -67,7 +67,7 @@
                                             <div class="accordion-body">
                                                 <ul>
                                                     {% for organization in user.organizations %}
-                                                    <li>{{ organization | add_link }}</li>
+                                                    <li>{{ organization | add_link | safe }}</li>
                                                     {% else %}
                                                     <li>No organizations available</li>
                                                     {% endfor %}
@@ -96,7 +96,7 @@
                                             <div class="accordion-body">
                                                 <ul>
                                                     {% for project in user.projects %}
-                                                    <li>{{ project | add_link }}</li>
+                                                    <li>{{ project | add_link | safe }}</li>
                                                     {% else %}
                                                     <li>No projects available</li>
                                                     {% endfor %}
@@ -125,7 +125,7 @@
                                             <div class="accordion-body">
                                                 <ul>
                                                     {% for dataset in user.datasets %}
-                                                    <li>{{ dataset | add_link }}</li>
+                                                    <li>{{ dataset | add_link | safe }}</li>
                                                     {% else %}
                                                     <li>No datasets available</li>
                                                     {% endfor %}
@@ -154,7 +154,7 @@
                                             <div class="accordion-body">
                                                 <ul>
                                                     {% for software in user.software %}
-                                                    <li>{{ software | add_link }}</li>
+                                                    <li>{{ software | add_link | safe }}</li>
                                                     {% else %}
                                                     <li>No software available</li>
                                                     {% endfor %}
@@ -183,7 +183,7 @@
                                             <div class="accordion-body">
                                                 <ul>
                                                     {% for rocrate in user.rocrates %}
-                                                    <li>{{ rocrate | add_link }}</li>
+                                                    <li>{{ rocrate | add_link | safe }}</li>
                                                     {% else %}
                                                     <li>No ROCrates available</li>
                                                     {% endfor %}
@@ -212,7 +212,7 @@
                                             <div class="accordion-body">
                                                 <ul>
                                                     {% for computation in user.computations %}
-                                                    <li>{{ computation | add_link }}</li>
+                                                    <li>{{ computation | add_link | safe }}</li>
                                                     {% else %}
                                                     <li>No computations available</li>
                                                     {% endfor %}
@@ -341,7 +341,7 @@
                 </script>
             </div>
         </div>
-        {% include './development notebooks/vizualization/scripts_template.html' %}
+        {% include 'scripts_template.html' %}
 </body>
 
 </html>
