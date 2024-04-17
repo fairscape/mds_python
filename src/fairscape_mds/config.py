@@ -45,6 +45,10 @@ def get_minio_config():
 def get_minio_client():
     mds_config = get_fairscape_config()
     return mds_config.CreateMinioClient()
+
+@lru_cache()
+def get_fairscape_url():
+    return get_fairscape_config().url
     
 
 @lru_cache()
@@ -77,6 +81,7 @@ def get_fairscape_config(env_path: str = '../deploy/local.env'):
     return FairscapeConfig(
             host = config_values.get('FAIRSCAPE_HOST'),
             port = config_values.get('FAIRSCAPE_PORT'),
+            url = config_values.get("FAIRSCAPE_URL"),
             mongo = server_mongo_config,
             minio = server_minio_config
             )
@@ -152,6 +157,7 @@ class K8sComputeConfig(BaseModel):
 class FairscapeConfig(BaseModel):
     host: Optional[str] = Field(default='0.0.0.0')
     port: Optional[int] = Field(default=8080)
+    url: Optional[str] = Field(default = "http://localhost:8080/")
     mongo: MongoConfig
     minio: MinioConfig
 

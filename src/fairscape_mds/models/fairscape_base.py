@@ -17,7 +17,7 @@ from fairscape_mds.utilities.utils import validate_ark
 from fairscape_mds.utilities.operation_status import OperationStatus
 
 ARK_NAAN = "59852"
-IdentifierPattern = "^ark[0-9]{5}:\\/[a-zA-Z0-9_\\-]*.$"
+IdentifierPattern = "^ark:[0-9]{5}\\/[a-zA-Z0-9_\\-]*.$"
 DEFAULT_LICENSE = " https://creativecommons.org/licenses/by/4.0/"
 
 default_context = {
