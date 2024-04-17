@@ -64,9 +64,14 @@
                         <tr>
                             <td>Source Organization</td>
                             <td>
+                                {% if dataset.sourceOrganization %}
                                 {{ dataset.sourceOrganization | add_link | safe}}
+                                {% else %}
+                                No Source Organization listed.
+                                {% endif %}
                             </td>
                         </tr>
+
                         <tr>
                             <td>usedBy</td>
                             <td>
@@ -127,7 +132,11 @@
                         </tr>
                         <td>includedInDataCatalog</td>
                         <td>
+                            {% if dataset.includedInDataCatalog %}
                             {{ dataset.includedInDataCatalog | add_link | safe}}
+                            {% else %}
+                            No data catalogs listed.
+                            {% endif %}
                         </td>
                         </tr>
                     </tbody>
