@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 
-{% include './fairscape_mds/templates/page/head_template.html' %}
+{% include 'head_template.html' %}
 
 <body>
     <div id="main-content" class="container">
@@ -46,7 +46,7 @@
                         <tr>
                             <td>Persistant Identifier</td>
                             <td>
-                                {{ dataset.guid | add_link }}
+                                {{ dataset.guid | add_link | safe}}
                             </td>
                         </tr>
                         <tr>
@@ -55,16 +55,16 @@
                         </tr>
                         <tr>
                             <td>Owner</td>
-                            <td>{{ dataset.owner | add_link }}</td>
+                            <td>{{ dataset.owner | add_link | safe}}</td>
                         </tr>
                         <tr>
                             <td>Author</td>
-                            <td>{{ dataset.author | add_link }}</td>
+                            <td>{{ dataset.author | add_link | safe}}</td>
                         </tr>
                         <tr>
                             <td>Source Organization</td>
                             <td>
-                                {{ dataset.sourceOrganization | add_link }}
+                                {{ dataset.sourceOrganization | add_link | safe}}
                             </td>
                         </tr>
                         <tr>
@@ -85,7 +85,7 @@
                                             <div class="accordion-body">
                                                 <ul>
                                                     {% for d in dataset.usedBy %}
-                                                    <li>{{ d | add_link }}</li>
+                                                    <li>{{ d | add_link | safe}}</li>
                                                     {% else %}
                                                     <li></li>
                                                     {% endfor %}
@@ -114,7 +114,7 @@
                                             <div class="accordion-body">
                                                 <ul>
                                                     {% for d in dataset.distribution %}
-                                                    <li>{{ d | add_link }}</li>
+                                                    <li>{{ d | add_link | safe}}</li>
                                                     {% else %}
                                                     <li>No distributions available</li>
                                                     {% endfor %}
@@ -127,7 +127,7 @@
                         </tr>
                         <td>includedInDataCatalog</td>
                         <td>
-                            {{ dataset.includedInDataCatalog | add_link }}
+                            {{ dataset.includedInDataCatalog | add_link | safe}}
                         </td>
                         </tr>
                     </tbody>
@@ -182,7 +182,7 @@
             </pre>
         </div>
     </div>
-    {% include './fairscape_mds/templates/page/scripts_template.html' %}
+    {% include 'scripts_template.html' %}
 </body>
 
 </html>
