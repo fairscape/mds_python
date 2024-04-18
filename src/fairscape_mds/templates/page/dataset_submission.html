@@ -24,6 +24,12 @@
 
         h1 {
             text-align: center;
+            color: #6a6969;
+            text-shadow: 1px 1px 0 white;
+        }
+
+        h2 {
+            text-align: center;
             color: #a8a8a8;
             text-shadow: 1px 1px 0 white;
         }
@@ -109,84 +115,30 @@
         .cf:after {
             clear: both;
         }
-
-        .parameters {
-            width: 100%;
-            /* Ensure the parameters div takes full width */
-        }
-
-        .parameter-item {
-            display: flex;
-            justify-content: space-between;
-            /* This spreads out the items to both ends */
-            align-items: center;
-            margin-bottom: 10px;
-        }
-
-        .parameter-item label {
-            flex: 1;
-            /* Allows label to take up as much space as possible pushing checkbox to the right */
-            text-align: left;
-            /* Align text to the left */
-        }
-
-        .parameter-item input[type="text"] {
-            width: 100%;
-            /* Make the text input fill the space when visible */
-            margin-top: 5px;
-            /* Adds a little space above the text input */
-        }
     </style>
 </head>
 
 <h1>Fairscape Dataset Metadata Submission</h1>
 <form>
     <div class="cf">
+        <h2>Requeried Properties</h2>
         <div class="half left cf">
             <input type="text" id="name" placeholder="Dataset Name">
             <input type="text" id="guid" placeholder="GUID">
             <input type="text" id="owner" placeholder="Owner">
+            <!-- Optional inputs added directly -->
+
         </div>
         <div class="half right cf">
             <textarea name="message" type="text" id="description" placeholder="Description"></textarea>
         </div>
     </div>
-    <!-- Parameter selections -->
-    <div class="parameters">
-        <div class="parameter-item">
-            <label for="author">Author</label>
-            <input type="checkbox" id="author-checkbox" class="param-checkbox" data-target="author">
-            <input type="text" id="author" placeholder="Author:" style="display:none;">
-        </div>
-        <div class="parameter-item">
-            <label for="sourceOrganization">Source Organization</label>
-            <input type="checkbox" id="sourceOrganization-checkbox" class="param-checkbox"
-                data-target="sourceOrganization">
-            <input type="text" id="sourceOrganization" placeholder="Source organization:" style="display:none;">
-        </div>
-        <div class="parameter-item">
-            <label for="usedBy">Any computations that used this Dataset?</label>
-            <input type="checkbox" id="usedBy-checkbox" class="param-checkbox" data-target="usedBy">
-            <input type="text" id="usedBy" placeholder="Computations:" style="display:none;">
-        </div>
-        <!-- Add more parameters as needed -->
+    <div class="cf">
+        <h2>Optional Properties</h2>
+        <input type="text" id="author" placeholder="Author (Optional)">
+        <input type="text" id="sourceOrganization" placeholder="Source Organization (Optional)">
+        <input type="text" id="usedBy" placeholder="Any computations that used this Dataset? (Optional)">
+        <input type="text" id="generatedBy" placeholder="What computations created this Dataset? (Optional)">
     </div>
-
     <input type="submit" value="Submit" id="input-submit">
 </form>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        var checkboxes = document.querySelectorAll('.param-checkbox');
-        checkboxes.forEach(function (checkbox) {
-            checkbox.addEventListener('change', function () {
-                var targetInput = document.getElementById(this.getAttribute('data-target'));
-                if (this.checked) {
-                    targetInput.style.display = 'block';
-                } else {
-                    targetInput.style.display = 'none';
-                }
-            });
-        });
-    });
-</script>
