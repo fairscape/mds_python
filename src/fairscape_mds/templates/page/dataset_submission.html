@@ -3,15 +3,12 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Create Dataset</title>
+    <title>Fairscape Dataset</title>
+    <link href="https://fonts.googleapis.com/css?family=Merriweather" rel="stylesheet">
     <style>
-        @import url(https://fonts.googleapis.com/css?family=Merriweather);
-
         *,
         *:before,
         *:after {
-            -moz-box-sizing: border-box;
-            -webkit-box-sizing: border-box;
             box-sizing: border-box;
         }
 
@@ -22,22 +19,28 @@
             padding: 1em;
         }
 
-        h1 {
+        h1,
+        h2 {
             text-align: center;
+        }
+
+        h1 {
             color: #6a6969;
             text-shadow: 1px 1px 0 white;
         }
 
         h2 {
-            text-align: center;
             color: #a8a8a8;
             text-shadow: 1px 1px 0 white;
         }
 
         form {
-            max-width: 600px;
-            text-align: center;
+            max-width: 90%;
+            /* Increased width */
             margin: 20px auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
         form input,
@@ -45,23 +48,16 @@
             border: 0;
             outline: 0;
             padding: 1em;
-            -moz-border-radius: 8px;
-            -webkit-border-radius: 8px;
             border-radius: 8px;
             display: block;
             width: 100%;
             margin-top: 1em;
-            font-family: 'Merriweather', sans-serif;
-            -moz-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
-            -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
             box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
             resize: none;
         }
 
         form input:focus,
         form textarea:focus {
-            -moz-box-shadow: 0 0px 2px #e74c3c !important;
-            -webkit-box-shadow: 0 0px 2px #e74c3c !important;
             box-shadow: 0 0px 2px #e74c3c !important;
         }
 
@@ -72,8 +68,6 @@
         }
 
         form #input-submit:hover {
-            -moz-box-shadow: 0 1px 1px 1px rgba(170, 170, 170, 0.6);
-            -webkit-box-shadow: 0 1px 1px 1px rgba(170, 170, 170, 0.6);
             box-shadow: 0 1px 1px 1px rgba(170, 170, 170, 0.6);
         }
 
@@ -81,35 +75,31 @@
             height: 126px;
         }
 
-        .half {
-            float: left;
+        .properties {
+            display: flex;
+            width: 100%;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            /* Ensures responsiveness */
+        }
+
+        .property-section {
             width: 48%;
+            /* Half width for larger screens */
             margin-bottom: 1em;
         }
 
-        .right {
-            width: 50%;
-        }
-
-        .left {
-            margin-right: 2%;
-        }
-
-        @media (max-width: 480px) {
-            .half {
+        @media (max-width: 800px) {
+            .property-section {
                 width: 100%;
-                float: none;
-                margin-bottom: 0;
+                /* Full width for smaller screens */
             }
         }
 
-        /* Clearfix */
         .cf:before,
         .cf:after {
             content: " ";
-            /* 1 */
             display: table;
-            /* 2 */
         }
 
         .cf:after {
@@ -118,27 +108,29 @@
     </style>
 </head>
 
-<h1>Fairscape Dataset Metadata Submission</h1>
-<form>
-    <div class="cf">
-        <h2>Requeried Properties</h2>
-        <div class="half left cf">
-            <input type="text" id="name" placeholder="Dataset Name">
-            <input type="text" id="guid" placeholder="GUID">
-            <input type="text" id="owner" placeholder="Owner">
-            <!-- Optional inputs added directly -->
+<body>
+    <h1>Dataset Metadata Submission</h1>
+    <form>
+        <div class="properties">
+            <div class="property-section">
+                <h2>Required Properties</h2>
+                <input type="text" id="name" placeholder="Dataset Name">
+                <input type="text" id="guid" placeholder="GUID">
+                <input type="text" id="owner" placeholder="Owner">
+                <textarea name="message" type="text" id="description" placeholder="Description"></textarea>
+            </div>
+            <div class="property-section">
+                <h2>Optional Properties</h2>
+                <input type="text" id="author" placeholder="Author (Optional)">
+                <input type="text" id="sourceOrganization" placeholder="Source Organization (Optional)">
+                <input type="text" id="usedBy" placeholder="Any computations that used this Dataset? (Optional)">
+                <input type="text" id="generatedBy" placeholder="What computations created this Dataset? (Optional)">
+                <input type="text" id="includedInDataCatalog"
+                    placeholder="What catalogs is the Dataset included in? (Optional)">
+            </div>
+        </div>
+        <input type="submit" value="Submit" id="input-submit">
+    </form>
+</body>
 
-        </div>
-        <div class="half right cf">
-            <textarea name="message" type="text" id="description" placeholder="Description"></textarea>
-        </div>
-    </div>
-    <div class="cf">
-        <h2>Optional Properties</h2>
-        <input type="text" id="author" placeholder="Author (Optional)">
-        <input type="text" id="sourceOrganization" placeholder="Source Organization (Optional)">
-        <input type="text" id="usedBy" placeholder="Any computations that used this Dataset? (Optional)">
-        <input type="text" id="generatedBy" placeholder="What computations created this Dataset? (Optional)">
-    </div>
-    <input type="submit" value="Submit" id="input-submit">
-</form>
+</html>
