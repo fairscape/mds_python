@@ -534,7 +534,6 @@ def GetMetadataFromCrate(MinioClient, BucketName, TransactionFolder, CratePath, 
             ro_crate_dict = json.loads(ro_crate_json)
             ro_crate_dict['distribution'] = Distribution.dict(by_alias=True)
             ro_crate_dict['additionalType'] = ROCRATE_TYPE
-            return ro_crate_dict
         except Exception as json_exception:
             rocrate_logger.debug(
                 "GetMetadataFromCrate\t" +
@@ -545,14 +544,12 @@ def GetMetadataFromCrate(MinioClient, BucketName, TransactionFolder, CratePath, 
             return None
 
         # parse dictionary into ROCrate pydantic model
-        #try:
-        #    crate = ROCrate(**ro_crate_dict)
-        #    return crate
-        #except ValidationError:
-
+        try:
+           crate = ROCrate(**ro_crate_dict)
+           return crate
+        except ValidationError:
             # TODO try to parse gracefully
-            # additionalType generation
-        #    return None
+           return None
 
     except Exception as e:
         raise Exception(f"ROCRATE ERROR: ro-crate-metadata.json not found exception={str(e)}")
