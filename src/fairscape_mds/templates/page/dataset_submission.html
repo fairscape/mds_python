@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Create Dataset</title>
+    <style>
+        @import url(https://fonts.googleapis.com/css?family=Merriweather);
+
+        *,
+        *:before,
+        *:after {
+            -moz-box-sizing: border-box;
+            -webkit-box-sizing: border-box;
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            background: #f1f1f1;
+            font-family: 'Merriweather', sans-serif;
+            padding: 1em;
+        }
+
+        h1 {
+            text-align: center;
+            color: #a8a8a8;
+            text-shadow: 1px 1px 0 white;
+        }
+
+        form {
+            max-width: 600px;
+            text-align: center;
+            margin: 20px auto;
+        }
+
+        form input,
+        form textarea {
+            border: 0;
+            outline: 0;
+            padding: 1em;
+            -moz-border-radius: 8px;
+            -webkit-border-radius: 8px;
+            border-radius: 8px;
+            display: block;
+            width: 100%;
+            margin-top: 1em;
+            font-family: 'Merriweather', sans-serif;
+            -moz-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+            -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+            resize: none;
+        }
+
+        form input:focus,
+        form textarea:focus {
+            -moz-box-shadow: 0 0px 2px #e74c3c !important;
+            -webkit-box-shadow: 0 0px 2px #e74c3c !important;
+            box-shadow: 0 0px 2px #e74c3c !important;
+        }
+
+        form #input-submit {
+            color: white;
+            background: #e74c3c;
+            cursor: pointer;
+        }
+
+        form #input-submit:hover {
+            -moz-box-shadow: 0 1px 1px 1px rgba(170, 170, 170, 0.6);
+            -webkit-box-shadow: 0 1px 1px 1px rgba(170, 170, 170, 0.6);
+            box-shadow: 0 1px 1px 1px rgba(170, 170, 170, 0.6);
+        }
+
+        form textarea {
+            height: 126px;
+        }
+
+        .half {
+            float: left;
+            width: 48%;
+            margin-bottom: 1em;
+        }
+
+        .right {
+            width: 50%;
+        }
+
+        .left {
+            margin-right: 2%;
+        }
+
+        @media (max-width: 480px) {
+            .half {
+                width: 100%;
+                float: none;
+                margin-bottom: 0;
+            }
+        }
+
+        /* Clearfix */
+        .cf:before,
+        .cf:after {
+            content: " ";
+            /* 1 */
+            display: table;
+            /* 2 */
+        }
+
+        .cf:after {
+            clear: both;
+        }
+
+        .parameters {
+            width: 100%;
+            /* Ensure the parameters div takes full width */
+        }
+
+        .parameter-item {
+            display: flex;
+            justify-content: space-between;
+            /* This spreads out the items to both ends */
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .parameter-item label {
+            flex: 1;
+            /* Allows label to take up as much space as possible pushing checkbox to the right */
+            text-align: left;
+            /* Align text to the left */
+        }
+
+        .parameter-item input[type="text"] {
+            width: 100%;
+            /* Make the text input fill the space when visible */
+            margin-top: 5px;
+            /* Adds a little space above the text input */
+        }
+    </style>
+</head>
+
+<h1>Fairscape Dataset Metadata Submission</h1>
+<form>
+    <div class="cf">
+        <div class="half left cf">
+            <input type="text" id="name" placeholder="Dataset Name">
+            <input type="text" id="guid" placeholder="GUID">
+            <input type="text" id="owner" placeholder="Owner">
+        </div>
+        <div class="half right cf">
+            <textarea name="message" type="text" id="description" placeholder="Description"></textarea>
+        </div>
+    </div>
+    <!-- Parameter selections -->
+    <div class="parameters">
+        <div class="parameter-item">
+            <label for="author">Author</label>
+            <input type="checkbox" id="author-checkbox" class="param-checkbox" data-target="author">
+            <input type="text" id="author" placeholder="Author:" style="display:none;">
+        </div>
+        <div class="parameter-item">
+            <label for="sourceOrganization">Source Organization</label>
+            <input type="checkbox" id="sourceOrganization-checkbox" class="param-checkbox"
+                data-target="sourceOrganization">
+            <input type="text" id="sourceOrganization" placeholder="Source organization:" style="display:none;">
+        </div>
+        <div class="parameter-item">
+            <label for="usedBy">Any computations that used this Dataset?</label>
+            <input type="checkbox" id="usedBy-checkbox" class="param-checkbox" data-target="usedBy">
+            <input type="text" id="usedBy" placeholder="Computations:" style="display:none;">
+        </div>
+        <!-- Add more parameters as needed -->
+    </div>
+
+    <input type="submit" value="Submit" id="input-submit">
+</form>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var checkboxes = document.querySelectorAll('.param-checkbox');
+        checkboxes.forEach(function (checkbox) {
+            checkbox.addEventListener('change', function () {
+                var targetInput = document.getElementById(this.getAttribute('data-target'));
+                if (this.checked) {
+                    targetInput.style.display = 'block';
+                } else {
+                    targetInput.style.display = 'none';
+                }
+            });
+        });
+    });
+</script>
