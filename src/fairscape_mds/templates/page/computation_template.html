@@ -102,23 +102,72 @@
                         <tr>
                             <td>usedDataset</td>
                             <td>
-                                {% if computation.usedDataset %}
-                                {{ computation.usedDataset | add_link | safe }}
-                                {% else %}
-                                No datasets used.
-                                {% endif %}
+                                <!-- Dropdown element -->
+                                <div class="accordion" id="accordionusedDataset">
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                                data-bs-target="#collapseusedDataset" aria-expanded="false"
+                                                aria-controls="collapseusedDataset">
+                                                usedDataset
+                                            </button>
+                                        </h2>
+                                        <div id="collapseusedDataset" class="accordion-collapse collapse"
+                                            data-bs-parent="#accordionusedDataset">
+                                            <div class="accordion-body">
+                                                <ul>
+                                                    {% if computation.usedDataset %}
+                                                    {% for d in computation.usedDataset %}
+                                                    <li>{{ d | add_link | safe }}</li>
+                                                    {% endfor %}
+                                                    {% else %}
+                                                    <li>No usedDataset items available</li>
+                                                    {% endif %}
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </td>
                         </tr>
                         <tr>
                             <td>usedSoftware</td>
                             <td>
                                 {% if computation.usedSoftware %}
+                                {% if computation.usedSoftware is string %}
                                 {{ computation.usedSoftware | add_link | safe }}
+                                {% elif computation.usedSoftware is iterable %}
+                                <!-- Dropdown element for list of software -->
+                                <div class="accordion" id="accordionUsedSoftware">
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button collapsed" type="button"
+                                                data-bs-toggle="collapse" data-bs-target="#collapseUsedSoftware"
+                                                aria-expanded="false" aria-controls="collapseUsedSoftware">
+                                                Show/Hide Used Software
+                                            </button>
+                                        </h2>
+                                        <div id="collapseUsedSoftware" class="accordion-collapse collapse"
+                                            data-bs-parent="#accordionUsedSoftware">
+                                            <div class="accordion-body">
+                                                <ul>
+                                                    {% for software in computation.usedSoftware %}
+                                                    <li>{{ software | add_link | safe }}</li>
+                                                    {% else %}
+                                                    <li>No software items available.</li>
+                                                    {% endfor %}
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endif %}
                                 {% else %}
                                 No software used.
                                 {% endif %}
                             </td>
                         </tr>
+
                         <tr>
                             <td>Command</td>
                             <td>
