@@ -136,17 +136,15 @@ def resolve(
         "computation": (Computation, "computation_template.html")
     }
 
-    metadata_type = ark_metadata.get("@type").lower().replace('evi:', '').replace('person','user')
+    metadata_type = ark_metadata.get("@type").lower().replace('evi:', '').replace('person','user').replace("https://w3id.org/evi#","")
     type_info = model_map.get(metadata_type)
     try: 
         if type_info:
             model_class, template_name = type_info
-            model_instance = model_class(**ark_metadata)
+            model_instance = model_class.construct(**ark_metadata)
             json_data = json.dumps(model_instance.dict(by_alias=True), default=str, indent=2)
             rdf, turtle = convert_to_rdf(json_data)
-
             if "text/html" in request.headers.get("Accept", "").lower():
-                print('I made it ')
                 context = {
                             "request": request, 
                             metadata_type: model_instance,
