@@ -138,7 +138,7 @@ def resolve(
         "computation": (Computation, "computation_template.html")
     }
 
-    metadata_type = ark_metadata.get("@type").lower().replace('evi:', '').replace('person','user').replace("https://w3id.org/evi#","")
+    metadata_type = ark_metadata.get("@type").lower().replace('evi:', '').replace('person','user').replace("https://w3id.org/evi#","").replace("https://w2id.org/evi#","")
     type_info = model_map.get(metadata_type)
     try: 
         if type_info:
