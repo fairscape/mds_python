@@ -84,6 +84,7 @@
                                             <div class="accordion-body">
                                                 <strong>Name:</strong> {{ metadata.name }}<br>
                                                 <strong>GUID:</strong> {{ metadata.get('@id') | add_link | safe }}<br>
+                                                <strong>Type:</strong> {{ metadata.get('@type') | add_link | safe }}<br>
                                                 <strong>Description:</strong> {{ metadata.description }}<br>
                                                 <strong>Type:</strong> {{ metadata.metadataType }}<br>
                                                 <strong>Keywords:</strong> {{ metadata.keywords }}<br>
