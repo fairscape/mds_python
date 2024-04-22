@@ -41,79 +41,93 @@
                     <tbody>
                         <tr>
                             <td>Name</td>
-                            <td>{{ computation.name }}</td>
+                            <td>
+                                {% if computation.name %}
+                                {{ computation.name }}
+                                {% else %}
+                                No name listed.
+                                {% endif %}
+                            </td>
                         </tr>
                         <tr>
                             <td>Persistant Identifier</td>
                             <td>
+                                {% if computation.guid %}
                                 {{ computation.guid | add_link | safe }}
+                                {% else %}
+                                No identifier listed.
+                                {% endif %}
                             </td>
                         </tr>
                         <tr>
                             <td>Description</td>
-                            <td>{{ computation.description }}</td>
+                            <td>
+                                {% if computation.description %}
+                                {{ computation.description }}
+                                {% else %}
+                                No description provided.
+                                {% endif %}
+                            </td>
                         </tr>
                         <tr>
                             <td>Owner</td>
-                            <td>{{ computation.owner | add_link | safe }}</td>
+                            <td>
+                                {% if computation.owner %}
+                                {{ computation.owner | add_link | safe }}
+                                {% else %}
+                                No owner listed.
+                                {% endif %}
+                            </td>
                         </tr>
                         <tr>
                             <td>Author</td>
-                            <td>{{ computation.author | add_link | safe }}</td>
+                            <td>
+                                {% if computation.author %}
+                                {{ computation.author | add_link | safe }}
+                                {% else %}
+                                No author listed.
+                                {% endif %}
+                            </td>
                         </tr>
                         <tr>
                             <td>Source Organization</td>
                             <td>
+                                {% if computation.sourceOrganization %}
                                 {{ computation.sourceOrganization | add_link | safe }}
+                                {% else %}
+                                No Source Organization listed.
+                                {% endif %}
                             </td>
                         </tr>
-                        <!-- <tr>
-                            <td>usedDataset</td>
-                            <td>
-
-                                <div class="accordion" id="accordionusedBy">
-                                    <div class="accordion-item">
-                                        <h2 class="accordion-header">
-                                            <button class="accordion-button" type="button" data-bs-toggle="collapse"
-                                                data-bs-target="#collapseusedBy" aria-expanded="false"
-                                                aria-controls="collapseusedBy">
-                                                usedBy
-                                            </button>
-                                        </h2>
-                                        <div id="collapseusedBy" class="accordion-collapse collapse"
-                                            data-bs-parent="#accordionusedBy">
-                                            <div class="accordion-body">
-                                                <ul>
-                                                    {% for d in computation.usedDataset %}
-                                                    <li>{{ d | add_link | safe }}</li>
-                                                    {% else %}
-                                                    <li></li>
-                                                    {% endfor %}
-                                                </ul>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </td>
-                        </tr> -->
                         <tr>
                             <td>usedDataset</td>
                             <td>
-                                {{ computation.usedDataset| add_link | safe }}
+                                {% if computation.usedDataset %}
+                                {{ computation.usedDataset | add_link | safe }}
+                                {% else %}
+                                No datasets used.
+                                {% endif %}
                             </td>
                         </tr>
                         <tr>
                             <td>usedSoftware</td>
                             <td>
+                                {% if computation.usedSoftware %}
                                 {{ computation.usedSoftware | add_link | safe }}
+                                {% else %}
+                                No software used.
+                                {% endif %}
                             </td>
                         </tr>
-                        <td>
-                            Command
-                        </td>
-                        <td>
-                            {{ computation.command| add_link | safe }}
-                        </td>
+                        <tr>
+                            <td>Command</td>
+                            <td>
+                                {% if computation.command %}
+                                {{ computation.command | add_link | safe }}
+                                {% else %}
+                                No command provided.
+                                {% endif %}
+                            </td>
                         </tr>
                         <tr>
                             <td>generated</td>
@@ -132,11 +146,13 @@
                                             data-bs-parent="#accordiongenerated">
                                             <div class="accordion-body">
                                                 <ul>
+                                                    {% if computation.generated %}
                                                     {% for d in computation.generated %}
                                                     <li>{{ d | add_link | safe }}</li>
-                                                    {% else %}
-                                                    <li>No software available</li>
                                                     {% endfor %}
+                                                    {% else %}
+                                                    <li>No generated items available</li>
+                                                    {% endif %}
                                                 </ul>
                                             </div>
                                         </div>
@@ -144,17 +160,21 @@
                                 </div>
                             </td>
                         </tr>
-                        <td>
-                            Container Id
-                        </td>
-                        <td>
-                            {{ computation.containerId| add_link | safe }}
-                        </td>
+                        <tr>
+                            <td>Container Id</td>
+                            <td>
+                                {% if computation.containerId %}
+                                {{ computation.containerId | add_link | safe }}
+                                {% else %}
+                                No container ID listed.
+                                {% endif %}
+                            </td>
                         </tr>
                     </tbody>
                 </table>
             </div>
         </div>
+
 
         <div class="row" id="json-ld-container">
             <div class="serialization-btn-group" style="margin-top: 20px; text-align: center;">

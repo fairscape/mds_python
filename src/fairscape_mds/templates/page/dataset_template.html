@@ -41,37 +41,74 @@
                     <tbody>
                         <tr>
                             <td>Name</td>
-                            <td>{{ dataset.name }}</td>
+                            <td>
+                                {% if dataset.name %}
+                                {{ dataset.name }}
+                                {% else %}
+                                No name listed.
+                                {% endif %}
+                            </td>
                         </tr>
                         <tr>
                             <td>Persistant Identifier</td>
                             <td>
-                                {{ dataset.guid | add_link | safe}}
+                                {% if dataset.guid %}
+                                {{ dataset.guid | add_link | safe }}
+                                {% else %}
+                                No identifier listed.
+                                {% endif %}
                             </td>
                         </tr>
                         <tr>
                             <td>Description</td>
-                            <td>{{ dataset.description }}</td>
+                            <td>
+                                {% if dataset.description %}
+                                {{ dataset.description }}
+                                {% else %}
+                                No description provided.
+                                {% endif %}
+                            </td>
                         </tr>
                         <tr>
                             <td>Owner</td>
-                            <td>{{ dataset.owner | add_link | safe}}</td>
+                            <td>
+                                {% if dataset.owner %}
+                                {{ dataset.owner | add_link | safe }}
+                                {% else %}
+                                No owner listed.
+                                {% endif %}
+                            </td>
                         </tr>
                         <tr>
                             <td>Author</td>
-                            <td>{{ dataset.author | add_link | safe}}</td>
+                            <td>
+                                {% if dataset.author %}
+                                {{ dataset.author | add_link | safe }}
+                                {% else %}
+                                No author listed.
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Schema</td>
+                            <td>
+                                {% if dataset.schema %}
+                                {{ dataset.schema | add_link | safe }}
+                                {% else %}
+                                No schema listed.
+                                {% endif %}
+                            </td>
                         </tr>
                         <tr>
                             <td>Source Organization</td>
                             <td>
                                 {% if dataset.sourceOrganization %}
-                                {{ dataset.sourceOrganization | add_link | safe}}
+                                {{ dataset.sourceOrganization | add_link | safe }}
                                 {% else %}
                                 No Source Organization listed.
                                 {% endif %}
                             </td>
                         </tr>
-
                         <tr>
                             <td>usedBy</td>
                             <td>
@@ -89,11 +126,13 @@
                                             data-bs-parent="#accordionusedBy">
                                             <div class="accordion-body">
                                                 <ul>
+                                                    {% if dataset.usedBy %}
                                                     {% for d in dataset.usedBy %}
-                                                    <li>{{ d | add_link | safe}}</li>
-                                                    {% else %}
-                                                    <li></li>
+                                                    <li>{{ d | add_link | safe }}</li>
                                                     {% endfor %}
+                                                    {% else %}
+                                                    <li>No usage data available</li>
+                                                    {% endif %}
                                                 </ul>
                                             </div>
                                         </div>
@@ -118,11 +157,13 @@
                                             data-bs-parent="#accordionDistributions">
                                             <div class="accordion-body">
                                                 <ul>
+                                                    {% if dataset.distribution %}
                                                     {% for d in dataset.distribution %}
-                                                    <li>{{ d | add_link | safe}}</li>
+                                                    <li>{{ d | add_link | safe }}</li>
+                                                    {% endfor %}
                                                     {% else %}
                                                     <li>No distributions available</li>
-                                                    {% endfor %}
+                                                    {% endif %}
                                                 </ul>
                                             </div>
                                         </div>
@@ -130,19 +171,21 @@
                                 </div>
                             </td>
                         </tr>
-                        <td>includedInDataCatalog</td>
-                        <td>
-                            {% if dataset.includedInDataCatalog %}
-                            {{ dataset.includedInDataCatalog | add_link | safe}}
-                            {% else %}
-                            No data catalogs listed.
-                            {% endif %}
-                        </td>
+                        <tr>
+                            <td>includedInDataCatalog</td>
+                            <td>
+                                {% if dataset.includedInDataCatalog %}
+                                {{ dataset.includedInDataCatalog | add_link | safe }}
+                                {% else %}
+                                No data catalogs listed.
+                                {% endif %}
+                            </td>
                         </tr>
                     </tbody>
                 </table>
             </div>
         </div>
+
 
         <div class="row" id="json-ld-container">
             <div class="serialization-btn-group" style="margin-top: 20px; text-align: center;">

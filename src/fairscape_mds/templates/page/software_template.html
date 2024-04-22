@@ -41,26 +41,52 @@
                     <tbody>
                         <tr>
                             <td>Name</td>
-                            <td>{{ software.name }}</td>
+                            <td>
+                                {% if software.name %}
+                                {{ software.name }}
+                                {% else %}
+                                No name listed.
+                                {% endif %}
+                            </td>
                         </tr>
                         <tr>
-                            <td>Persistant Identifier</td>
+                            <td>Persistent Identifier</td>
                             <td>
+                                {% if software.guid %}
                                 {{ software.guid | add_link | safe }}
+                                {% else %}
+                                No identifier listed.
+                                {% endif %}
                             </td>
                         </tr>
                         <tr>
                             <td>Description</td>
-                            <td>{{ software.description }}</td>
+                            <td>
+                                {% if software.description %}
+                                {{ software.description }}
+                                {% else %}
+                                No description provided.
+                                {% endif %}
+                            </td>
                         </tr>
                         <tr>
                             <td>Owner</td>
-                            <td>{{ software.owner | add_link | safe }}</td>
+                            <td>
+                                {% if software.owner %}
+                                {{ software.owner | add_link | safe }}
+                                {% else %}
+                                No owner listed.
+                                {% endif %}
+                            </td>
                         </tr>
                         <tr>
                             <td>Associated Organization</td>
                             <td>
+                                {% if software.sourceOrganization %}
                                 {{ software.sourceOrganization | add_link | safe }}
+                                {% else %}
+                                No associated organization listed.
+                                {% endif %}
                             </td>
                         </tr>
                         <tr>
@@ -80,11 +106,13 @@
                                             data-bs-parent="#accordionusedBy">
                                             <div class="accordion-body">
                                                 <ul>
+                                                    {% if software.usedBy %}
                                                     {% for d in software.usedBy %}
                                                     <li>{{ d | add_link | safe }}</li>
-                                                    {% else %}
-                                                    <li></li>
                                                     {% endfor %}
+                                                    {% else %}
+                                                    <li>No users listed</li>
+                                                    {% endif %}
                                                 </ul>
                                             </div>
                                         </div>
@@ -109,11 +137,13 @@
                                             data-bs-parent="#accordionDistributions">
                                             <div class="accordion-body">
                                                 <ul>
+                                                    {% if software.distribution %}
                                                     {% for d in software.distribution %}
                                                     <li>{{ d | add_link | safe }}</li>
+                                                    {% endfor %}
                                                     {% else %}
                                                     <li>No distributions available</li>
-                                                    {% endfor %}
+                                                    {% endif %}
                                                 </ul>
                                             </div>
                                         </div>
@@ -125,6 +155,7 @@
                 </table>
             </div>
         </div>
+
 
         <!-- Raw JSON-LD of the software -->
         <div class="row" id="json-ld-container">
