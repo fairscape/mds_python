@@ -32,6 +32,7 @@ from fairscape_mds.models.rocrate import (
     ROCrate
 )
 
+from pydantic import BaseModel
 import uuid
 from pathlib import Path
 
@@ -274,8 +275,14 @@ def archived_rocrate_download(
         )
         
     else:
+
+        if isinstance(rocrate_metadata.distribution, BaseModel):
+            object_path = rocrate_metadata.distribution.archivedObjectPath
+        elif isinstance(rocrate_metadata.distribution, dict):
+            # Access as a dictionary
+            object_path = rocrate_metadata.distribution.get('archivedObjectPath', None)
         return StreamZippedROCrate(
             MinioClient=minio_client,
             BucketName=minio_config.rocrate_bucket,
-            ObjectPath = rocrate_metadata.distribution.archivedObjectPath
+            ObjectPath = object_path
         )
