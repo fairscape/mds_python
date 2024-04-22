@@ -141,6 +141,37 @@
                             </td>
                         </tr>
                         <tr>
+                            <td>generatedBy</td>
+                            <td>
+                                <!-- Dropdown element -->
+                                <div class="accordion" id="accordiongeneratedBy">
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                                data-bs-target="#collapsegeneratedBy" aria-expanded="false"
+                                                aria-controls="collapsegeneratedBy">
+                                                generatedBy
+                                            </button>
+                                        </h2>
+                                        <div id="collapsegeneratedBy" class="accordion-collapse collapse"
+                                            data-bs-parent="#accordiongeneratedBy">
+                                            <div class="accordion-body">
+                                                <ul>
+                                                    {% if dataset.generatedBy %}
+                                                    {% for d in dataset.generatedBy %}
+                                                    <li>{{ d | add_link | safe }}</li>
+                                                    {% endfor %}
+                                                    {% else %}
+                                                    <li>No usage data available</li>
+                                                    {% endif %}
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
                             <td>Distributions</td>
                             <td>
                                 <!-- Dropdown element -->
