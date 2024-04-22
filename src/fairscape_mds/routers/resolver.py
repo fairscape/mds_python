@@ -138,6 +138,7 @@ def resolve(
         "computation": (Computation, "computation_template.html")
     }
 
+    #TODO clean up this line
     metadata_type = ark_metadata.get("@type").lower().replace('evi:', '').replace('person','user').replace("https://w3id.org/evi#","").replace("https://w2id.org/evi#","")
     type_info = model_map.get(metadata_type)
     try: 
