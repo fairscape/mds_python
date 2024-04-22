@@ -110,13 +110,7 @@
                                             data-bs-parent="#accordionDistributions">
                                             <div class="accordion-body">
                                                 <ul>
-                                                    {% if rocrate.distribution %}
-                                                    {% for d in rocrate.distribution %}
-                                                    <li>{{ d | add_link | safe }}</li>
-                                                    {% endfor %}
-                                                    {% else %}
-                                                    <li>No distributions available</li>
-                                                    {% endif %}
+                                                    <li>{{ rocrate.guid | add_link(true) | safe }}</li>
                                                 </ul>
                                             </div>
                                         </div>

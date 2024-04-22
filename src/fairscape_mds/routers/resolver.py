@@ -66,9 +66,11 @@ def convert_to_rdf(json_data):
 
     return rdf_xml_data, turtle_data
 
-def add_link(value):
+def add_link(value, download = False):
     """For values that match ark or look like urls add a hyperlink"""
     url_pattern = r'^(http|https)://[^\s]+'
+    if download:
+        return f'<a href={FAIRSCAPE_URL}rocrate/archived/download/{value}>Download Link</a>'
     if re.match(IdentifierPattern, value):
         return f'<a href={FAIRSCAPE_URL}{value}>{value}</a>'
     elif re.match(url_pattern, value):
