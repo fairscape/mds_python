@@ -27,6 +27,7 @@ class Dataset(FairscapeEVIBaseModel, extra=Extra.allow):
     dateModified: Optional[datetime] = Field(default_factory=datetime.now)
     usedBy: Optional[List[str]] = Field(default=[])
     generatedBy: Optional[str] = Field(default=None)
+    schema: Optional[str] = Field(default="")
 
 
     def read(self, MongoCollection: pymongo.collection.Collection) -> OperationStatus:
