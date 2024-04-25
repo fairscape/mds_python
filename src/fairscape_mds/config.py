@@ -45,6 +45,10 @@ def get_minio_config():
 def get_minio_client():
     mds_config = get_fairscape_config()
     return mds_config.CreateMinioClient()
+
+@lru_cache()
+def get_fairscape_url():
+    return get_fairscape_config().url
     
 
 @lru_cache()
@@ -79,6 +83,7 @@ def get_fairscape_config(env_path: str = '../deploy/local.env'):
             port = config_values.get('FAIRSCAPE_PORT'),
             jwtSecret = config_values.get('FAIRSCAPE_JWT_SECRET', 'testjwtsecret'),
             passwordSalt = config_values.get('FAIRSCAPE_PASSWORD_SALT', 'testsalt'),
+            url = config_values.get("FAIRSCAPE_URL"),
             mongo = server_mongo_config,
             minio = server_minio_config
             )
@@ -156,6 +161,7 @@ class FairscapeConfig(BaseModel):
     port: Optional[int] = Field(default=8080)
     jwtSecret: str 
     passwordSalt: str 
+    url: Optional[str] = Field(default = "http://localhost:8080/")
     mongo: MongoConfig
     minio: MinioConfig
 

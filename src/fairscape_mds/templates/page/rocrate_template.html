@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 
-{% include './development notebooks/vizualization/head_template.html' %}
+{% include 'head_template.html' %}
 
 <body>
     <div id="main-content" class="container">
@@ -46,7 +46,7 @@
                         <tr>
                             <td>Persistant Identifier</td>
                             <td>
-                                {{ rocrate.guid | add_link }}
+                                {{ rocrate.guid | add_link | safe }}
                             </td>
                         </tr>
                         <tr>
@@ -57,7 +57,7 @@
                             <td>Source Organization</td>
                             <td>
                                 {% if rocrate.sourceOrganization %}
-                                {{ rocrate.sourceOrganization | add_link }}
+                                {{ rocrate.sourceOrganization | add_link | safe }}
                                 {% else %}
                                 No source organization available
                                 {% endif %}
@@ -111,7 +111,7 @@
                                                 <ul>
                                                     {% if rocrate.distribution %}
                                                     {% for d in rocrate.distribution %}
-                                                    <li>{{ d | add_link }}</li>
+                                                    <li>{{ d | add_link | safe }}</li>
                                                     {% endfor %}
                                                     {% else %}
                                                     <li>No distributions available</li>
@@ -163,7 +163,7 @@
             </pre>
         </div>
     </div>
-    {% include './development notebooks/vizualization/scripts_template.html' %}
+    {% include 'scripts_template.html' %}
 </body>
 
 </html>

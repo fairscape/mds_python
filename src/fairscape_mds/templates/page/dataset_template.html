@@ -1,13 +1,13 @@
 <!doctype html>
 <html lang="en">
 
-{% include './development notebooks/vizualization/head_template.html' %}
+{% include 'head_template.html' %}
 
 <body>
     <div id="main-content" class="container">
         <div class="row">
             <div class="col-lg-auto">
-                <h3>Software Metadata: {{ software.guid }}</h3>
+                <h3>Dataset Metadata: {{ dataset.guid }}</h3>
             </div>
         </div>
 
@@ -41,28 +41,37 @@
                     <tbody>
                         <tr>
                             <td>Name</td>
-                            <td>{{ software.name }}</td>
+                            <td>{{ dataset.name }}</td>
                         </tr>
                         <tr>
                             <td>Persistant Identifier</td>
                             <td>
-                                {{ software.guid | add_link }}
+                                {{ dataset.guid | add_link | safe}}
                             </td>
                         </tr>
                         <tr>
                             <td>Description</td>
-                            <td>{{ software.description }}</td>
+                            <td>{{ dataset.description }}</td>
                         </tr>
                         <tr>
                             <td>Owner</td>
-                            <td>{{ software.owner | add_link }}</td>
+                            <td>{{ dataset.owner | add_link | safe}}</td>
                         </tr>
                         <tr>
-                            <td>Associated Organization</td>
+                            <td>Author</td>
+                            <td>{{ dataset.author | add_link | safe}}</td>
+                        </tr>
+                        <tr>
+                            <td>Source Organization</td>
                             <td>
-                                {{ software.sourceOrganization | add_link }}
+                                {% if dataset.sourceOrganization %}
+                                {{ dataset.sourceOrganization | add_link | safe}}
+                                {% else %}
+                                No Source Organization listed.
+                                {% endif %}
                             </td>
                         </tr>
+
                         <tr>
                             <td>usedBy</td>
                             <td>
@@ -80,8 +89,8 @@
                                             data-bs-parent="#accordionusedBy">
                                             <div class="accordion-body">
                                                 <ul>
-                                                    {% for d in software.usedBy %}
-                                                    <li>{{ d | add_link }}</li>
+                                                    {% for d in dataset.usedBy %}
+                                                    <li>{{ d | add_link | safe}}</li>
                                                     {% else %}
                                                     <li></li>
                                                     {% endfor %}
@@ -109,8 +118,8 @@
                                             data-bs-parent="#accordionDistributions">
                                             <div class="accordion-body">
                                                 <ul>
-                                                    {% for d in software.distribution %}
-                                                    <li>{{ d | add_link }}</li>
+                                                    {% for d in dataset.distribution %}
+                                                    <li>{{ d | add_link | safe}}</li>
                                                     {% else %}
                                                     <li>No distributions available</li>
                                                     {% endfor %}
@@ -121,12 +130,20 @@
                                 </div>
                             </td>
                         </tr>
+                        <td>includedInDataCatalog</td>
+                        <td>
+                            {% if dataset.includedInDataCatalog %}
+                            {{ dataset.includedInDataCatalog | add_link | safe}}
+                            {% else %}
+                            No data catalogs listed.
+                            {% endif %}
+                        </td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
         </div>
 
-        <!-- Raw JSON-LD of the software -->
         <div class="row" id="json-ld-container">
             <div class="serialization-btn-group" style="margin-top: 20px; text-align: center;">
                 <div class="btn-group" role="group" aria-label="Serialization options" style="width: 50%;">
@@ -151,17 +168,30 @@
                 <pre id="rdf-xml-text" style="display: none;">{{ rdf_xml }}</pre>
                 <pre id="turtle-text" style="display: none;">{{ turtle }}</pre>
             </div>
+
         </div>
+
 
         <!-- Mermaid graph -->
         <div class="row" id="mermaid-container">
+            <!--
+            %%{
+              init: {
+                'theme': 'base',
+                'themeVariables': {
+                  'fontFamily': 'verdana',
+                  'fontSize': '20px',
+                  'primaryColor': '#4dbdc9'
+                }
+              }
+            }%%
+            -->
             <pre class="mermaid" id="mermaid-text">
                 {{ evidencegraph }}
             </pre>
-
         </div>
     </div>
-    {% include './development notebooks/vizualization/scripts_template.html' %}
+    {% include 'scripts_template.html' %}
 </body>
 
 </html>
