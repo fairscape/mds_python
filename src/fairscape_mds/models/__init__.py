@@ -1,7 +1,9 @@
 from fairscape_mds.models.user import User, listUsers
 from fairscape_mds.models.group import Group, list_groups
 from fairscape_mds.models.dataset import (
-        Dataset, 
+        DatasetCreateModel, 
+        DatasetWriteModel, 
+        DatasetUpdateModel,
         listDatasets, 
         deleteDataset, 
         createDataset
@@ -31,7 +33,7 @@ from fairscape_mds.models.evidencegraph import EvidenceGraph, list_evidencegraph
 __all__ = [ 
     'User', 'listUsers', 
     'Group', 'list_groups',
-    'Dataset', 'listDatasets', 'deleteDataset', 'createDataset',
+    'DatasetCreateModel', 'DatasetWriteModel', 'DatasetUpdateModel', 'listDatasets', 'deleteDataset', 'createDataset',
     'Software', 'listSoftware', 'createSoftware', 'deleteSoftware',
     'Computation', 'listComputation', 'getComputation', 'deleteComputation', 'getComputation', 'updateComputation',
     'Organization', 

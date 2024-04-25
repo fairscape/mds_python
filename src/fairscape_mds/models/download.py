@@ -20,7 +20,7 @@ from fairscape_mds.models.fairscape_base import (
     FairscapeEVIBaseModel,
     IdentifierPattern
 )
-from fairscape_mds.models.dataset import Dataset
+from fairscape_mds.models.dataset import DatasetWriteModel
 from fairscape_mds.utilities.operation_status import OperationStatus
 from fairscape_mds.config import (
     get_minio_config, 
