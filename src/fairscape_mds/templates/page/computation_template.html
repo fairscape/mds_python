@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 
-{% include './development notebooks/vizualization/head_template.html' %}
+{% include 'head_template.html' %}
 
 <body>
     <div id="main-content" class="container">
@@ -46,7 +46,7 @@
                         <tr>
                             <td>Persistant Identifier</td>
                             <td>
-                                {{ computation.guid | add_link }}
+                                {{ computation.guid | add_link | safe }}
                             </td>
                         </tr>
                         <tr>
@@ -55,16 +55,16 @@
                         </tr>
                         <tr>
                             <td>Owner</td>
-                            <td>{{ computation.owner | add_link }}</td>
+                            <td>{{ computation.owner | add_link | safe }}</td>
                         </tr>
                         <tr>
                             <td>Author</td>
-                            <td>{{ computation.author | add_link }}</td>
+                            <td>{{ computation.author | add_link | safe }}</td>
                         </tr>
                         <tr>
                             <td>Source Organization</td>
                             <td>
-                                {{ computation.sourceOrganization | add_link }}
+                                {{ computation.sourceOrganization | add_link | safe }}
                             </td>
                         </tr>
                         <!-- <tr>
@@ -85,7 +85,7 @@
                                             <div class="accordion-body">
                                                 <ul>
                                                     {% for d in computation.usedDataset %}
-                                                    <li>{{ d | add_link }}</li>
+                                                    <li>{{ d | add_link | safe }}</li>
                                                     {% else %}
                                                     <li></li>
                                                     {% endfor %}
@@ -99,20 +99,20 @@
                         <tr>
                             <td>usedDataset</td>
                             <td>
-                                {{ computation.usedDataset| add_link }}
+                                {{ computation.usedDataset| add_link | safe }}
                             </td>
                         </tr>
                         <tr>
                             <td>usedSoftware</td>
                             <td>
-                                {{ computation.usedSoftware | add_link }}
+                                {{ computation.usedSoftware | add_link | safe }}
                             </td>
                         </tr>
                         <td>
                             Command
                         </td>
                         <td>
-                            {{ computation.command| add_link }}
+                            {{ computation.command| add_link | safe }}
                         </td>
                         </tr>
                         <tr>
@@ -133,7 +133,7 @@
                                             <div class="accordion-body">
                                                 <ul>
                                                     {% for d in computation.generated %}
-                                                    <li>{{ d | add_link }}</li>
+                                                    <li>{{ d | add_link | safe }}</li>
                                                     {% else %}
                                                     <li>No software available</li>
                                                     {% endfor %}
@@ -148,7 +148,7 @@
                             Container Id
                         </td>
                         <td>
-                            {{ computation.containerId| add_link }}
+                            {{ computation.containerId| add_link | safe }}
                         </td>
                         </tr>
                     </tbody>
@@ -192,7 +192,7 @@
 
         </div>
     </div>
-    {% include './development notebooks/vizualization/scripts_template.html' %}
+    {% include 'scripts_template.html' %}
 </body>
 
 </html>

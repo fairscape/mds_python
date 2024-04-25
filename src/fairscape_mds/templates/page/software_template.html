@@ -1,13 +1,13 @@
 <!doctype html>
 <html lang="en">
 
-{% include './development notebooks/vizualization/head_template.html' %}
+{% include 'head_template.html' %}
 
 <body>
     <div id="main-content" class="container">
         <div class="row">
             <div class="col-lg-auto">
-                <h3>Schema Metadata: {{ schema.guid }}</h3>
+                <h3>Software Metadata: {{ software.guid }}</h3>
             </div>
         </div>
 
@@ -41,64 +41,47 @@
                     <tbody>
                         <tr>
                             <td>Name</td>
-                            <td>{{ schema.name }}</td>
+                            <td>{{ software.name }}</td>
                         </tr>
                         <tr>
                             <td>Persistant Identifier</td>
                             <td>
-                                {{ schema.guid | add_link }}
+                                {{ software.guid | add_link | safe }}
                             </td>
                         </tr>
                         <tr>
                             <td>Description</td>
-                            <td>{{ schema.description }}</td>
+                            <td>{{ software.description }}</td>
                         </tr>
                         <tr>
-                            <td>Properties</td>
+                            <td>Owner</td>
+                            <td>{{ software.owner | add_link | safe }}</td>
+                        </tr>
+                        <tr>
+                            <td>Associated Organization</td>
                             <td>
-                                {% for property_name, property_details in schema.properties.items() %}
-                                <div class="accordion" id="accordion{{ property_name | replace(' ', '-') }}">
-                                    <div class="accordion-item">
-                                        <h2 class="accordion-header">
-                                            <button class="accordion-button" type="button" data-bs-toggle="collapse"
-                                                data-bs-target="#collapse{{ property_name | replace(' ', '-') }}"
-                                                aria-expanded="true"
-                                                aria-controls="collapse{{ property_name | replace(' ', '-') }}">
-                                                {{ property_name }}
-                                            </button>
-                                        </h2>
-                                        <div id="collapse{{ property_name | replace(' ', '-') }}"
-                                            class="accordion-collapse collapse"
-                                            data-bs-parent="#accordion{{ property_name | replace(' ', '-') }}">
-                                            <div class="accordion-body">
-                                                <strong>Description:</strong> {{ property_details.description }}<br>
-                                                <strong>Type:</strong> {{ property_details.type }}<br>
-                                                <strong>Index:</strong> {{ property_details.index }}
-                                            </div>
-                                        </div>
-                                    </div>
-                                    {% endfor %}
-                                </div>
+                                {{ software.sourceOrganization | add_link | safe }}
                             </td>
                         </tr>
                         <tr>
-                            <td>Required</td>
+                            <td>usedBy</td>
                             <td>
-                                <div class="accordion" id="accordionrequired">
+                                <!-- Dropdown element -->
+                                <div class="accordion" id="accordionusedBy">
                                     <div class="accordion-item">
                                         <h2 class="accordion-header">
                                             <button class="accordion-button" type="button" data-bs-toggle="collapse"
-                                                data-bs-target="#collapserequired" aria-expanded="false"
-                                                aria-controls="collapserequired">
-                                                required
+                                                data-bs-target="#collapseusedBy" aria-expanded="false"
+                                                aria-controls="collapseusedBy">
+                                                usedBy
                                             </button>
                                         </h2>
-                                        <div id="collapserequired" class="accordion-collapse collapse"
-                                            data-bs-parent="#accordionrequired">
+                                        <div id="collapseusedBy" class="accordion-collapse collapse"
+                                            data-bs-parent="#accordionusedBy">
                                             <div class="accordion-body">
                                                 <ul>
-                                                    {% for d in schema.required %}
-                                                    <li>{{ d | add_link }}</li>
+                                                    {% for d in software.usedBy %}
+                                                    <li>{{ d | add_link | safe }}</li>
                                                     {% else %}
                                                     <li></li>
                                                     {% endfor %}
@@ -110,14 +93,40 @@
                             </td>
                         </tr>
                         <tr>
-                            <td>Separator</td>
-                            <td>{{ schema.separator }}</td>
+                            <td>Distributions</td>
+                            <td>
+                                <!-- Dropdown element -->
+                                <div class="accordion" id="accordionDistributions">
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                                data-bs-target="#collapseDistributions" aria-expanded="false"
+                                                aria-controls="collapseDistributions">
+                                                Distributions
+                                            </button>
+                                        </h2>
+                                        <div id="collapseDistributions" class="accordion-collapse collapse"
+                                            data-bs-parent="#accordionDistributions">
+                                            <div class="accordion-body">
+                                                <ul>
+                                                    {% for d in software.distribution %}
+                                                    <li>{{ d | add_link | safe }}</li>
+                                                    {% else %}
+                                                    <li>No distributions available</li>
+                                                    {% endfor %}
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
                         </tr>
                     </tbody>
                 </table>
             </div>
         </div>
 
+        <!-- Raw JSON-LD of the software -->
         <div class="row" id="json-ld-container">
             <div class="serialization-btn-group" style="margin-top: 20px; text-align: center;">
                 <div class="btn-group" role="group" aria-label="Serialization options" style="width: 50%;">
@@ -142,18 +151,17 @@
                 <pre id="rdf-xml-text" style="display: none;">{{ rdf_xml }}</pre>
                 <pre id="turtle-text" style="display: none;">{{ turtle }}</pre>
             </div>
-
         </div>
-
 
         <!-- Mermaid graph -->
         <div class="row" id="mermaid-container">
             <pre class="mermaid" id="mermaid-text">
-            {{ evidencegraph }}
+                {{ evidencegraph }}
             </pre>
+
         </div>
     </div>
-    {% include './development notebooks/vizualization/scripts_template.html' %}
+    {% include 'scripts_template.html' %}
 </body>
 
 </html>

@@ -1,13 +1,13 @@
 <!doctype html>
 <html lang="en">
 
-{% include './development notebooks/vizualization/head_template.html' %}
+{% include 'head_template.html' %}
 
 <body>
     <div id="main-content" class="container">
         <div class="row">
             <div class="col-lg-auto">
-                <h3>Dataset Metadata: {{ dataset.guid }}</h3>
+                <h3>Schema Metadata: {{ schema.guid }}</h3>
             </div>
         </div>
 
@@ -41,51 +41,64 @@
                     <tbody>
                         <tr>
                             <td>Name</td>
-                            <td>{{ dataset.name }}</td>
+                            <td>{{ schema.name }}</td>
                         </tr>
                         <tr>
                             <td>Persistant Identifier</td>
                             <td>
-                                {{ dataset.guid | add_link }}
+                                {{ schema.guid | add_link | safe }}
                             </td>
                         </tr>
                         <tr>
                             <td>Description</td>
-                            <td>{{ dataset.description }}</td>
+                            <td>{{ schema.description }}</td>
                         </tr>
                         <tr>
-                            <td>Owner</td>
-                            <td>{{ dataset.owner | add_link }}</td>
-                        </tr>
-                        <tr>
-                            <td>Author</td>
-                            <td>{{ dataset.author | add_link }}</td>
-                        </tr>
-                        <tr>
-                            <td>Source Organization</td>
+                            <td>Properties</td>
                             <td>
-                                {{ dataset.sourceOrganization | add_link }}
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>usedBy</td>
-                            <td>
-                                <!-- Dropdown element -->
-                                <div class="accordion" id="accordionusedBy">
+                                {% for property_name, property_details in schema.properties.items() %}
+                                <div class="accordion" id="accordion{{ property_name | replace(' ', '-') }}">
                                     <div class="accordion-item">
                                         <h2 class="accordion-header">
                                             <button class="accordion-button" type="button" data-bs-toggle="collapse"
-                                                data-bs-target="#collapseusedBy" aria-expanded="false"
-                                                aria-controls="collapseusedBy">
-                                                usedBy
+                                                data-bs-target="#collapse{{ property_name | replace(' ', '-') }}"
+                                                aria-expanded="true"
+                                                aria-controls="collapse{{ property_name | replace(' ', '-') }}">
+                                                {{ property_name }}
                                             </button>
                                         </h2>
-                                        <div id="collapseusedBy" class="accordion-collapse collapse"
-                                            data-bs-parent="#accordionusedBy">
+                                        <div id="collapse{{ property_name | replace(' ', '-') }}"
+                                            class="accordion-collapse collapse"
+                                            data-bs-parent="#accordion{{ property_name | replace(' ', '-') }}">
+                                            <div class="accordion-body">
+                                                <strong>Description:</strong> {{ property_details.description }}<br>
+                                                <strong>Type:</strong> {{ property_details.type }}<br>
+                                                <strong>Index:</strong> {{ property_details.index }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Required</td>
+                            <td>
+                                <div class="accordion" id="accordionrequired">
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                                data-bs-target="#collapserequired" aria-expanded="false"
+                                                aria-controls="collapserequired">
+                                                required
+                                            </button>
+                                        </h2>
+                                        <div id="collapserequired" class="accordion-collapse collapse"
+                                            data-bs-parent="#accordionrequired">
                                             <div class="accordion-body">
                                                 <ul>
-                                                    {% for d in dataset.usedBy %}
-                                                    <li>{{ d | add_link }}</li>
+                                                    {% for d in schema.required %}
+                                                    <li>{{ d | add_link | safe }}</li>
                                                     {% else %}
                                                     <li></li>
                                                     {% endfor %}
@@ -97,38 +110,8 @@
                             </td>
                         </tr>
                         <tr>
-                            <td>Distributions</td>
-                            <td>
-                                <!-- Dropdown element -->
-                                <div class="accordion" id="accordionDistributions">
-                                    <div class="accordion-item">
-                                        <h2 class="accordion-header">
-                                            <button class="accordion-button" type="button" data-bs-toggle="collapse"
-                                                data-bs-target="#collapseDistributions" aria-expanded="false"
-                                                aria-controls="collapseDistributions">
-                                                Distributions
-                                            </button>
-                                        </h2>
-                                        <div id="collapseDistributions" class="accordion-collapse collapse"
-                                            data-bs-parent="#accordionDistributions">
-                                            <div class="accordion-body">
-                                                <ul>
-                                                    {% for d in dataset.distribution %}
-                                                    <li>{{ d | add_link }}</li>
-                                                    {% else %}
-                                                    <li>No distributions available</li>
-                                                    {% endfor %}
-                                                </ul>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
-                        <td>includedInDataCatalog</td>
-                        <td>
-                            {{ dataset.includedInDataCatalog | add_link }}
-                        </td>
+                            <td>Separator</td>
+                            <td>{{ schema.separator }}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -165,24 +148,12 @@
 
         <!-- Mermaid graph -->
         <div class="row" id="mermaid-container">
-            <!--
-            %%{
-              init: {
-                'theme': 'base',
-                'themeVariables': {
-                  'fontFamily': 'verdana',
-                  'fontSize': '20px',
-                  'primaryColor': '#4dbdc9'
-                }
-              }
-            }%%
-            -->
             <pre class="mermaid" id="mermaid-text">
-                {{ evidencegraph }}
+            {{ evidencegraph }}
             </pre>
         </div>
     </div>
-    {% include './development notebooks/vizualization/scripts_template.html' %}
+    {% include 'scripts_template.html' %}
 </body>
 
 </html>
