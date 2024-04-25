@@ -3,7 +3,7 @@ from pydantic import (
     Extra,
     Field,
 )
-from typing import Optional, List, Union, Literal
+from typing import Optional, List, Union, Literal, Tuple
 from datetime import datetime
 from pymongo.collection import Collection
 
@@ -223,7 +223,7 @@ def deleteDataset(
     datasetGUID: str,
     identifierCollection: pymongo.collection.Collection, 
     userCollection: pymongo.collection.Collection
-) -> tuple[DatasetWriteModel, OperationStatus]:
+) -> Tuple[DatasetWriteModel, OperationStatus]:
     """Delete the dataset. Update each user who is an owner of the dataset.
 
     Args:
@@ -301,7 +301,7 @@ def deleteDownload(
     user_collection: Collection,
     minio_client,
     download_identifier,
-) -> tuple[DatasetWriteModel, OperationStatus]:
+) -> Tuple[DatasetWriteModel, OperationStatus]:
     '''
     '''
     pass

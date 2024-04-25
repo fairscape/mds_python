@@ -14,7 +14,6 @@ from fairscape_mds.models.dataset import (
         listDatasets, 
         deleteDataset, 
         createDataset, 
-        DatasetCreateModel
         )
 
 router = APIRouter()
@@ -84,7 +83,6 @@ def dataset_get(NAAN: str, postfix: str):
     dataset_id = f"ark:{NAAN}/{postfix}"
 
     dataset = Dataset.construct(guid=dataset_id)
-
     read_status = dataset.read(identifier_collection)
 
     if read_status.success:

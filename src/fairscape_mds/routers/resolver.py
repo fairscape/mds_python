@@ -1,5 +1,3 @@
-from typing_extensions import Annotated
-
 from fastapi import (
     APIRouter,
     Path,
@@ -7,24 +5,23 @@ from fastapi import (
     Depends,
     Request
 )
-
-from fairscape_mds.models.user import User
-from fairscape_mds.models.rocrate import ROCrate
-from fairscape_mds.models.schema import Schema
-from fairscape_mds.models.dataset import Dataset
-from fairscape_mds.models.software import Software
-from fairscape_mds.models.computation import Computation
-from fairscape_mds.models.evidencegraph import EvidenceGraph
-from fairscape_mds.models.fairscape_base import IdentifierPattern
-
-from fastapi.responses import JSONResponse
-
-from fairscape_mds.config import (
-    get_mongo_config,
-    get_mongo_client,
-    get_fairscape_url,
-) 
 from fastapi.templating import Jinja2Templates
+from fastapi.responses import JSONResponse, RedirectResponse
+
+from fairscape_mds.config import get_fairscape_config
+from fairscape_mds.models import (
+    User,
+    ROCrate,
+    Schema,
+    DatasetWriteModel,
+    Software,
+    Computation,
+    EvidenceGraph,
+    IdentifierPattern
+    )
+
+
+from typing_extensions import Annotated
 import sys
 import logging
 import json
@@ -37,10 +34,13 @@ logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 rocrate_logger = logging.getLogger("rosolver")
 
 ResolverRouter = APIRouter()
-mongo_config = get_mongo_config()
-mongo_client = get_mongo_client()
 
-FAIRSCAPE_URL = get_fairscape_url()
+fairscapeConfig = get_fairscape_config()
+mongo_client = fairscapeConfig.CreateMongoClient()
+mongo_db = mongo_client[fairscapeConfig.mongo.db]
+userCollection = mongo_db[fairscapeConfig.mongo.user_collection]
+identifierCollection = mongo_db[fairscapeConfig.mongo.identifier_collection]
+FAIRSCAPE_URL = fairscapeConfig.url
 
 def convert_to_rdf(json_data):  
     """Convert json data to rdf and turtle"""
@@ -77,6 +77,7 @@ def add_link(value):
 
 def find_metadata(collections, naan, postfix):
     """Look for ID in all possible collections return first document."""
+
     for collection in collections:
         ark_metadata = collection.find_one({"@id": f"ark:{naan}/{postfix}"}, projection={"_id": 0, "@graph._id": 0})
         if ark_metadata:
@@ -100,8 +101,6 @@ def resolve(
     request: Request,
     NAAN: Annotated[str, Path(
         title="ARK Name Assigning Authority Number",
-        # TODO import ark NAAN from config
-        #default = "59852",
         )], 
     postfix: Annotated[str, Path(
         title="Persitant Identifier"
@@ -110,11 +109,17 @@ def resolve(
     """ Resolve Identifier Metadata and Return in JSON-LD
     """
 
-    # TODO validate NAAN is 5 digits
+    # TODO return HTML for failed naan
+    if len(NAAN) != 5:
+        return JSONResponse(
+                status_code=404,
+                content={"error": "NAAN must be 5 digits"}
+                )
 
-    # TODO validate that NAAN is configured
+    # TODO support multiple NAANs
+    if NAAN!= fairscapeConfig.NAAN:
+        return RedirectResponse(f'https://n2t.net/ark:{NAAN}/{postfix}')
 
-    # TODO if not a local NAAN redirect to n2t.net
 
     mongo_db = mongo_client[mongo_config.db]
     collections = [mongo_db[mongo_config.identifier_collection], 
@@ -131,7 +136,7 @@ def resolve(
         "evidencegraph": (EvidenceGraph, "evidencegraph_template.html"),
         "rocrate": (ROCrate, "rocrate_template.html"),
         "schema": (Schema, "schema_template.html"),
-        "dataset": (Dataset, "dataset_template.html"),
+        "dataset": (DatasetWriteModel, "dataset_template.html"),
         "software": (Software, "software_template.html"),
         "computation": (Computation, "computation_template.html")
     }
