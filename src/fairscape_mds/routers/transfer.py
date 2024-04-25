@@ -9,7 +9,7 @@ from fairscape_mds.config import (
     get_minio_client,
     MongoConfig,
     )
-from fairscape_mds.models.dataset import Dataset
+from fairscape_mds.models.dataset import DatasetCreateModel
 from fairscape_mds.models.download import (
     DownloadCreateModel,
     DownloadReadModel,
