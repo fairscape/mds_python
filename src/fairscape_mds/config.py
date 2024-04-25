@@ -77,6 +77,8 @@ def get_fairscape_config(env_path: str = '../deploy/local.env'):
     return FairscapeConfig(
             host = config_values.get('FAIRSCAPE_HOST'),
             port = config_values.get('FAIRSCAPE_PORT'),
+            jwtSecret = config_values.get('FAIRSCAPE_JWT_SECRET', 'testjwtsecret'),
+            passwordSalt = config_values.get('FAIRSCAPE_PASSWORD_SALT', 'testsalt'),
             mongo = server_mongo_config,
             minio = server_minio_config
             )
@@ -152,6 +154,8 @@ class K8sComputeConfig(BaseModel):
 class FairscapeConfig(BaseModel):
     host: Optional[str] = Field(default='0.0.0.0')
     port: Optional[int] = Field(default=8080)
+    jwtSecret: str 
+    passwordSalt: str 
     mongo: MongoConfig
     minio: MinioConfig
 
