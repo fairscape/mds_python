@@ -5,25 +5,32 @@ from fastapi import (
     Depends
 )
 from fastapi.responses import JSONResponse
-from fairscape_mds.models.user import User, listUsers, deleteUserByGUID
-from fairscape_mds.config import (
-    get_mongo_config,
-    get_mongo_client,
-    MongoConfig,
-) 
+
+from fairscape_mds.auth.oauth import getCurrentUser
+from fairscape_mds.models.user import (
+    User, 
+    createUser,
+    getUserByGUID,
+    listUsers, 
+    deleteUserByGUID
+)
+
+from fairscape_mds.config import get_fairscape_config
+
 
 router = APIRouter()
 
-mongo_config = get_mongo_config()
-mongo_client = get_mongo_client()
-mongo_db = mongo_client[mongo_config.db]
-userCollection = mongo_db[mongo_config.user_collection]
+fairscapeConfig = get_fairscape_config()
+mongo_client = fairscapeConfig.CreateMongoClient()
+mongo_db = mongo_client[fairscapeConfig.mongo.db]
+userCollection = mongo_db[fairscapeConfig.mongo.user_collection]
+passwordSalt = fairscapeConfig.passwordSalt
 
 
 @router.post('/user',
              summary="Create a user",
              response_description="The created user")
-def user_create(user: User):
+def user_create(passedUser: User):
     """
     Create a user with the following properties:
 
@@ -34,27 +41,20 @@ def user_create(user: User):
     - **password**: a password
     """
 
+    create_status = createUser(
+            passedUser,
+            passwordSalt, 
+            userCollection)
 
-    create_status = user.create(userCollection)
-
-    if create_status.success:
-
-        # create permissions for casbin
-        # fairscape_mds.mds.auth.casbin.createUser(
-        #     casbin_enforcer,
-        #     user.email,
-        #     user.id
-        # )
-        # casbin_enforcer.save_policy()
-        
+    if create_status.success: 
 
         return JSONResponse(
             status_code=201,
             content={
                 'created': {
-                    '@id': user.guid, 
+                    '@id': passedUser.guid, 
                     '@type': 'Person', 
-                    'name': user.name
+                    'name': passedUser.name
                 }
             }
         )
@@ -68,7 +68,7 @@ def user_create(user: User):
 @router.get('/user', status_code=200,
             summary="List all users",
             response_description="Retrieved list of users")
-def user_list():
+def user_list(currentUser: Annotated[User, Depends(getCurrentUser)]):
     users = listUsers(userCollection)
     return users
 
@@ -84,61 +84,56 @@ async def user_get(NAAN: str, postfix: str):
     - **postfix**: a unique string
     """
 
-    user_id = f"ark:{NAAN}/{postfix}"
+    userGUID = f"ark:{NAAN}/{postfix}"
+    userInstance, readStatus = getUserByGUID(userGUID, userCollection)
 
-    user = User.construct(guid=user_id)
-    read_status = user.read(userCollection)
-
-    if read_status.success:
-        return user
+    if readStatus.success:
+        return userInstance
     else:
         return JSONResponse(
-            status_code=read_status.status_code, 
+            status_code=readStatus.status_code, 
             content={
-                "error": read_status.message
+                "error": readStatus.message
             }
         )
 
 
-@router.put("/user/ark:{NAAN}/{postfix}",
-            summary="Update a user",
-            response_description="The updated user")
-def user_update(
-    user: User
-):
-
-    user_id = f"ark:{NAAN}/{postfix}"
-    user = User.construct(guid=user_id)
-
-    update_status = user.update(userCollection)
-
-    if update_status.success:
-        return JSONResponse(
-            status_code=200,
-            content={"updated": {"@id": user.id, "@type": "Person", "name": user.name}}
-        )
-
-    else:
-        return JSONResponse(
-            status_code=update_status.status_code,
-            content={"error": update_status.message}
-        )
+#@router.put("/user/ark:{NAAN}/{postfix}",
+#            summary="Update a user",
+#            response_description="The updated user")
+#def user_update(
+#    user: User
+#):
+#    updateUser(passedUser, userCollection)
+#    user = User.construct(guid=user_id)
+#
+#    update_status = user.update(userCollection)
+#
+#    if update_status.success:
+#        return JSONResponse(
+#            status_code=200,
+#            content={"updated": {"@id": user.id, "@type": "Person", "name": user.name}}
+#        )
+#    else:
+#        return JSONResponse(
+#            status_code=update_status.status_code,
+#            content={"error": update_status.message}
+#        )
 
 
 @router.delete("/user/ark:{NAAN}/{postfix}",
                summary="Delete a user",
                response_description="The deleted user")
-def user_delete(NAAN: str, postfix: str):
+def user_delete(NAAN: str, postfix: str, currentUser: Annotated[User, Depends(getCurrentUser)]):
     """
     Deletes a user based on a given identifier:
 
     - **NAAN**: Name Assigning Authority Number which uniquely identifies an organization e.g. 12345
     - **postfix**: a unique string
     """
-    user_id = f"ark:{NAAN}/{postfix}"
+    userGUID = f"ark:{NAAN}/{postfix}"
 
-
-    deleted_user = deleteUserByGUID(userCollection, user_id)
+    deleted_user = deleteUserByGUID(userGUID, userCollection)
 
     if deleted_user is None:
         return JSONResponse(
