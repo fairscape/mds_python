@@ -1,7 +1,10 @@
-VERSION ?= 0.2.0
+VERSION = RELEASE.2024-04-30.1
 
 run:
-	python3 main.py
+	cd src/ && python -m fairscape_mds
+
+run-docker: 
+	docker run -p 80:80 --env-file deploy/docker.env -it ghcr.io/fairscape/mds_python:${VERSION}
 
 setup: requirements.txt
 	pip install -r requirements.txt
