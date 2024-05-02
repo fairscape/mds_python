@@ -22,9 +22,10 @@ def evidencegraph_create(evidencegraph: EvidenceGraph, response: Response):
     - **name**: a name
     - **owner**: an existing user in its compact form with @id, @type, name, and email
     """
-    mongo_client = mongo.GetConfig()
-    mongo_db = mongo_client[MONGO_DATABASE]
-    mongo_collection = mongo_db[MONGO_COLLECTION]
+    mongo_client = get_mongo_client()
+    mongo_config = get_mongo_config()
+    mongo_db = mongo_client[mongo_config.db]
+    mongo_collection = mongo_db[mongo_config.identifier_collection]
 
     create_status = evidencegraph.create(mongo_collection)
 
@@ -33,7 +34,7 @@ def evidencegraph_create(evidencegraph: EvidenceGraph, response: Response):
     if create_status.success:
         return JSONResponse(
             status_code=201,
-            content={"created": {"@id": evidencegraph.id, "@type": "evi:EvidenceGraph"}}
+            content={"created": {"@id": evidencegraph.guid, "@type": "evi:EvidenceGraph"}}
         )
     else:
         return JSONResponse(
@@ -46,13 +47,12 @@ def evidencegraph_create(evidencegraph: EvidenceGraph, response: Response):
             summary="List all evidencegraphs",
             response_description="Retrieved list of evidencegraphs")
 def evidencegraph_list(response: Response):
-    mongo_client = mongo.GetConfig()
-    mongo_db = mongo_client[MONGO_DATABASE]
-    mongo_collection = mongo_db[MONGO_COLLECTION]
+    mongo_client = get_mongo_client()
+    mongo_config = get_mongo_config()
+    mongo_db = mongo_client[mongo_config.db]
+    mongo_collection = mongo_db[mongo_config.identifier_collection]
 
     evidencegraph = list_evidencegraph(mongo_collection)
-
-    mongo_client.close()
 
     return evidencegraph
 
@@ -67,17 +67,16 @@ def evidencegraph_get(NAAN: str, postfix: str, response: Response):
     - **NAAN**: Name Assigning Authority Number which uniquely identifies an organization e.g. 12345
     - **postfix**: a unique string
     """
-    mongo_client = mongo.GetConfig()
-    mongo_db = mongo_client[MONGO_DATABASE]
-    mongo_collection = mongo_db[MONGO_COLLECTION]
+    mongo_client = get_mongo_client()
+    mongo_config = get_mongo_config()
+    mongo_db = mongo_client[mongo_config.db]
+    mongo_collection = mongo_db[mongo_config.identifier_collection]
 
     evidencegraph_id = f"ark:{NAAN}/{postfix}"
 
     evidencegraph = EvidenceGraph.construct(id=evidencegraph_id)
 
     read_status = evidencegraph.read(mongo_collection)
-
-    mongo_client.close()
 
     if read_status.success:
         return evidencegraph
@@ -90,18 +89,17 @@ def evidencegraph_get(NAAN: str, postfix: str, response: Response):
             summary="Update an evidencegraph",
             response_description="The updated evidencegraph")
 def evidencegraph_update(evidencegraph: EvidenceGraph, response: Response):
-    mongo_client = mongo.GetConfig()
-    mongo_db = mongo_client[MONGO_DATABASE]
-    mongo_collection = mongo_db[MONGO_COLLECTION]
+    mongo_client = get_mongo_client()
+    mongo_config = get_mongo_config()
+    mongo_db = mongo_client[mongo_config.db]
+    mongo_collection = mongo_db[mongo_config.identifier_collection]
 
     update_status = evidencegraph.update(mongo_collection)
-
-    mongo_client.close()
 
     if update_status.success:
         return JSONResponse(
             status_code=200,
-            content={"updated": {"@id": evidencegraph.id, "@type": "evi:EvidenceGraph"}}
+            content={"updated": {"@id": evidencegraph.guid, "@type": "evi:EvidenceGraph"}}
         )
     else:
         return JSONResponse(
@@ -129,8 +127,6 @@ def evidencegraph_delete(NAAN: str, postfix: str):
     evidencegraph = EvidenceGraph.construct(id=evidencegraph_id)
 
     delete_status = evidencegraph.delete(mongo_collection)
-
-    mongo_client.close()
 
     if delete_status.success:
         return JSONResponse(
