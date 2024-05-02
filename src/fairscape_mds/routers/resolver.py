@@ -127,6 +127,17 @@ def resolve(
 
     if not ark_metadata:
         return JSONResponse({"@id": f"ark:{NAAN}/{postfix}", "error": "ark not found", "status_code": 404}, status_code=404)
+    
+    #look and see if an evidence graph exists if it does return it
+    # if not return empty dict.
+    eg_ark = ark_metadata.get("hasEvidenceGraph",None)
+    if eg_ark:
+        prefix_and_naan, eg_postfix = eg_ark.split("/")
+        _, eg_NAAN = prefix_and_naan.split(":")
+        
+        eg_metadata = find_metadata(collections, eg_NAAN, eg_postfix).get("@graph",[0])
+    else:
+        eg_metadata = {}
 
     model_map = {
         "user": (User, "user_template.html"),
@@ -154,7 +165,8 @@ def resolve(
                             "json": json_data,
                             "rdf_xml": rdf,
                             "turtle": turtle, 
-                            "type": metadata_type.title()
+                            "type": metadata_type.title(),
+                            "evidencegraph":eg_metadata
                         }
                 return templates.TemplateResponse(template_name, context)
 
