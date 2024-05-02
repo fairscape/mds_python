@@ -245,24 +245,10 @@
 
         </div>
 
-
-        <!-- Mermaid graph -->
         <div class="row" id="mermaid-container">
-            <!--
-            %%{
-              init: {
-                'theme': 'base',
-                'themeVariables': {
-                  'fontFamily': 'verdana',
-                  'fontSize': '20px',
-                  'primaryColor': '#4dbdc9'
-                }
-              }
-            }%%
-            -->
-            <pre class="mermaid" id="mermaid-text">
-                {{ evidencegraph }}
-            </pre>
+            <svg width="960" height="500"></svg>
+            <script src="https://d3js.org/d3.v4.min.js"></script>
+            {% include 'visualization_template.html' %}
         </div>
     </div>
     {% include 'scripts_template.html' %}

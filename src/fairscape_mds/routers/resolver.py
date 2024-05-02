@@ -135,9 +135,10 @@ def resolve(
         prefix_and_naan, eg_postfix = eg_ark.split("/")
         _, eg_NAAN = prefix_and_naan.split(":")
         
-        eg_metadata = find_metadata(collections, eg_NAAN, eg_postfix).get("@graph",[0])
+        #far from perfect, but default to shwoing first @graph or normal metadata
+        eg_metadata = find_metadata(collections, eg_NAAN, eg_postfix).get("@graph",[ark_metadata])[0]
     else:
-        eg_metadata = {}
+        eg_metadata = ark_metadata
 
     model_map = {
         "user": (User, "user_template.html"),
