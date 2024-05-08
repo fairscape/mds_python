@@ -12,72 +12,76 @@ from fairscape_mds.utilities.operation_status import OperationStatus
  
 
 
-class Dataset(FairscapeEVIBaseModel, extra=Extra.allow):
-    owner: str = Field(...)
-    metadataType: str = Field(
-        title="metadataType",
-        alias="@type",
-        default="evi:Dataset"
-    )
-    distribution: Optional[List[str]] = Field(default=[])
-    includedInDataCatalog: Optional[str] = Field(default=None)
-    sourceOrganization: Optional[str] = Field(default=None)
-    author: Optional[str] = Field(default=None)
-    dateCreated: Optional[datetime] = Field(default_factory=datetime.now)
-    dateModified: Optional[datetime] = Field(default_factory=datetime.now)
-    usedBy: Optional[List[str]] = Field(default=[])
-    generatedBy: Optional[str] = Field(default=None)
-    schema: Optional[str] = Field(default="")
-
-
-    def read(self, MongoCollection: pymongo.collection.Collection) -> OperationStatus:
-        return super().read(MongoCollection)
-
-    def update(self, MongoCollection: pymongo.collection.Collection) -> OperationStatus:
-
-        # TODO e.g. when dataset is updated, it should be reflected in its owners profile
-        return super().update(MongoCollection)
-
 
 class DatasetCreateModel(BaseModel, extra=Extra.allow):
-    guid: str = Field(
+    guid: Optional[str] = Field(
         title="guid",
-        alias="@id"
+        alias="@id",
+        default=None
     )
     name: str
     description: str
     keywords: List[str]
-    owner: str = Field(...)
     includedInDataCatalog: Optional[str] = Field(default=None)
     sourceOrganization: Optional[str] = Field(default=None)
     author: Optional[str] = Field(default=None)
     dateCreated: Optional[datetime] = Field(default_factory=datetime.now)
     dateModified: Optional[datetime] = Field(default_factory=datetime.now)
-    usedBy: Optional[List[str]] = Field(default=[])
-    generatedBy: Optional[str] = Field(default=None)
+    usedBy: Optional[List[str]] = Field(alias="evi:usedBy", default=[])
+    generatedBy: Optional[str] = Field(alias="evi:generatedBy", default=None)
+    dataSchema: Optional[str] = Field(alias="evi:Schema", default=None)
+
+    def read(self, MongoCollection: pymongo.collection.Collection) -> OperationStatus:
+        return super().read(MongoCollection)
+
+class DatasetWriteModel(DatasetCreateModel, extra=Extra.allow):
+    distribution: Optional[List[str]] = Field(default=[])
+    published: bool = Field(default=True)
 
 
-    def convert(self)-> Dataset:
+class DatasetUpdateModel(BaseModel):
+    name: str
+    description: str
+    keywords: List[str]
+    includedInDataCatalog: Optional[str] = Field(default=None)
+    sourceOrganization: Optional[str] = Field(default=None)
+    author: Optional[str] = Field(default=None)
+    dateCreated: Optional[datetime] = Field(default_factory=datetime.now)
+    dateModified: Optional[datetime] = Field(default_factory=datetime.now)
+    usedBy: Optional[List[str]] = Field(alias="evi:usedBy", default=[])
+    generatedBy: Optional[str] = Field(alias="evi:generatedBy", default=None)
+    dataSchema: Optional[str] = Field(alias="evi:Schema", default=None)
 
-        return Dataset(
-                guid=self.guid,
-                name=self.name,
-                description=self.description,
-                keywords=self.keywords,
-                owner=self.owner,
+
+def convertDatasetCreateToWrite(datasetInstance: DatasetCreateModel, ownerGUID: str)-> DatasetWriteModel:
+
+        if datasetInstance.guid is None:
+            # generate guid
+            #passedGUID = generateGUID()
+            passedGUID = None
+            pass
+        else:
+            passedGUID= datasetInstance.guid
+
+        return DatasetWriteModel(
+                guid=passedGUID,
+                name=datasetInstance.name,
+                description=datasetInstance.description,
+                keywords=datasetInstance.keywords,
+                owner=ownerGUID,
                 distribution=[],
-                includedInDataCatalog=self.includedInDataCatalog,
-                sourceOrganization=self.sourceOrganization,
-                author=self.author,
-                dateCreated=self.dateCreated,
-                dateModified=self.dateModified,
+                includedInDataCatalog=datasetInstance.includedInDataCatalog,
+                sourceOrganization=datasetInstance.sourceOrganization,
+                author=datasetInstance.author,
+                dateCreated=datasetInstance.dateCreated,
+                dateModified=datasetInstance.dateModified,
+                dataSchema=datasetInstance.dataSchema,
                 published=True
                 )
 
 
-
 def updateEVIUsedBy(
-    datasetInstance: Dataset,
+    datasetInstance,
     identifierCollection: pymongo.collection.Collection
         ):
     if len(datasetInstance.usedBy) != 0:
@@ -119,7 +123,7 @@ def updateEVIUsedBy(
 
 
 def updateEVIGeneratedBy(
-    datasetInstance: Dataset,
+    datasetInstance,
     identifierCollection: pymongo.collection.Collection
     ):
     # must check that generatedBy is an ark
@@ -160,7 +164,7 @@ def updateEVIGeneratedBy(
 
 
 def createDataset(
-    datasetInstance: Dataset,
+    datasetInstance: DatasetCreateModel,
     identifierCollection: pymongo.collection.Collection,
     userCollection: pymongo.collection.Collection
     )-> OperationStatus:
@@ -188,7 +192,8 @@ def createDataset(
 
 
     # insert dataset
-    datasetMetadata = datasetInstance.model_dump(by_alias=True)
+    writeInstance = convertDatasetCreateToWrite(datasetInstance)
+    datasetMetadata = writeInstance.model_dump(by_alias=True)
     insertResult = identifierCollection.insert_one(
         datasetMetadata
         )
@@ -220,7 +225,7 @@ def deleteDataset(
     datasetGUID: str,
     identifierCollection: pymongo.collection.Collection, 
     userCollection: pymongo.collection.Collection
-) -> tuple[Dataset, OperationStatus]:
+) -> tuple[DatasetWriteModel, OperationStatus]:
     """Delete the dataset. Update each user who is an owner of the dataset.
 
     Args:
@@ -245,7 +250,7 @@ def deleteDataset(
         return None, OperationStatus(False, "dataset not found", 404)
 
 
-    datasetInstance = Dataset.model_validate(datasetMetadata)
+    datasetInstance = DatasetWriteModel.model_validate(datasetMetadata)
 
     # if dataset has been deleted already
     if not datasetInstance.published:
@@ -298,7 +303,7 @@ def deleteDownload(
     user_collection: Collection,
     minio_client,
     download_identifier,
-) -> tuple[Dataset, OperationStatus]:
+) -> tuple[DatasetWriteModel, OperationStatus]:
     '''
     '''
     pass

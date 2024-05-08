@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Response
+from fastapi import APIRouter, Response, Depends
 from fastapi.responses import JSONResponse
 
 from fairscape_mds.models.software import (
@@ -9,25 +9,35 @@ from fairscape_mds.models.software import (
         deleteSoftware,
         getSoftware
         )
+
+from fairscape_mds.auth.oauth import getCurrentUser
 from fairscape_mds.config import (
-        get_mongo_config,
-        get_mongo_client,
+        get_fairscape_config
         )
+from fairscape_mds.models.user import (
+        User
+        )
+
+from typing import Annotated
 
 router = APIRouter()
 
-mongo_config = get_mongo_config()
-mongo_client = get_mongo_client()
 
-mongo_db = mongo_client[mongo_config.db]
-identifierCollection = mongo_db[mongo_config.identifier_collection]
-userCollection = mongo_db[mongo_config.user_collection]
+fairscapeConfig = get_fairscape_config()
+mongo_client = fairscapeConfig.CreateMongoClient()
+mongo_db = mongo_client[fairscapeConfig.mongo.db]
+userCollection = mongo_db[fairscapeConfig.mongo.user_collection]
+identifierCollection = mongo_db[fairscapeConfig.mongo.identifier_collection]
 
 
-@router.post("/software",
-             summary="Create a software",
-             response_description="The created software")
-def software_create(software: SoftwareCreateModel, response: Response):
+@router.post(
+    "/software",
+    summary="Create a software",
+    )
+def software_create(
+        softwareInstance: SoftwareCreateModel, 
+        currentUser: Annotated[User, Depends(getCurrentUser)]
+        ):
     """
     Create a software with the following properties:
 
@@ -37,13 +47,18 @@ def software_create(software: SoftwareCreateModel, response: Response):
     - **owner**: an existing user in its compact form with @id, @type, name, and email
     """
 
+    softwareInstance.owner = currentUser.guid
+
     softwareInstance = software.convert()
     create_status = createSoftware(softwareInstance, identifierCollection, userCollection)
 
     if create_status.success:
         return JSONResponse(
             status_code=201,
-            content={"created": softwareInstance.model_dump(by_alias=True, include=['guid', 'name', 'description', 'metadataType', 'author'])
+            content={"created": softwareInstance.model_dump(
+                by_alias=True, 
+                include=['guid', 'name', 'description', 'metadataType', 'author']
+                )
                 }
         )
     else:
@@ -53,18 +68,22 @@ def software_create(software: SoftwareCreateModel, response: Response):
         )
 
 
-@router.get("/software",
-            summary="List all software",
-            response_description="Retrieved list of software")
-def software_list(response: Response):
-    software = listSoftware(identifierCollection)
-    return software
+@router.get(
+    "/software",
+    summary="List all software",
+    response_description="Retrieved list of software"
+    )
+def software_list(
+    currentUser: Annotated[User, Depends(getCurrentUser)]
+    ):
+    softwareList = listSoftware(identifierCollection)
+    return softwareList
 
 
 @router.get("/software/ark:{NAAN}/{postfix}",
             summary="Retrieve a software",
             response_description="The retrieved software")
-def software_get(NAAN: str, postfix: str, response: Response):
+def software_get(NAAN: str, postfix: str):
     """
     Retrieves a software based on a given identifier:
 
@@ -85,28 +104,34 @@ def software_get(NAAN: str, postfix: str, response: Response):
                 )
 
 
-@router.put("/software",
-            summary="Update a software",
-            response_description="The updated software")
-def software_update(software: Software, response: Response):
-    update_status = software.update(identifier_collection)
+#@router.put("/software",
+#            summary="Update a software",
+#            response_description="The updated software")
+#def software_update(software: Software, response: Response):
+#    update_status = software.update(identifier_collection)
+#
+#    if update_status.success:
+#        return JSONResponse(
+#            status_code=200,
+#            content={"updated": {"@id": software.guid, "@type": "evi:Software"}}
+#        )
+#    else:
+#        return JSONResponse(
+#            status_code=update_status.status_code,
+#            content={"deleted": software.model_dump(by_alias=True, include=['guid', 'name', 'description', 'metadataType', 'author'])}
+#        )
 
-    if update_status.success:
-        return JSONResponse(
-            status_code=200,
-            content={"updated": {"@id": software.guid, "@type": "evi:Software"}}
-        )
-    else:
-        return JSONResponse(
-            status_code=update_status.status_code,
-            content={"deleted": software.model_dump(by_alias=True, include=['guid', 'name', 'description', 'metadataType', 'author'])}
-        )
 
-
-@router.delete("/software/ark:{NAAN}/{postfix}",
-               summary="Delete a software",
-               response_description="The deleted software")
-def software_delete(NAAN: str, postfix: str):
+@router.delete(
+    "/software/ark:{NAAN}/{postfix}",
+    summary="Delete a software",
+    response_description="The deleted software"
+    )
+def software_delete(
+    NAAN: str, 
+    postfix: str, 
+    currentUser: Annotated[User, Depends(getCurrentUser)]
+    ):
     """
     Deletes a software based on a given identifier:
 
@@ -124,8 +149,13 @@ def software_delete(NAAN: str, postfix: str):
     if deleteStatus.success:
         return JSONResponse(
             status_code=200,
-            content={"deleted": softwareInstance.model_dump(by_alias=True, include=['guid', 'name', 'description', 'metadataType', 'author'])}
-        )
+            content={
+                "deleted": softwareInstance.model_dump(
+                    by_alias=True, 
+                    include=['guid', 'name', 'description', 'metadataType', 'author']
+                    )
+                }
+            )
     else:
         return JSONResponse(
             status_code=deleteStatus.status_code,

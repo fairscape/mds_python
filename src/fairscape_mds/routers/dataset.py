@@ -8,7 +8,9 @@ from fairscape_mds.config import (
 ) 
 
 from fairscape_mds.models.dataset import (
-        Dataset, 
+        DatasetCreateModel, 
+        DatasetWriteModel,
+        DatasetUpdateModel,
         listDatasets, 
         deleteDataset, 
         createDataset, 
@@ -27,7 +29,10 @@ user_collection = mongo_db[mongo_config.user_collection]
 @router.post("/dataset",
              summary="Create a dataset",
              response_description="The created dataset")
-def dataset_create(dataset: DatasetCreateModel):
+def dataset_create(
+    dataset: DatasetCreateModel,
+#    currentUser: Annotated[User, Depends(getCurrentUser)]
+    ):
     """
     Create a dataset with the following properties:
 
@@ -37,7 +42,7 @@ def dataset_create(dataset: DatasetCreateModel):
     - **owner**: an existing user in its compact form with @id, @type, name, and email
     """
 
-    datasetInstance = dataset.convert()
+    datasetInstance = convertDatasetCreateToWrite(datasetInstance, currentUser.guid)
     
     create_status = createDataset(
             datasetInstance,
@@ -94,7 +99,7 @@ def dataset_get(NAAN: str, postfix: str):
 @router.put("/dataset",
             summary="Update a dataset",
             response_description="The updated dataset")
-def dataset_update(dataset: Dataset):
+def dataset_update(datasetUpdateInstance: DatasetUpdateModel):
     update_status = dataset.update(identifier_collection)
 
     if update_status.success:
