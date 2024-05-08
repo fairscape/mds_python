@@ -74,7 +74,7 @@ class Schema(FairscapeBaseModel, extra=Extra.allow):
 
 def list_schemas(mongo_collection: pymongo.collection.Collection):
     cursor = mongo_collection.find(
-        filter={"@type": "evi:Schema"},
+        filter = {"@type": {"$regex": "^evi:Schema$|^EVI:Schema$|^Schema$", "$options": "i"}},
         projection={"_id": False}
     )
     return {"schemas":  [{"@id": schema.get("@id"), "@type": "evi:Schema", "name": schema.get("name")} for schema in cursor] }
