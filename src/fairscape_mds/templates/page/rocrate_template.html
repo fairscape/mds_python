@@ -83,6 +83,8 @@
                                             data-bs-parent="#accordion{{ metadata.name | replace(' ', '-') }}">
                                             <div class="accordion-body">
                                                 <strong>Name:</strong> {{ metadata.name }}<br>
+                                                <strong>GUID:</strong> {{ metadata.get('@id') | add_link | safe }}<br>
+                                                <strong>Type:</strong> {{ metadata.get('@type') | add_link | safe }}<br>
                                                 <strong>Description:</strong> {{ metadata.description }}<br>
                                                 <strong>Type:</strong> {{ metadata.metadataType }}<br>
                                                 <strong>Keywords:</strong> {{ metadata.keywords }}<br>
@@ -109,13 +111,7 @@
                                             data-bs-parent="#accordionDistributions">
                                             <div class="accordion-body">
                                                 <ul>
-                                                    {% if rocrate.distribution %}
-                                                    {% for d in rocrate.distribution %}
-                                                    <li>{{ d | add_link | safe }}</li>
-                                                    {% endfor %}
-                                                    {% else %}
-                                                    <li>No distributions available</li>
-                                                    {% endif %}
+                                                    <li>{{ rocrate.guid | add_link(true) | safe }}</li>
                                                 </ul>
                                             </div>
                                         </div>
@@ -158,9 +154,9 @@
 
         <!-- Mermaid graph -->
         <div class="row" id="mermaid-container">
-            <pre class="mermaid" id="mermaid-text">
-                {{ evidencegraph }}
-            </pre>
+            <svg width="960" height="500"></svg>
+            <script src="https://d3js.org/d3.v4.min.js"></script>
+            {% include 'visualization_template.html' %}
         </div>
     </div>
     {% include 'scripts_template.html' %}

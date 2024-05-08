@@ -55,10 +55,6 @@
         });
     }
 
-
-
-    mermaid.initialize({ startOnLoad: true });
-
     function copyJSON() {
         var jsonContent = document.getElementById("json-text");
         navigator.clipboard.writeText(jsonContent.innerText).then(function () {

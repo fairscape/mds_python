@@ -66,9 +66,11 @@ def convert_to_rdf(json_data):
 
     return rdf_xml_data, turtle_data
 
-def add_link(value):
+def add_link(value, download = False):
     """For values that match ark or look like urls add a hyperlink"""
     url_pattern = r'^(http|https)://[^\s]+'
+    if download:
+        return f'<a href={FAIRSCAPE_URL}rocrate/archived/download/{value}>Download Link</a>'
     if re.match(IdentifierPattern, value):
         return f'<a href={FAIRSCAPE_URL}{value}>{value}</a>'
     elif re.match(url_pattern, value):
@@ -125,6 +127,18 @@ def resolve(
 
     if not ark_metadata:
         return JSONResponse({"@id": f"ark:{NAAN}/{postfix}", "error": "ark not found", "status_code": 404}, status_code=404)
+    
+    #look and see if an evidence graph exists if it does return it
+    # if not return empty dict.
+    eg_ark = ark_metadata.get("hasEvidenceGraph",None)
+    if eg_ark:
+        prefix_and_naan, eg_postfix = eg_ark.split("/")
+        _, eg_NAAN = prefix_and_naan.split(":")
+        
+        #far from perfect, but default to shwoing first @graph or normal metadata
+        eg_metadata = find_metadata(collections, eg_NAAN, eg_postfix).get("@graph",[ark_metadata])[0]
+    else:
+        eg_metadata = ark_metadata
 
     model_map = {
         "user": (User, "user_template.html"),
@@ -136,24 +150,24 @@ def resolve(
         "computation": (Computation, "computation_template.html")
     }
 
-    metadata_type = ark_metadata.get("@type").lower().replace('evi:', '').replace('person','user')
+    #TODO clean up this line
+    metadata_type = ark_metadata.get("@type").lower().replace('evi:', '').replace('person','user').replace("https://w3id.org/evi#","").replace("https://w2id.org/evi#","")
     type_info = model_map.get(metadata_type)
     try: 
         if type_info:
             model_class, template_name = type_info
-            model_instance = model_class(**ark_metadata)
+            model_instance = model_class.construct(**ark_metadata)
             json_data = json.dumps(model_instance.dict(by_alias=True), default=str, indent=2)
             rdf, turtle = convert_to_rdf(json_data)
-
             if "text/html" in request.headers.get("Accept", "").lower():
-                print('I made it ')
                 context = {
                             "request": request, 
                             metadata_type: model_instance,
                             "json": json_data,
                             "rdf_xml": rdf,
                             "turtle": turtle, 
-                            "type": metadata_type.title()
+                            "type": metadata_type.title(),
+                            "evidencegraph":eg_metadata
                         }
                 return templates.TemplateResponse(template_name, context)
 

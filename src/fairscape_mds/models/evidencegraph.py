@@ -21,28 +21,29 @@ class EvidenceGraph(FairscapeEVIBaseModel, extra = Extra.allow):
         # self.graph = str
 
         # check that evidencegraph does not already exist
-        if MongoCollection.find_one({"@id": self.id}) is not None:
+        if MongoCollection.find_one({"@id": self.guid}) is not None:
             return OperationStatus(False, "evidencegraph already exists", 400)
 
-        # check that owner exists
-        if MongoCollection.find_one({"@id": self.owner.id}) is None:
-            return OperationStatus(False, "owner does not exist", 404)
+        # check that owner exists for now turn off
+        # if MongoCollection.find_one({"@id": self.owner}) is None:
+        #     return OperationStatus(False, "owner does not exist", 404)
 
         # embeded bson documents to enable Mongo queries
         evidencegraph_dict = self.dict(by_alias=True)
 
         # embeded bson document for owner
-        evidencegraph_dict["owner"] = SON([(key, value) for key, value in evidencegraph_dict["owner"].items()])
+        # Owner is a str
+        #evidencegraph_dict["owner"] = SON([(key, value) for key, value in evidencegraph_dict["owner"].items()])
 
         # update operations for the owner user of the evidencegraph
         add_evidencegraph_update = {
-            "$push": {"evidencegraphs": SON([("@id", self.id), ("@type", "evi:EvidenceGraph"), ("name", self.name)])}
+            "$push": {"evidencegraphs": SON([("@id", self.guid), ("@type", "evi:EvidenceGraph"), ("name", self.name)])}
         }
 
         evidencegraph_bulk_write = [
             pymongo.InsertOne(evidencegraph_dict),
             # update owner model to have listed the evidencegraph
-            pymongo.UpdateOne({"@id": self.owner.id}, add_evidencegraph_update)
+            pymongo.UpdateOne({"@id": self.owner}, add_evidencegraph_update)
         ]
 
         # perform the bulk write
@@ -86,7 +87,7 @@ class EvidenceGraph(FairscapeEVIBaseModel, extra = Extra.allow):
 
         # create a bulk write operation
         # to remove a document from a list
-        pull_operation = {"$pull": {"evidencegraphs": {"@id": self.id}}}
+        pull_operation = {"$pull": {"evidencegraphs": {"@id": self.guid}}}
 
         # for ever member, remove the evidencegraph from their list of evidencegraph
         # bulk_edit = [pymongo.UpdateOne({"@id": member.id}, pull_operation) for member in self.members]
@@ -98,7 +99,7 @@ class EvidenceGraph(FairscapeEVIBaseModel, extra = Extra.allow):
 
         # operations to delete the evidencegraph document
         bulk_edit.append(
-            pymongo.DeleteOne({"@id": self.id})
+            pymongo.DeleteOne({"@id": self.guid})
         )
 
         # run the transaction

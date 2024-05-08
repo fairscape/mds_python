@@ -41,56 +41,70 @@
                     <tbody>
                         <tr>
                             <td>Name</td>
-                            <td>{{ schema.name }}</td>
+                            <td>{{ schema.name if schema.name else 'No name available' }}</td>
                         </tr>
                         <tr>
-                            <td>Persistant Identifier</td>
-                            <td>
-                                {{ schema.guid | add_link | safe }}
-                            </td>
+                            <td>Persistent Identifier</td>
+                            <td>{{ schema.guid | add_link | safe if schema.guid else 'No GUID available' }}</td>
                         </tr>
                         <tr>
                             <td>Description</td>
-                            <td>{{ schema.description }}</td>
+                            <td>{{ schema.description if schema.description else 'No description available' }}</td>
                         </tr>
                         <tr>
                             <td>Properties</td>
                             <td>
-                                {% for property_name, property_details in schema.properties.items() %}
-                                <div class="accordion" id="accordion{{ property_name | replace(' ', '-') }}">
-                                    <div class="accordion-item">
-                                        <h2 class="accordion-header">
-                                            <button class="accordion-button" type="button" data-bs-toggle="collapse"
-                                                data-bs-target="#collapse{{ property_name | replace(' ', '-') }}"
-                                                aria-expanded="true"
-                                                aria-controls="collapse{{ property_name | replace(' ', '-') }}">
-                                                {{ property_name }}
-                                            </button>
-                                        </h2>
-                                        <div id="collapse{{ property_name | replace(' ', '-') }}"
-                                            class="accordion-collapse collapse"
-                                            data-bs-parent="#accordion{{ property_name | replace(' ', '-') }}">
-                                            <div class="accordion-body">
-                                                <strong>Description:</strong> {{ property_details.description }}<br>
-                                                <strong>Type:</strong> {{ property_details.type }}<br>
-                                                <strong>Index:</strong> {{ property_details.index }}
+                                {% if schema.properties %}
+                                <button class="btn btn-secondary" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#collapseProperties" aria-expanded="false"
+                                    aria-controls="collapseProperties">
+                                    Show/Hide Properties
+                                </button>
+                                <div class="collapse" id="collapseProperties">
+                                    {% for property_name, property_details in schema.properties.items() %}
+                                    <div class="accordion" id="accordion{{ property_name | replace(' ', '-') }}">
+                                        <div class="accordion-item">
+                                            <h2 class="accordion-header">
+                                                <button class="accordion-button collapsed" type="button"
+                                                    data-bs-toggle="collapse"
+                                                    data-bs-target="#collapse{{ property_name | replace(' ', '-') }}"
+                                                    aria-expanded="false"
+                                                    aria-controls="collapse{{ property_name | replace(' ', '-') }}">
+                                                    {{ property_name }}
+                                                </button>
+                                            </h2>
+                                            <div id="collapse{{ property_name | replace(' ', '-') }}"
+                                                class="accordion-collapse collapse"
+                                                data-bs-parent="#accordion{{ property_name | replace(' ', '-') }}">
+                                                <div class="accordion-body">
+                                                    <strong>Description:</strong> {{ property_details.description if
+                                                    property_details.description else 'No description' }}<br>
+                                                    <strong>Type:</strong> {{ property_details.type if
+                                                    property_details.type else 'No type specified' }}<br>
+                                                    <strong>Index:</strong> {{ property_details.index if
+                                                    property_details.index else 'No index specified' }}
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                     {% endfor %}
                                 </div>
+                                {% else %}
+                                No properties available.
+                                {% endif %}
                             </td>
                         </tr>
                         <tr>
                             <td>Required</td>
                             <td>
+                                {% if schema.required %}
                                 <div class="accordion" id="accordionrequired">
                                     <div class="accordion-item">
                                         <h2 class="accordion-header">
-                                            <button class="accordion-button" type="button" data-bs-toggle="collapse"
-                                                data-bs-target="#collapserequired" aria-expanded="false"
-                                                aria-controls="collapserequired">
-                                                required
+                                            <button class="accordion-button collapsed" type="button"
+                                                data-bs-toggle="collapse" data-bs-target="#collapserequired"
+                                                aria-expanded="false" aria-controls="collapserequired">
+                                                Required fields
                                             </button>
                                         </h2>
                                         <div id="collapserequired" class="accordion-collapse collapse"
@@ -100,24 +114,26 @@
                                                     {% for d in schema.required %}
                                                     <li>{{ d | add_link | safe }}</li>
                                                     {% else %}
-                                                    <li></li>
+                                                    <li>No required fields listed.</li>
                                                     {% endfor %}
                                                 </ul>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
+                                {% else %}
+                                No required fields.
+                                {% endif %}
                             </td>
                         </tr>
                         <tr>
                             <td>Separator</td>
-                            <td>{{ schema.separator }}</td>
+                            <td>{{ schema.separator if schema.separator else 'No separator specified' }}</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
         </div>
-
         <div class="row" id="json-ld-container">
             <div class="serialization-btn-group" style="margin-top: 20px; text-align: center;">
                 <div class="btn-group" role="group" aria-label="Serialization options" style="width: 50%;">
@@ -145,12 +161,10 @@
 
         </div>
 
-
-        <!-- Mermaid graph -->
         <div class="row" id="mermaid-container">
-            <pre class="mermaid" id="mermaid-text">
-            {{ evidencegraph }}
-            </pre>
+            <svg width="960" height="500"></svg>
+            <script src="https://d3js.org/d3.v4.min.js"></script>
+            {% include 'visualization_template.html' %}
         </div>
     </div>
     {% include 'scripts_template.html' %}

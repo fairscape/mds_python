@@ -31,6 +31,8 @@ class DatasetCreateModel(BaseModel, extra=Extra.allow):
     generatedBy: Optional[str] = Field(alias="evi:generatedBy", default=None)
     dataSchema: Optional[str] = Field(alias="evi:Schema", default=None)
 
+    def read(self, MongoCollection: pymongo.collection.Collection) -> OperationStatus:
+        return super().read(MongoCollection)
 
 class DatasetWriteModel(DatasetCreateModel, extra=Extra.allow):
     distribution: Optional[List[str]] = Field(default=[])

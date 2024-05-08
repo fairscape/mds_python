@@ -648,7 +648,7 @@ def GetROCrateMetadata(rocrate_collection: pymongo.collection, rocrate_id):
  
     if query:
         try:
-            parsed_crate = ROCrate(**query)
+            parsed_crate = ROCrate.construct(**query)
             return parsed_crate
         except Exception as e:
             raise Exception(message=f"ROCRATE Metadata not valid: {str(e)}")

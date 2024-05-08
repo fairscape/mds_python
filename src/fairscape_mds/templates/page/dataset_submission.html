@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Fairscape Dataset</title>
+    <link href="https://fonts.googleapis.com/css?family=Merriweather" rel="stylesheet">
+    <link rel="stylesheet"
+        href="/Users/justin/Docs/Tim_Work/Git_Repos/mds_python/src/fairscape_mds/static/css/submission.css">
+</head>
+
+<body>
+    <h1>Dataset Metadata Submission</h1>
+    <form>
+        <div class="properties">
+            <div class="property-section">
+                <h2>Required Properties</h2>
+                <input type="text" id="name" placeholder="Dataset Name">
+                <input type="text" id="guid" placeholder="GUID">
+                <input type="text" id="owner" placeholder="Owner">
+                <textarea name="message" type="text" id="description" placeholder="Description"></textarea>
+            </div>
+            <div class="property-section">
+                <h2>Optional Properties</h2>
+                <input type="text" id="author" placeholder="Author (Optional)">
+                <input type="text" id="sourceOrganization" placeholder="Source Organization (Optional)">
+                <input type="text" id="usedBy" placeholder="Any computations that used this Dataset? (Optional)">
+                <input type="text" id="generatedBy" placeholder="What computations created this Dataset? (Optional)">
+                <input type="text" id="includedInDataCatalog"
+                    placeholder="What catalogs is the Dataset included in? (Optional)">
+            </div>
+        </div>
+        <input type="submit" value="Submit" id="input-submit">
+    </form>
+</body>
+
+</html>
