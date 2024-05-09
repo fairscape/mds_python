@@ -20,9 +20,9 @@ FROM builder as fairscape
 
 # copy source code
 COPY src/ /fairscape/src/
-WORKDIR fairscape/src/
+WORKDIR /fairscape/src/
 
 RUN export PYTHONPATH=$PYTHONPATH:/fairscape_mds
 
 # run using uvicorn
-CMD ["uvicorn", "fairscape_mds.mds.app:app", "--host", "0.0.0.0", "--port", "80"]
+CMD ["uvicorn", "fairscape_mds.app:app", "--host", "0.0.0.0", "--port", "80"]

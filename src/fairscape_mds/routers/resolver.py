@@ -24,6 +24,7 @@ from fairscape_mds.config import (
     get_mongo_client,
     get_fairscape_url,
 ) 
+from datetime import datetime
 from fastapi.templating import Jinja2Templates
 import sys
 import logging
@@ -158,6 +159,8 @@ def resolve(
             model_class, template_name = type_info
             model_instance = model_class.construct(**ark_metadata)
             json_data = json.dumps(model_instance.dict(by_alias=True), default=str, indent=2)
+            eg_json = json.loads(json.dumps(eg_metadata, default=str))
+
             rdf, turtle = convert_to_rdf(json_data)
             if "text/html" in request.headers.get("Accept", "").lower():
                 context = {
@@ -167,7 +170,7 @@ def resolve(
                             "rdf_xml": rdf,
                             "turtle": turtle, 
                             "type": metadata_type.title(),
-                            "evidencegraph":eg_metadata
+                            "evidencegraph":eg_json
                         }
                 return templates.TemplateResponse(template_name, context)
 

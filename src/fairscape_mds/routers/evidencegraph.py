@@ -29,8 +29,6 @@ def evidencegraph_create(evidencegraph: EvidenceGraph, response: Response):
 
     create_status = evidencegraph.create(mongo_collection)
 
-    mongo_client.close()
-
     if create_status.success:
         return JSONResponse(
             status_code=201,
