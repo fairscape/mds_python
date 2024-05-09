@@ -101,7 +101,7 @@ app = FastAPI(
 
 # mounting templates
 app.mount("/static", StaticFiles(directory='fairscape_mds/static'), name="static")
-templates = Jinja2Templates(directory="templates")
+templates = Jinja2Templates(directory="fairscape_mds/templates")
 
 
 @app.get('/', response_class=HTMLResponse, tags=["Root"])
@@ -109,7 +109,7 @@ async def get_root(request: Request):
     context = {
         "request": request
     }
-    return templates.TemplateResponse("/page/index.html", context=context)
+    return templates.TemplateResponse("page/index.html", context=context)
 
 @app.get('/healthz')
 async def healthcheck():

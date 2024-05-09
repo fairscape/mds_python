@@ -36,7 +36,6 @@ from typing import (
     Tuple
 )
 
-from fairscape_mds.config import get_ark_naan
 from fairscape_mds.models.fairscape_base import FairscapeBaseModel, FairscapeEVIBaseModel
 from fairscape_mds.utilities.operation_status import OperationStatus
 

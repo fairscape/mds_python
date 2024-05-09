@@ -31,4 +31,4 @@ USER fair
 ENV PATH="/opt/venv/bin:$PATH"
 
 # run using uvicorn
-CMD ["uvicorn", "fairscape_mds.app:app", "--host", "0.0.0.0", "--port", "80"]
+CMD ["uvicorn", "fairscape_mds.app:app", "--host", "0.0.0.0", "--port", "8080"]

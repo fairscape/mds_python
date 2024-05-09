@@ -29,6 +29,10 @@ from fairscape_mds.models.download import (
         deleteDownload
         )
 from fairscape_mds.models.evidencegraph import EvidenceGraph, list_evidencegraph
+from fairscape_mds.models.rocrate import ROCrate
+from fairscape_mds.models.schema import Schema
+from fairscape_mds.models.fairscape_base import IdentifierPattern
+
 
 __all__ = [ 
     'User', 'listUsers', 
@@ -40,4 +44,7 @@ __all__ = [
     'Project', 'list_project',
     'DownloadCreateModel', 'DownloadReadModel', 'listDownloads', 'createDownload', 'getDownloadMetadata', 'getDownloadContent', 'deleteDownload',
     'EvidenceGraph', 
+    'ROCrate',
+    'Schema',
+    'IdentifierPattern'
 ]
