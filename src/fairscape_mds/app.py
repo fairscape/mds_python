@@ -9,7 +9,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 
 from fairscape_mds.routers.user import router as UserRouter
 from fairscape_mds.routers.schema import router as SchemaRouter
-#from fairscape_mds.routers.group import router as GroupRouter
+from fairscape_mds.routers.auth import router as AuthRouter
 from fairscape_mds.routers.software import router as SoftwareRouter
 from fairscape_mds.routers.dataset import router as DatasetRouter
 from fairscape_mds.routers.rocrate import router as ROCrateRouter
@@ -109,7 +109,7 @@ async def get_root(request: Request):
     context = {
         "request": request
     }
-    return templates.TemplateResponse("/page/index.html", context=context)
+    return templates.TemplateResponse("page/index.html", context=context)
 
 @app.get('/healthz')
 async def healthcheck():
@@ -131,6 +131,7 @@ app.include_router(EvidenceGraphRouter, tags=["evidencegraph"])
 app.include_router(TransferRouter, tags=["transfer"])
 app.include_router(ResolverRouter, tags=["resolver"])
 app.include_router(SchemaRouter, tags=["schema"])
+app.include_router(AuthRouter, tags=["auth"])
 
 # Routes for Web pages
 #app.include_router(WebIndexRouter, tags=["webindex"])

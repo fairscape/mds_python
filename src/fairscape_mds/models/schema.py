@@ -1,4 +1,7 @@
-from typing import Optional
+from typing import (
+        Optional,
+        Dict
+)
 from pydantic import Extra
 import re
 from fairscape_mds.models.fairscape_base import *
@@ -46,14 +49,14 @@ class Property(BaseModel, extra = Extra.allow):
                 raise ValueError("Pattern must be a valid regular expression")
         return value
 
-class Schema(FairscapeBaseModel, extra=Extra.allow):
-    context: dict = Field( 
+class Schema(FairscapeEVIBaseModel, extra=Extra.allow):
+    context: Dict[str, str] = Field( 
         default= {"@vocab": "https://schema.org/", "evi": "https://w3id.org/EVI#"},
         alias="@context" 
     )
     metadataType: str = Field(alias="@type", default= "evi:Schema")
     properties: Dict[str, Property]
-    type: Optional[str] = Field(default="object")
+    schemaType: Optional[str] = Field(default="object", alias="type")
     additionalProperties: Optional[bool] = Field(default=True)
     required: Optional[List[str]] = []  
     separator: Optional[str] = Field(default=",")

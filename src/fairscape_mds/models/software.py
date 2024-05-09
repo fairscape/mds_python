@@ -95,7 +95,7 @@ class SoftwareCreateModel(BaseModel, extra=Extra.allow):
     url: Optional[str] = Field(default=None)
     author: Optional[str] = Field(default=None)
     citation: Optional[str] = Field(default=None)
-    owner: str
+    owner: Optional[str]
     includedInDataCatalog: Optional[str] = Field(default=None)
     sourceOrganization: Optional[str] = Field(default=None)
     dateCreated: Optional[datetime] = Field(default_factory=datetime.now)

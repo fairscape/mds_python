@@ -58,7 +58,7 @@ def get_fairscape_config(env_path: str = '../deploy/local.env'):
     server_mongo_config = MongoConfig.model_validate(
         {
             'host': config_values.get('FAIRSCAPE_MONGO_HOST'), 
-            'port': config_values.get("FAIRSCAPE_MONGO_PORT"),
+            'port': config_values.get("FAIRSCAPE_MONGO_PORT", "27017"),
             'user': config_values.get('FAIRSCAPE_MONGO_ACCESS_KEY'),
             'password': config_values.get('FAIRSCAPE_MONGO_SECRET_KEY'),
             'db': config_values.get('FAIRSCAPE_MONGO_DATABASE'),
@@ -77,21 +77,19 @@ def get_fairscape_config(env_path: str = '../deploy/local.env'):
         rocrate_bucket=config_values.get("FAIRSCAPE_MINIO_ROCRATE_BUCKET"),
         secure= bool(config_values.get("FAIRSCAPE_MINIO_SECURE")=="True"),
     )
+
+    # TODO support multiple NAANs
     
     return FairscapeConfig(
             host = config_values.get('FAIRSCAPE_HOST'),
             port = config_values.get('FAIRSCAPE_PORT'),
+            jwtSecret = config_values.get('FAIRSCAPE_JWT_SECRET', 'testjwtsecret'),
+            passwordSalt = config_values.get('FAIRSCAPE_PASSWORD_SALT', 'testsalt'),
+            NAAN = config_values.get('FAIRSCAPE_NAAN', '59852'),
             url = config_values.get("FAIRSCAPE_URL"),
             mongo = server_mongo_config,
             minio = server_minio_config
             )
-
-
-@lru_cache()
-def get_ark_naan():
-    # TODO return entire config object
-    config_values= cached_dotenv()
-    return config_values.get("FAIRSCAPE_ARK_NAAN", "59853")
 
 
 class MongoConfig(BaseModel):
@@ -114,8 +112,8 @@ class MongoConfig(BaseModel):
 
 
 class MinioConfig(BaseModel):
-    host: str = Field(default="localhost")
-    port: str = Field(default="9000")
+    host: Optional[str] = Field(default="localhost")
+    port: Optional[str] = Field(default="9000")
     secret_key: Optional[str] = Field(default="")
     access_key: Optional[str] = Field(default="")
     default_bucket: Optional[str] = Field(default="mds")
@@ -156,7 +154,10 @@ class K8sComputeConfig(BaseModel):
 
 class FairscapeConfig(BaseModel):
     host: Optional[str] = Field(default='0.0.0.0')
-    port: Optional[int] = Field(default=8080)
+    port: Optional[str] = Field(default='8080')
+    jwtSecret: str 
+    passwordSalt: str 
+    NAAN: Optional[str] = Field(default = '59852')
     url: Optional[str] = Field(default = "http://localhost:8080/")
     mongo: MongoConfig
     minio: MinioConfig
@@ -172,7 +173,7 @@ class FairscapeConfig(BaseModel):
         uvicorn.run(
             'fairscape_mds.app:app', 
             host=self.host, 
-            port=self.port, 
+            port=int(self.port), 
             reload=True
             )
 
