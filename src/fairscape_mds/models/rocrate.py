@@ -129,7 +129,7 @@ class ROCrateComputation(FairscapeBaseModel):
 
 
 class ROCrateDistribution(BaseModel):
-    extractedROCrateBucket: Optional[List[str]] = Field(default=[])
+    extractedROCrateBucket: Optional[str] = Field(default=None)
     archivedROCrateBucket: Optional[str] = Field(default=None)
     extractedObjectPath: Optional[List[str]] = Field(default=[])
     archivedObjectPath: Optional[str] = Field(default=None)
@@ -260,7 +260,7 @@ class ROCrate(FairscapeBaseModel):
 
                 rocrate_logger.info(
                     "validateObjectReference\t" +
-                    f"transaction_folder={TransactionFolder}\t" +
+                    f"transaction_folder={str(TransactionFolder)}\t" +
                     "message='validation successfull'\t" +
                     "success=true"
                 )
@@ -338,7 +338,7 @@ def UploadZippedCrate(
         BucketName, 
         TransactionFolder: uuid.UUID, 
         Filename: str,
-        ) -> Tuple[OperationStatus, ROCrateDistribution]:
+        ) -> Tuple[OperationStatus, str]:
 
     #source_filepath = Path(ZippedObject.filename).name
     upload_filepath = Path(str(TransactionFolder)) / Path(Filename)
@@ -361,12 +361,7 @@ def UploadZippedCrate(
         f"object_etag='{upload_result.etag}'"
         )
 
-    dist = ROCrateDistribution(
-        archivedObjectPath=str(upload_filepath),
-        archivedROCrateBucket=BucketName
-    )
-
-    return(OperationStatus(True, "", 200), dist)
+    return (OperationStatus(True, "", 200), upload_filepath)
 
 
 def UploadExtractedCrate(
@@ -374,8 +369,7 @@ def UploadExtractedCrate(
         ZippedObject, 
         BucketName: str, 
         TransactionFolder: str,
-        Distribution: ROCrateDistribution
-        ) -> OperationStatus:
+        ) -> Tuple[OperationStatus, List[str]]:
     """Accepts zipped ROCrate, unzip and upload onto MinIO.
 
     Args:
@@ -387,7 +381,9 @@ def UploadExtractedCrate(
     Returns:
         OperationStatus: Message
     """
- 
+
+    extractedPaths = []
+
     try:        
         zip_contents = ZippedObject.read()
             
@@ -413,9 +409,8 @@ def UploadExtractedCrate(
                     length=len(file_contents)
                     )
                 
-                # Update Distribution information with where files are being stored. 
-                Distribution.extractedROCrateBucket.append(BucketName)
-                Distribution.extractedObjectPath.append(str(upload_filepath))
+
+                extractedPaths.append(str(upload_filepath))
 
                 rocrate_logger.info(
                     "UploadExtractedCrate\t" +
@@ -426,9 +421,9 @@ def UploadExtractedCrate(
                     )
 
     except Exception as e:
-        return OperationStatus(False, f"Exception uploading ROCrate: {str(e)}", 500)
+        return (OperationStatus(False, f"Exception uploading ROCrate: {str(e)}", 500), None)
 
-    return OperationStatus(True, "", 200)
+    return (OperationStatus(True, "", 200), extractedPaths)
 
 
 
@@ -496,7 +491,13 @@ def DeleteExtractedCrate(
     return OperationStatus(True, "", 200)
 
 
-def GetMetadataFromCrate(MinioClient, BucketName, TransactionFolder, CratePath, Distribution):
+def GetMetadataFromCrate(
+        MinioClient, 
+        BucketName, 
+        TransactionFolder, 
+        CratePath, 
+        Distribution
+    ):
     """Extract metadata from the unzipped ROCrate onto MinIO
     
     Args:

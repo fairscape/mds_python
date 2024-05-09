@@ -2,8 +2,9 @@ from typing import Union
 from fastapi import (
     APIRouter, 
     UploadFile, 
-#    Form, 
+    BackgroundTasks,
     File, 
+#    Form, 
 #    Response, 
 #    Header
 )
@@ -12,12 +13,8 @@ from fastapi.responses import (
 #    StreamingResponse, 
 #    FileResponse
 )
-from fairscape_mds.config import (
-    get_minio_config,
-    get_minio_client,
-    get_mongo_config,
-    get_mongo_client,
-)
+from fairscape_mds.config import get_fairscape_config
+
 from fairscape_mds.models.utils import remove_ids
 from fairscape_mds.models.rocrate import (
     UploadExtractedCrate,
@@ -29,23 +26,223 @@ from fairscape_mds.models.rocrate import (
     GetROCrateMetadata,
     PublishROCrateMetadata,
     PublishProvMetadata,
-    ROCrate
+    ROCrate,
+    ROCrateDistribution
 )
 
-from pydantic import BaseModel
-import uuid
+import asyncio
+import logging
+import sys
+
+from pydantic import BaseModel, Field
+from typing import List, Dict
+from uuid import UUID, uuid4
 from pathlib import Path
 
 router = APIRouter()
 
 # setup clients to backend
-mongo_config = get_mongo_config()
-mongo_client = get_mongo_client()
-mongo_db = mongo_client[mongo_config.db]
-rocrate_collection = mongo_db[mongo_config.rocrate_collection]
-identifier_collection = mongo_db[mongo_config.identifier_collection]
-minio_config= get_minio_config()
-minio_client = get_minio_client()
+fairscapeConfig = get_fairscape_config()
+
+mongoClient = fairscapeConfig.CreateMongoClient()
+mongoDB = mongoClient[fairscapeConfig.mongo.db]
+rocrateCollection = mongoDB[fairscapeConfig.mongo.rocrate_collection]
+identifierCollection = mongoDB[fairscapeConfig.mongo.identifier_collection]
+userCollection = mongoDB[fairscapeConfig.mongo.user_collection]
+
+minioConfig= fairscapeConfig.minio
+minioClient = fairscapeConfig.CreateMinioClient()
+
+
+logging.basicConfig(stream=sys.stdout, level=logging.INFO)
+backgroundTaskLogger = logging.getLogger("backgroundTaskLogger")
+
+class ROCrateUploadJob(BaseModel):
+    uid: UUID = Field(default_factory= uuid4)
+    status: str = 'in progress'
+    filePath: str
+    processedFiles: List[str] = Field(default=[])
+    identifiersMinted: List[str] = Field(default=[])
+    errors: List[str] = Field(default=[])
+    completed: bool = Field(default=False)
+
+
+jobs: Dict[UUID, ROCrateUploadJob] = {}
+
+
+def processCrateTask(transactionFolder: UUID, filePath: str):
+    ''' Task of Unzipping Crate, Processing 
+    '''
+
+    backgroundTaskLogger.info(
+            f"Background Task\ttransaction: {str(transactionFolder)}\tmessage: init background rocrate processing"
+            )
+
+    # get zipped crate from minio
+    jobs[transactionFolder].status = 'retrieving crate from minio'
+
+    zippedObject = minioClient.get_object(
+        bucket_name=fairscapeConfig.minio.rocrate_bucket, 
+        object_name=filePath
+        ).read()
+
+
+    backgroundTaskLogger.info(
+            f"Background Task\ttransaction: {str(transactionFolder)}\tmessage: read zipped rocrate object from minio"
+            )
+    
+
+    # unzip crate and upload back to minio
+    jobs[transactionFolder].status = 'extracting crate'
+
+    uploadExtractedResult, extractedPaths  = UploadExtractedCrate(
+        minioClient, 
+        zippedObject, 
+        fairscapeConfig.minio.default_bucket, 
+        str(transactionFolder),
+        ) 
+
+    backgroundTaskLogger.info(
+            f"Background Task\ttransaction: {str(transactionFolder)}\tmessage: uploaded extracted rocrate to minio"
+            )
+
+    crateDistribution = ROCrateDistribution(
+        extractedROCrateBucket = fairscapeConfig.minio.default_bucket,
+        archivedROCrateBucket = fairscapeConfig.minio.rocrate_bucket,
+        extractedObjectPath = extractedPaths,
+        archivedObjectPath =  filePath           
+        )
+
+    # validate metadata
+    jobs[transactionFolder].status = 'validating metadata'
+
+    crate = GetMetadataFromCrate(
+        MinioClient=minioClient, 
+        BucketName=fairscapeConfig.minio.default_bucket,
+        TransactionFolder=transaction_folder,
+        CratePath=zip_foldername, 
+        Distribution = crateDistribution
+        )
+
+    backgroundTaskLogger.info(
+            f"Background Task\ttransaction: {str(transactionFolder)}\tmessage: read metadata from rocrate"
+            )
+
+    # mint identifiers
+    jobs[transactionFolder].status = 'minting identifiers'
+    prov_metadata = PublishProvMetadata(crate, identifier_collection)
+    
+    backgroundTaskLogger.info(
+            f"Background Task\ttransaction: {str(transactionFolder)}\tmessage: published prov metadata"
+            )
+
+    if not prov_metadata:
+        pass
+
+    rocrate_metadata = PublishROCrateMetadata(crate, rocrate_collection)
+    
+    backgroundTaskLogger.info(
+            f"Background Task\ttransaction: {str(transactionFolder)}\tmessage: published rocrate metadata"
+            )
+
+    if not rocrate_metadata:
+        pass
+
+    # finish tasks
+    jobs[transactionFolder].status = 'complete'
+
+
+async def startROCrateProcessing(uid: UUID, zippedFilePath) -> None:
+    queue = asyncio.Queue()
+    task = asyncio.create_task(processCrateTask(queue, uid, zippedFilePath))
+
+    while progress := await queue.get():  # monitor task progress
+        jobs[uid].status = progress
+
+    jobs[uid].status = "complete"
+
+
+@router.post(
+        "/rocrate/upload-async",
+        summary="",
+        status_code=202
+        )
+async def uploadAsync(
+    file: UploadFile,
+    background_tasks: BackgroundTasks
+    ):
+
+    # create a uuid for transaction
+    transactionUUID = uuid4()
+    transaction_folder = str(transactionUUID)
+
+    # get the zipfile's filename
+    zip_filename = str(Path(file.filename).name)
+
+    # get the zipfile extracted name
+    zip_foldername = str(Path(file.filename).stem)
+
+
+    # upload the zipped ROCrate 
+    zipped_upload_status, zippedPath = UploadZippedCrate(
+        MinioClient=minioClient,
+        ZippedObject=file.file,
+        BucketName=fairscapeConfig.minio.rocrate_bucket,
+        TransactionFolder=transaction_folder,
+        Filename=zip_filename
+    )
+
+    if zipped_upload_status is None:
+        return JSONResponse(
+            status_code=zipped_upload_status.status_code,
+            content={
+                "error": zipped_upload_status.message
+                }
+        )
+
+    else:
+        # start background task
+        newTask = ROCrateUploadJob(
+            uid = str(transactionUUID),
+            status = 'in progress',
+            filePath = str(zippedPath),
+            processedFiles = [],
+            identifiersMinted = [],
+            errors = [],
+            completed = False
+        )
+
+        # add to the dictionary of tasks
+        jobs[newTask.uid] = newTask
+        background_tasks.add_task(processCrateTask, newTask.uid, zippedPath)
+
+        return JSONResponse(
+            status_code=202,
+            content={
+                "submitted": transaction_folder
+            }
+        )
+        # return status
+
+
+@router.get(
+        "/rocrate/upload-async/status/{submissionUUID}",
+        summary=""
+        ) 
+def getROCrateStatus(submissionUUID: UUID):
+    jobMetadata = jobs.get(submissionUUID)
+
+    if jobMetadata is None:
+        return JSONResponse(
+                status_code = 404,
+                content={
+                    "submissionUUID": str(submissionUUID), 
+                    "error": "rocrate submission not found"
+                    }
+                )
+
+    else:
+        return jobMetadata
 
 
 @router.post("/rocrate/upload",
@@ -54,7 +251,7 @@ minio_client = get_minio_client()
 def rocrate_upload(file: UploadFile = File(...)):
 
     # create a uuid for transaction
-    transaction_folder = str(uuid.uuid4())
+    transaction_folder = str(uuid4())
 
     # get the zipfile's filename
     zip_filename = str(Path(file.filename).name)
@@ -65,10 +262,10 @@ def rocrate_upload(file: UploadFile = File(...)):
 
 
     # upload the zipped ROCrate 
-    zipped_upload_status, crateDistribution = UploadZippedCrate(
-        MinioClient=minio_client,
+    zipped_upload_status, zippedPath = UploadZippedCrate(
+        MinioClient=minioClient,
         ZippedObject=file.file,
-        BucketName=minio_config.rocrate_bucket,
+        BucketName=fairscapeConfig.minio.rocrate_bucket,
         TransactionFolder=transaction_folder,
         Filename=zip_filename
     )
@@ -85,13 +282,19 @@ def rocrate_upload(file: UploadFile = File(...)):
     file.file.seek(0)
 
     # upload the unziped ROcrate
-    extracted_upload_status = UploadExtractedCrate(
-        MinioClient=minio_client,
+    extracted_upload_status, extractedPaths = UploadExtractedCrate(
+        MinioClient=minioClient,
         ZippedObject=file.file,
-        BucketName=minio_config.default_bucket,
+        BucketName=fairscapeConfig.minio.default_bucket,
         TransactionFolder=transaction_folder,
-        Distribution = crateDistribution
     )
+
+    crateDistribution = ROCrateDistribution(
+        extractedROCrateBucket = fairscapeConfig.minio.default_bucket,
+        archivedROCrateBucket = fairscapeConfig.minio.rocrate_bucket,
+        extractedObjectPath = extractedPaths,
+        archivedObjectPath =  str(zippedPath)
+        )
 
     if not extracted_upload_status.success:
         return JSONResponse(
@@ -107,8 +310,8 @@ def rocrate_upload(file: UploadFile = File(...)):
         # TODO Clean up how distribution is passed around
         # Get metadata from the unzipped crate
         crate = GetMetadataFromCrate(
-            MinioClient=minio_client, 
-            BucketName=minio_config.default_bucket,
+            MinioClient=minioClient, 
+            BucketName=fairscapeConfig.minio.default_bucket,
             TransactionFolder=transaction_folder,
             CratePath=zip_foldername, 
             Distribution = crateDistribution
@@ -149,13 +352,13 @@ def rocrate_upload(file: UploadFile = File(...)):
     #if validation_status.success:
         # mint all identifiers in identifier namespace
     
-    prov_metadata = PublishProvMetadata(crate, identifier_collection)
+    prov_metadata = PublishProvMetadata(crate, identifierCollection)
 
     # TODO check mongo write success
     if not prov_metadata:
         pass
 
-    rocrate_metadata = PublishROCrateMetadata(crate, rocrate_collection)
+    rocrate_metadata = PublishROCrateMetadata(crate, rocrateCollection)
 
     # TODO check mongo write success
     if not rocrate_metadata:
