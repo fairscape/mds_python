@@ -20,7 +20,7 @@ from fairscape_mds.models import (
     IdentifierPattern
     )
 
-
+from datetime import datetime
 from typing_extensions import Annotated
 import sys
 import logging
@@ -85,6 +85,12 @@ def find_metadata(collections, naan, postfix):
         if ark_metadata:
             return ark_metadata
     return
+
+def default_serializer(obj):
+    """Custom serializer for objects not serializable by default json code"""
+    if isinstance(obj, datetime):
+        return obj.isoformat()  
+    return str(obj) 
 
 templates = Jinja2Templates(directory="fairscape_mds/templates/page")
 templates.env.filters['add_link'] = add_link
@@ -162,7 +168,7 @@ def resolve(
         if type_info:
             model_class, template_name = type_info
             model_instance = model_class.construct(**ark_metadata)
-            json_data = json.dumps(model_instance.dict(by_alias=True), default=str, indent=2)
+            json_data = json.dumps(model_instance.dict(by_alias=True), default=default_serializer, indent=2)
             rdf, turtle = convert_to_rdf(json_data)
             if "text/html" in request.headers.get("Accept", "").lower():
                 context = {
