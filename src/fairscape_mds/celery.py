@@ -93,7 +93,7 @@ def celeryRegisterROCrate(transactionFolder: str, filePath: str):
             transactionFolder
             )
 
-    if !extractStatus.success:
+    if not extractStatus.success:
         backgroundTaskLogger.error(
             f"transaction: {str(transactionFolder)}" +
             "\tmessage: uploaded extracted rocrate to minio" +
@@ -140,7 +140,7 @@ def celeryRegisterROCrate(transactionFolder: str, filePath: str):
     # mint identifiers
     provMetadataMinted = PublishProvMetadata(crate, identifierCollection)
 
-    if !provMetadataMinted:
+    if not provMetadataMinted:
         backgroundTaskLogger.error(
                 f"transaction: {str(transactionFolder)}\t" +
                 "message: error minting prov identifiers"
@@ -156,7 +156,7 @@ def celeryRegisterROCrate(transactionFolder: str, filePath: str):
 
     rocrateMetadataMinted = PublishROCrateMetadata(crate, rocrateCollection)
 
-    if !rocrateMetadataMinted:
+    if not rocrateMetadataMinted:
         backgroundTaskLogger.error(
                 f"transaction: {str(transactionFolder)}\t" +
                 "message: error minting rocrate identifiers"
