@@ -29,9 +29,9 @@ from fairscape_mds.models.rocrate import (
     ROCrateDistribution
 )
 
-from fairscape_mds.celery import (
-        celeryRegisterROCrate
-        )
+from fairscape_mds.worker import (
+    celeryRegisterROCrate
+    )
 
 import logging
 import sys

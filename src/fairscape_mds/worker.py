@@ -181,5 +181,5 @@ def celeryRegisterROCrate(transactionFolder: str, filePath: str):
 
 if __name__ == '__main__':
     args = ['worker', '--loglevel=INFO']
-    app.worker_main(argv=args)
+    celeryApp.worker_main(argv=args)
 

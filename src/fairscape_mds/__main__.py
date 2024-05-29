@@ -11,18 +11,18 @@ def run(config):
 
 
     #load configuration
-    fairscape_config = get_fairscape_config(config) 
+    fairscapeConfig = get_fairscape_config(config) 
 
     # try to instantiate
     try:
-        fairscape_config.SetupMinio()
+        fairscapeConfig.SetupMinio()
         print("setup_minio")
-        fairscape_config.SetupMongo()
+        fairscapeConfig.SetupMongo()
         print("setup_mongo")
     except Exception:
         pass
 
-    fairscape_config.RunServer()
+    fairscapeConfig.RunServer()
 
 if __name__ == '__main__':
     run()
