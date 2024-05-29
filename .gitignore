@@ -1,3 +1,7 @@
+# local testing data
+deploy/minio/
+deploy/mongo/
+
 # sqlite casbin permissions
 casbin.db
 casbin_policy.db
