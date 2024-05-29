@@ -2,7 +2,6 @@ from typing import Union
 from fastapi import (
     APIRouter, 
     UploadFile, 
-    BackgroundTasks,
     File, 
 #    Form, 
 #    Response, 
@@ -30,7 +29,10 @@ from fairscape_mds.models.rocrate import (
     ROCrateDistribution
 )
 
-import asyncio
+from fairscape_mds.celery import (
+        celeryRegisterROCrate
+        )
+
 import logging
 import sys
 
@@ -54,112 +56,6 @@ minioConfig= fairscapeConfig.minio
 minioClient = fairscapeConfig.CreateMinioClient()
 
 
-logging.basicConfig(stream=sys.stdout, level=logging.INFO)
-backgroundTaskLogger = logging.getLogger("backgroundTaskLogger")
-
-class ROCrateUploadJob(BaseModel):
-    uid: UUID = Field(default_factory= uuid4)
-    status: str = 'in progress'
-    filePath: str
-    processedFiles: List[str] = Field(default=[])
-    identifiersMinted: List[str] = Field(default=[])
-    errors: List[str] = Field(default=[])
-    completed: bool = Field(default=False)
-
-
-jobs: Dict[UUID, ROCrateUploadJob] = {}
-
-
-def processCrateTask(transactionFolder: UUID, filePath: str):
-    ''' Task of Unzipping Crate, Processing 
-    '''
-
-    backgroundTaskLogger.info(
-            f"Background Task\ttransaction: {str(transactionFolder)}\tmessage: init background rocrate processing"
-            )
-
-    # get zipped crate from minio
-    jobs[transactionFolder].status = 'retrieving crate from minio'
-
-    zippedObject = minioClient.get_object(
-        bucket_name=fairscapeConfig.minio.rocrate_bucket, 
-        object_name=filePath
-        ).read()
-
-
-    backgroundTaskLogger.info(
-            f"Background Task\ttransaction: {str(transactionFolder)}\tmessage: read zipped rocrate object from minio"
-            )
-    
-
-    # unzip crate and upload back to minio
-    jobs[transactionFolder].status = 'extracting crate'
-
-    uploadExtractedResult, extractedPaths  = UploadExtractedCrate(
-        minioClient, 
-        zippedObject, 
-        fairscapeConfig.minio.default_bucket, 
-        str(transactionFolder),
-        ) 
-
-    backgroundTaskLogger.info(
-            f"Background Task\ttransaction: {str(transactionFolder)}\tmessage: uploaded extracted rocrate to minio"
-            )
-
-    crateDistribution = ROCrateDistribution(
-        extractedROCrateBucket = fairscapeConfig.minio.default_bucket,
-        archivedROCrateBucket = fairscapeConfig.minio.rocrate_bucket,
-        extractedObjectPath = extractedPaths,
-        archivedObjectPath =  filePath           
-        )
-
-    # validate metadata
-    jobs[transactionFolder].status = 'validating metadata'
-
-    crate = GetMetadataFromCrate(
-        MinioClient=minioClient, 
-        BucketName=fairscapeConfig.minio.default_bucket,
-        TransactionFolder=transaction_folder,
-        CratePath=zip_foldername, 
-        Distribution = crateDistribution
-        )
-
-    backgroundTaskLogger.info(
-            f"Background Task\ttransaction: {str(transactionFolder)}\tmessage: read metadata from rocrate"
-            )
-
-    # mint identifiers
-    jobs[transactionFolder].status = 'minting identifiers'
-    prov_metadata = PublishProvMetadata(crate, identifier_collection)
-    
-    backgroundTaskLogger.info(
-            f"Background Task\ttransaction: {str(transactionFolder)}\tmessage: published prov metadata"
-            )
-
-    if not prov_metadata:
-        pass
-
-    rocrate_metadata = PublishROCrateMetadata(crate, rocrate_collection)
-    
-    backgroundTaskLogger.info(
-            f"Background Task\ttransaction: {str(transactionFolder)}\tmessage: published rocrate metadata"
-            )
-
-    if not rocrate_metadata:
-        pass
-
-    # finish tasks
-    jobs[transactionFolder].status = 'complete'
-
-
-async def startROCrateProcessing(uid: UUID, zippedFilePath) -> None:
-    queue = asyncio.Queue()
-    task = asyncio.create_task(processCrateTask(queue, uid, zippedFilePath))
-
-    while progress := await queue.get():  # monitor task progress
-        jobs[uid].status = progress
-
-    jobs[uid].status = "complete"
 
 
 @router.post(
@@ -169,7 +65,6 @@ async def startROCrateProcessing(uid: UUID, zippedFilePath) -> None:
         )
 async def uploadAsync(
     file: UploadFile,
-    background_tasks: BackgroundTasks
     ):
 
     # create a uuid for transaction
@@ -202,6 +97,7 @@ async def uploadAsync(
 
     else:
         # start background task
+
         newTask = ROCrateUploadJob(
             uid = str(transactionUUID),
             status = 'in progress',
@@ -213,8 +109,11 @@ async def uploadAsync(
         )
 
         # add to the dictionary of tasks
-        jobs[newTask.uid] = newTask
-        background_tasks.add_task(processCrateTask, newTask.uid, zippedPath)
+        uploadTask = celeryRegisterROCrate.apply_async(args=(
+            str(transactionUUID),
+            str(zippedPath)
+            ))
+
 
         return JSONResponse(
             status_code=202,
@@ -222,7 +121,6 @@ async def uploadAsync(
                 "submitted": transaction_folder
             }
         )
-        # return status
 
 
 @router.get(

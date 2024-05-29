@@ -388,7 +388,10 @@ def UploadExtractedCrate(
         zip_contents = ZippedObject.read()
             
         with zipfile.ZipFile(io.BytesIO(zip_contents), "r") as zip_file:
-            for file_info in zip_file.infolist():
+            # skip first entry on the infolist which is for the folder itself
+            # minio will error if there exist an object which is both a 
+            # directory containing objects and an object itself
+            for file_info in zip_file.infolist()[1::]:
                 file_contents = zip_file.read(file_info.filename)
 
                 # TODO the source filepath will not start at the root of the rocrate

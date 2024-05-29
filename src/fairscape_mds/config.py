@@ -78,6 +78,15 @@ def get_fairscape_config(env_path: str = '../deploy/local.env'):
         secure= bool(config_values.get("FAIRSCAPE_MINIO_SECURE")=="True"),
     )
 
+    server_redis_config = RedisConfig(
+        port= config_values.get("FAIRSCAPE_REDIS_PORT", 6379),
+        hostname = config_values.get("FAIRSCAPE_REDIS_HOST", 'localhost'),
+        username= config_values.get("FAIRSCAPE_REDIS_USERNAME"),
+        password= config_values.get("FAIRSCAPE_REDIS_PASSWORD"),
+        database= config_values.get("FAIRSCAPE_REDIS_DATABASE"),
+        result_database = config_values.get("FAIRSCAPE_REDIS_RESULT_DATABASE") 
+    )
+
     # TODO support multiple NAANs
     
     return FairscapeConfig(
@@ -88,7 +97,8 @@ def get_fairscape_config(env_path: str = '../deploy/local.env'):
             NAAN = config_values.get('FAIRSCAPE_NAAN', '59852'),
             url = config_values.get("FAIRSCAPE_URL"),
             mongo = server_mongo_config,
-            minio = server_minio_config
+            minio = server_minio_config,
+            redis = server_redis_config,
             )
 
 
@@ -142,10 +152,18 @@ class ComputeBackendEnum(str, Enum):
 
 
 class RedisConfig(BaseModel):
-    port: int
-    uri: str
-    broker_url: Optional[str]
-    result_backend: Optional[str]
+    port: Optional[int] = Field(default=6379)
+    hostname: Optional[str] = Field(default='localhost')
+    username: Optional[str] = Field(default=None)
+    password: Optional[str] = Field(default=None)
+    database: Optional[int] = Field(default=0)
+    result_database: Optional[int] = Field(default=1)
+
+    def getBrokerURL(self):
+        if self.username and self.password:
+            return f'redis://{self.username}:{self.password}@{self.hostname}:{self.port}/{self.database}'
+        else:
+            return f'redis://{self.hostname}:{self.port}/{self.database}'
 
 
 class K8sComputeConfig(BaseModel):
@@ -161,6 +179,7 @@ class FairscapeConfig(BaseModel):
     url: Optional[str] = Field(default = "http://localhost:8080/")
     mongo: MongoConfig
     minio: MinioConfig
+    redis: Optional[RedisConfig]
 
 
     def CreateMongoClient(self):
