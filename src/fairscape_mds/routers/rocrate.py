@@ -30,7 +30,9 @@ from fairscape_mds.models.rocrate import (
 )
 
 from fairscape_mds.worker import (
-    celeryRegisterROCrate
+    AsyncRegisterROCrate,
+    createUploadJob,
+    getUploadJob
     )
 
 import logging
@@ -51,6 +53,7 @@ mongoDB = mongoClient[fairscapeConfig.mongo.db]
 rocrateCollection = mongoDB[fairscapeConfig.mongo.rocrate_collection]
 identifierCollection = mongoDB[fairscapeConfig.mongo.identifier_collection]
 userCollection = mongoDB[fairscapeConfig.mongo.user_collection]
+asyncCollection = mongoDB[fairscapeConfig.mongo.async_collection]
 
 minioConfig= fairscapeConfig.minio
 minioClient = fairscapeConfig.CreateMinioClient()
@@ -95,31 +98,24 @@ async def uploadAsync(
                 }
         )
 
-    else:
-        # start background task
 
-        newTask = ROCrateUploadJob(
-            uid = str(transactionUUID),
-            status = 'in progress',
-            filePath = str(zippedPath),
-            processedFiles = [],
-            identifiersMinted = [],
-            errors = [],
-            completed = False
+    # add to the dictionary of tasks
+    uploadTask = AsyncRegisterROCrate.apply_async(args=(
+        str(transactionUUID),
+        str(zippedPath)
+        ))
+
+    # create the
+    uploadJob = createUploadJob(
+        str(transactionUUID), 
+        str(zippedPath), 
+        uploadTask.id
         )
 
-        # add to the dictionary of tasks
-        uploadTask = celeryRegisterROCrate.apply_async(args=(
-            str(transactionUUID),
-            str(zippedPath)
-            ))
 
-
-        return JSONResponse(
-            status_code=202,
-            content={
-                "submitted": transaction_folder
-            }
+    return JSONResponse(
+        status_code=201,
+        content=uploadJob.model_dump()        
         )
 
 
@@ -127,8 +123,9 @@ async def uploadAsync(
         "/rocrate/upload-async/status/{submissionUUID}",
         summary=""
         ) 
-def getROCrateStatus(submissionUUID: UUID):
-    jobMetadata = jobs.get(submissionUUID)
+def getROCrateStatus(submissionUUID: str):
+
+    jobMetadata = getUploadJob(submissionUUID)
 
     if jobMetadata is None:
         return JSONResponse(

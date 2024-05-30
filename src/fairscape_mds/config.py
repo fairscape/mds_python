@@ -17,7 +17,6 @@ import uvicorn
 from dotenv import dotenv_values
 
 
-
 @lru_cache()
 def cached_dotenv(env_path: str = '.env'):
     config = {
@@ -64,7 +63,8 @@ def get_fairscape_config(env_path: str = '../deploy/local.env'):
             'db': config_values.get('FAIRSCAPE_MONGO_DATABASE'),
             'identifier_collection': config_values.get('FAIRSCAPE_MONGO_IDENTIFIER_COLLECTION'),
             'user_collection': config_values.get('FAIRSCAPE_MONGO_USER_COLLECTION'),
-            'rocrate_collection': config_values.get('FAIRSCAPE_MONGO_ROCRATE_COLLECTION')
+            'rocrate_collection': config_values.get('FAIRSCAPE_MONGO_ROCRATE_COLLECTION'),
+            'async_collection': config_values.get('FAIRSCAPE_MONGO_ASYNC_COLLECTION', 'async')
         }
         )
 
@@ -78,13 +78,23 @@ def get_fairscape_config(env_path: str = '../deploy/local.env'):
         secure= bool(config_values.get("FAIRSCAPE_MINIO_SECURE")=="True"),
     )
 
+    if config_values.get("FAIRSCAPE_REDIS_DATABASE"):
+        redisDB=int(config_values.get("FAIRSCAPE_REDIS_DATABASE"))
+    else:
+        redisDB=0
+
+    if config_values.get("FAIRSCAPE_REDIS_RESULT_DATABASE"):
+        redisResultDB=int(config_values.get("FAIRSCAPE_REDIS_RESULT_DATABASE"))
+    else:
+        redisResultDB=0
+
     server_redis_config = RedisConfig(
         port= config_values.get("FAIRSCAPE_REDIS_PORT", 6379),
         hostname = config_values.get("FAIRSCAPE_REDIS_HOST", 'localhost'),
         username= config_values.get("FAIRSCAPE_REDIS_USERNAME"),
         password= config_values.get("FAIRSCAPE_REDIS_PASSWORD"),
-        database= config_values.get("FAIRSCAPE_REDIS_DATABASE"),
-        result_database = config_values.get("FAIRSCAPE_REDIS_RESULT_DATABASE") 
+        database= redisDB,
+        result_database = redisResultDB
     )
 
     # TODO support multiple NAANs
@@ -111,6 +121,7 @@ class MongoConfig(BaseModel):
     identifier_collection: Optional[str] = Field(default="mds")
     rocrate_collection: Optional[str] = Field(default="rocrate")
     user_collection: Optional[str] = Field(default="users")
+    async_collection: Optional[str] = Field(default="async")
     session_collection: Optional[str] = Field(default="sessions")
 
 
