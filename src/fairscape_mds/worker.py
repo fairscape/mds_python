@@ -64,12 +64,12 @@ class ROCrateUploadJob(BaseModel):
     zippedCratePath: str
     timeStarted: datetime.datetime | None = Field(default=None)
     timeFinished: datetime.datetime | None = Field(default=None)
-    status: Optional[str] = Field(default='started')
+    status: Optional[str] = Field(default='in progress')
     completed: Optional[bool] = Field(default=False)
     success: Optional[bool] = Field(default=False)
     processedFiles: List[str] = Field(default=[])
     identifiersMinted: List[str] = Field(default=[])
-    errors: List[str] = Field(default=[])
+    error: str | None = Field(default=None)
 
 
 def createUploadJob(
@@ -118,6 +118,21 @@ def getUploadJob(
         return None
 
 
+def updateUploadJob(transactionFolder: str, update: Dict):
+    ''' Update async job using the transactionFolder as the primary key
+
+    Keyword arguments:
+    transactionFolder -- (str) the UUID representing the job
+    update            -- (Dict) the update representing the dictionary
+    '''
+
+    # update job with extracted status status
+    asyncCollection.update_one(
+            {
+                "transactionFolder": transactionFolder,
+                }, 
+            {"$set": update}
+            )
 
 @celeryApp.task(name='async-register-ro-crate')
 def AsyncRegisterROCrate(transactionFolder: str, filePath: str):
@@ -141,11 +156,21 @@ def AsyncRegisterROCrate(transactionFolder: str, filePath: str):
         zippedContent = objectResponse.read()
 
     except Exception as minioException:
-        # TODO abort the job
         backgroundTaskLogger.error(
                 f"transaction: {str(transactionFolder)}" +
                 "\tmessage: failed to read minio object" + f"\terror: {str(minioException)}"
                 )
+
+        updateUploadJob(
+                transactionFolder, 
+                {
+                    "completed": True,
+                    "success": False,
+                    "error": f"Failed to read minio Object \terror: {str(minioException)}"
+                    }
+                )
+
+
         return False
 
     finally:
@@ -171,22 +196,24 @@ def AsyncRegisterROCrate(transactionFolder: str, filePath: str):
             "\tmessage: uploaded extracted rocrate to minio" +
             f"\terror: {extractStatus.message}"
             )
-        # TODO abort the job
-        pass
+        updateUploadJob(
+                transactionFolder, 
+                {
+                    "completed": True,
+                    "success": False,
+                    "error": f"Failed to extract rocrate\terror: {extractStatus.message}"
+                    }
+                )
+        return False
 
     # update job with extracted status status
-    asyncCollection.update_one(
-            {
-                "transactionFolder": transactionFolder,
-                "zippedCratePath": filePath
-                }, 
-            {
-                "$set": {
-                    "processedFiles": extractedFileList,
-                    "status": "processing metadata"
-                    }
-                }
-            )
+    updateUploadJob(
+        transactionFolder,
+        {
+            "processedFiles": extractedFileList,
+            "status": "processing metadata"
+            }
+        )
 
     backgroundTaskLogger.info(
             f"transaction: {str(transactionFolder)}\tmessage: uploaded extracted rocrate to minio"
@@ -209,26 +236,22 @@ def AsyncRegisterROCrate(transactionFolder: str, filePath: str):
             Distribution = crateDistribution
             )
     except Exception as e:
-        backgroundTaskLogger.error(
-                f"transaction: {str(transactionFolder)}\t" +
+        
+        errorLog = f"transaction: {str(transactionFolder)}\t" +
                 "message: error retreiving rocrate metadata from crate\t" +
                 f"error: {str(e)}"
-                )
+        backgroundTaskLogger.error(errorLog)
+
         # update the async record
-        asyncCollection.update_one(
+        updateUploadJob(
+                transactionFolder,
                 {
-                    "transactionFolder": transactionFolder,
-                    "zippedCratePath": filePath
-                    }, 
-                {
-                    "$set": {
-                        "error": str(e)
-                        }
+                    "completed": True,
+                    "success": False,
+                    "error": errorLog
                     }
                 )
 
-
-        # TODO kill the task
         return False
 
     
@@ -237,33 +260,48 @@ def AsyncRegisterROCrate(transactionFolder: str, filePath: str):
     provMetadataMinted = PublishProvMetadata(crateMetadata, identifierCollection)
 
     if not provMetadataMinted:
-        backgroundTaskLogger.error(
-                f"transaction: {str(transactionFolder)}\t" +
+        errorLog = f"transaction: {str(transactionFolder)}\t" +
                 "message: error minting prov identifiers"
+        backgroundTaskLogger.error(errorLog)
+    
+        # update the uploadJob record
+        updateUploadJob(
+                transactionFolder,
+                {
+                    "completed": True,
+                    "success": False,
+                    "error": errorLog
+                    }
                 )
+
         # kill the task
         return False
 
-    asyncCollection.update_one(
+    updateUploadJob(
+            transactionFolder,
             {
-                "transactionFolder": transactionFolder,
-                "zippedCratePath": filePath
-                }, 
-            {
-                "$set": {
-                    "status": "minting identifiers",
-                    "identifiersMinted": [ elem.get("@id") for elem in crateMetadata['@graph'] ] + [crateMetadata['@id']]
-                    }
+                "status": "minting identifiers",
+                "identifiersMinted": [ elem.get("@id") for elem in crateMetadata['@graph'] ] + [crateMetadata['@id']]
                 }
             )
 
     rocrateMetadataMinted = PublishROCrateMetadata(crateMetadata, rocrateCollection)
 
     if not rocrateMetadataMinted:
-        backgroundTaskLogger.error(
-                f"transaction: {str(transactionFolder)}\t" +
+        errorLog = f"transaction: {str(transactionFolder)}\t" +
                 "message: error minting rocrate identifiers"
+        backgroundTaskLogger.error(errorLog)
+
+        # update job record
+        updateUploadJob(
+                transactionFolder,
+                {
+                    "completed": True,
+                    "success": False,
+                    "error": errorLog
+                    }
                 )
+
         # kill the task
         return False
 
@@ -272,21 +310,17 @@ def AsyncRegisterROCrate(transactionFolder: str, filePath: str):
             "message: task succeeded"
             )
     
-    asyncCollection.update_one(
+    updateUploadJob(
+            transactionFolder,
             {
-                "transactionFolder": transactionFolder,
-                "zippedCratePath": filePath
-                }, 
-            {
-                "$set": {
-                    "status": "finished",
-                    "completed": True,
-                    "success": True,
-                    "timeFinished": datetime.datetime.now(tz=datetime.timezone.utc)
-                    }
+                "status": "Finished",
+                "timeFinished": datetime.datetime.now(tz=datetime.timezone.utc)
+                "completed": True
+                "success": True
                 }
+
             )
-    
+ 
     # mark task as sucessfull
     return True
 
