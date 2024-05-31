@@ -143,11 +143,6 @@ def AsyncRegisterROCrate(transactionFolder: str, filePath: str):
     zippedCratePath   -- (str) the filename of the zipped crate contents
     '''
 
-    backgroundTaskLogger.info(
-            f"transaction: {str(transactionFolder)}\tmessage: init background rocrate processing"
-            )
-
-
     try:
         objectResponse = minioClient.get_object(
             bucket_name=fairscapeConfig.minio.rocrate_bucket, 
@@ -177,10 +172,6 @@ def AsyncRegisterROCrate(transactionFolder: str, filePath: str):
         objectResponse.close()
         objectResponse.release_conn()
 
-
-    backgroundTaskLogger.info(
-            f"transaction: {str(transactionFolder)}\tmessage: read zipped rocrate object from minio"
-            )
     
     # upload extracted crate to minio
     extractStatus, extractedFileList = UploadExtractedCrate(
@@ -215,10 +206,6 @@ def AsyncRegisterROCrate(transactionFolder: str, filePath: str):
             }
         )
 
-    backgroundTaskLogger.info(
-            f"transaction: {str(transactionFolder)}\tmessage: uploaded extracted rocrate to minio"
-            )
-
     crateDistribution = ROCrateDistribution(
         extractedROCrateBucket = fairscapeConfig.minio.default_bucket,
         archivedROCrateBucket = fairscapeConfig.minio.rocrate_bucket,
@@ -237,9 +224,7 @@ def AsyncRegisterROCrate(transactionFolder: str, filePath: str):
             )
     except Exception as e:
         
-        errorLog = f"transaction: {str(transactionFolder)}\t" +
-                "message: error retreiving rocrate metadata from crate\t" +
-                f"error: {str(e)}"
+        errorLog = f"transaction: {str(transactionFolder)}\t" + "message: error retreiving rocrate metadata from crate\t" + f"error: {str(e)}"
         backgroundTaskLogger.error(errorLog)
 
         # update the async record
@@ -255,13 +240,11 @@ def AsyncRegisterROCrate(transactionFolder: str, filePath: str):
         return False
 
     
-
     # mint identifiers
     provMetadataMinted = PublishProvMetadata(crateMetadata, identifierCollection)
 
     if not provMetadataMinted:
-        errorLog = f"transaction: {str(transactionFolder)}\t" +
-                "message: error minting prov identifiers"
+        errorLog = f"transaction: {str(transactionFolder)}\t" + "message: error minting prov identifiers"
         backgroundTaskLogger.error(errorLog)
     
         # update the uploadJob record
@@ -288,8 +271,7 @@ def AsyncRegisterROCrate(transactionFolder: str, filePath: str):
     rocrateMetadataMinted = PublishROCrateMetadata(crateMetadata, rocrateCollection)
 
     if not rocrateMetadataMinted:
-        errorLog = f"transaction: {str(transactionFolder)}\t" +
-                "message: error minting rocrate identifiers"
+        errorLog = f"transaction: {str(transactionFolder)}\t" + "message: error minting rocrate identifiers"
         backgroundTaskLogger.error(errorLog)
 
         # update job record
@@ -314,9 +296,9 @@ def AsyncRegisterROCrate(transactionFolder: str, filePath: str):
             transactionFolder,
             {
                 "status": "Finished",
-                "timeFinished": datetime.datetime.now(tz=datetime.timezone.utc)
-                "completed": True
-                "success": True
+                "timeFinished": datetime.datetime.now(tz=datetime.timezone.utc),
+                "completed": True,
+                "success": True,
                 }
 
             )
