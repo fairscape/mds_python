@@ -3,14 +3,18 @@ from fastapi.responses import JSONResponse
 
 from fairscape_mds.models.schema import Schema, list_schemas
 from fairscape_mds.config import (
-    get_mongo_config,
-    get_mongo_client
+    get_fairscape_config,
 )
 
 router = APIRouter()
 
-mongo_config = get_mongo_config()
-mongo_client = get_mongo_client()
+fairscapeConfig = get_fairscape_config()
+
+mongoClient = fairscapeConfig.CreateMongoClient()
+mongoDB = mongoClient[fairscapeConfig.mongo.db]
+identifierCollection = mongoDB[fairscapeConfig.mongo.identifier_collection]
+userCollection = mongoDB[fairscapeConfig.mongo.user_collection]
+
 
 
 @router.post('/schema',
@@ -37,10 +41,7 @@ def schema_create(schema: Schema):
     - **license**: the license of the schema (optional)
     """
 
-    mongo_db = mongo_client[mongo_config.db]
-    mongo_collection = mongo_db[mongo_config.identifier_collection]
-
-    create_status = schema.create(mongo_collection)
+    create_status = schema.create(identifierCollection)
 
     if create_status.success:
         return JSONResponse(
@@ -64,11 +65,7 @@ def schema_create(schema: Schema):
             summary="List all schemas",
             response_description="Retrieved list of schemas")
 def schema_list():
-    mongo_db = mongo_client[mongo_config.db]
-    mongo_collection = mongo_db[mongo_config.identifier_collection]
-
-    schemas = list_schemas(mongo_collection)
-
+    schemas = list_schemas(identifierCollection)
     return schemas
 
 
@@ -83,13 +80,10 @@ async def schema_get(NAAN: str, postfix: str):
     - **postfix**: a unique string
     """
 
-    mongo_db = mongo_client[mongo_config.db]
-    mongo_collection = mongo_db[mongo_config.identifier_collection]
-
     schema_id = f"ark:{NAAN}/{postfix}"
 
     schema = Schema.model_construct(guid=schema_id)
-    read_status = schema.read(mongo_collection)
+    read_status = schema.read(identifierCollection)
 
     if read_status.success:
         return schema
@@ -102,17 +96,29 @@ async def schema_get(NAAN: str, postfix: str):
         )
 
 
-@router.put("/schema",
+@router.put("/schema/ark:{NAAN}/{postfix}",
             summary="Update a schema",
             response_description="The updated schema")
 def schema_update(
-    current_schema: Schema,
+    NAAN: str,
+    postfix: str,
     schema: Schema
 ):
-    mongo_db = mongo_client[mongo_config.db]
-    mongo_collection = mongo_db[mongo_config.identifier_collection]
+    
+    schema_id = f"ark:{NAAN}/{postfix}"
+    schema = Schema.model_construct(guid=schema_id)
+    read_status = schema.read(identifierCollection)
+    
+    if not read_status.success:
+        return JSONResponse(
+            status_code=read_status.status_code, 
+            content={
+                "error": read_status.message
+            }
+        )
 
-    update_status = schema.update(mongo_collection)
+    
+    update_status = schema.update(identifierCollection)
 
     if update_status.success:
         return JSONResponse(
@@ -139,12 +145,9 @@ def schema_delete(NAAN: str, postfix: str):
     """
     schema_id = f"ark:{NAAN}/{postfix}"
 
-    mongo_db = mongo_client[mongo_config.db]
-    mongo_collection = mongo_db[mongo_config.identifier_collection]
-
     schema = Schema.model_construct(guid=schema_id)
 
-    delete_status = schema.delete(mongo_collection)
+    delete_status = schema.delete(identifierCollection)
 
     if delete_status.success:
         return JSONResponse(
