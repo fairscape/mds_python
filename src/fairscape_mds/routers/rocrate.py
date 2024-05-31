@@ -67,7 +67,7 @@ minioClient = fairscapeConfig.CreateMinioClient()
         status_code=202
         )
 async def uploadAsync(
-    file: UploadFile,
+    crate: UploadFile,
     ):
 
     # create a uuid for transaction
@@ -75,16 +75,16 @@ async def uploadAsync(
     transaction_folder = str(transactionUUID)
 
     # get the zipfile's filename
-    zip_filename = str(Path(file.filename).name)
+    zip_filename = str(Path(crate.filename).name)
 
     # get the zipfile extracted name
-    zip_foldername = str(Path(file.filename).stem)
+    zip_foldername = str(Path(crate.filename).stem)
 
 
     # upload the zipped ROCrate 
     zipped_upload_status, zippedPath = UploadZippedCrate(
         MinioClient=minioClient,
-        ZippedObject=file.file,
+        ZippedObject=crate.file,
         BucketName=fairscapeConfig.minio.rocrate_bucket,
         TransactionFolder=transaction_folder,
         Filename=zip_filename
@@ -108,14 +108,15 @@ async def uploadAsync(
     # create the
     uploadJob = createUploadJob(
         str(transactionUUID), 
-        str(zippedPath), 
-        uploadTask.id
+        str(zippedPath)
         )
 
+    uploadMetadata = uploadJob.model_dump()
+    uploadMetadata['timeStarted'] = uploadMetadata['timeStarted'].timestamp()
 
     return JSONResponse(
         status_code=201,
-        content=uploadJob.model_dump()        
+        content=uploadMetadata
         )
 
 
@@ -137,7 +138,15 @@ def getROCrateStatus(submissionUUID: str):
                 )
 
     else:
-        return jobMetadata
+        jobResponse = jobMetadata.model_dump()
+        jobResponse['timeStarted'] = jobResponse['timeStarted'].timestamp()
+        if jobResponse['timeFinished']:
+            jobResponse['timeFinished'] = jobResponse['timeFinished'].timestamp()
+        
+        return JSONResponse(
+                status_code=200,
+                content=jobResponse
+                )
 
 
 @router.post("/rocrate/upload",

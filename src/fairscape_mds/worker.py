@@ -53,6 +53,12 @@ minioClient = fairscapeConfig.CreateMinioClient()
 celeryApp = Celery()
 celeryApp.conf.broker_url = brokerURL
 
+def serializeTimestamp(time):
+    if time:
+        return time.timestamp()
+    else:
+        return None
+
 class ROCrateUploadJob(BaseModel):
     transactionFolder: str
     zippedCratePath: str
@@ -60,6 +66,7 @@ class ROCrateUploadJob(BaseModel):
     timeFinished: datetime.datetime | None = Field(default=None)
     status: Optional[str] = Field(default='started')
     completed: Optional[bool] = Field(default=False)
+    success: Optional[bool] = Field(default=False)
     processedFiles: List[str] = Field(default=[])
     identifiersMinted: List[str] = Field(default=[])
     errors: List[str] = Field(default=[])
@@ -198,7 +205,7 @@ def AsyncRegisterROCrate(transactionFolder: str, filePath: str):
             MinioClient=minioClient, 
             BucketName=fairscapeConfig.minio.default_bucket,
             TransactionFolder=transactionFolder,
-            CratePath=pathlib.Path(filePath).name, 
+            CratePath=pathlib.Path(filePath).stem, 
             Distribution = crateDistribution
             )
     except Exception as e:
@@ -207,6 +214,20 @@ def AsyncRegisterROCrate(transactionFolder: str, filePath: str):
                 "message: error retreiving rocrate metadata from crate\t" +
                 f"error: {str(e)}"
                 )
+        # update the async record
+        asyncCollection.update_one(
+                {
+                    "transactionFolder": transactionFolder,
+                    "zippedCratePath": filePath
+                    }, 
+                {
+                    "$set": {
+                        "error": str(e)
+                        }
+                    }
+                )
+
+
         # TODO kill the task
         return False
 
@@ -260,6 +281,7 @@ def AsyncRegisterROCrate(transactionFolder: str, filePath: str):
                 "$set": {
                     "status": "finished",
                     "completed": True,
+                    "success": True,
                     "timeFinished": datetime.datetime.now(tz=datetime.timezone.utc)
                     }
                 }
