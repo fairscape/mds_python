@@ -63,7 +63,7 @@ class ROCrateDataset(FairscapeEVIBaseModel):
     associatedPublication: Optional[str] = Field(default=None)
     additionalDocumentation: Optional[str] = Field(default=None)
     fileFormat: str = Field(alias="format")
-    dataSchema: Optional[Union[str, dict]] = Field(alias="schema", default=None)
+    dataSchema: Optional[Union[str, dict]] = Field(alias="evi:Schema", default=None)
     generatedBy: Optional[List[str]] = Field(default=[])
     derivedFrom: Optional[List[str]] = Field(default=[])
     usedByComputation: Optional[List[str]] = Field(default=[])
