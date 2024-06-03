@@ -20,3 +20,4 @@ boto3>=1.34.26
 pydantic>=2.5.1
 click
 rdflib
+email-validator
