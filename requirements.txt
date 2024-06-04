@@ -21,3 +21,4 @@ pydantic>=2.5.1
 click
 rdflib
 email-validator
+celery[redis]
