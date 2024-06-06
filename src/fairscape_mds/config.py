@@ -25,30 +25,6 @@ def cached_dotenv(env_path: str = '.env'):
     }
     return config
 
-@lru_cache()
-def get_mongo_config():
-    mds_config = get_fairscape_config()
-    return mds_config.mongo
-
-@lru_cache()
-def get_mongo_client():
-    mds_config = get_fairscape_config()
-    return mds_config.CreateMongoClient()
-
-@lru_cache()
-def get_minio_config():
-    mds_config = get_fairscape_config()
-    return mds_config.minio
-
-@lru_cache()
-def get_minio_client():
-    mds_config = get_fairscape_config()
-    return mds_config.CreateMinioClient()
-
-@lru_cache()
-def get_fairscape_url():
-    return get_fairscape_config().url
-    
 
 @lru_cache()
 def get_fairscape_config(env_path: str = '../deploy/local.env'):    
@@ -74,7 +50,9 @@ def get_fairscape_config(env_path: str = '../deploy/local.env'):
         access_key = config_values.get("FAIRSCAPE_MINIO_ACCESS_KEY"),
         secret_key = config_values.get("FAIRSCAPE_MINIO_SECRET_KEY"),
         default_bucket= config_values.get("FAIRSCAPE_MINIO_DEFAULT_BUCKET"), 
+        default_bucket_path = config_values.get("FAIRSCAPE_MINIO_DEFAULT_BUCKET_PATH"),
         rocrate_bucket=config_values.get("FAIRSCAPE_MINIO_ROCRATE_BUCKET"),
+        rocrate_bucket_path = config_values.get("FAIRSCAPE_MINIO_ROCRATE_BUCKET_PATH"),
         secure= bool(config_values.get("FAIRSCAPE_MINIO_SECURE")=="True"),
     )
 
@@ -137,8 +115,10 @@ class MinioConfig(BaseModel):
     port: Optional[str] = Field(default="9000")
     secret_key: Optional[str] = Field(default="")
     access_key: Optional[str] = Field(default="")
-    default_bucket: Optional[str] = Field(default="mds")
+    default_bucket: Optional[str] = Field(default="default")
+    default_bucket_path: str | None 
     rocrate_bucket: Optional[str] = Field(default="rocrate")
+    rocrate_bucket_path: str | None
     secure: Optional[bool] = Field(default=False)
 
 

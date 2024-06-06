@@ -9,9 +9,12 @@ from pathlib import Path
 from io import BytesIO
 import zipfile
 from zipfile import ZipFile
+
+import minio.api
 from minio.deleteobjects import DeleteObject
 from datetime import datetime
 import pymongo
+
 import sys
 import logging
 
@@ -333,15 +336,22 @@ class UploadROCrate():
 
 
 def UploadZippedCrate(
-        MinioClient, 
+        MinioClient: minio.api.Minio, 
+        BucketName: str, 
+        BucketRootPath: str | None,
         ZippedObject, 
-        BucketName, 
         TransactionFolder: uuid.UUID, 
         Filename: str,
         ) -> Tuple[OperationStatus, str]:
+    """ Upload A Zipped ROCrate
+    """
 
     #source_filepath = Path(ZippedObject.filename).name
-    upload_filepath = Path(str(TransactionFolder)) / Path(Filename)
+
+    if BucketRootPath:
+        upload_filepath = Path(str(TransactionFolder)) / Path(Filename)
+    else:
+        upload_filepath = Path(str(TransactionFolder)) / Path(Filename)
     
     upload_result = MinioClient.put_object(
         bucket_name=BucketName, 
@@ -366,17 +376,19 @@ def UploadZippedCrate(
 
 def UploadExtractedCrate(
         MinioClient, 
-        ZippedObject, 
         BucketName: str, 
+        BucketRootPath: str | None,
+        ZippedObject, 
         TransactionFolder: str,
         ) -> Tuple[OperationStatus, List[str]]:
     """Accepts zipped ROCrate, unzip and upload onto MinIO.
 
     Args:
         MinioClient (Any): MinIO client
-        Object (Any): zipped ROCrate file
         ROCrateBucketName (str): Name of S3 Bucket to upload zip archive of ROCrate,
-        Distribution (ROCrateDistribution): Distribution data for use within Fairscape
+        BucketRootPath (str): Root of the ROCrate Path to Upload To
+        ZippedObject (Any): zipped ROCrate file
+        TransactionFolder (str): UUID created for this upload request
 
     Returns:
         OperationStatus: Message
@@ -402,8 +414,10 @@ def UploadExtractedCrate(
                 # Extracted/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha/ro-crate-metadata.json
                 # this causes the GetROCrateMetadata function to fail later on becaues it looks only in
                 # 1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha/ 
-
-                upload_filepath = Path(TransactionFolder) / source_filepath
+                if BucketRootPath:
+                    upload_filepath = Path(BucketRootPath) / Path(TransactionFolder) / source_filepath
+                else: 
+                    upload_filepath = Path(TransactionFolder) / source_filepath
 
                 upload_result = MinioClient.put_object(
                     bucket_name= BucketName, 

@@ -178,6 +178,7 @@ def AsyncRegisterROCrate(transactionFolder: str, filePath: str):
             minioClient,
             io.BytesIO(zippedContent),
             fairscapeConfig.minio.default_bucket,
+            fairscapeConfig.minio.default_bucket_path,
             transactionFolder
             )
 
@@ -215,11 +216,16 @@ def AsyncRegisterROCrate(transactionFolder: str, filePath: str):
 
     # validate metadata
     try:
+        if fairscapeConfig.minio.default_bucket_path:
+            cratePath = Path(fairscapeConfig.minio.default_bucket_path) / pathlib.Path(filePath).stem
+        else:
+            cratePath = pathlib.Path(filePath).stem
+
         crateMetadata = GetMetadataFromCrate(
             MinioClient=minioClient, 
             BucketName=fairscapeConfig.minio.default_bucket,
             TransactionFolder=transactionFolder,
-            CratePath=pathlib.Path(filePath).stem, 
+            CratePath=cratePath, 
             Distribution = crateDistribution
             )
     except Exception as e:

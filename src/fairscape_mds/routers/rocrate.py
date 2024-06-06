@@ -86,6 +86,7 @@ async def uploadAsync(
         MinioClient=minioClient,
         ZippedObject=crate.file,
         BucketName=fairscapeConfig.minio.rocrate_bucket,
+        BucketRootPath=fairscapeConfig.minio.rocrate_bucket_path,
         TransactionFolder=transaction_folder,
         Filename=zip_filename
     )
@@ -98,17 +99,21 @@ async def uploadAsync(
                 }
         )
 
+    if fairscapeConfig.minio.rocrate_bucket == '/':
+        zippedFilepath = Path(transaction_folder) / Path(zip_filename)
+    else:
+        zippedFilepath = Path(fairscapeConfig.minio.rocrate_bucket_path) / Path(transaction_folder) / Path(zip_filename)
 
     # add to the dictionary of tasks
     uploadTask = AsyncRegisterROCrate.apply_async(args=(
         str(transactionUUID),
-        str(zippedPath)
+        str(zippedFilepath)
         ))
 
     # create the
     uploadJob = createUploadJob(
         str(transactionUUID), 
-        str(zippedPath)
+        str(zippedFilepath)
         )
 
     uploadMetadata = uploadJob.model_dump()
@@ -170,6 +175,7 @@ def rocrate_upload(file: UploadFile = File(...)):
         MinioClient=minioClient,
         ZippedObject=file.file,
         BucketName=fairscapeConfig.minio.rocrate_bucket,
+        BucketRootPath=fairscapeConfig.minio.rocrate_bucket_path,
         TransactionFolder=transaction_folder,
         Filename=zip_filename
     )
