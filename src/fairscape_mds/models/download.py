@@ -23,13 +23,14 @@ from fairscape_mds.models.fairscape_base import (
 from fairscape_mds.models.dataset import DatasetWriteModel
 from fairscape_mds.utilities.operation_status import OperationStatus
 from fairscape_mds.config import (
-    get_minio_config, 
-    get_minio_client, 
     get_fairscape_config
     )
 
 fairscapeConfig = get_fairscape_config()
 fairscapeHost = fairscapeConfig.host
+
+minioConfig = fairscapeConfig.minio
+minioClient = fairscapeConfig.CreateMinioClient()
 
 
 class DownloadCreateModel(FairscapeEVIBaseModel, extra=Extra.allow):
@@ -105,10 +106,7 @@ def createDownload(
     postfix = downloadInstance.guid.split('/', 1)[1] 
     minioPath = f"{postfix}/{dataObject.filename}"
 
-    # upload to minio
-    minioConfig = get_minio_config()
-    minioClient = get_minio_client()
-    
+    # upload to minio 
     try:
         upload_operation = minioClient.put_object(
             bucket_name=minioConfig.default_bucket,
@@ -200,9 +198,8 @@ def deleteDownload(
     downloadMetadata = identifierCollection.find_one(
             {"@id": downloadGUID}
             )
-    
-    minioConfig = get_minio_config()
-    minioClient = get_minio_client()
+   
+
 
     published = downloadMetadata.get("published")
     minioPath = downloadMetadata.get("minioPath")

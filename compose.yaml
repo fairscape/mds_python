@@ -18,6 +18,17 @@ services:
   #  links:
   #  - mongo:mongo
   #  - minio:minio
+  worker:
+    image: ghcr.io/fairscape/mds_python:RELEASE.2024-06-10 
+    volumes:
+    - type: bind
+      source: ./deploy/docker_compose.env
+      target: /fairscape/.env
+    links:
+    - mongo:mongo
+    - minio:minio
+    - redis:redis
+    command: ["python", "fairscape_mds/worker.py" ]
   redis:
     image: redis:7.2.4
     ports:

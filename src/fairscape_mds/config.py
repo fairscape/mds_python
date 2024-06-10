@@ -27,7 +27,7 @@ def cached_dotenv(env_path: str = '.env'):
 
 
 @lru_cache()
-def get_fairscape_config(env_path: str = '../deploy/local.env'):    
+def get_fairscape_config(env_path: str = '/fairscape/.env'):    
     config_values = cached_dotenv(env_path)
 
     server_mongo_config = MongoConfig.model_validate(
@@ -66,8 +66,13 @@ def get_fairscape_config(env_path: str = '../deploy/local.env'):
     else:
         redisResultDB=0
 
+    if config_values.get("FAIRSCAPE_REDIS_PORT"):
+        redisPort= int(config_values.get("FAIRSCAPE_REDIS_PORT"))
+    else:
+        redisPort= 6379
+
     server_redis_config = RedisConfig(
-        port= config_values.get("FAIRSCAPE_REDIS_PORT", 6379),
+        port= redisPort,
         hostname = config_values.get("FAIRSCAPE_REDIS_HOST", 'localhost'),
         username= config_values.get("FAIRSCAPE_REDIS_USERNAME"),
         password= config_values.get("FAIRSCAPE_REDIS_PASSWORD"),
