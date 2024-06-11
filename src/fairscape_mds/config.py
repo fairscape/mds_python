@@ -44,6 +44,16 @@ def get_fairscape_config(env_path: str = '/fairscape/.env'):
         }
         )
 
+    if config_values.get("FAIRSCAPE_MINIO_CERT_CHECK"):
+        checkCert = bool(config_values.get("FAIRSCAPE_MINIO_CERT_CHECK")=="True")
+    else:
+        checkCert = False
+
+    if config_values.get("FAIRSCAPE_MINIO_SECURE"):
+        secure = bool(config_values.get("FAIRSCAPE_MINIO_SECURE")=="True")
+    else:
+        secure = False
+
     server_minio_config = MinioConfig(
         host= config_values.get("FAIRSCAPE_MINIO_URI"),
         port=config_values.get("FAIRSCAPE_MINIO_PORT"),
@@ -53,7 +63,8 @@ def get_fairscape_config(env_path: str = '/fairscape/.env'):
         default_bucket_path = config_values.get("FAIRSCAPE_MINIO_DEFAULT_BUCKET_PATH"),
         rocrate_bucket=config_values.get("FAIRSCAPE_MINIO_ROCRATE_BUCKET"),
         rocrate_bucket_path = config_values.get("FAIRSCAPE_MINIO_ROCRATE_BUCKET_PATH"),
-        secure= bool(config_values.get("FAIRSCAPE_MINIO_SECURE")=="True"),
+        secure= secure,
+        check_cert= checkCert
     )
 
     if config_values.get("FAIRSCAPE_REDIS_DATABASE"):
@@ -125,6 +136,7 @@ class MinioConfig(BaseModel):
     rocrate_bucket: Optional[str] = Field(default="rocrate")
     rocrate_bucket_path: str | None
     secure: Optional[bool] = Field(default=False)
+    cert_check: Optional[bool] = Field(default=False)
 
 
     def CreateClient(self):
@@ -135,10 +147,11 @@ class MinioConfig(BaseModel):
             uri = f"{self.host}:{self.port}"
 
         return minio.Minio(
-                endpoint= uri, 
-                access_key= self.access_key, 
-                secret_key= self.secret_key,
-                secure = self.secure
+                endpoint = uri, 
+                access_key = self.access_key, 
+                secret_key = self.secret_key,
+                secure = self.secure,
+                cert_check = self.cert_check
                 )
 
 
