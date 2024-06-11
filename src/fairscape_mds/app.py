@@ -20,13 +20,6 @@ from fairscape_mds.routers.evidencegraph import router as EvidenceGraphRouter
 from fairscape_mds.routers.transfer import router as TransferRouter
 from fairscape_mds.routers.resolver import ResolverRouter
 
-from fairscape_mds.config import (
-    get_mongo_config,
-    get_mongo_client
-) 
-
-mongo_config = get_mongo_config()
-mongo_client = get_mongo_client()
 
 tags_metadata = [
     {

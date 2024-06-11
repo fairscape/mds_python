@@ -5,11 +5,17 @@ from fastapi.responses import JSONResponse
 from fairscape_mds.models.project import Project, list_project
 from fairscape_mds.models.auth import ParseAuthHeader, UserNotFound, TokenError
 from fairscape_mds.config import (
-    get_mongo_config,
-    get_mongo_client
+    get_fairscape_config
 ) 
 
 router = APIRouter()
+
+fairscapeConfig = get_fairscape_config()
+mongoClient = fairscapeConfig.CreateMongoClient()
+
+mongoDB = mongoClient[fairscapeConfig.mongo.db]
+identifierCollection = mongoDB[fairscapeConfig.mongo.identifier_collection]
+userCollection = mongoDB[fairscapeConfig.mongo.user_collection]
 
 
 @router.post("/project",
@@ -29,14 +35,9 @@ def project_create(
     - **owner**: an existing user in its compact form with @id, @type, name, and email
     """
 
-    mongo_client = mongo.GetConfig()
-    mongo_db = mongo_client[MONGO_DATABASE]
-    mongo_collection = mongo_db[MONGO_COLLECTION]
-
-
     # decode the credentials and find the user
     try:
-        calling_user = ParseAuthHeader(mongo_collection, Authorization)
+        calling_user = ParseAuthHeader(userCollection, Authorization)
     except UserNotFound:
         return JSONResponse(
             status_code=401,

@@ -2,9 +2,7 @@ from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 
 from fairscape_mds.config import (
-    get_minio_config,
-    get_mongo_config,
-    get_mongo_client,
+        get_fairscape_config
 ) 
 
 from fairscape_mds.models.dataset import (
@@ -17,8 +15,10 @@ from fairscape_mds.models.dataset import (
         )
 
 router = APIRouter()
-mongo_config = get_mongo_config()
-mongo_client = get_mongo_client()
+
+fairscapeConfig = get_fairscape_config()
+mongo_config = fairscapeConfig.mongo
+mongo_client = fairscapeConfig.CreateMongoClient()
 
 mongo_db = mongo_client[mongo_config.db]
 identifier_collection = mongo_db[mongo_config.identifier_collection]

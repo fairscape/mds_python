@@ -3,12 +3,8 @@ from fastapi.responses import JSONResponse, StreamingResponse
 
 import json
 from fairscape_mds.config import (
-    get_mongo_config,
-    get_mongo_client,
-    get_minio_config,
-    get_minio_client,
-    MongoConfig,
-    )
+    get_fairscape_config
+)
 from fairscape_mds.models.dataset import DatasetCreateModel
 from fairscape_mds.models.download import (
     DownloadCreateModel,
@@ -22,15 +18,15 @@ from fairscape_mds.models.download import (
 
 router = APIRouter()
 
-mongo_config = get_mongo_config()
-mongo_client = get_mongo_client()
-
+fairscapeConfig = get_fairscape_config()
+mongo_config = fairscapeConfig.mongo
+mongo_client = fairscapeConfig.CreateMongoClient()
 mongo_db = mongo_client[mongo_config.db]
-identifierCollection = mongo_db[mongo_config.identifier_collection]
-userCollection = mongo_db[mongo_config.user_collection]
+identifier_collection = mongo_db[mongo_config.identifier_collection]
+user_collection = mongo_db[mongo_config.user_collection]
 
-minioConfig = get_minio_config()
-minioClient = get_minio_client()
+minioConfig = fairscapeConfig.minio
+minioClient = fairscapeConfig.CreateMinioClient()
 
 
 @router.post("/register")

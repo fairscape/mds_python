@@ -7,14 +7,17 @@ from fairscape_mds.models.organization import Organization, list_organization
 from fairscape_mds.models.auth import ParseAuthHeader, UserNotFound, TokenError
 
 from fairscape_mds.config import (
-    get_mongo_config,
-    get_mongo_client,
-    MongoConfig,
+    get_fairscape_config
 ) 
 
 
 router = APIRouter()
 
+fairscapeConfig = get_fairscape_config()
+mongoClient = fairscapeConfig.CreateMongoClient()
+mongoDB = mongoClient[fairscapeConfig.mongo.db]
+identifierCollection = mongoDB[fairscapeConfig.mongo.identifier_collection]
+userCollection = mongoDB[fairscapeConfig.mongo.user_collection]
 
 @router.post("/organization",
              summary="Create a organization",
