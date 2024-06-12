@@ -78,7 +78,7 @@ async def uploadAsync(
     zip_filename = str(Path(crate.filename).name)
 
     # get the zipfile extracted name
-    zip_foldername = str(Path(crate.filename).stem)
+    # zip_foldername = str(Path(crate.filename).stem)
 
 
     # upload the zipped ROCrate 
@@ -99,7 +99,7 @@ async def uploadAsync(
                 }
         )
 
-    if fairscapeConfig.minio.rocrate_bucket == '/':
+    if not fairscapeConfig.minio.rocrate_bucket_path or fairscapeConfig.minio.rocrate_bucket_path == "/":
         zippedFilepath = Path(transaction_folder) / Path(zip_filename)
     else:
         zippedFilepath = Path(fairscapeConfig.minio.rocrate_bucket_path) / Path(transaction_folder) / Path(zip_filename)

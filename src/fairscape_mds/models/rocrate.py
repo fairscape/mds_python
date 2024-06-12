@@ -349,7 +349,7 @@ def UploadZippedCrate(
     #source_filepath = Path(ZippedObject.filename).name
 
     if BucketRootPath:
-        upload_filepath = Path(str(TransactionFolder)) / Path(Filename)
+        upload_filepath = Path(str(BucketRootPath)) / Path(str(TransactionFolder)) / Path(Filename)
     else:
         upload_filepath = Path(str(TransactionFolder)) / Path(Filename)
     
@@ -511,6 +511,7 @@ def DeleteExtractedCrate(
 def GetMetadataFromCrate(
         MinioClient, 
         BucketName, 
+        BucketRootPath: str | None,
         TransactionFolder, 
         CratePath, 
         Distribution
@@ -520,6 +521,7 @@ def GetMetadataFromCrate(
     Args:
         MinioClient (Any): MinIO client
         BucketName (str): name for bucket to search for the crate metadata
+        BucketRootPath(str): folder for bucket root path
         TransactionFolder (str): UUID for this transaction 
         CratePath (str): name of expanded crate path
         Distribution (ROCrateDistribution): Distribution information for use within Fairscape
@@ -527,7 +529,10 @@ def GetMetadataFromCrate(
     Returns:
         ro_crate_json (dict): contents of the ro-crate-metadata.json file as a dictionary
     """
-    object_path = f"{TransactionFolder}/{CratePath}/ro-crate-metadata.json"
+    if BucketRootPath:
+        object_path = f"{BucketRootPath}/{TransactionFolder}/{CratePath}/ro-crate-metadata.json"
+    else:
+        object_path = f"{TransactionFolder}/{CratePath}/ro-crate-metadata.json"
 
     rocrate_logger.debug(
         "GetMetadataFromCrate\t" +
@@ -536,7 +541,6 @@ def GetMetadataFromCrate(
     )
 
     try:
-        # List all objects in the bucket
         ro_crate_response = MinioClient.get_object(
             bucket_name= BucketName, 
             object_name=object_path, 
@@ -673,44 +677,63 @@ def GetROCrateMetadata(rocrate_collection: pymongo.collection, rocrate_id):
         return None    
 
 
+class ROCrateException(Exception):
+    """ Exception class for all ROCrate Exceptions"""
+
+    def __init__(self, message, errors):
+        super().__init__(message) 
+        self.errors = errors
+
+    def __str__(self):
+        return self.message
+
+
+
+class ROCrateMetadataExistsException(ROCrateException):
+    """ Raised when metadata already exists in mongoDB """
+    pass
+
+
 def PublishROCrateMetadata(
-        rocrate_json,
-        #rocrate: ROCrate, 
-        rocrate_collection: pymongo.collection.Collection
+        rocrateJSON,
+        rocrateCollection: pymongo.collection.Collection
         ) -> bool:  
     """ Insert ROCrate metadata into mongo rocrate collection
     """
 
-    # TODO Check if @id already exsists?
-    #rocrate_json = rocrate.model_dump(by_alias=True)
-    insert_result = rocrate_collection.insert_one(rocrate_json)
-    if insert_result.inserted_id is None:
+    # Check if @id already exsists
+    rocrateFound = rocrateCollection.find_one(
+            {"@id": rocrateJSON['@id']}
+            )
+
+    if rocrateFound:
+        raise ROCrateMetadataExistsException(f"ROCrate with @id == {rocrateJSON['@id']} found", None)
+
+    insertResult = rocrateCollection.insert_one(rocrateJSON)
+    if insertResult.inserted_id is None:
         return False
     else:
         return True
 
 
 def PublishProvMetadata(
-        rocrate_json,
-        #rocrate: ROCrate, 
-        identifier_collection: pymongo.collection.Collection
+        rocrateJSON,
+        identifierCollection: pymongo.collection.Collection
         ) -> bool:
     """ Insert ROCrate metadata and metadata for all identifiers into the identifier collection
     """
 
-
-
     # for every element in the rocrate model dump json
     #insert_metadata = [ prov.model_dump(by_alias=True) for prov in rocrate.metadataGraph  ]
-    insert_metadata = [ elem for elem in rocrate_json.get("@graph")]
+    insertMetadata = [ elem for elem in rocrateJSON.get("@graph")]
     # insert rocrate json into identifier collection
     #insert_metadata.append(rocrate.model_dump(by_alias=True))
-    insert_metadata.append(rocrate_json)
+    insertMetadata.append(rocrateJSON)
 
     # insert all identifiers into the identifier collection
-    insert_result = identifier_collection.insert_many(insert_metadata)
+    insertResult = identifierCollection.insert_many(insertMetadata)
 
-    if len(insert_result.inserted_ids) != len(insert_metadata):
+    if len(insertResult.inserted_ids) != len(insertMetadata):
         return False
     else:
         return True

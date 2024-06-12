@@ -4,6 +4,7 @@ import sys
 import pathlib
 import io
 import datetime
+import re
 
 
 # temporary fix for importing module problems
@@ -175,11 +176,11 @@ def AsyncRegisterROCrate(transactionFolder: str, filePath: str):
     
     # upload extracted crate to minio
     extractStatus, extractedFileList = UploadExtractedCrate(
-            minioClient,
-            io.BytesIO(zippedContent),
-            fairscapeConfig.minio.default_bucket,
-            fairscapeConfig.minio.default_bucket_path,
-            transactionFolder
+            MinioClient = minioClient,
+            BucketName = fairscapeConfig.minio.default_bucket,
+            BucketRootPath = fairscapeConfig.minio.default_bucket_path,
+            ZippedObject = io.BytesIO(zippedContent),
+            TransactionFolder = transactionFolder
             )
 
     if not extractStatus.success:
@@ -216,14 +217,12 @@ def AsyncRegisterROCrate(transactionFolder: str, filePath: str):
 
     # validate metadata
     try:
-        if fairscapeConfig.minio.default_bucket_path:
-            cratePath = Path(fairscapeConfig.minio.default_bucket_path) / pathlib.Path(filePath).stem
-        else:
-            cratePath = pathlib.Path(filePath).stem
+        cratePath = pathlib.Path(filePath).stem
 
         crateMetadata = GetMetadataFromCrate(
             MinioClient=minioClient, 
             BucketName=fairscapeConfig.minio.default_bucket,
+            BucketRootPath = fairscapeConfig.minio.default_bucket_path,
             TransactionFolder=transactionFolder,
             CratePath=cratePath, 
             Distribution = crateDistribution
@@ -245,7 +244,16 @@ def AsyncRegisterROCrate(transactionFolder: str, filePath: str):
 
         return False
 
-    
+
+    # format identifiers for storage
+    _, splitArk = crateMetadata["@id"].split("ark:")
+    crateMetadata["@id"] = "ark:" + splitArk
+
+    for crateElement in crateMetadata["@graph"]:
+        _, splitArk = crateElement["@id"].split("ark:")
+        crateElement["@id"] = "ark:" + splitArk
+ 
+
     # mint identifiers
     provMetadataMinted = PublishProvMetadata(crateMetadata, identifierCollection)
 
