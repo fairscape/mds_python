@@ -15,7 +15,9 @@ from functools import lru_cache
 import uvicorn
 
 from dotenv import dotenv_values
+import urllib3
 
+urllib3.disable_warnings()
 
 @lru_cache()
 def cached_dotenv(env_path: str = '.env'):
@@ -128,7 +130,7 @@ class MongoConfig(BaseModel):
 
 class MinioConfig(BaseModel):
     host: Optional[str] = Field(default="localhost")
-    port: Optional[str] = Field(default="9000")
+    port: Optional[str] = Field(default=None)
     secret_key: Optional[str] = Field(default="")
     access_key: Optional[str] = Field(default="")
     default_bucket: Optional[str] = Field(default="default")
