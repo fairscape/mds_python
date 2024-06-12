@@ -1,34 +1,5 @@
 # Docker Compose Spec for Local Testing of Fairscape
 services:
-  #  fairscape:
-  #  build: .
-  #  volumes:
-  #  - type: bind
-  #    source: /var/run/docker.sock
-  #    target: /var/run/docker.sock
-  #  - type: bind
-  #    source: ./deploy/docker_compose.env
-  #    target: /fairscape_mds/.env
-  #  - type: bind
-  #    source: ./deploy/casbin_model.conf
-  #    target: /fairscape_mds/casbin_model.conf
-  #  - type: bind
-  #    source: ./deploy/casbin_policy.db
-  #    target: /fairscape_mds/casbin_policy.db
-  #  links:
-  #  - mongo:mongo
-  #  - minio:minio
-  worker:
-    image: ghcr.io/fairscape/mds_python:RELEASE.2024-06-10 
-    volumes:
-    - type: bind
-      source: ./deploy/docker_compose.env
-      target: /fairscape/.env
-    links:
-    - mongo:mongo
-    - minio:minio
-    - redis:redis
-    command: ["python", "fairscape_mds/worker.py" ]
   redis:
     image: redis:7.2.4
     ports:
