@@ -14,13 +14,14 @@ def run(config):
     fairscapeConfig = get_fairscape_config(config) 
 
     # try to instantiate
-    try:
-        fairscapeConfig.SetupMinio()
-        print("setup_minio")
-        fairscapeConfig.SetupMongo()
-        print("setup_mongo")
-    except Exception:
-        pass
+
+    #try:
+    #    fairscapeConfig.SetupMinio()
+    #    print("setup_minio")
+    #    fairscapeConfig.SetupMongo()
+    #    print("setup_mongo")
+    #except Exception:
+    #    pass
 
     fairscapeConfig.RunServer()
 
