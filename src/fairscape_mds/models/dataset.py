@@ -11,8 +11,6 @@ from fairscape_mds.models.fairscape_base import *
 from fairscape_mds.utilities.operation_status import OperationStatus
  
 
-
-
 class DatasetCreateModel(BaseModel, extra=Extra.allow):
     guid: Optional[str] = Field(
         title="guid",

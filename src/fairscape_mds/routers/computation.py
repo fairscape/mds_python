@@ -2,9 +2,6 @@ import pymongo
 from fastapi import APIRouter, Response, BackgroundTasks
 from fairscape_mds.config import (
     get_fairscape_config,
-    get_minio_config,
-    get_mongo_config,
-    get_mongo_client,
 ) 
 
 from fairscape_mds.models.computation import (
@@ -24,8 +21,9 @@ import time
 
 router = APIRouter()
 
-mongo_config = get_mongo_config()
-mongo_client = get_mongo_client()
+fairscapeConfig = get_fairscape_config()
+mongo_config = fairscapeConfig.mongo
+mongo_client = fairscapeConfig.CreateMongoClient()
 
 mongo_db = mongo_client[mongo_config.db]
 identifierCollection = mongo_db[mongo_config.identifier_collection]

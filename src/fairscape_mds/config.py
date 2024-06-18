@@ -15,8 +15,9 @@ from functools import lru_cache
 import uvicorn
 
 from dotenv import dotenv_values
+import urllib3
 
-
+urllib3.disable_warnings()
 
 @lru_cache()
 def cached_dotenv(env_path: str = '.env'):
@@ -26,33 +27,9 @@ def cached_dotenv(env_path: str = '.env'):
     }
     return config
 
-@lru_cache()
-def get_mongo_config():
-    mds_config = get_fairscape_config()
-    return mds_config.mongo
 
 @lru_cache()
-def get_mongo_client():
-    mds_config = get_fairscape_config()
-    return mds_config.CreateMongoClient()
-
-@lru_cache()
-def get_minio_config():
-    mds_config = get_fairscape_config()
-    return mds_config.minio
-
-@lru_cache()
-def get_minio_client():
-    mds_config = get_fairscape_config()
-    return mds_config.CreateMinioClient()
-
-@lru_cache()
-def get_fairscape_url():
-    return get_fairscape_config().url
-    
-
-@lru_cache()
-def get_fairscape_config(env_path: str = '../deploy/local.env'):    
+def get_fairscape_config(env_path: str = '/fairscape/.env'):    
     config_values = cached_dotenv(env_path)
 
     server_mongo_config = MongoConfig.model_validate(
@@ -64,9 +41,20 @@ def get_fairscape_config(env_path: str = '../deploy/local.env'):
             'db': config_values.get('FAIRSCAPE_MONGO_DATABASE'),
             'identifier_collection': config_values.get('FAIRSCAPE_MONGO_IDENTIFIER_COLLECTION'),
             'user_collection': config_values.get('FAIRSCAPE_MONGO_USER_COLLECTION'),
-            'rocrate_collection': config_values.get('FAIRSCAPE_MONGO_ROCRATE_COLLECTION')
+            'rocrate_collection': config_values.get('FAIRSCAPE_MONGO_ROCRATE_COLLECTION'),
+            'async_collection': config_values.get('FAIRSCAPE_MONGO_ASYNC_COLLECTION', 'async')
         }
         )
+
+    if config_values.get("FAIRSCAPE_MINIO_CERT_CHECK"):
+        checkCert = bool(config_values.get("FAIRSCAPE_MINIO_CERT_CHECK")=="True")
+    else:
+        checkCert = False
+
+    if config_values.get("FAIRSCAPE_MINIO_SECURE"):
+        secure = bool(config_values.get("FAIRSCAPE_MINIO_SECURE")=="True")
+    else:
+        secure = False
 
     server_minio_config = MinioConfig(
         host= config_values.get("FAIRSCAPE_MINIO_URI"),
@@ -74,8 +62,35 @@ def get_fairscape_config(env_path: str = '../deploy/local.env'):
         access_key = config_values.get("FAIRSCAPE_MINIO_ACCESS_KEY"),
         secret_key = config_values.get("FAIRSCAPE_MINIO_SECRET_KEY"),
         default_bucket= config_values.get("FAIRSCAPE_MINIO_DEFAULT_BUCKET"), 
+        default_bucket_path = config_values.get("FAIRSCAPE_MINIO_DEFAULT_BUCKET_PATH"),
         rocrate_bucket=config_values.get("FAIRSCAPE_MINIO_ROCRATE_BUCKET"),
-        secure= bool(config_values.get("FAIRSCAPE_MINIO_SECURE")=="True"),
+        rocrate_bucket_path = config_values.get("FAIRSCAPE_MINIO_ROCRATE_BUCKET_PATH"),
+        secure= secure,
+        check_cert= checkCert
+    )
+
+    if config_values.get("FAIRSCAPE_REDIS_DATABASE"):
+        redisDB=int(config_values.get("FAIRSCAPE_REDIS_DATABASE"))
+    else:
+        redisDB=0
+
+    if config_values.get("FAIRSCAPE_REDIS_RESULT_DATABASE"):
+        redisResultDB=int(config_values.get("FAIRSCAPE_REDIS_RESULT_DATABASE"))
+    else:
+        redisResultDB=0
+
+    if config_values.get("FAIRSCAPE_REDIS_PORT"):
+        redisPort= int(config_values.get("FAIRSCAPE_REDIS_PORT"))
+    else:
+        redisPort= 6379
+
+    server_redis_config = RedisConfig(
+        port= redisPort,
+        hostname = config_values.get("FAIRSCAPE_REDIS_HOST", 'localhost'),
+        username= config_values.get("FAIRSCAPE_REDIS_USERNAME"),
+        password= config_values.get("FAIRSCAPE_REDIS_PASSWORD"),
+        database= redisDB,
+        result_database = redisResultDB
     )
 
     # TODO support multiple NAANs
@@ -88,7 +103,8 @@ def get_fairscape_config(env_path: str = '../deploy/local.env'):
             NAAN = config_values.get('FAIRSCAPE_NAAN', '59852'),
             url = config_values.get("FAIRSCAPE_URL"),
             mongo = server_mongo_config,
-            minio = server_minio_config
+            minio = server_minio_config,
+            redis = server_redis_config,
             )
 
 
@@ -101,24 +117,29 @@ class MongoConfig(BaseModel):
     identifier_collection: Optional[str] = Field(default="mds")
     rocrate_collection: Optional[str] = Field(default="rocrate")
     user_collection: Optional[str] = Field(default="users")
+    async_collection: Optional[str] = Field(default="async")
     session_collection: Optional[str] = Field(default="sessions")
 
 
     def CreateClient(self):
 
+        connection_string = f"mongodb://{quote_plus(self.user)}:{quote_plus(self.password)}@{self.host}:{self.port}"
         #connection_string = f"mongodb://{quote_plus(self.user)}:{quote_plus(self.password)}@{self.host}:{self.port}/{self.db}"
-        connection_string = f"mongodb://{quote_plus(self.user)}:{quote_plus(self.password)}@{self.host}:{self.port}/?authSource=admin"
+        #connection_string = f"mongodb://{quote_plus(self.user)}:{quote_plus(self.password)}@{self.host}:{self.port}/?authSource=admin"
         return MongoClient(connection_string)
 
 
 class MinioConfig(BaseModel):
     host: Optional[str] = Field(default="localhost")
-    port: Optional[str] = Field(default="9000")
+    port: Optional[str] = Field(default=None)
     secret_key: Optional[str] = Field(default="")
     access_key: Optional[str] = Field(default="")
-    default_bucket: Optional[str] = Field(default="mds")
+    default_bucket: Optional[str] = Field(default="default")
+    default_bucket_path: str | None 
     rocrate_bucket: Optional[str] = Field(default="rocrate")
+    rocrate_bucket_path: str | None
     secure: Optional[bool] = Field(default=False)
+    cert_check: Optional[bool] = Field(default=False)
 
 
     def CreateClient(self):
@@ -129,10 +150,11 @@ class MinioConfig(BaseModel):
             uri = f"{self.host}:{self.port}"
 
         return minio.Minio(
-                endpoint= uri, 
-                access_key= self.access_key, 
-                secret_key= self.secret_key,
-                secure = self.secure
+                endpoint = uri, 
+                access_key = self.access_key, 
+                secret_key = self.secret_key,
+                secure = self.secure,
+                cert_check = self.cert_check
                 )
 
 
@@ -142,10 +164,18 @@ class ComputeBackendEnum(str, Enum):
 
 
 class RedisConfig(BaseModel):
-    port: int
-    uri: str
-    broker_url: Optional[str]
-    result_backend: Optional[str]
+    port: Optional[int] = Field(default=6379)
+    hostname: Optional[str] = Field(default='localhost')
+    username: Optional[str] = Field(default=None)
+    password: Optional[str] = Field(default=None)
+    database: Optional[int] = Field(default=0)
+    result_database: Optional[int] = Field(default=1)
+
+    def getBrokerURL(self):
+        if self.username and self.password:
+            return f'redis://{self.username}:{self.password}@{self.hostname}:{self.port}/{self.database}'
+        else:
+            return f'redis://{self.hostname}:{self.port}/{self.database}'
 
 
 class K8sComputeConfig(BaseModel):
@@ -161,6 +191,7 @@ class FairscapeConfig(BaseModel):
     url: Optional[str] = Field(default = "http://localhost:8080/")
     mongo: MongoConfig
     minio: MinioConfig
+    redis: Optional[RedisConfig]
 
 
     def CreateMongoClient(self):

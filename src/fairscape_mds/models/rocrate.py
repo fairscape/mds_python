@@ -9,9 +9,12 @@ from pathlib import Path
 from io import BytesIO
 import zipfile
 from zipfile import ZipFile
+
+import minio.api
 from minio.deleteobjects import DeleteObject
 from datetime import datetime
 import pymongo
+
 import sys
 import logging
 
@@ -63,7 +66,7 @@ class ROCrateDataset(FairscapeEVIBaseModel):
     associatedPublication: Optional[str] = Field(default=None)
     additionalDocumentation: Optional[str] = Field(default=None)
     fileFormat: str = Field(alias="format")
-    dataSchema: Optional[Union[str, dict]] = Field(alias="schema", default=None)
+    dataSchema: Optional[Union[str, dict]] = Field(alias="evi:Schema", default=None)
     generatedBy: Optional[List[str]] = Field(default=[])
     derivedFrom: Optional[List[str]] = Field(default=[])
     usedByComputation: Optional[List[str]] = Field(default=[])
@@ -333,15 +336,22 @@ class UploadROCrate():
 
 
 def UploadZippedCrate(
-        MinioClient, 
+        MinioClient: minio.api.Minio, 
+        BucketName: str, 
+        BucketRootPath: str | None,
         ZippedObject, 
-        BucketName, 
         TransactionFolder: uuid.UUID, 
         Filename: str,
         ) -> Tuple[OperationStatus, str]:
+    """ Upload A Zipped ROCrate
+    """
 
     #source_filepath = Path(ZippedObject.filename).name
-    upload_filepath = Path(str(TransactionFolder)) / Path(Filename)
+
+    if BucketRootPath:
+        upload_filepath = Path(str(BucketRootPath)) / Path(str(TransactionFolder)) / Path(Filename)
+    else:
+        upload_filepath = Path(str(TransactionFolder)) / Path(Filename)
     
     upload_result = MinioClient.put_object(
         bucket_name=BucketName, 
@@ -366,17 +376,19 @@ def UploadZippedCrate(
 
 def UploadExtractedCrate(
         MinioClient, 
-        ZippedObject, 
         BucketName: str, 
+        BucketRootPath: str | None,
+        ZippedObject, 
         TransactionFolder: str,
         ) -> Tuple[OperationStatus, List[str]]:
     """Accepts zipped ROCrate, unzip and upload onto MinIO.
 
     Args:
         MinioClient (Any): MinIO client
-        Object (Any): zipped ROCrate file
         ROCrateBucketName (str): Name of S3 Bucket to upload zip archive of ROCrate,
-        Distribution (ROCrateDistribution): Distribution data for use within Fairscape
+        BucketRootPath (str): Root of the ROCrate Path to Upload To
+        ZippedObject (Any): zipped ROCrate file
+        TransactionFolder (str): UUID created for this upload request
 
     Returns:
         OperationStatus: Message
@@ -388,7 +400,10 @@ def UploadExtractedCrate(
         zip_contents = ZippedObject.read()
             
         with zipfile.ZipFile(io.BytesIO(zip_contents), "r") as zip_file:
-            for file_info in zip_file.infolist():
+            # skip first entry on the infolist which is for the folder itself
+            # minio will error if there exist an object which is both a 
+            # directory containing objects and an object itself
+            for file_info in zip_file.infolist()[1::]:
                 file_contents = zip_file.read(file_info.filename)
 
                 # TODO the source filepath will not start at the root of the rocrate
@@ -399,8 +414,10 @@ def UploadExtractedCrate(
                 # Extracted/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha/ro-crate-metadata.json
                 # this causes the GetROCrateMetadata function to fail later on becaues it looks only in
                 # 1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha/ 
-
-                upload_filepath = Path(TransactionFolder) / source_filepath
+                if BucketRootPath:
+                    upload_filepath = Path(BucketRootPath) / Path(TransactionFolder) / source_filepath
+                else: 
+                    upload_filepath = Path(TransactionFolder) / source_filepath
 
                 upload_result = MinioClient.put_object(
                     bucket_name= BucketName, 
@@ -494,6 +511,7 @@ def DeleteExtractedCrate(
 def GetMetadataFromCrate(
         MinioClient, 
         BucketName, 
+        BucketRootPath: str | None,
         TransactionFolder, 
         CratePath, 
         Distribution
@@ -503,6 +521,7 @@ def GetMetadataFromCrate(
     Args:
         MinioClient (Any): MinIO client
         BucketName (str): name for bucket to search for the crate metadata
+        BucketRootPath(str): folder for bucket root path
         TransactionFolder (str): UUID for this transaction 
         CratePath (str): name of expanded crate path
         Distribution (ROCrateDistribution): Distribution information for use within Fairscape
@@ -510,7 +529,10 @@ def GetMetadataFromCrate(
     Returns:
         ro_crate_json (dict): contents of the ro-crate-metadata.json file as a dictionary
     """
-    object_path = f"{TransactionFolder}/{CratePath}/ro-crate-metadata.json"
+    if BucketRootPath:
+        object_path = f"{BucketRootPath}/{TransactionFolder}/{CratePath}/ro-crate-metadata.json"
+    else:
+        object_path = f"{TransactionFolder}/{CratePath}/ro-crate-metadata.json"
 
     rocrate_logger.debug(
         "GetMetadataFromCrate\t" +
@@ -519,7 +541,6 @@ def GetMetadataFromCrate(
     )
 
     try:
-        # List all objects in the bucket
         ro_crate_response = MinioClient.get_object(
             bucket_name= BucketName, 
             object_name=object_path, 
@@ -656,44 +677,63 @@ def GetROCrateMetadata(rocrate_collection: pymongo.collection, rocrate_id):
         return None    
 
 
+class ROCrateException(Exception):
+    """ Exception class for all ROCrate Exceptions"""
+
+    def __init__(self, message, errors):
+        super().__init__(message) 
+        self.errors = errors
+
+    def __str__(self):
+        return self.message
+
+
+
+class ROCrateMetadataExistsException(ROCrateException):
+    """ Raised when metadata already exists in mongoDB """
+    pass
+
+
 def PublishROCrateMetadata(
-        rocrate_json,
-        #rocrate: ROCrate, 
-        rocrate_collection: pymongo.collection.Collection
+        rocrateJSON,
+        rocrateCollection: pymongo.collection.Collection
         ) -> bool:  
     """ Insert ROCrate metadata into mongo rocrate collection
     """
 
-    # TODO Check if @id already exsists?
-    #rocrate_json = rocrate.model_dump(by_alias=True)
-    insert_result = rocrate_collection.insert_one(rocrate_json)
-    if insert_result.inserted_id is None:
+    # Check if @id already exsists
+    rocrateFound = rocrateCollection.find_one(
+            {"@id": rocrateJSON['@id']}
+            )
+
+    if rocrateFound:
+        raise ROCrateMetadataExistsException(f"ROCrate with @id == {rocrateJSON['@id']} found", None)
+
+    insertResult = rocrateCollection.insert_one(rocrateJSON)
+    if insertResult.inserted_id is None:
         return False
     else:
         return True
 
 
 def PublishProvMetadata(
-        rocrate_json,
-        #rocrate: ROCrate, 
-        identifier_collection: pymongo.collection.Collection
+        rocrateJSON,
+        identifierCollection: pymongo.collection.Collection
         ) -> bool:
     """ Insert ROCrate metadata and metadata for all identifiers into the identifier collection
     """
 
-
-
     # for every element in the rocrate model dump json
     #insert_metadata = [ prov.model_dump(by_alias=True) for prov in rocrate.metadataGraph  ]
-    insert_metadata = [ elem for elem in rocrate_json.get("@graph")]
+    insertMetadata = [ elem for elem in rocrateJSON.get("@graph")]
     # insert rocrate json into identifier collection
     #insert_metadata.append(rocrate.model_dump(by_alias=True))
-    insert_metadata.append(rocrate_json)
+    insertMetadata.append(rocrateJSON)
 
     # insert all identifiers into the identifier collection
-    insert_result = identifier_collection.insert_many(insert_metadata)
+    insertResult = identifierCollection.insert_many(insertMetadata)
 
-    if len(insert_result.inserted_ids) != len(insert_metadata):
+    if len(insertResult.inserted_ids) != len(insertMetadata):
         return False
     else:
         return True

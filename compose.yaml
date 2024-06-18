@@ -1,26 +1,16 @@
 # Docker Compose Spec for Local Testing of Fairscape
 services:
-  #  fairscape:
-  #  build: .
-  #  volumes:
-  #  - type: bind
-  #    source: /var/run/docker.sock
-  #    target: /var/run/docker.sock
-  #  - type: bind
-  #    source: ./deploy/docker_compose.env
-  #    target: /fairscape_mds/.env
-  #  - type: bind
-  #    source: ./deploy/casbin_model.conf
-  #    target: /fairscape_mds/casbin_model.conf
-  #  - type: bind
-  #    source: ./deploy/casbin_policy.db
-  #    target: /fairscape_mds/casbin_policy.db
-  #  links:
-  #  - mongo:mongo
-  #  - minio:minio
+  redis:
+    image: redis:7.2.4
+    ports:
+      - 6379:6379
   mongo:
     image: mongo:6.0
     restart: always
+    volumes:
+      - type: bind
+        source: ./deploy/mongo/
+        target: /data/db
     environment:
       MONGO_INITDB_ROOT_USERNAME: mongotestaccess
       MONGO_INITDB_ROOT_PASSWORD: mongotestsecret
@@ -48,10 +38,13 @@ services:
       - type: bind
         source: ./deploy/minio_config
         target: /etc/default/minio
+      - type: bind
+        source: ./deploy/minio/
+        target: /mnt/minio/
     ports:
       - 9000:9000
       - 9001:9001
     environment:
       MINIO_ROOT_USER: miniotestadmin
       MINIO_ROOT_PASSWORD: miniotestsecret
-    command: server /data --console-address ":9001"
+    command: server /mnt/minio --console-address ":9001"

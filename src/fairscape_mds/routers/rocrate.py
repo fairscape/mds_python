@@ -2,7 +2,6 @@ from typing import Union
 from fastapi import (
     APIRouter, 
     UploadFile, 
-    BackgroundTasks,
     File, 
 #    Form, 
 #    Response, 
@@ -30,7 +29,12 @@ from fairscape_mds.models.rocrate import (
     ROCrateDistribution
 )
 
-import asyncio
+from fairscape_mds.worker import (
+    AsyncRegisterROCrate,
+    createUploadJob,
+    getUploadJob
+    )
+
 import logging
 import sys
 
@@ -49,117 +53,12 @@ mongoDB = mongoClient[fairscapeConfig.mongo.db]
 rocrateCollection = mongoDB[fairscapeConfig.mongo.rocrate_collection]
 identifierCollection = mongoDB[fairscapeConfig.mongo.identifier_collection]
 userCollection = mongoDB[fairscapeConfig.mongo.user_collection]
+asyncCollection = mongoDB[fairscapeConfig.mongo.async_collection]
 
 minioConfig= fairscapeConfig.minio
 minioClient = fairscapeConfig.CreateMinioClient()
 
 
-logging.basicConfig(stream=sys.stdout, level=logging.INFO)
-backgroundTaskLogger = logging.getLogger("backgroundTaskLogger")
-
-class ROCrateUploadJob(BaseModel):
-    uid: UUID = Field(default_factory= uuid4)
-    status: str = 'in progress'
-    filePath: str
-    processedFiles: List[str] = Field(default=[])
-    identifiersMinted: List[str] = Field(default=[])
-    errors: List[str] = Field(default=[])
-    completed: bool = Field(default=False)
-
-
-jobs: Dict[UUID, ROCrateUploadJob] = {}
-
-
-def processCrateTask(transactionFolder: UUID, filePath: str):
-    ''' Task of Unzipping Crate, Processing 
-    '''
-
-    backgroundTaskLogger.info(
-            f"Background Task\ttransaction: {str(transactionFolder)}\tmessage: init background rocrate processing"
-            )
-
-    # get zipped crate from minio
-    jobs[transactionFolder].status = 'retrieving crate from minio'
-
-    zippedObject = minioClient.get_object(
-        bucket_name=fairscapeConfig.minio.rocrate_bucket, 
-        object_name=filePath
-        ).read()
-
-
-    backgroundTaskLogger.info(
-            f"Background Task\ttransaction: {str(transactionFolder)}\tmessage: read zipped rocrate object from minio"
-            )
-    
-
-    # unzip crate and upload back to minio
-    jobs[transactionFolder].status = 'extracting crate'
-
-    uploadExtractedResult, extractedPaths  = UploadExtractedCrate(
-        minioClient, 
-        zippedObject, 
-        fairscapeConfig.minio.default_bucket, 
-        str(transactionFolder),
-        ) 
-
-    backgroundTaskLogger.info(
-            f"Background Task\ttransaction: {str(transactionFolder)}\tmessage: uploaded extracted rocrate to minio"
-            )
-
-    crateDistribution = ROCrateDistribution(
-        extractedROCrateBucket = fairscapeConfig.minio.default_bucket,
-        archivedROCrateBucket = fairscapeConfig.minio.rocrate_bucket,
-        extractedObjectPath = extractedPaths,
-        archivedObjectPath =  filePath           
-        )
-
-    # validate metadata
-    jobs[transactionFolder].status = 'validating metadata'
-
-    crate = GetMetadataFromCrate(
-        MinioClient=minioClient, 
-        BucketName=fairscapeConfig.minio.default_bucket,
-        TransactionFolder=transaction_folder,
-        CratePath=zip_foldername, 
-        Distribution = crateDistribution
-        )
-
-    backgroundTaskLogger.info(
-            f"Background Task\ttransaction: {str(transactionFolder)}\tmessage: read metadata from rocrate"
-            )
-
-    # mint identifiers
-    jobs[transactionFolder].status = 'minting identifiers'
-    prov_metadata = PublishProvMetadata(crate, identifier_collection)
-    
-    backgroundTaskLogger.info(
-            f"Background Task\ttransaction: {str(transactionFolder)}\tmessage: published prov metadata"
-            )
-
-    if not prov_metadata:
-        pass
-
-    rocrate_metadata = PublishROCrateMetadata(crate, rocrate_collection)
-    
-    backgroundTaskLogger.info(
-            f"Background Task\ttransaction: {str(transactionFolder)}\tmessage: published rocrate metadata"
-            )
-
-    if not rocrate_metadata:
-        pass
-
-    # finish tasks
-    jobs[transactionFolder].status = 'complete'
-
-
-async def startROCrateProcessing(uid: UUID, zippedFilePath) -> None:
-    queue = asyncio.Queue()
-    task = asyncio.create_task(processCrateTask(queue, uid, zippedFilePath))
-
-    while progress := await queue.get():  # monitor task progress
-        jobs[uid].status = progress
-
-    jobs[uid].status = "complete"
 
 
 @router.post(
@@ -168,8 +67,7 @@ async def startROCrateProcessing(uid: UUID, zippedFilePath) -> None:
         status_code=202
         )
 async def uploadAsync(
-    file: UploadFile,
-    background_tasks: BackgroundTasks
+    crate: UploadFile,
     ):
 
     # create a uuid for transaction
@@ -177,17 +75,18 @@ async def uploadAsync(
     transaction_folder = str(transactionUUID)
 
     # get the zipfile's filename
-    zip_filename = str(Path(file.filename).name)
+    zip_filename = str(Path(crate.filename).name)
 
     # get the zipfile extracted name
-    zip_foldername = str(Path(file.filename).stem)
+    # zip_foldername = str(Path(crate.filename).stem)
 
 
     # upload the zipped ROCrate 
     zipped_upload_status, zippedPath = UploadZippedCrate(
         MinioClient=minioClient,
-        ZippedObject=file.file,
+        ZippedObject=crate.file,
         BucketName=fairscapeConfig.minio.rocrate_bucket,
+        BucketRootPath=fairscapeConfig.minio.rocrate_bucket_path,
         TransactionFolder=transaction_folder,
         Filename=zip_filename
     )
@@ -200,37 +99,39 @@ async def uploadAsync(
                 }
         )
 
+    if not fairscapeConfig.minio.rocrate_bucket_path or fairscapeConfig.minio.rocrate_bucket_path == "/":
+        zippedFilepath = Path(transaction_folder) / Path(zip_filename)
     else:
-        # start background task
-        newTask = ROCrateUploadJob(
-            uid = str(transactionUUID),
-            status = 'in progress',
-            filePath = str(zippedPath),
-            processedFiles = [],
-            identifiersMinted = [],
-            errors = [],
-            completed = False
+        zippedFilepath = Path(fairscapeConfig.minio.rocrate_bucket_path) / Path(transaction_folder) / Path(zip_filename)
+
+    # add to the dictionary of tasks
+    uploadTask = AsyncRegisterROCrate.apply_async(args=(
+        str(transactionUUID),
+        str(zippedFilepath)
+        ))
+
+    # create the
+    uploadJob = createUploadJob(
+        str(transactionUUID), 
+        str(zippedFilepath)
         )
 
-        # add to the dictionary of tasks
-        jobs[newTask.uid] = newTask
-        background_tasks.add_task(processCrateTask, newTask.uid, zippedPath)
+    uploadMetadata = uploadJob.model_dump()
+    uploadMetadata['timeStarted'] = uploadMetadata['timeStarted'].timestamp()
 
-        return JSONResponse(
-            status_code=202,
-            content={
-                "submitted": transaction_folder
-            }
+    return JSONResponse(
+        status_code=201,
+        content=uploadMetadata
         )
-        # return status
 
 
 @router.get(
         "/rocrate/upload-async/status/{submissionUUID}",
         summary=""
         ) 
-def getROCrateStatus(submissionUUID: UUID):
-    jobMetadata = jobs.get(submissionUUID)
+def getROCrateStatus(submissionUUID: str):
+
+    jobMetadata = getUploadJob(submissionUUID)
 
     if jobMetadata is None:
         return JSONResponse(
@@ -242,7 +143,15 @@ def getROCrateStatus(submissionUUID: UUID):
                 )
 
     else:
-        return jobMetadata
+        jobResponse = jobMetadata.model_dump()
+        jobResponse['timeStarted'] = jobResponse['timeStarted'].timestamp()
+        if jobResponse['timeFinished']:
+            jobResponse['timeFinished'] = jobResponse['timeFinished'].timestamp()
+        
+        return JSONResponse(
+                status_code=200,
+                content=jobResponse
+                )
 
 
 @router.post("/rocrate/upload",
@@ -266,6 +175,7 @@ def rocrate_upload(file: UploadFile = File(...)):
         MinioClient=minioClient,
         ZippedObject=file.file,
         BucketName=fairscapeConfig.minio.rocrate_bucket,
+        BucketRootPath=fairscapeConfig.minio.rocrate_bucket_path,
         TransactionFolder=transaction_folder,
         Filename=zip_filename
     )
