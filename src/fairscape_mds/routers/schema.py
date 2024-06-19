@@ -5,7 +5,9 @@ from fairscape_mds.models.schema import Schema, list_schemas
 from fairscape_mds.config import (
     get_fairscape_config,
 )
+
 from fairscape_mds.auth.oauth import getCurrentUser
+from fairscape_mds.models.user import User
 from typing_extensions import Annotated
 
 router = APIRouter()

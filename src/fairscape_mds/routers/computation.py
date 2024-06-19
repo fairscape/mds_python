@@ -1,5 +1,10 @@
 import pymongo
-from fastapi import APIRouter, Response, BackgroundTasks
+from fastapi import (
+        APIRouter, 
+        Response, 
+        Depends,
+        BackgroundTasks
+)
 from fairscape_mds.config import (
     get_fairscape_config,
 ) 
@@ -16,6 +21,7 @@ from fairscape_mds.utilities.operation_status import OperationStatus
 from fairscape_mds.utilities.funcs import *
 
 from typing import Annotated
+from fairscape_mds.models.user import User
 from fairscape_mds.auth.oauth import getCurrentUser
 
 from datetime import datetime

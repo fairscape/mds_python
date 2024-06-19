@@ -18,6 +18,7 @@ from fairscape_mds.models.user import (
         )
 
 from typing import Annotated
+from fairscape_mds.models.user import User
 from fairscape_mds.auth.oauth import getCurrentUser
 
 router = APIRouter()

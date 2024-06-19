@@ -1,4 +1,11 @@
-from fastapi import APIRouter, Response, UploadFile, Form, File
+from fastapi import (
+        APIRouter, 
+        Depends,
+        Response, 
+        UploadFile, 
+        Form, 
+        File
+) 
 from fastapi.responses import JSONResponse, StreamingResponse
 
 import json
@@ -17,6 +24,7 @@ from fairscape_mds.models.download import (
 )
 
 from typing import Annotated
+from fairscape_mds.models.user import User
 from fairscape_mds.auth.oauth import getCurrentUser
 
 router = APIRouter()

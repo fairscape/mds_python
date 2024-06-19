@@ -1,6 +1,7 @@
 from typing import Union
 from fastapi import (
     APIRouter, 
+    Depends,
     UploadFile, 
     File, 
 )
@@ -37,6 +38,7 @@ from uuid import UUID, uuid4
 from pathlib import Path
 
 from typing import Annotated
+from fairscape_mds.models.user import User
 from fairscape_mds.auth.oauth import getCurrentUser
 
 router = APIRouter()

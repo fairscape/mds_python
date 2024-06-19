@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
 
 from fairscape_mds.config import (
@@ -15,6 +15,7 @@ from fairscape_mds.models.dataset import (
 )
 
 from typing import Annotated
+from fairscape_mds.models.user import User
 from fairscape_mds.auth.oauth import getCurrentUser
 
 router = APIRouter()
