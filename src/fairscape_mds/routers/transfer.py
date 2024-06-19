@@ -16,6 +16,9 @@ from fairscape_mds.models.download import (
     deleteDownload
 )
 
+from typing import Annotated
+from fairscape_mds.auth.oauth import getCurrentUser
+
 router = APIRouter()
 
 fairscapeConfig = get_fairscape_config()
@@ -30,7 +33,11 @@ minioClient = fairscapeConfig.CreateMinioClient()
 
 
 @router.post("/register")
-def register_download(download = Form(...), file: UploadFile = File(...)):
+def register_download(
+    currentUser: Annotated[User, Depends(getCurrentUser)],
+    download = Form(...), 
+    file: UploadFile = File(...)
+    ):
 
     # parse the download string from the 
     downloadInstance = DownloadCreateModel.model_validate(json.loads(download))
@@ -96,7 +103,11 @@ def data_download_read(NAAN: str, download_id: str):
 
 
 @router.get("/download/ark:{NAAN}/{download_id}/download")
-def data_download_read(NAAN: str, download_id: str):
+def data_download_read(
+        currentUser: Annotated[User, Depends(getCurrentUser)],
+        NAAN: str, 
+        download_id: str
+    ):
     downloadGUID = f"ark:{NAAN}/{download_id}"
 
     minioPath, readStatus = getDownloadMinioPath(
@@ -121,9 +132,13 @@ def data_download_read(NAAN: str, download_id: str):
 
 
 @router.delete("/download/ark:{NAAN}/{download_id}")
-def transfer_delete(NAAN: str, download_id: str):
+def transfer_delete(
+    currentUser: Annotated[User, Depends(getCurrentUser)],
+    NAAN: str, 
+    download_id: str
+    ):
     """
-	delete the data download, removing its content inside minio but leaving a record in mongo
+	Delete the data download, removing its content inside minio but leaving a tombstone record in mongo
 	"""
     downloadGUID = f"ark:{NAAN}/{download_id}"
 

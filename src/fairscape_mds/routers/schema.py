@@ -5,6 +5,8 @@ from fairscape_mds.models.schema import Schema, list_schemas
 from fairscape_mds.config import (
     get_fairscape_config,
 )
+from fairscape_mds.auth.oauth import getCurrentUser
+from typing_extensions import Annotated
 
 router = APIRouter()
 
@@ -20,7 +22,7 @@ userCollection = mongoDB[fairscapeConfig.mongo.user_collection]
 @router.post('/schema',
              summary="Create a schema",
              response_description="The created schema")
-def schema_create(schema: Schema):
+def schema_create(schema: Schema, currentUser: Annotated[User, Depends(getCurrentUser)]):
     """
     Create a schema with the following properties:
 
@@ -64,7 +66,9 @@ def schema_create(schema: Schema):
 @router.get('/schema', status_code=200,
             summary="List all schemas",
             response_description="Retrieved list of schemas")
-def schema_list():
+def schema_list(
+        currentUser: Annotated[User, Depends(getCurrentUser)]
+    ):
     schemas = list_schemas(identifierCollection)
     return schemas
 
@@ -72,7 +76,11 @@ def schema_list():
 @router.get("/schema/ark:{NAAN}/{postfix}",
             summary="Retrieve a schema",
             response_description="The retrieved schema")
-async def schema_get(NAAN: str, postfix: str):
+def schema_get(
+        currentUser: Annotated[User, Depends(getCurrentUser)],
+        NAAN: str, 
+        postfix: str 
+    ):
     """
     Retrieves a schema based on a given identifier:
 
@@ -100,10 +108,11 @@ async def schema_get(NAAN: str, postfix: str):
             summary="Update a schema",
             response_description="The updated schema")
 def schema_update(
-    NAAN: str,
-    postfix: str,
-    schema: Schema
-):
+        currentUser: Annotated[User, Depends(getCurrentUser)],
+        NAAN: str,
+        postfix: str,
+        schema: Schema
+    ):
     
     schema_id = f"ark:{NAAN}/{postfix}"
     schema = Schema.model_construct(guid=schema_id)
@@ -136,13 +145,18 @@ def schema_update(
 @router.delete("/schema/ark:{NAAN}/{postfix}",
                summary="Delete a schema",
                response_description="The deleted schema")
-def schema_delete(NAAN: str, postfix: str):
+def schema_delete(
+        currentUser: Annotated[User, Depends(getCurrentUser)],
+        NAAN: str, 
+        postfix: str
+    ):
     """
     Deletes a schema based on a given identifier:
 
     - **NAAN**: Name Assigning Authority Number which uniquely identifies an organization e.g. 12345
     - **postfix**: a unique string
     """
+
     schema_id = f"ark:{NAAN}/{postfix}"
 
     schema = Schema.model_construct(guid=schema_id)

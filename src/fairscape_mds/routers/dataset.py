@@ -6,13 +6,16 @@ from fairscape_mds.config import (
 ) 
 
 from fairscape_mds.models.dataset import (
-        DatasetCreateModel, 
-        DatasetWriteModel,
-        DatasetUpdateModel,
-        listDatasets, 
-        deleteDataset, 
-        createDataset, 
-        )
+    DatasetCreateModel, 
+    DatasetWriteModel,
+    DatasetUpdateModel,
+    listDatasets, 
+    deleteDataset, 
+    createDataset, 
+)
+
+from typing import Annotated
+from fairscape_mds.auth.oauth import getCurrentUser
 
 router = APIRouter()
 
@@ -29,8 +32,8 @@ user_collection = mongo_db[mongo_config.user_collection]
              summary="Create a dataset",
              response_description="The created dataset")
 def dataset_create(
-    dataset: DatasetCreateModel,
-#    currentUser: Annotated[User, Depends(getCurrentUser)]
+    currentUser: Annotated[User, Depends(getCurrentUser)],
+    dataset: DatasetCreateModel
     ):
     """
     Create a dataset with the following properties:
@@ -64,7 +67,9 @@ def dataset_create(
 @router.get("/dataset",
             summary="List all datasets",
             response_description="Retrieved list of datasets")
-def dataset_list():
+def dataset_list(
+    currentUser: Annotated[User, Depends(getCurrentUser)],
+    ):
     datasets = listDatasets(identifier_collection)
     return datasets
 
@@ -97,7 +102,10 @@ def dataset_get(NAAN: str, postfix: str):
 @router.put("/dataset",
             summary="Update a dataset",
             response_description="The updated dataset")
-def dataset_update(datasetUpdateInstance: DatasetUpdateModel):
+def dataset_update(
+    currentUser: Annotated[User, Depends(getCurrentUser)],
+    datasetUpdateInstance: DatasetUpdateModel
+    ):
     update_status = dataset.update(identifier_collection)
 
     if update_status.success:
@@ -113,9 +121,13 @@ def dataset_update(datasetUpdateInstance: DatasetUpdateModel):
 
 
 @router.delete("/dataset/ark:{NAAN}/{postfix}",
-               summary="Delete a dataset",
-               response_description="The deleted dataset")
-def dataset_delete(NAAN: str, postfix: str):
+    summary="Delete a dataset",
+    response_description="The deleted dataset")
+def dataset_delete(
+    currentUser: Annotated[User, Depends(getCurrentUser)],
+    NAAN: str, 
+    postfix: str
+    ):
     """
     Deletes a dataset based on a given identifier:
 

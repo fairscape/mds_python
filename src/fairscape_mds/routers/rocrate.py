@@ -3,15 +3,9 @@ from fastapi import (
     APIRouter, 
     UploadFile, 
     File, 
-#    Form, 
-#    Response, 
-#    Header
 )
-from fastapi.responses import (
-    JSONResponse, 
-#    StreamingResponse, 
-#    FileResponse
-)
+from fastapi.responses import JSONResponse
+
 from fairscape_mds.config import get_fairscape_config
 
 from fairscape_mds.models.utils import remove_ids
@@ -38,10 +32,12 @@ from fairscape_mds.worker import (
 import logging
 import sys
 
-from pydantic import BaseModel, Field
 from typing import List, Dict
 from uuid import UUID, uuid4
 from pathlib import Path
+
+from typing import Annotated
+from fairscape_mds.auth.oauth import getCurrentUser
 
 router = APIRouter()
 
@@ -63,12 +59,13 @@ minioClient = fairscapeConfig.CreateMinioClient()
 
 @router.post(
         "/rocrate/upload-async",
-        summary="",
+        summary="Upload a Zipped RO-Crate",
         status_code=202
         )
-async def uploadAsync(
+def uploadAsync(
+    currentUser: Annotated[User, Depends(getCurrentUser)],
     crate: UploadFile,
-    ):
+):
 
     # create a uuid for transaction
     transactionUUID = uuid4()
@@ -76,10 +73,6 @@ async def uploadAsync(
 
     # get the zipfile's filename
     zip_filename = str(Path(crate.filename).name)
-
-    # get the zipfile extracted name
-    # zip_foldername = str(Path(crate.filename).stem)
-
 
     # upload the zipped ROCrate 
     zipped_upload_status, zippedPath = UploadZippedCrate(
@@ -127,9 +120,12 @@ async def uploadAsync(
 
 @router.get(
         "/rocrate/upload-async/status/{submissionUUID}",
-        summary=""
+        summary="Check the Status of an Asynchronous Upload Job"
         ) 
-def getROCrateStatus(submissionUUID: str):
+def getROCrateStatus(
+    currentUser: Annotated[User, Depends(getCurrentUser)],
+    submissionUUID: str
+    ):
 
     jobMetadata = getUploadJob(submissionUUID)
 
@@ -154,175 +150,14 @@ def getROCrateStatus(submissionUUID: str):
                 )
 
 
-@router.post("/rocrate/upload",
-             summary="Unzip the ROCrate and upload to object store",
-             response_description="The transferred rocrate")
-def rocrate_upload(file: UploadFile = File(...)):
-
-    # create a uuid for transaction
-    transaction_folder = str(uuid4())
-
-    # get the zipfile's filename
-    zip_filename = str(Path(file.filename).name)
-
-    # get the zipfile extracted name
-    zip_foldername = str(Path(file.filename).stem)
-
-
-
-    # upload the zipped ROCrate 
-    zipped_upload_status, zippedPath = UploadZippedCrate(
-        MinioClient=minioClient,
-        ZippedObject=file.file,
-        BucketName=fairscapeConfig.minio.rocrate_bucket,
-        BucketRootPath=fairscapeConfig.minio.rocrate_bucket_path,
-        TransactionFolder=transaction_folder,
-        Filename=zip_filename
-    )
-
-    if zipped_upload_status is None:
-        return JSONResponse(
-            status_code=zipped_upload_status.status_code,
-            content={
-                "error": zipped_upload_status.message
-                }
-        )
-
-    # try to seek the begining of the file
-    file.file.seek(0)
-
-    # upload the unziped ROcrate
-    extracted_upload_status, extractedPaths = UploadExtractedCrate(
-        MinioClient=minioClient,
-        ZippedObject=file.file,
-        BucketName=fairscapeConfig.minio.default_bucket,
-        TransactionFolder=transaction_folder,
-    )
-
-    crateDistribution = ROCrateDistribution(
-        extractedROCrateBucket = fairscapeConfig.minio.default_bucket,
-        archivedROCrateBucket = fairscapeConfig.minio.rocrate_bucket,
-        extractedObjectPath = extractedPaths,
-        archivedObjectPath =  str(zippedPath)
-        )
-
-    if not extracted_upload_status.success:
-        return JSONResponse(
-            status_code = extracted_upload_status.status_code,
-            content = {
-                "message": "Error UploadExtractedCrate",
-                "error": extracted_upload_status.message
-                }
-        )
-
-
-    try:
-        # TODO Clean up how distribution is passed around
-        # Get metadata from the unzipped crate
-        crate = GetMetadataFromCrate(
-            MinioClient=minioClient, 
-            BucketName=fairscapeConfig.minio.default_bucket,
-            TransactionFolder=transaction_folder,
-            CratePath=zip_foldername, 
-            Distribution = crateDistribution
-            )
-
-        if crate is None:
-            return JSONResponse(
-                status_code=400,
-                content={"error": "ROCrate Parsing Error"}
-        )
-
-    # TODO handle exception more specifically
-    except Exception: 
-        return JSONResponse(
-            status_code=400,
-            content={
-                "error": "ro-crate-metadata.json not found in ROCrate"
-                }
-        )
-
-        
-    # TODO check if new identifiers must be minted
-
-    # run entailment
-    #crate.entailment()
-    
-
-    # turn off validation for not found metadata
-    # Compare objects referenced in the metadata file to the objects in the crate 
-    #validation_status = crate.validateObjectReference(
-    #    MinioClient=minio_client,
-    #    MinioConfig=minio_config,
-    #    TransactionFolder=transaction_folder,
-    #    CrateName=zip_foldername
-    #    )
-
-
-    #if validation_status.success:
-        # mint all identifiers in identifier namespace
-    
-    prov_metadata = PublishProvMetadata(crate, identifierCollection)
-
-    # TODO check mongo write success
-    if not prov_metadata:
-        pass
-
-    rocrate_metadata = PublishROCrateMetadata(crate, rocrateCollection)
-
-    # TODO check mongo write success
-    if not rocrate_metadata:
-        pass
-
-    return JSONResponse(
-        status_code=201,
-        content={
-            "created": {
-                #"@id": crate.guid,
-                "@id": crate.get("@id"),
-                "@type": "Dataset",
-                #"name": crate.name
-                "name": crate.get("name")
-            }
-        }
-    )
-
-    # else:
-
-    #     remove_status = DeleteExtractedCrate(
-    #         MinioClient=minio_client, 
-    #         BucketName=minio_config.default_bucket,
-    #         TransactionFolder=transaction_folder,
-    #         CratePath=zip_foldername
-    #         )
-        
-    #     # TODO cleanup operations
-
-    #     if not remove_status.success:
-    #         return JSONResponse(
-    #             status_code=remove_status.status_code,
-    #             content={"error": remove_status.message}
-    #         )
-
-    #     return JSONResponse(
-    #         status_code=validation_status.status_code,
-    #         content={"error": validation_status.message}
-    #     )
-
-
 @router.get("/rocrate",
-            summary="List all ROCrates",
-            response_description="Retrieved list of ROCrates")
-def rocrate_list():
-    # TODO check headers to return json or html view
+    summary="List all ROCrates",
+    response_description="Retrieved list of ROCrates")
+def rocrate_list(
+    currentUser: Annotated[User, Depends(getCurrentUser)],
+    ):
 
     rocrate = ListROCrates(rocrate_collection)
-
-    # if headers.requests == "text/html":
-    #    return Response(
-    #       template = "./static/templates/rocrate-list.html" 
-    #        content = rocrate_list
-    #       )
 
     return JSONResponse(
         status_code=200,
@@ -330,8 +165,8 @@ def rocrate_list():
     )
 
 @router.get("/rocrate/ark:{NAAN}/{postfix}",
-            summary="Retrieve metadata about a ROCrate",
-            response_description="JSON metadata describing the ROCrate")
+    summary="Retrieve metadata about a ROCrate",
+    response_description="JSON metadata describing the ROCrate")
 def dataset_get(NAAN: str, postfix: str):
     """
     Retrieves a dataset based on a given identifier:
@@ -355,29 +190,16 @@ def dataset_get(NAAN: str, postfix: str):
             content={"error": read_status.message}
         )
 
-#@router.get("/rocrate/extracted/download/ark:{NAAN}/{postfix:path}",
-#            summary="Download extracted form of ROCrate using StreamingResponse",
-#            response_description="ROCrate downloaded as a zip file")
-#def extracted_rocrate_download(NAAN: str, postfix: str):
-#    rocrate_id = f"ark:{NAAN}/{postfix}"
-#    rocrate_metadata = GetROCrateMetadata(rocrate_collection, rocrate_id)
-#    if rocrate_metadata is None:
-#        return JSONResponse(
-#            status_code=404,
-#            content={"error": f"unable to find record for RO-Crate: {rocrate_id}"}
-#        )
-#
-#    else:
-#        return 
 
-
-@router.get("/rocrate/archived/download/ark:{NAAN}/{postfix:path}",
+@router.get("/rocrate/download/ark:{NAAN}/{postfix}",
             summary="Download archived form of ROCrate using StreamingResponse",
             response_description="ROCrate downloaded as a zip file")
 def archived_rocrate_download(
-        NAAN: str,
-        postfix: str
-):
+    currentUser: Annotated[User, Depends(getCurrentUser)],
+    NAAN: str,
+    postfix: str
+    ):
+
     rocrate_id = f"ark:{NAAN}/{postfix}"
     rocrate_metadata = GetROCrateMetadata(rocrate_collection, rocrate_id)
 

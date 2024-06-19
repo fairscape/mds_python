@@ -1,4 +1,3 @@
-from typing_extensions import Annotated
 from fastapi import (
     APIRouter,
     Header,
@@ -7,6 +6,8 @@ from fastapi import (
 from fastapi.responses import JSONResponse
 
 from fairscape_mds.auth.oauth import getCurrentUser
+from typing_extensions import Annotated
+
 from fairscape_mds.models.user import (
     User, 
     createUser,
@@ -76,7 +77,7 @@ def user_list(currentUser: Annotated[User, Depends(getCurrentUser)]):
 @router.get("/user/ark:{NAAN}/{postfix}",
             summary="Retrieve a user",
             response_description="The retrieved user")
-async def user_get(NAAN: str, postfix: str):
+async def user_get(NAAN: str, postfix: str, currentUser: Annotated[User, Depends(getCurrentUser)):
     """
     Retrieves a user based on a given identifier:
 

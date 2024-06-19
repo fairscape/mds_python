@@ -10,7 +10,6 @@ from fairscape_mds.models.software import (
         getSoftware
         )
 
-from fairscape_mds.auth.oauth import getCurrentUser
 from fairscape_mds.config import (
         get_fairscape_config
         )
@@ -19,9 +18,9 @@ from fairscape_mds.models.user import (
         )
 
 from typing import Annotated
+from fairscape_mds.auth.oauth import getCurrentUser
 
 router = APIRouter()
-
 
 fairscapeConfig = get_fairscape_config()
 mongo_client = fairscapeConfig.CreateMongoClient()
@@ -35,9 +34,9 @@ identifierCollection = mongo_db[fairscapeConfig.mongo.identifier_collection]
     summary="Create a software",
     )
 def software_create(
+        currentUser: Annotated[User, Depends(getCurrentUser)],
         softwareInstance: SoftwareCreateModel, 
-        currentUser: Annotated[User, Depends(getCurrentUser)]
-        ):
+    ):
     """
     Create a software with the following properties:
 
@@ -128,9 +127,9 @@ def software_get(NAAN: str, postfix: str):
     response_description="The deleted software"
     )
 def software_delete(
+    currentUser: Annotated[User, Depends(getCurrentUser)],
     NAAN: str, 
-    postfix: str, 
-    currentUser: Annotated[User, Depends(getCurrentUser)]
+    postfix: str
     ):
     """
     Deletes a software based on a given identifier:

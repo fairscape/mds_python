@@ -20,7 +20,7 @@ userCollection = mongoDB[fairscapeConfig.mongo.user_collection]
 
 router = APIRouter()
 
-@router.post("/token")
+@router.post("/login")
 def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
 
     userInstance, findUserResult = getUserByEmail(form_data.username, userCollection)
@@ -42,7 +42,6 @@ def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
 
     # create a JWT for the token
     new_token = createToken(userInstance.email, userInstance.name)
-
 
     return JSONResponse(
             status_code=200,
