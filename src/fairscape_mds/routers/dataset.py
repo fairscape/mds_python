@@ -48,6 +48,7 @@ def dataset_create(
     datasetInstance = convertDatasetCreateToWrite(datasetInstance, currentUser.guid)
     
     create_status = createDataset(
+            currentUser,
             datasetInstance,
             identifier_collection,
             user_collection
@@ -86,9 +87,9 @@ def dataset_get(NAAN: str, postfix: str):
     - **postfix**: a unique string
     """
 
-    dataset_id = f"ark:{NAAN}/{postfix}"
+    datasetGUID = f"ark:{NAAN}/{postfix}"
 
-    dataset = Dataset.construct(guid=dataset_id)
+    dataset = Dataset.construct(guid=datasetGUID)
     read_status = dataset.read(identifier_collection)
 
     if read_status.success:
@@ -100,24 +101,30 @@ def dataset_get(NAAN: str, postfix: str):
         )
 
 
-@router.put("/dataset",
+@router.put("/dataset/ark:{NAAN}/{postfix}",
             summary="Update a dataset",
             response_description="The updated dataset")
 def dataset_update(
+    NAAN: str,
+    postfix: str,
+    datasetUpdateInstance: DatasetUpdateModel,
     currentUser: Annotated[User, Depends(getCurrentUser)],
-    datasetUpdateInstance: DatasetUpdateModel
     ):
-    update_status = dataset.update(identifier_collection)
 
-    if update_status.success:
+    datasetGUID = f"ark:{NAAN}/{postfix}"
+
+    updateStatus = updateDataset(currentUser, datasetGUID, datasetUpdateInstance, identifier_collection)
+
+
+    if updateStatus.success:
         return JSONResponse(
             status_code=200,
             content={"updated": {"@id": dataset.id, "@type": "evi:Dataset"}}
         )
     else:
         return JSONResponse(
-            status_code=update_status.status_code,
-            content={"error": update_status.message}
+            status_code=updateStatus.status_code,
+            content={"error": updateStatus.message}
         )
 
 

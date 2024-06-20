@@ -32,6 +32,7 @@ from fairscape_mds.models.evidencegraph import EvidenceGraph, list_evidencegraph
 from fairscape_mds.models.rocrate import ROCrate
 from fairscape_mds.models.schema import Schema
 from fairscape_mds.models.fairscape_base import IdentifierPattern
+from fairscape_mds.models.acl import AccessControlList
 
 
 __all__ = [ 
@@ -46,5 +47,6 @@ __all__ = [
     'EvidenceGraph', 
     'ROCrate',
     'Schema',
-    'IdentifierPattern'
+    'IdentifierPattern',
+    'AccessControlList',
 ]
