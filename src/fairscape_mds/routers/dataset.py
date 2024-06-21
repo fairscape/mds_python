@@ -145,6 +145,7 @@ def dataset_delete(
     datasetGUID = f"ark:{NAAN}/{postfix}"
 
     datasetMetadata, deleteStatus = deleteDataset(
+            currentUser,
             datasetGUID,
             identifier_collection,
             user_collection
