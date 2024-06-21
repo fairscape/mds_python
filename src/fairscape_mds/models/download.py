@@ -22,16 +22,6 @@ from fairscape_mds.models.fairscape_base import (
 )
 from fairscape_mds.models.dataset import DatasetWriteModel
 from fairscape_mds.utilities.operation_status import OperationStatus
-from fairscape_mds.config import (
-    get_fairscape_config
-    )
-
-fairscapeConfig = get_fairscape_config()
-fairscapeHost = fairscapeConfig.host
-
-minioConfig = fairscapeConfig.minio
-minioClient = fairscapeConfig.CreateMinioClient()
-
 
 class DownloadCreateModel(FairscapeEVIBaseModel, extra=Extra.allow):
     metadataType: Literal['evi:DataDownload'] = Field(alias="@type", default='evi:DataDownload')
@@ -57,7 +47,9 @@ def createDownload(
         downloadInstance: DownloadCreateModel, 
         dataObject,
         identifierCollection: pymongo.collection.Collection,
-        userCollection: pymongo.collection.Collection
+        userCollection: pymongo.collection.Collection, 
+        minioClient,
+        minioConfig
         ) -> OperationStatus: 
 
     # check that the data download doesn't already exist
@@ -191,7 +183,8 @@ def getDownloadContent(
 def deleteDownload(
         downloadGUID: str,
         identifierCollection: pymongo.collection.Collection,
-        userCollection: pymongo.collection.Collection
+        userCollection: pymongo.collection.Collection,
+        minioClient
         )-> OperationStatus:
 
     # get download metadata 
