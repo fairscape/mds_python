@@ -1,5 +1,24 @@
 # Docker Compose Spec for Local Testing of Fairscape
 services:
+  ldap-frontend:
+    image: dnknth/ldap-ui
+    environment:
+      LDAP_URL: ldap://ldap:1389
+      BASE_DN: "dc=fairscape,dc=net"
+    ports:
+      - 5000:5000
+
+  ldap:
+    image: bitnami/openldap:latest
+    environment:
+      LDAP_ADMIN_USERNAME: "admin"
+      LDAP_ADMIN_PASSWORD: "adminpassword"
+      LDAP_USERS: "fairscapeUser"
+      LDAP_PASSWORDS: "fairscapePass"
+      LDAP_ROOT: "dc=fairscape,dc=net"
+      LDAP_ADMIN_DN: "cn=admin,dc=fairscape,dc=net"
+    ports:
+      - 1389:1389
   redis:
     image: redis:7.2.4
     ports:
