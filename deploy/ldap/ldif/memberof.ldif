@@ -1,0 +1,12 @@
+# when modifying existing module list
+#dn: cn=module,cn=config
+#changetype: modify
+#add: olcModuleLoad
+#olcModuleLoad: memberof.so
+
+
+dn: cn=module{1},cn=config
+objectClass: olcModuleList
+cn: module{1}
+olcModulePath: /opt/bitnami/openldap/lib/openldap
+olcModuleLoad: {0}memberof.so
