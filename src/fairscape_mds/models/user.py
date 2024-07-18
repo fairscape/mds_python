@@ -7,6 +7,15 @@ from fairscape_mds.models.fairscape_base import *
 from fairscape_mds.utilities.operation_status import OperationStatus
 from fairscape_mds.utilities.utils import validate_email
 
+class UserLDAP(BaseModel):
+    dn: str 
+    email: str
+    givenName: str
+    surname: str
+    organization: str
+    memberOf: List[str]
+
+
 class User(FairscapeBaseModel, extra=Extra.allow):
     context: dict = Field( 
         default= {"@vocab": "https://schema.org/", "evi": "https://w3id.org/EVI#"},

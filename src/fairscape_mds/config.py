@@ -219,11 +219,11 @@ class LDAPConfig(BaseModel):
         
         serverURI = f'ldap://{self.hostname}:{self.port}'
 
-        connection = connectLDAPServer(
-            ldapURI=serverURI,
-            userRDN=self.adminRDN,
-            userPassword=self.adminPassword
-        )
+        connection = ldap3.Connection(
+                serverURI,
+                user=self.adminDN,
+                password=self.adminPassword
+            )
 
         bind_response = connection.bind()
         return connection
@@ -251,10 +251,10 @@ class LDAPConfig(BaseModel):
         else:
             userDN = username
 
-        connection = connectLDAPServer(
-            ldapURI=serverURI,
-            userRDN=userDN,
-            userPassword=password
+        connection = ldap3.Connection(
+            serverURI,
+            user=userDN,
+            password=password
         )
         bind_response = connection.bind()
         return connection        
