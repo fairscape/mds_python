@@ -247,7 +247,7 @@ class LDAPConfig(BaseModel):
             if "cn=" not in username:
                 userDN = f"cn={username},{self.usersDN}"
             else:
-                userDN = f"{username},self.usersDN}"
+                userDN = f"{username},{self.usersDN}"
         else:
             userDN = username
 
