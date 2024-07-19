@@ -69,6 +69,8 @@ def convert_to_rdf(json_data):
 
 def add_link(value, download = False):
     """For values that match ark or look like urls add a hyperlink"""
+    if isinstance(value,list):
+        return value
     url_pattern = r'^(http|https)://[^\s]+'
     if download:
         return f'<a href={FAIRSCAPE_URL}rocrate/archived/download/{value}>Download Link</a>'
@@ -80,11 +82,30 @@ def add_link(value, download = False):
 
 def find_metadata(collections, naan, postfix):
     """Look for ID in all possible collections return first document."""
+    print(f"ark:{naan}/{postfix}")
     for collection in collections:
         ark_metadata = collection.find_one({"@id": f"ark:{naan}/{postfix}"}, projection={"_id": 0, "@graph._id": 0})
         if ark_metadata:
             return ark_metadata
-    return
+    return {}
+
+def filter_nonprov(d, keys_to_keep):
+    """
+    Recursively filter a dictionary, keeping only the keys in keys_to_keep.
+    If a list is encountered, apply the filtering to any dictionaries within the list.
+
+    Parameters:
+    d (dict): The dictionary to filter.
+    keys_to_keep (list): The list of keys to keep.
+
+    Returns:
+    dict: A new dictionary with only the keys in keys_to_keep.
+    """
+    if isinstance(d, dict):
+        return {k: filter_nonprov(v, keys_to_keep) for k, v in d.items() if k in keys_to_keep}
+    elif isinstance(d, list):
+        return [filter_nonprov(item, keys_to_keep) for item in d]
+    return d
 
 templates = Jinja2Templates(directory="fairscape_mds/templates/page")
 templates.env.filters['add_link'] = add_link
@@ -137,9 +158,12 @@ def resolve(
         _, eg_NAAN = prefix_and_naan.split(":")
         
         #far from perfect, but default to shwoing first @graph or normal metadata
-        eg_metadata = find_metadata(collections, eg_NAAN, eg_postfix).get("@graph",[ark_metadata])[0]
+        eg_metadata = find_metadata(collections, eg_NAAN, eg_postfix)
+        if '@graph' in eg_metadata.keys():
+            eg_metadata = eg_metadata.get("@graph",[ark_metadata])[0]
+
     else:
-        eg_metadata = ark_metadata
+        eg_metadata = filter_nonprov(ark_metadata,["@id",'name','description',"@type",'generatedBy',"isPartOf","@graph","usedByComputation","usedSoftware","usedDataset"])
 
     model_map = {
         "user": (User, "user_template.html"),
@@ -154,9 +178,11 @@ def resolve(
     #TODO clean up this line
     metadata_type = ark_metadata.get("@type").lower().replace('evi:', '').replace('person','user').replace("https://w3id.org/evi#","").replace("https://w2id.org/evi#","")
     type_info = model_map.get(metadata_type)
-    try: 
+
+    try:
         if type_info:
             model_class, template_name = type_info
+            ark_metadata.pop('distribution', None)
             model_instance = model_class.construct(**ark_metadata)
             json_data = json.dumps(model_instance.dict(by_alias=True), default=str, indent=2)
             eg_json = json.loads(json.dumps(eg_metadata, default=str))

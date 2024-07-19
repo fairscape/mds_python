@@ -10,7 +10,7 @@ from fairscape_mds.models.fairscape_base import *
 
 class EvidenceGraph(FairscapeEVIBaseModel, extra = Extra.allow):
     metadataType: str = Field(default="evi:EvidenceGraph", alias="@type")
-    owner: constr(pattern=IdentifierPattern)
+    #owner: constr(pattern=IdentifierPattern)
 
     # graph: str
 

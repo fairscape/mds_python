@@ -1,193 +1,197 @@
 <script>
-    var svg = d3.select("svg"),
-        width = +svg.attr("width"),
-        height = +svg.attr("height"),
-        g = svg.append("g").attr("transform", "translate(100,0)");
+  var svg = d3.select("svg"),
+      width = +svg.attr("width"),
+      height = +svg.attr("height"),
+      g = svg.append("g").attr("transform", "translate(100,0)");
 
-    var zoom = d3.zoom()
-        .scaleExtent([0.5, 3])
-        .on("zoom", function () {
-            g.attr("transform", d3.event.transform);
-        });
+  var zoom = d3.zoom()
+      .scaleExtent([0.5, 3])
+      .on("zoom", function () {
+          g.attr("transform", d3.event.transform);
+      });
 
-    svg.call(zoom);
+  svg.call(zoom);
 
-    var tree = d3.tree().size([height, width - 160]);
+  var tree = d3.tree().size([height, width - 160]);
 
-    var root;
-    var i = 0;
+  var root;
+  var i = 0;
 
-    function update(source) {
-        var treeData = tree(root);
-        var nodes = treeData.descendants().filter(function (d) { return d.data.visible !== false; });
-        var links = treeData.links().filter(function (d) { return d.source.data.visible !== false && d.target.data.visible !== false; });
+  function update(source) {
+      var treeData = tree(root);
+      var nodes = treeData.descendants().filter(function (d) { return d.data.visible !== false; });
+      var links = treeData.links().filter(function (d) { return d.source.data.visible !== false && d.target.data.visible !== false; });
 
-        nodes.forEach(function (d) {
-            d.y = (d.depth - 1) * 180 + (d.data.type === 'property' ? 90 : 180); // Property nodes are closer
-        });
+      nodes.forEach(function (d) {
+          d.y = (d.depth - 1) * 180 + (d.data.type === 'property' ? 90 : 180); // Property nodes are closer
+      });
 
-        var node = g.selectAll('.node')
-            .data(nodes, function (d) { return d.id || (d.id = ++i); });
+      var node = g.selectAll('.node')
+          .data(nodes, function (d) { return d.id || (d.id = ++i); });
 
-        var nodeEnter = node.enter().append('g')
-            .attr('class', 'node')
-            .attr('transform', function (d) {
-                return "translate(" + d.y + "," + d.x + ")";
-            })
-            .on('click', click);
+      var nodeEnter = node.enter().append('g')
+          .attr('class', 'node')
+          .attr('transform', function (d) {
+              return "translate(" + d.y + "," + d.x + ")";
+          })
+          .on('click', click);
 
-        nodeEnter.append('circle')
-            .attr('r', 10)
-            .style("fill", function (d) {
-                if (d.data.type === "property") {
-                    return d.data.nameOnly ? "#66BFFF" : "#E6F7FF";
-                }
-                return d.children ? "#FFFF99" : "#FFEF00";
-            });
+      nodeEnter.append('circle')
+          .attr('r', 10)
+          .style("fill", function (d) {
+              if (d.data.type === "property") {
+                  return d.data.nameOnly ? "#66BFFF" : "#E6F7FF";
+              }
+              return d.children ? "#FFFF99" : "#FFEF00";
+          });
 
-        nodeEnter.append('text')
-            .attr("dy", ".35em")
-            .attr("x", function (d) { return d.children || d._children ? -13 : 13; })
-            .attr("text-anchor", function (d) { return d.children || d._children ? "end" : "start"; })
-            .text(function (d) {
-                if (d.data.type === "property") {
-                    return d.data.nameOnly ? `${d.data.name}:` : `${d.data.name}: ${d.data.value}`;
-                }
-                return d.data.name;
-            });
+      nodeEnter.append('text')
+          .attr("dy", ".35em")
+          .attr("x", function (d) { return d.children || d._children ? -13 : 13; })
+          .attr("text-anchor", function (d) { return d.children || d._children ? "end" : "start"; })
+          .text(function (d) {
+              if (d.data.type === "property") {
+                  return d.data.nameOnly ? `${d.data.name}:` : `${d.data.name}: ${d.data.value}`;
+              }
+              return d.data.name;
+          });
 
-        var nodeUpdate = nodeEnter.merge(node);
+      var nodeUpdate = nodeEnter.merge(node);
 
-        nodeUpdate.transition()
-            .duration(500)
-            .attr("transform", function (d) {
-                return "translate(" + d.y + "," + d.x + ")";
-            });
+      nodeUpdate.transition()
+          .duration(500)
+          .attr("transform", function (d) {
+              return "translate(" + d.y + "," + d.x + ")";
+          });
 
-        nodeUpdate.select('circle').transition()
-            .duration(500)
-            .style("fill", function (d) {
-                if (d.data.type === "property") {
-                    return d.data.nameOnly ? "#66BFFF" : "#E6F7FF";
-                }
-                return d.children ? "#FFFF99" : "#FFEF00";
-            });
+      nodeUpdate.select('circle').transition()
+          .duration(500)
+          .style("fill", function (d) {
+              if (d.data.type === "property") {
+                  return d.data.nameOnly ? "#66BFFF" : "#E6F7FF";
+              }
+              return d.children ? "#FFFF99" : "#FFEF00";
+          });
 
+      nodeUpdate.select('text').transition()
+          .duration(500)
+          .text(function (d) {
+              if (d.data.type === "property") {
+                  return d.data.nameOnly ? `${d.data.name}:` : `${d.data.name}: ${d.data.value}`;
+              }
+              return d.data.name;
+          });
 
-        nodeUpdate.select('text').transition()
-            .duration(500)
-            .text(function (d) {
-                if (d.data.type === "property") {
-                    return d.data.nameOnly ? `${d.data.name}:` : `${d.data.name}: ${d.data.value}`;
-                }
-                return d.data.name;
-            });
+      var nodeExit = node.exit().transition()
+          .duration(500)
+          .attr("transform", function (d) {
+              return "translate(" + source.y + "," + source.x + ")";
+          })
+          .remove();
 
+      var link = g.selectAll(".link")
+          .data(links, function (d) { return d.target.id; });
 
+      var linkEnter = link.enter().insert('path', "g")
+          .attr("class", "link")
+          .attr('d', d3.linkHorizontal()
+              .x(function (d) { return d.y; })
+              .y(function (d) { return d.x; }));
 
-        var nodeExit = node.exit().transition()
-            .duration(500)
-            .attr("transform", function (d) {
-                return "translate(" + source.y + "," + source.x + ")";
-            })
-            .remove();
+      var linkUpdate = linkEnter.merge(link);
 
-        var link = g.selectAll(".link")
-            .data(links, function (d) { return d.target.id; });
+      linkUpdate.transition()
+          .duration(250)
+          .attr('d', d3.linkHorizontal()
+              .x(function (d) { return d.y; })
+              .y(function (d) { return d.x; }));
 
-        var linkEnter = link.enter().insert('path', "g")
-            .attr("class", "link")
-            .attr('d', d3.linkHorizontal()
-                .x(function (d) { return d.y; })
-                .y(function (d) { return d.x; }));
+      var linkExit = link.exit().transition()
+          .duration(250)
+          .remove();
 
-        var linkUpdate = linkEnter.merge(link);
+      nodes.forEach(function (d) {
+          d.x0 = d.x;
+          d.y0 = d.y;
+      });
+  }
 
-        linkUpdate.transition()
-            .duration(250)
-            .attr('d', d3.linkHorizontal()
-                .x(function (d) { return d.y; })
-                .y(function (d) { return d.x; }));
+  function click(d) {
+      if (d.data.type === "property") {
+          d.data.nameOnly = !d.data.nameOnly;
+          update(d);
+      } else {
+          if (d.children) {
+              d._children = d.children;
+              d.children = null;
+          } else {
+              d.children = d._children;
+              d._children = null;
+          }
+          update(d);
+      }
+  }
 
-        var linkExit = link.exit().transition()
-            .duration(250)
-            .remove();
+  function collapse(d) {
+      if (d.children) {
+          d._children = d.children;
+          d._children.forEach(collapse);
+          d.children = null;
+      }
+  }
 
-        nodes.forEach(function (d) {
-            d.x0 = d.x;
-            d.y0 = d.y;
-        });
-    }
+  function processData(data) {
+      function recurse(value) {
+          if (value != null && typeof value === 'object') {
+              let children = [];
+              for (let k in value) {
+                  if (value.hasOwnProperty(k)) {
+                      if (typeof value[k] === 'object' && value[k] !== null) {
+                          if (Array.isArray(value[k])) {
+                              value[k].forEach((item, index) => {
+                                  children.push(recurse({
+                                      name: `${k} ${index}`,
+                                      ...item
+                                  }));
+                              });
+                          } else {
+                              children.push(recurse({
+                                  name: k,
+                                  ...value[k]
+                              }));
+                          }
+                      } else {
+                          // Direct properties are handled here
+                          children.push({
+                              name: k,
+                              value: value[k],
+                              type: 'property',
+                              visible: true,
+                              textVisible: true,
+                              nameOnly: k === "description"  // Default to true if the key is "description", false otherwise
+                          });
+                      }
+                  }
+              }
+              return {
+                  name: value.name || value.id || "Node",
+                  children: children,
+                  visible: true,
+                  type: value.type || 'default'
+              };
+          }
+          return value;
+      }
+      return recurse(data);
+  }
 
-    function click(d) {
-        if (d.data.type === "property") {
-            d.data.nameOnly = !d.data.nameOnly;
-            update(d);
-        } else {
-            if (d.children) {
-                d._children = d.children;
-                d.children = null;
-            } else {
-                d.children = d._children;
-                d._children = null;
-            }
-            update(d);
-        }
-    }
+  var jsonData = {{ evidencegraph | tojson }};
+  console.log(jsonData);
+  root = d3.hierarchy(processData(jsonData), function (d) { return d.children; });
+  root.x0 = height / 2;
+  root.y0 = 0;
 
+  root.children.forEach(collapse); // Collapse all children of root
 
-
-    function processData(data) {
-        function recurse(value) {
-            if (value != null && typeof value === 'object') {
-                let children = [];
-                for (let k in value) {
-                    if (value.hasOwnProperty(k)) {
-                        if (typeof value[k] === 'object' && value[k] !== null) {
-                            if (Array.isArray(value[k])) {
-                                value[k].forEach((item, index) => {
-                                    children.push(recurse({
-                                        name: `${k} ${index}`,
-                                        ...item
-                                    }));
-                                });
-                            } else {
-                                children.push(recurse({
-                                    name: k,
-                                    ...value[k]
-                                }));
-                            }
-                        } else {
-                            // Direct properties are handled here
-                            children.push({
-                                name: k,
-                                value: value[k],
-                                type: 'property',
-                                visible: true,
-                                textVisible: true,
-                                nameOnly: k === "description"  // Default to true if the key is "description", false otherwise
-                            });
-                        }
-                    }
-                }
-                return {
-                    name: value.name || value.id || "Node",
-                    children: children,
-                    visible: true,
-                    type: value.type || 'default'
-                };
-            }
-            return value;
-        }
-        return recurse(data);
-    }
-
-
-    var jsonData = {{ evidencegraph | tojson }};
-
-    root = d3.hierarchy(processData(jsonData), function (d) { return d.children; });
-    root.x0 = height / 2;
-    root.y0 = 0;
-
-    update(root);
+  update(root);
 </script>

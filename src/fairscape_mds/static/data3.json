@@ -1,0 +1,48 @@
+{
+    "name": "Output Data",
+    "@type": "EVI:Dataset",
+    "description": "An example output from a Compuation.",
+    "id": "Output Data",
+    "genereatedBy": {
+        "name": "Fake Compuatation",
+        "@type": "EVI:Computation",
+        "id": "Processing Compuation",
+        "description": "Processing computation.",
+        "usedDataset": [
+            {
+                "name": "Middle Data",
+                "@type": "EVI:Dataset",
+                "description": "Fake Input Dataset.",
+                "id": "Middle Data",
+                "genereatedBy": {
+                    "name": "Early Compuatation",
+                    "@type": "EVI:Computation",
+                    "id": "Processing Compuation",
+                    "description": "Processing computation.",
+                    "usedDataset": [
+                        {
+                            "name": "First Data",
+                            "@type": "EVI:Dataset",
+                            "description": "Fake Input Dataset.",
+                            "id": "First Data"
+                        }
+                    ],
+                    "usedSoftware": {
+                        "name": "Sample Software2",
+                        "@type": "EVI:Software",
+                        "description": "Python processing script.",
+                        "id": "Processing Software Script2"
+                    }
+                }
+            }
+        ],
+        "usedSoftware": [
+            {
+                "name": "Sample Software",
+                "@type": "EVI:Software",
+                "description": "Python processing script.",
+                "id": "Processing Software Script"
+            }
+        ]
+    }
+}

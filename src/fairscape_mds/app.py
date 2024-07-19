@@ -7,6 +7,7 @@ from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 from fastapi.security import OAuth2PasswordRequestForm
 
+from fastapi.middleware.cors import CORSMiddleware
 from fairscape_mds.routers.user import router as UserRouter
 from fairscape_mds.routers.schema import router as SchemaRouter
 #from fairscape_mds.routers.group import router as GroupRouter
@@ -96,6 +97,19 @@ app = FastAPI(
     openapi_tags=tags_metadata
 )
 
+origins = [
+    "http://localhost:5173",  # Your frontend origin
+    "http://localhost:8080",  # Your backend origin
+    # Add other origins if needed
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 #static_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'static')
 

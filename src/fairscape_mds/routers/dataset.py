@@ -37,7 +37,7 @@ def dataset_create(dataset: DatasetCreateModel):
     - **owner**: an existing user in its compact form with @id, @type, name, and email
     """
 
-    datasetInstance = dataset.convert()
+    datasetInstance = dataset
     
     create_status = createDataset(
             datasetInstance,

@@ -50,8 +50,8 @@ def createComputation(
         return OperationStatus(False, "computation already exists", 400)
 
     # check that owner exists
-    if userCollection.find_one({"@id": computationInstance.owner}) is None:
-        return OperationStatus(False, f"owner {computationInstance.owner} does not exist", 404)
+    # if userCollection.find_one({"@id": computationInstance.owner}) is None:
+    #     return OperationStatus(False, f"owner {computationInstance.owner} does not exist", 404)
 
 
     # check that software exists
@@ -73,13 +73,13 @@ def createComputation(
     insertComputationResult = identifierCollection.insert_one(computationMetadata)
 
     # update user
-    updateUserResult = userCollection.update_one(
-            {"@id": computationInstance.owner},
-            {"$push": {"computations": computationInstance.guid}}
-            )
+    # updateUserResult = userCollection.update_one(
+    #         {"@id": computationInstance.owner},
+    #         {"$push": {"computations": computationInstance.guid}}
+    #         )
 
-    if updateUserResult.modified_count != 1:
-        return OperationStatus(False, f"failed to update user list of software", 500)
+    # if updateUserResult.modified_count != 1:
+    #     return OperationStatus(False, f"failed to update user list of software", 500)
 
     # update software
     updateSoftwareResult = identifierCollection.update_one(

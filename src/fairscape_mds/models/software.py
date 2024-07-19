@@ -165,9 +165,9 @@ def createSoftware(
         return OperationStatus(False, "software already exists", 400)
 
     # check that owner exists
-    owner = userCollection.find_one({"@id": softwareInstance.owner})
-    if owner is None:
-        return OperationStatus(False, "owner does not exist", 404)
+    # owner = userCollection.find_one({"@id": softwareInstance.owner})
+    # if owner is None:
+    #     return OperationStatus(False, "owner does not exist", 404)
 
     # embeded bson documents to enable Mongo queries
     softwareDict = softwareInstance.model_dump(by_alias=True)
@@ -187,13 +187,13 @@ def createSoftware(
             {"$push": {"software": softwareInstance.guid}}
             )
 
-    if userUpdateResult.modified_count != 1:
-        return OperationStatus(
-                False, 
-                f"error updating user {softwareInstance.owner}\n" + 
-                f"matched_documents: {userUpdateResult.matched_count}\n" + 
-                f"modified_count: {userUpdateResult.modified_count}",
-                500)
+    # if userUpdateResult.modified_count != 1:
+    #     return OperationStatus(
+    #             False, 
+    #             f"error updating user {softwareInstance.owner}\n" + 
+    #             f"matched_documents: {userUpdateResult.matched_count}\n" + 
+    #             f"modified_count: {userUpdateResult.modified_count}",
+    #             500)
 
     # TODO update organization
 

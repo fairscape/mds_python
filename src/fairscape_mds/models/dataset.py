@@ -49,6 +49,7 @@ class DatasetCreateModel(BaseModel, extra=Extra.allow):
     keywords: List[str]
     owner: str = Field(...)
     includedInDataCatalog: Optional[str] = Field(default=None)
+    hasEvidenceGraph: Optional[str] = Field(default=None)
     sourceOrganization: Optional[str] = Field(default=None)
     author: Optional[str] = Field(default=None)
     dateCreated: Optional[datetime] = Field(default_factory=datetime.now)
@@ -71,7 +72,9 @@ class DatasetCreateModel(BaseModel, extra=Extra.allow):
                 author=self.author,
                 dateCreated=self.dateCreated,
                 dateModified=self.dateModified,
-                published=True
+                published=True,
+                hasEvidenceGraph=self.hasEvidenceGraph,
+                generatedBy=self.generatedBy
                 )
 
 
@@ -169,8 +172,8 @@ def createDataset(
         return OperationStatus(False, "dataset already exists", 400)
     
     # check that owner exists
-    if userCollection.find_one({"@id": datasetInstance.owner}) is None:
-        return OperationStatus(False, "owner does not exist", 404)
+    # if userCollection.find_one({"@id": datasetInstance.owner}) is None:
+    #     return OperationStatus(False, "owner does not exist", 404)
 
     # if generatedBy is an ark
     # make sure it exists in the database as a computation
@@ -199,15 +202,15 @@ def createDataset(
         
 
     # update operations for the owner user of the dataset
-    updateResult = userCollection.update_one(
-        {"@id": datasetInstance.owner}, 
-        {"$push": {"datasets": datasetInstance.guid}}
-        )
+    # updateResult = userCollection.update_one(
+    #     {"@id": datasetInstance.owner}, 
+    #     {"$push": {"datasets": datasetInstance.guid}}
+    #     )
 
     # check that the update operation succeeded
-    if updateResult.modified_count != 1:
-        identifierCollection.delete_one({"@id": datasetInstance.guid})
-        return OperationStatus(False, f"error updating user on dataset create", 500)
+    # if updateResult.modified_count != 1:
+    #     identifierCollection.delete_one({"@id": datasetInstance.guid})
+    #     return OperationStatus(False, f"error updating user on dataset create", 500)
     
     # TODO update organization
 

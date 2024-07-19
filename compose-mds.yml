@@ -1,0 +1,70 @@
+# Docker Compose Spec for Local Testing of Fairscape
+services:
+  #  fairscape:
+  #  build: .
+  #  volumes:
+  #  - type: bind
+  #    source: /var/run/docker.sock
+  #    target: /var/run/docker.sock
+  #  - type: bind
+  #    source: ./deploy/docker_compose.env
+  #    target: /fairscape_mds/.env
+  #  - type: bind
+  #    source: ./deploy/casbin_model.conf
+  #    target: /fairscape_mds/casbin_model.conf
+  #  - type: bind
+  #    source: ./deploy/casbin_policy.db
+  #    target: /fairscape_mds/casbin_policy.db
+  #  links:
+  #  - mongo:mongo
+  #  - minio:minio
+  mongo:
+    image: mongo:6.0
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: mongotestaccess
+      MONGO_INITDB_ROOT_PASSWORD: mongotestsecret
+      MONGO_INITDB_DATABASE: admin
+    ports:
+      - 27017:27017
+    command: ["mongod", "--auth"]
+  mongo-express:
+    image: mongo-express
+    restart: always
+    ports:
+      - 8081:8081
+    environment:
+      ME_CONFIG_BASICAUTH_USERNAME: meadmin
+      ME_CONFIG_BASICAUTH_PASSWORD: meadmin
+      ME_CONFIG_MONGODB_ADMINUSERNAME: mongotestaccess
+      ME_CONFIG_MONGODB_ADMINPASSWORD: mongotestsecret
+      ME_CONFIG_MONGODB_URL: mongodb://mongotestaccess:mongotestsecret@mongo:27017/
+    links:
+      - mongo:mongo
+  minio:
+    image: minio/minio
+    restart: always
+    ports:
+      - 9000:9000
+      - 9001:9001
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: miniotestadmin
+      MINIO_ROOT_PASSWORD: miniotestsecret
+  # mds:
+  #   image: jniestroy/mds
+  #   restart: always
+  #   ports:
+  #     - 8000:8000
+  #   links:
+  #     - mongo:mongo
+  #     - minio:minio
+  #   command:
+  #     [
+  #       "uvicorn",
+  #       "fairscape_mds.mds.app:app",
+  #       "--host",
+  #       "0.0.0.0",
+  #       "--port",
+  #       "8000"
+  #     ]
