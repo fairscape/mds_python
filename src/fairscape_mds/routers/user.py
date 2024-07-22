@@ -67,37 +67,37 @@ def user_create(passedUser: User):
         )
 
 
-@router.get('/user', status_code=200,
-            summary="List all users",
-            response_description="Retrieved list of users")
-def user_list(currentUser: Annotated[User, Depends(getCurrentUser)]):
-    users = listUsers(userCollection)
-    return users
-
-
-@router.get("/user/ark:{NAAN}/{postfix}",
-            summary="Retrieve a user",
-            response_description="The retrieved user")
-def user_get(NAAN: str, postfix: str, currentUser: Annotated[User, Depends(getCurrentUser)]):
-    """
-    Retrieves a user based on a given identifier:
-
-    - **NAAN**: Name Assigning Authority Number which uniquely identifies an organization e.g. 12345
-    - **postfix**: a unique string
-    """
-
-    userGUID = f"ark:{NAAN}/{postfix}"
-    userInstance, readStatus = getUserByGUID(userGUID, userCollection)
-
-    if readStatus.success:
-        return userInstance
-    else:
-        return JSONResponse(
-            status_code=readStatus.status_code, 
-            content={
-                "error": readStatus.message
-            }
-        )
+#@router.get('/user', status_code=200,
+#            summary="List all users",
+#            response_description="Retrieved list of users")
+#def user_list(currentUser: Annotated[User, Depends(getCurrentUser)]):
+#    users = listUsers(userCollection)
+#    return users
+#
+#
+#@router.get("/user/ark:{NAAN}/{postfix}",
+#            summary="Retrieve a user",
+#            response_description="The retrieved user")
+#def user_get(NAAN: str, postfix: str, currentUser: Annotated[User, Depends(getCurrentUser)]):
+#    """
+#    Retrieves a user based on a given identifier:
+#
+#    - **NAAN**: Name Assigning Authority Number which uniquely identifies an organization e.g. 12345
+#    - **postfix**: a unique string
+#    """
+#
+#    userGUID = f"ark:{NAAN}/{postfix}"
+#    userInstance, readStatus = getUserByGUID(userGUID, userCollection)
+#
+#    if readStatus.success:
+#        return userInstance
+#    else:
+#        return JSONResponse(
+#            status_code=readStatus.status_code, 
+#            content={
+#                "error": readStatus.message
+#            }
+#        )
 
 
 #@router.put("/user/ark:{NAAN}/{postfix}",

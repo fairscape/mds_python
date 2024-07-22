@@ -163,10 +163,10 @@ def updateEVIGeneratedBy(
 
 
 def createDataset(
-    userInstance: User,
+    userInstance: UserLDAP,
     datasetInstance: DatasetCreateModel,
     identifierCollection: pymongo.collection.Collection,
-    userCollection: pymongo.collection.Collection
+    #userCollection: pymongo.collection.Collection
     )-> OperationStatus:
     # check that dataset does not already exist
     if identifierCollection.find_one({"@id": datasetInstance.guid}) is not None:

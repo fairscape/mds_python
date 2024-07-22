@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, UploadFile
 from fastapi.responses import JSONResponse
 
 from fairscape_mds.config import (
@@ -34,18 +34,32 @@ user_collection = mongo_db[mongo_config.user_collection]
              response_description="The created dataset")
 def dataset_create(
     currentUser: Annotated[User, Depends(getCurrentUser)],
-    dataset: DatasetCreateModel
+    datasetMetadata: DatasetCreateModel,
+    datasetFile: Optional[UploadFile]
     ):
     """
-    Create a dataset with the following properties:
+    API endpoint to create a dataset record in fairscape, optionally uploading a file
 
-    - **@id**: a unique identifier
-    - **@type**: evi:Dataset
-    - **name**: a name
-    - **owner**: an existing user in its compact form with @id, @type, name, and email
     """
 
-    datasetInstance = convertDatasetCreateToWrite(datasetInstance, currentUser.guid)
+    datasetDictionary = datasetMetadata.model_dump(by_alias=True)
+
+    # set permissions on the file
+    datasetDictionary['permissions'] = {
+            "owner": currentUser.dn,
+            "group": currentUser.memberOf[0]
+            }
+
+    #
+    if datasetFile is None:
+        insertResponse = identifierCollection.insertOne(datasetMetadata)
+        
+        return JSONResponse(
+            status_code=201,
+            content={"created": {"@id": dataset.guid, "@type": "evi:Dataset", "name": dataset.name}}
+        )
+
+    #TODO  if there is a file
     
     create_status = createDataset(
             currentUser,
@@ -55,10 +69,6 @@ def dataset_create(
             )
 
     if create_status.success:
-        return JSONResponse(
-            status_code=201,
-            content={"created": {"@id": dataset.guid, "@type": "evi:Dataset", "name": dataset.name}}
-        )
     else:
         return JSONResponse(
             status_code=create_status.status_code,
@@ -75,6 +85,13 @@ def dataset_list(
     datasets = listDatasets(identifier_collection)
     return datasets
 
+@router.get("/dataset/download/ark:{NAAN}/{postfix}")
+def download_dataset(
+    currentUser: Annotated[UserLDAP, Depends(getCurrentUser)],
+    NAAN: str,
+    postfix: str
+    ):
+    pass
 
 @router.get("/dataset/ark:{NAAN}/{postfix}",
             summary="Retrieve a dataset",
@@ -105,10 +122,10 @@ def dataset_get(NAAN: str, postfix: str):
             summary="Update a dataset",
             response_description="The updated dataset")
 def dataset_update(
+    currentUser: Annotated[UserLDAP, Depends(getCurrentUser)],
     NAAN: str,
     postfix: str,
     datasetUpdateInstance: DatasetUpdateModel,
-    currentUser: Annotated[User, Depends(getCurrentUser)],
     ):
 
     datasetGUID = f"ark:{NAAN}/{postfix}"
@@ -132,7 +149,7 @@ def dataset_update(
     summary="Delete a dataset",
     response_description="The deleted dataset")
 def dataset_delete(
-    currentUser: Annotated[User, Depends(getCurrentUser)],
+    currentUser: Annotated[UserLDAP, Depends(getCurrentUser)],
     NAAN: str, 
     postfix: str
     ):

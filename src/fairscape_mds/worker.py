@@ -14,6 +14,7 @@ sys.path.append(str(pathRoot))
 
 from pydantic import BaseModel, Field
 from fairscape_mds.config import get_fairscape_config
+from fairscape_mds.models.user import UserLDAP
 from fairscape_mds.models.rocrate import (
     UploadExtractedCrate,
     UploadZippedCrate,
@@ -50,7 +51,6 @@ asyncCollection = mongoDB[fairscapeConfig.mongo.async_collection]
 minioConfig= fairscapeConfig.minio
 minioClient = fairscapeConfig.CreateMinioClient()
 
-
 celeryApp = Celery()
 celeryApp.conf.broker_url = brokerURL
 
@@ -65,6 +65,7 @@ class ROCrateUploadJob(BaseModel):
     zippedCratePath: str
     timeStarted: datetime.datetime | None = Field(default=None)
     timeFinished: datetime.datetime | None = Field(default=None)
+    uploadUser: str
     status: Optional[str] = Field(default='in progress')
     completed: Optional[bool] = Field(default=False)
     success: Optional[bool] = Field(default=False)
@@ -74,6 +75,7 @@ class ROCrateUploadJob(BaseModel):
 
 
 def createUploadJob(
+        currentUserDN: str,
         transactionFolder: str, 
         zippedCratePath: str,
         ):
@@ -88,7 +90,8 @@ def createUploadJob(
     uploadJobInstance = ROCrateUploadJob(
         transactionFolder=transactionFolder,
         zippedCratePath=zippedCratePath,
-        timeStarted= datetime.datetime.now(tz=datetime.timezone.utc)
+        timeStarted= datetime.datetime.now(tz=datetime.timezone.utc),
+        uploadUser=currentUserDN
     )
 
     insertResult = asyncCollection.insert_one(
@@ -136,13 +139,14 @@ def updateUploadJob(transactionFolder: str, update: Dict):
             )
 
 @celeryApp.task(name='async-register-ro-crate')
-def AsyncRegisterROCrate(transactionFolder: str, filePath: str):
-    ''' Background task for processing Zipped ROCrates.
+def AsyncRegisterROCrate(currentUser: UserLDAP, transactionFolder: str, filePath: str):
+    """
+    Background task for processing Zipped ROCrates.
 
-    Keyword arguments:
-    transactionFolder -- (str) the UUID representing the unique path in minio
-    zippedCratePath   -- (str) the filename of the zipped crate contents
-    '''
+    :param fairscape_mds.models.user.UserLDAP currentUser: Current User Uploading the ROCrate
+    :param str transactionFolder: UUID folder representing the unique path in minio
+    :param str zippedCratePath: The filename of the zipped crate contents
+    """
 
     try:
         objectResponse = minioClient.get_object(
@@ -252,10 +256,17 @@ def AsyncRegisterROCrate(transactionFolder: str, filePath: str):
     for crateElement in crateMetadata["@graph"]:
         _, splitArk = crateElement["@id"].split("ark:")
         crateElement["@id"] = "ark:" + splitArk
+
+    # TODO set minio uri for datasets
+
  
 
     # mint identifiers
-    provMetadataMinted = PublishProvMetadata(crateMetadata, identifierCollection)
+    provMetadataMinted = PublishProvMetadata(
+            currentUser, 
+            crateMetadata, 
+            identifierCollection
+            )
 
     if not provMetadataMinted:
         errorLog = f"transaction: {str(transactionFolder)}\t" + "message: error minting prov identifiers"
@@ -282,7 +293,11 @@ def AsyncRegisterROCrate(transactionFolder: str, filePath: str):
                 }
             )
 
-    rocrateMetadataMinted = PublishROCrateMetadata(crateMetadata, rocrateCollection)
+    rocrateMetadataMinted = PublishROCrateMetadata(
+            currentUser, 
+            crateMetadata, 
+            rocrateCollection
+            )
 
     if not rocrateMetadataMinted:
         errorLog = f"transaction: {str(transactionFolder)}\t" + "message: error minting rocrate identifiers"

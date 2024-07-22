@@ -41,6 +41,7 @@ from typing import (
 
 from fairscape_mds.models.fairscape_base import FairscapeBaseModel, FairscapeEVIBaseModel
 from fairscape_mds.utilities.operation_status import OperationStatus
+from fairscape_mds.models.user import UserLDAP
 
 
 # setup logger for minio operations
@@ -318,9 +319,7 @@ class ProcessROCrate():
         pass
 
     def Process(self):
-        pass
-
-
+        
 class UploadROCrate():
     """ Class for Uploading ROCrate to Minio
     """
@@ -579,29 +578,6 @@ def GetMetadataFromCrate(
         raise Exception(f"ROCRATE ERROR: ro-crate-metadata.json not found exception={str(e)}")
 
 
-def ListROCrates(ROCrateCollection: pymongo.collection.Collection):
-    """ List all ROCrates uploaded to FAIRSCAPE
-    """
-
-    rocrate_cursor = ROCrateCollection.find(
-        filter={"additionalType": ROCRATE_TYPE}
-    )
-    query_results = { "rocrates": 
-        [ 
-            {
-                "@id": crate.get("@id"), 
-                "name": crate.get("name"),
-                "description": crate.get("description"),
-                "keywords": crate.get("keywords"),
-                "sourceOrganization": crate.get("sourceOrganization")
-            } 
-            for crate in list(rocrate_cursor) 
-        ] 
-        }
-    rocrate_cursor.close()
-    return query_results
-
-
 
 def zip_extracted_rocrate(bucket_name: str, object_loc_in_bucket, minio_client):
 
@@ -695,10 +671,16 @@ class ROCrateMetadataExistsException(ROCrateException):
 
 
 def PublishROCrateMetadata(
+        currentUser: UserLDAP,
         rocrateJSON,
         rocrateCollection: pymongo.collection.Collection
         ) -> bool:  
-    """ Insert ROCrate metadata into mongo rocrate collection
+    """ 
+    Insert ROCrate metadata into mongo rocrate collection
+
+    :param fairscape.models.user.UserLDAP currentUser: User metadata from the uploader
+    :param dict rocrateJSON: ROCrate metadata to instantiate
+    :param pymongo.collection.Collection rocrateCollection: Mongo Collection for storing ROCrate metadata
     """
 
     # Check if @id already exsists
@@ -706,8 +688,15 @@ def PublishROCrateMetadata(
             {"@id": rocrateJSON['@id']}
             )
 
+
     if rocrateFound:
         raise ROCrateMetadataExistsException(f"ROCrate with @id == {rocrateJSON['@id']} found", None)
+   
+    # set default permissions for uploaded crate
+    rocrateJSON['permissions'] = {
+            "owner": currentUser.dn,
+            "group": currentUser.memberOf[0]
+            }
 
     insertResult = rocrateCollection.insert_one(rocrateJSON)
     if insertResult.inserted_id is None:
@@ -717,18 +706,37 @@ def PublishROCrateMetadata(
 
 
 def PublishProvMetadata(
-        rocrateJSON,
+        currentUser: UserLDAP,
+        rocrateJSON: dict,
+        transactionFolder: str,
         identifierCollection: pymongo.collection.Collection
         ) -> bool:
-    """ Insert ROCrate metadata and metadata for all identifiers into the identifier collection
+    """ 
+    Insert ROCrate metadata and metadata for all identifiers into the identifier collection
+
+    :param fairscape_mds.models.user.UserLDAP currentUser: Metadata about user submitting the ROCrate
+    :param dict rocrateJSON: Metadata for the ROCrate
+    :param pymongo.collection.Collection identifierCollection: Collection to submit identifier metadata
     """
 
     # for every element in the rocrate model dump json
-    #insert_metadata = [ prov.model_dump(by_alias=True) for prov in rocrate.metadataGraph  ]
     insertMetadata = [ elem for elem in rocrateJSON.get("@graph")]
     # insert rocrate json into identifier collection
-    #insert_metadata.append(rocrate.model_dump(by_alias=True))
     insertMetadata.append(rocrateJSON)
+
+    # set the permissions for the uploading user
+    for identifierMetadata in insertMetadata:
+        identifierMetadata['permissions'] = {
+                "owner": currentUser.dn,
+                "group": currentUser.memberOf[0]
+                }
+
+    # set the minioBucket, minioPath for each download
+    for datasetElement in filter(lambda x: "Dataset" in x.get("@type", ""), insertMetadata):
+        # get the raw contentURL after file URI (file://)
+        datasetElement.get("contentURL")
+        datasetElement['minioPath'] = 
+
 
     # insert all identifiers into the identifier collection
     insertResult = identifierCollection.insert_many(insertMetadata)

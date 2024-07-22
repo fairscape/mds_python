@@ -9,6 +9,7 @@ from fairscape_mds.utilities.utils import validate_email
 
 class UserLDAP(BaseModel):
     dn: str 
+    cn: str
     email: str
     givenName: str
     surname: str

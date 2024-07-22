@@ -272,7 +272,6 @@ class FairscapeConfig(BaseModel):
     redis: Optional[RedisConfig]
     ldap: LDAPConfig
 
-
     def CreateMongoClient(self):
         return self.mongo.CreateClient() 
     

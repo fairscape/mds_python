@@ -10,19 +10,13 @@ from typing import Annotated
 import crypt
 import jwt
 from datetime import datetime, timezone, timedelta
+import ldap3
 
 OAuthScheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
 fairscapeConfig = get_fairscape_config()
-mongoClient = fairscapeConfig.CreateMongoClient()
-mongoDB = mongoClient[fairscapeConfig.mongo.db]
-userCollection = mongoDB[fairscapeConfig.mongo.user_collection]
-
 jwtSecret = fairscapeConfig.jwtSecret
-
-
-
 
 
 def createToken(email: str, fullname: str, userCN: str) -> str:
@@ -59,7 +53,7 @@ class AuthNExceptionUserNotFound(Exception):
     pass
 
 
-def loginLDAP(email: str, password: str) -> str:
+def loginLDAP(ldapConnection: ldap3.Connection, email: str, password: str) -> str:
     """
     Given a users email and password, search ldap if a matching record is found, create a JWT to return with the API response
 
@@ -70,10 +64,8 @@ def loginLDAP(email: str, password: str) -> str:
     :raises fairscape_mds.auth.oauth.LoginExceptionUserNotFound: Exception Raised when users credentials don't match any user in LDAP
     """
 
-    ldap_connection = fairscape_config.ldap.connectAdmin()
-
     # search the users 
-    ldap_connection.search(
+    ldapConnection.search(
             search_base=fairscape_config.ldap.usersDN,
             search_filter=f"(&(userPassword={password})(mail={email}))",
             search_scope=ldap3.SUBTREE,
@@ -81,7 +73,6 @@ def loginLDAP(email: str, password: str) -> str:
             )
 
     query_results = ldap_connection.entries
-    ldap_connection.unbind()
 
     # if no users are matched
     if len(query_results)==0:
