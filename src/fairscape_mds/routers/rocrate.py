@@ -176,16 +176,13 @@ def rocrate_list(
             {},
             projection={ 
                 "_id": 0, 
+            }
         )
 
     else:
         # filter by group ownership
         cursor = rocrateCollection.find(
-            {
-                "permissions.group": {
-                    "$in": currentUser.memberOf
-                } 
-            }, 
+            {"permissions.group": currentUser.memberOf[0]} , 
             projection={ "_id": 0}
             )
 
@@ -203,6 +200,7 @@ def rocrate_list(
                         "@id": f"{fairscapeConfig.url}/{crateElem.get("@id")}",
                         "@type": crateElem.get("@type"),
                         "name": crateElem.get("name"),
+                        "contentURL": f"{fairscapeConfig.url}/dataset/download/{crateElem.get('@id')}"
                      }
                      for crateElem in crate.get("@graph")
                 ]
@@ -228,7 +226,6 @@ def dataset_get(NAAN: str, postfix: str):
     """
 
     rocrateGUID = f"ark:{NAAN}/{postfix}"
-
     rocrateMetadata = rocrateCollection.find_one({"@id": rocrate_id}, projection={"_id":0}) 
 
     if rocrateMetadata is None:
@@ -277,7 +274,7 @@ def archived_rocrate_download(
 
     # AuthZ: check if user is allowed to download 
     # if a user is a part of the group that uploaded the ROCrate OR user is an Admin
-    if rocrate_metadata.permission.group is in currentUser.memberOf or fairscapeConfig.ldap.adminDN in currentUser.memberOf:
+    if rocrate_metadata.permission.group in currentUser.memberOf or fairscapeConfig.ldap.adminDN in currentUser.memberOf:
         objectPath = rocrateMetadata.get("archivedObjectPath", None)
         return StreamZippedROCrate(
             MinioClient=minio_client,

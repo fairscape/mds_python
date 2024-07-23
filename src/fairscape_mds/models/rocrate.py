@@ -319,6 +319,7 @@ class ProcessROCrate():
         pass
 
     def Process(self):
+        pass
         
 class UploadROCrate():
     """ Class for Uploading ROCrate to Minio
@@ -735,7 +736,7 @@ def PublishProvMetadata(
     for datasetElement in filter(lambda x: "Dataset" in x.get("@type", ""), insertMetadata):
         # get the raw contentURL after file URI (file://)
         datasetElement.get("contentURL")
-        datasetElement['minioPath'] = 
+        datasetElement['minioPath'] = f""
 
 
     # insert all identifiers into the identifier collection

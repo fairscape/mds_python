@@ -20,7 +20,6 @@ from fairscape_mds.models.rocrate import (
     UploadZippedCrate,
     DeleteExtractedCrate,
     GetMetadataFromCrate,
-    ListROCrates,
     StreamZippedROCrate,
     GetROCrateMetadata,
     PublishROCrateMetadata,

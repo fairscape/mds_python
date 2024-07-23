@@ -14,8 +14,8 @@ from fairscape_mds.models.dataset import (
     createDataset, 
 )
 
-from typing import Annotated
-from fairscape_mds.models.user import User
+from typing import Annotated, Optional
+from fairscape_mds.models.user import UserLDAP
 from fairscape_mds.auth.oauth import getCurrentUser
 
 router = APIRouter()
@@ -29,11 +29,12 @@ identifier_collection = mongo_db[mongo_config.identifier_collection]
 user_collection = mongo_db[mongo_config.user_collection]
 
 
-@router.post("/dataset",
-             summary="Create a dataset",
-             response_description="The created dataset")
-def dataset_create(
-    currentUser: Annotated[User, Depends(getCurrentUser)],
+@router.post(
+     "/dataset",
+    summary="Create a dataset",
+    response_description="The created dataset"
+)
+def dataset_create(currentUser: Annotated[UserLDAP, Depends(getCurrentUser)],
     datasetMetadata: DatasetCreateModel,
     datasetFile: Optional[UploadFile]
     ):
@@ -69,6 +70,16 @@ def dataset_create(
             )
 
     if create_status.success:
+        return JSONResponse(
+            status_code=201,
+            content= {"created": {
+                "@id": datasetDictionary['@id'],
+                "@type": "Dataset",
+                "name": datasetDictionary['name']
+                }
+            }
+        )
+
     else:
         return JSONResponse(
             status_code=create_status.status_code,
@@ -80,10 +91,11 @@ def dataset_create(
             summary="List all datasets",
             response_description="Retrieved list of datasets")
 def dataset_list(
-    currentUser: Annotated[User, Depends(getCurrentUser)],
+    currentUser: Annotated[UserLDAP, Depends(getCurrentUser)],
     ):
     datasets = listDatasets(identifier_collection)
     return datasets
+
 
 @router.get("/dataset/download/ark:{NAAN}/{postfix}")
 def download_dataset(

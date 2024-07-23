@@ -8,7 +8,7 @@ from typing import Optional, List, Union, Literal, Tuple
 from datetime import datetime
 import pymongo
 
-from fairscape_mds.models.user import User
+from fairscape_mds.models.user import UserLDAP
 from fairscape_mds.models.acl import AccessControlList
 from fairscape_mds.utilities.operation_status import OperationStatus
  
@@ -221,7 +221,7 @@ def createDataset(
 
 
 def updateDataset(
-    userInstance: User,
+    userInstance: UserLDAP,
     datasetGUID: str,
     datasetUpdate: DatasetUpdateModel ,
     identifierCollection: pymongo.collection.Collection
@@ -262,7 +262,7 @@ def updateDataset(
 
 
 def deleteDataset(
-    userInstance: User,
+    userInstance: UserLDAP,
     datasetGUID: str,
     identifierCollection: pymongo.collection.Collection, 
     userCollection: pymongo.collection.Collection
