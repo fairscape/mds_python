@@ -66,13 +66,13 @@ def loginLDAP(ldapConnection: ldap3.Connection, email: str, password: str) -> st
 
     # search the users 
     ldapConnection.search(
-            search_base=fairscape_config.ldap.usersDN,
+            search_base=fairscapeConfig.ldap.usersDN,
             search_filter=f"(&(userPassword={password})(mail={email}))",
             search_scope=ldap3.SUBTREE,
             attributes=['*']
             )
 
-    query_results = ldap_connection.entries
+    query_results = ldapConnection.entries
 
     # if no users are matched
     if len(query_results)==0:
@@ -102,56 +102,96 @@ def getCurrentUser(token: Annotated[str, Depends(OAuthScheme)])->UserLDAP:
     :returns: A user record
     :rtype: fairscape_mds.models.User
     :raises fastapi.HTTPException: Raises an error when decoding and validating the token fails
-    :raises AuthNExceptionUserNotFound: Raises when the token doesn't correspond to any user in LDAP
     """
-
     # decode jwt
     try:    
         token_metadata = jwt.decode(    
             token,     
             jwtSecret,    
-            algorithms=["HS256"]  
+            algorithms=["HS256"]
         )    
     except Exception as e: 
         raise HTTPException(    
-            status_code=status.HTTP_401_UNAUTHORIZED,                
-            detail=f"Authorization Error {str(e)}"     
+            status_code=401,
+            detail=f"Authorization Error Decoding Token\terror: {str(e)}\ttoken: {token}"     
         )    
 
     user_cn = token_metadata['sub']
     email = token_metadata['email']
     
-    ldap_connection = fairscape_config.ldap.connectAdmin()
+    ldapConnection = fairscapeConfig.ldap.connectAdmin()
 
     # search the users 
-    ldap_connection.search(
-            search_base=fairscape_config.ldap.usersDN,
+    ldapConnection.search(
+            search_base=fairscapeConfig.ldap.usersDN,
             search_filter=f"(&(cn={user_cn})(mail={email}))",
             search_scope=ldap3.SUBTREE,
-            attributes=['*']
+            attributes=['dn', 'cn', 'mail', 'givenName', 'sn', 'o', 'memberOf']
             )
 
-    query_results = ldap_connection.entries
-    ldap_connection.unbind()
+    query_results = ldapConnection.entries
+    ldapConnection.unbind()
 
     if len(query_results) == 0:
-        raise AuthNExceptionUserNotFound()
+        raise HTTPException(
+            status_code=404,
+            detail="User not found according to token"
+        )
     
     elif len(query_results) == 1:
         ldap_user_entry = query_results[0]
         ldap_user_attributes = ldap_user_entry.entry_attributes_as_dict
 
-        # construct the user entry
+        try: 
+            # construct the user entry
+            user_instance = UserLDAP.model_validate({
+                "dn": ldap_user_entry.entry_dn,
+                "cn": str(ldap_user_entry.cn),
+                "email": ldap_user_attributes.get('mail')[0],
+                "givenName": ldap_user_attributes.get('givenName')[0],
+                "surname": ldap_user_attributes.get('sn')[0],
+                "organization": ldap_user_attributes.get('o')[0],
+                "memberOf": ldap_user_attributes.get('memberOf')
+                })
+                   
+            return user_instance
+
+        except Exception as e:
+            raise HTTPException(
+                status_code=500,
+                detail=f"Error with User Metadata\tException: {str(e)}\tUser Metadata: {str(ldap_user_attributes)}"
+            )
+
+def getUserByCN(ldapConnection, user_cn):
+    # search users in ldap
+    ldapConnection.search(
+            search_base=fairscapeConfig.ldap.usersDN,
+            search_filter=f"(cn={user_cn})",
+            search_scope=ldap3.SUBTREE,
+            attributes=['dn', 'cn', 'mail', 'givenName', 'sn', 'o', 'memberOf']
+            )
+
+    query_results = ldapConnection.entries
+    
+    if len(query_results)==0:
+        raise Exception('User not found')
+
+    elif len(query_results)>1:
+        raise Exception('Multiple Users Found with CN')
+   
+    else:
+        ldap_user_entry = query_results[0]
+        ldap_user_attributes = ldap_user_entry.entry_attributes_as_dict
+
         user_instance = UserLDAP.model_validate({
             "dn": ldap_user_entry.entry_dn,
             "cn": str(ldap_user_entry.cn),
-            "email": ldap_user_attributes['mail'][0],
-            "givenName": ldap_user_attributes['givenName'][0],
-            "surname": ldap_user_attributes['sn'][0],
-            "organization": ldap_user_attributes['o'][0],
-            "memberOf": ldap_user_attributes['memberOf'] 
+            "email": ldap_user_attributes.get('mail')[0],
+            "givenName": ldap_user_attributes.get('givenName')[0],
+            "surname": ldap_user_attributes.get('sn')[0],
+            "organization": ldap_user_attributes.get('o')[0],
+            "memberOf": ldap_user_attributes.get('memberOf')
             })
-               
-        return user_instance
 
+        return user_instance
 
