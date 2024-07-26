@@ -13,7 +13,7 @@ from fairscape_mds.models.dataset import (
     deleteDataset, 
     createDataset, 
 )
-
+from fairscape_mds.models.acl import Permissions
 from typing import Annotated, Optional
 from fairscape_mds.models.user import UserLDAP
 from fairscape_mds.auth.oauth import getCurrentUser
@@ -21,12 +21,15 @@ from fairscape_mds.auth.oauth import getCurrentUser
 router = APIRouter()
 
 fairscapeConfig = get_fairscape_config()
-mongo_config = fairscapeConfig.mongo
-mongo_client = fairscapeConfig.CreateMongoClient()
 
-mongo_db = mongo_client[mongo_config.db]
-identifier_collection = mongo_db[mongo_config.identifier_collection]
-user_collection = mongo_db[mongo_config.user_collection]
+minioClient = fairscapeConfig.CreateMinioClient()
+
+mongoConfig = fairscapeConfig.mongo
+mongoClient = fairscapeConfig.CreateMongoClient()
+
+mongoDB = mongoClient[fairscapeConfig.mongo.db]
+identifierCollection = mongoDB[fairscapeConfig.mongo.identifier_collection]
+userCollection = mongoDB[fairscapeConfig.mongo.user_collection]
 
 
 @router.post(
@@ -34,7 +37,8 @@ user_collection = mongo_db[mongo_config.user_collection]
     summary="Create a dataset",
     response_description="The created dataset"
 )
-def dataset_create(currentUser: Annotated[UserLDAP, Depends(getCurrentUser)],
+def dataset_create(
+    currentUser: Annotated[UserLDAP, Depends(getCurrentUser)],
     datasetMetadata: DatasetCreateModel,
     datasetFile: Optional[UploadFile]
     ):
@@ -43,48 +47,75 @@ def dataset_create(currentUser: Annotated[UserLDAP, Depends(getCurrentUser)],
 
     """
 
-    datasetDictionary = datasetMetadata.model_dump(by_alias=True)
 
-    # set permissions on the file
-    datasetDictionary['permissions'] = {
-            "owner": currentUser.dn,
-            "group": currentUser.memberOf[0]
-            }
+    datasetPermissions = Permissions(
+            owner= currentUser.dn,
+            group=currentUser.memberOf[0]
+            )
+   
+    distributionMetadata = []
 
-    #
-    if datasetFile is None:
-        insertResponse = identifierCollection.insertOne(datasetMetadata)
-        
-        return JSONResponse(
-            status_code=201,
-            content={"created": {"@id": dataset.guid, "@type": "evi:Dataset", "name": dataset.name}}
-        )
+    if datasetMetadata.contentURL:
+        distributionMetadata.append(DatasetDistribution(
+            distributionType= DistributionTypeEnum.URL,
+            distribution=URLDistribution(uri=datasetMetadata.contentURL)
+            ))
 
-    #TODO  if there is a file
-    
-    create_status = createDataset(
-            currentUser,
-            datasetInstance,
-            identifier_collection,
-            user_collection
+    # if a file is provided from user
+    if datasetFile:
+        minioPath = "f{currentUser.cn}/datasets/{datasetMetadata.guid}/{datasetFile.filename}"
+        try:
+            # upload the object to minio
+            uploadOperation = minioClient.put_object(
+                bucket_name=fairscapeConfig.minio.default_bucket,
+                object_name=minioPath,
+                data=datasetFile.file,
+                length=-1,
+                part_size=10 * 1024 * 1024,
+                )
+
+            # get the size of the file from the stats
+            resultStats = minioClient.stat_object(
+                bucket_name=minioConfig.default_bucket,
+                object_name=minioPath
             )
 
-    if create_status.success:
-        return JSONResponse(
-            status_code=201,
-            content= {"created": {
-                "@id": datasetDictionary['@id'],
-                "@type": "Dataset",
-                "name": datasetDictionary['name']
-                }
-            }
-        )
+            # set the distribution metadata
+            distributionMetadata.append(DatasetDistribution(
+                    distributionType= DistributionTypeEnum.minio,
+                    distribution=MinioDistribution(path=minioPath)
+                    ))
 
-    else:
+        except Exception as e:
+            return JSONResponse(
+                status_code=500,
+                content={"error": "error minting identifier", "message": str(e)}
+            )
+
+    datasetWrite = DatasetWriteModel(
+            distribution = distributionMetadata,
+            published = True,
+            permissions = datasetPermissions,
+            **datasetMetadata
+            )
+
+    datasetJSON = datasetWrite.model_dump(by_alias=True)
+    insertResponse = identifierCollection.insertOne(datasetJSON)
+    
+    if insertResponse.inserted_id is None:
         return JSONResponse(
             status_code=create_status.status_code,
-            content={"error": create_status.message}
+            content={"error": "error minting identifier"}
         )
+
+    else: 
+        return JSONResponse(
+            status_code=201,
+            content={"created": {"@id": datasetMetadata.guid, "@type": "evi:Dataset", "name": datasetMetadata.name}}
+        )
+
+    
+
 
 
 @router.get("/dataset",
@@ -93,7 +124,7 @@ def dataset_create(currentUser: Annotated[UserLDAP, Depends(getCurrentUser)],
 def dataset_list(
     currentUser: Annotated[UserLDAP, Depends(getCurrentUser)],
     ):
-    datasets = listDatasets(identifier_collection)
+    datasets = listDatasets(identifierCollection)
     return datasets
 
 

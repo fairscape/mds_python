@@ -4,6 +4,9 @@ from pydantic import (
     )
 from typing import List
 
+class Permissions(BaseModel):
+    owner: str
+    group: str
 
 class AccessControlList(BaseModel):
     owner: str

@@ -27,6 +27,7 @@ from fairscape_mds.models.rocrate import (
     ROCrate,
     ROCrateDistribution
 )
+from fairscape_mds.auth.oauth import getUserByCN
 
 from typing import List, Dict, Optional
 from uuid import UUID, uuid4
@@ -60,11 +61,11 @@ def serializeTimestamp(time):
         return None
 
 class ROCrateUploadJob(BaseModel):
+    userCN: str
     transactionFolder: str
     zippedCratePath: str
     timeStarted: datetime.datetime | None = Field(default=None)
     timeFinished: datetime.datetime | None = Field(default=None)
-    uploadUser: str
     status: Optional[str] = Field(default='in progress')
     completed: Optional[bool] = Field(default=False)
     success: Optional[bool] = Field(default=False)
@@ -74,7 +75,7 @@ class ROCrateUploadJob(BaseModel):
 
 
 def createUploadJob(
-        currentUserDN: str,
+        userCN: str,
         transactionFolder: str, 
         zippedCratePath: str,
         ):
@@ -87,10 +88,10 @@ def createUploadJob(
 
     # setup job model
     uploadJobInstance = ROCrateUploadJob(
+        userCN = userCN,
         transactionFolder=transactionFolder,
         zippedCratePath=zippedCratePath,
         timeStarted= datetime.datetime.now(tz=datetime.timezone.utc),
-        uploadUser=currentUserDN
     )
 
     insertResult = asyncCollection.insert_one(
@@ -138,7 +139,7 @@ def updateUploadJob(transactionFolder: str, update: Dict):
             )
 
 @celeryApp.task(name='async-register-ro-crate')
-def AsyncRegisterROCrate(currentUser: UserLDAP, transactionFolder: str, filePath: str):
+def AsyncRegisterROCrate(userCN: str, transactionFolder: str, filePath: str):
     """
     Background task for processing Zipped ROCrates.
 
@@ -146,6 +147,12 @@ def AsyncRegisterROCrate(currentUser: UserLDAP, transactionFolder: str, filePath
     :param str transactionFolder: UUID folder representing the unique path in minio
     :param str zippedCratePath: The filename of the zipped crate contents
     """
+
+    # connect to ldap
+    ldapConnection = fairscapeConfig.ldap.connectAdmin()
+    currentUser = getUserByCN(ldapConnection, userCN)
+    ldapConnection.unbind()
+
 
     try:
         objectResponse = minioClient.get_object(
@@ -257,14 +264,15 @@ def AsyncRegisterROCrate(currentUser: UserLDAP, transactionFolder: str, filePath
         crateElement["@id"] = "ark:" + splitArk
 
     # TODO set minio uri for datasets
-
+    
  
 
     # mint identifiers
     provMetadataMinted = PublishProvMetadata(
-            currentUser, 
-            crateMetadata, 
-            identifierCollection
+            currentUser=currentUser, 
+            rocrateJSON=crateMetadata, 
+            transactionFolder=transactionFolder,
+            identifierCollection=identifierCollection
             )
 
     if not provMetadataMinted:
@@ -293,9 +301,9 @@ def AsyncRegisterROCrate(currentUser: UserLDAP, transactionFolder: str, filePath
             )
 
     rocrateMetadataMinted = PublishROCrateMetadata(
-            currentUser, 
-            crateMetadata, 
-            rocrateCollection
+            currentUser=currentUser, 
+            rocrateJSON=crateMetadata, 
+            rocrateCollection=rocrateCollection
             )
 
     if not rocrateMetadataMinted:
@@ -330,6 +338,9 @@ def AsyncRegisterROCrate(currentUser: UserLDAP, transactionFolder: str, filePath
                 }
 
             )
+
+    # TODO update the ro-crate-metadata.json inside the archival location in minio
+
  
     # mark task as sucessfull
     return True

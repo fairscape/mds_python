@@ -3,13 +3,15 @@ from pydantic import (
     BaseModel,
     Extra,
     Field,
+    HttpUrl,
 )
 from typing import Optional, List, Union, Literal, Tuple
 from datetime import datetime
 import pymongo
+from enum import Enum
 
 from fairscape_mds.models.user import UserLDAP
-from fairscape_mds.models.acl import AccessControlList
+from fairscape_mds.models.acl import Permissions 
 from fairscape_mds.utilities.operation_status import OperationStatus
  
 
@@ -30,12 +32,29 @@ class DatasetCreateModel(BaseModel, extra=Extra.allow):
     usedBy: Optional[List[str]] = Field(alias="evi:usedBy", default=[])
     generatedBy: Optional[str] = Field(alias="evi:generatedBy", default=None)
     dataSchema: Optional[str] = Field(alias="evi:Schema", default=None)
+    contentURL: HttpUrl | None  = Field(default=None)
+
+class DistributionTypeEnum(str, Enum):
+    MINIO = 'minio'
+    URL = 'url'
+    GLOBUS = 'globus'
+
+class MinioDistribution(BaseModel):
+    path: str
+
+class URLDistribution(BaseModel):
+    uri: str
+
+class DatasetDistribution(BaseModel):
+    distributionType: DistributionTypeEnum
+    distribution: List[Union[MinioDistribution, URLDistribution]] = Field(default=[])
 
 
 class DatasetWriteModel(DatasetCreateModel, extra=Extra.allow):
-    distribution: Optional[List[str]] = Field(default=[])
+    distribution: Optional[DatasetDistribution] = Field(default=[])
     published: bool = Field(default=True)
-    acl: AccessControlList
+    permissions: Permissions
+
 
 
 class DatasetUpdateModel(BaseModel):

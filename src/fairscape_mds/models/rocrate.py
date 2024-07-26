@@ -671,19 +671,17 @@ class ROCrateMetadataExistsException(ROCrateException):
     pass
 
 
-def PublishROCrateMetadata(
-        currentUser: UserLDAP,
-        rocrateJSON,
-        rocrateCollection: pymongo.collection.Collection
-        ) -> bool:  
-    """ 
-    Insert ROCrate metadata into mongo rocrate collection
-
-    :param fairscape.models.user.UserLDAP currentUser: User metadata from the uploader
-    :param dict rocrateJSON: ROCrate metadata to instantiate
-    :param pymongo.collection.Collection rocrateCollection: Mongo Collection for storing ROCrate metadata
+def PublishMetadata(
+    currentUser: UserLDAP,
+    rocrateJSON,
+    transactionFolder: str,
+    rocrateCollection: pymongo.collection.Collection,
+    identifierCollection: pymongo.collection.Collection
+    ) -> bool:
     """
-
+    Publish ROCrate Metadata into Mongo Database
+    """
+    
     # Check if @id already exsists
     rocrateFound = rocrateCollection.find_one(
             {"@id": rocrateJSON['@id']}
@@ -692,12 +690,57 @@ def PublishROCrateMetadata(
 
     if rocrateFound:
         raise ROCrateMetadataExistsException(f"ROCrate with @id == {rocrateJSON['@id']} found", None)
-   
+    
+
     # set default permissions for uploaded crate
     rocrateJSON['permissions'] = {
             "owner": currentUser.dn,
             "group": currentUser.memberOf[0]
             }
+
+    # set all datasets to have minio content paths
+
+    publishProvResult = PublishProvMetadata(
+        currentUser = currentUser,
+        rocrateJSON = rocrateJSON,
+        transactionFolder = transactionFolder,
+        identifierCollectio = identifierCollection
+        )
+
+    publishCrateResult = PublishROCrateMetadata(
+        currentUser,
+        rocrateJSON,
+        rocrateCollection
+        )
+
+    if publishCrateResult and publishProvResult:
+        return True
+    else:
+        # TODO raise exceptions
+        return False
+
+
+def PublishROCrateMetadata(
+        currentUser: UserLDAP,
+        rocrateJSON,
+        rocrateCollection: pymongo.collection.Collection
+    ) -> bool:  
+    """ 
+    Insert ROCrate metadata into mongo rocrate collection
+
+    :param fairscape.models.user.UserLDAP currentUser: User metadata from the uploader
+    :param dict rocrateJSON: ROCrate metadata to instantiate
+    :param pymongo.collection.Collection rocrateCollection: Mongo Collection for storing ROCrate metadata
+    """ 
+
+
+    # compress @graph property to have minimal metadata
+    compressedGraph = [ 
+        {
+            '@id': crateElem['@id'], 
+            '@type': crateElem['@type'],
+            'name': crateElem['name']
+        }  for crateElem in rocrateJSON['@graph']]
 
     insertResult = rocrateCollection.insert_one(rocrateJSON)
     if insertResult.inserted_id is None:

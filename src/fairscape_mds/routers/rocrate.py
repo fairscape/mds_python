@@ -100,14 +100,14 @@ def uploadAsync(
 
     # add to the dictionary of tasks
     uploadTask = AsyncRegisterROCrate.apply_async(args=(
-        currentUser,
+        currentUser.cn,
         str(transactionUUID),
         str(zippedFilepath)
         ))
 
     # create the
     uploadJob = createUploadJob(
-        uploadUser=currentUser.dn,
+        userCN=currentUser.cn,
         transactionFolder=str(transactionUUID), 
         zippedCratePath=str(zippedFilepath)
         )
@@ -133,7 +133,7 @@ def getROCrateStatus(
     jobMetadata = getUploadJob(submissionUUID)
 
     # check authorization to view upload status
-    if currentUser.dn != jobMetadata.uploadUser:
+    if currentUser.cn != jobMetadata.userCN:
         return JSONResponse(
                 status_code = 401,
                 content={
@@ -260,7 +260,7 @@ def archived_rocrate_download(
     rocrateGUID = f"ark:{NAAN}/{postfix}"
     rocrateMetadata = rocrateCollection.find_one(
         {"@id": rocrateGUID}, 
-        projection={"distribution": 1}
+        projection={"_id": 0}
         )
     
     if rocrateMetadata is None:
@@ -272,15 +272,31 @@ def archived_rocrate_download(
             }
         )
 
+    rocrateGroup = rocrateMetadata.get("permissions", {}).get("group")
+
     # AuthZ: check if user is allowed to download 
     # if a user is a part of the group that uploaded the ROCrate OR user is an Admin
-    if rocrate_metadata.permission.group in currentUser.memberOf or fairscapeConfig.ldap.adminDN in currentUser.memberOf:
-        objectPath = rocrateMetadata.get("archivedObjectPath", None)
-        return StreamZippedROCrate(
-            MinioClient=minio_client,
-            BucketName=minio_config.rocrate_bucket,
-            ObjectPath = object_path
-        )
+    if rocrateGroup in currentUser.memberOf or fairscapeConfig.ldap.adminDN in currentUser.memberOf:
+        objectPath = rocrateMetadata.get("distribution", {}).get("archivedObjectPath", None)
+
+        # TODO contentURI is external reference
+        # redirect
+
+        if objectPath is None:
+            return JSONResponse(
+                status_code=404,
+                content={
+                    "@id": f"{fairscapeConfig.url}/{rocrateGUID}",
+                    "error": f"No downloadable content found for ROCrate: {rocrate_id}"
+                }
+            )
+
+        else:
+            return StreamZippedROCrate(
+                MinioClient=minioClient,
+                BucketName=fairscapeConfig.minio.rocrate_bucket,
+                ObjectPath = objectPath
+            )
 
     else:
         # return a 401 error
