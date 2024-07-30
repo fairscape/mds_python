@@ -47,11 +47,11 @@ class URLDistribution(BaseModel):
 
 class DatasetDistribution(BaseModel):
     distributionType: DistributionTypeEnum
-    distribution: List[Union[MinioDistribution, URLDistribution]] = Field(default=[])
+    distribution: Union[MinioDistribution, URLDistribution] = Field(default=[])
 
 
 class DatasetWriteModel(DatasetCreateModel, extra=Extra.allow):
-    distribution: Optional[DatasetDistribution] = Field(default=[])
+    distribution: Optional[List[DatasetDistribution]] = Field(default=[])
     published: bool = Field(default=True)
     permissions: Permissions
 

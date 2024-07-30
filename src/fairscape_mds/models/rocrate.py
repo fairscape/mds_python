@@ -373,61 +373,100 @@ def UploadZippedCrate(
 
     return (OperationStatus(True, "", 200), upload_filepath)
 
-
-def UploadExtractedCrate(
-        MinioClient, 
-        BucketName: str, 
-        BucketRootPath: str | None,
-        ZippedObject, 
-        TransactionFolder: str,
-        ) -> Tuple[OperationStatus, List[str]]:
-    """Accepts zipped ROCrate, unzip and upload onto MinIO.
-
-    Args:
-        MinioClient (Any): MinIO client
-        ROCrateBucketName (str): Name of S3 Bucket to upload zip archive of ROCrate,
-        BucketRootPath (str): Root of the ROCrate Path to Upload To
-        ZippedObject (Any): zipped ROCrate file
-        TransactionFolder (str): UUID created for this upload request
-
-    Returns:
-        OperationStatus: Message
+def ExtractCrate(
+        minioClient,
+        bucketName: str,
+        bucketRootPath: str,
+        transactionFolder: str,
+        userCN: str,
+        zippedObject, 
+) -> dict:
     """
+    Extract the ro-crate-metadata.json file from a zipped ROCrate
 
-    extractedPaths = []
+    :param minio.Minio minioClient: Active minio client
+    :param str bucketName: Name of the bucket to make the request against
+    :param str bucketRootPath: Name of the bucket root path
+    :param str userCN: Uploading User's LDAP CN
+    :param file zippedObject: File like object for reading the zipped ROCrate
 
-    try:        
-        zip_contents = ZippedObject.read()
+    :returns: Metadata Extracted from Crate
+    :rtype: dict
+    """
+    zipContents = zippedObject.read()
             
-        with zipfile.ZipFile(io.BytesIO(zip_contents), "r") as zip_file:
-            # skip first entry on the infolist which is for the folder itself
-            # minio will error if there exist an object which is both a 
-            # directory containing objects and an object itself
-            for file_info in zip_file.infolist()[1::]:
-                file_contents = zip_file.read(file_info.filename)
+    with zipfile.ZipFile(io.BytesIO(zipContents), "r") as crateZip:
+        
+        crateInfoList = crateZip.infolist()
 
-                # TODO the source filepath will not start at the root of the rocrate
-                # but rather the full passed filename
-                source_filepath = Path(file_info.filename)
+        # extract the ro-crate-metadata.json from the zipfile
+        metadataInfo = list(filter(lambda info: 'ro-crate-metadata.json' in info.filename, crateInfoList))
 
-                # TODO file_info.filename can be 
-                # Extracted/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha/ro-crate-metadata.json
-                # this causes the GetROCrateMetadata function to fail later on becaues it looks only in
-                # 1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha/ 
-                if BucketRootPath:
-                    upload_filepath = Path(BucketRootPath) / Path(TransactionFolder) / source_filepath
-                else: 
-                    upload_filepath = Path(TransactionFolder) / source_filepath
+        # TODO raise a more descriptive exception
+        if len(metadataInfo) != 1:
+            raise Exception('ro-crate-metadata.json not found in crate')
 
-                upload_result = MinioClient.put_object(
-                    bucket_name= BucketName, 
-                    object_name=str(upload_filepath), 
-                    data=io.BytesIO(file_contents), 
-                    length=len(file_contents)
-                    )
-                
+        metadataFileInfo = metadataInfo[0]
 
-                extractedPaths.append(str(upload_filepath))
+        # uploaded crate path must be trimmed from all uploaded elements
+        crateParentPath = Path(metadataFileInfo.filename).parent
+
+        # extract and upload the content
+        fileContents = crateZip.read(metadataFileInfo.filename)
+        uploadFilepath = Path(bucketRootPath) / userCN / 'rocrates' / transactionFolder / 'ro-crate-metadata.json'
+
+        uploadResult = minioClient.put_object(
+            bucket_name= bucketName, 
+            object_name=str(uploadFilepath), 
+            data=io.BytesIO(fileContents), 
+            length=len(fileContents)
+            )
+
+        # may have to seek the begining of the file
+
+    # TODO validate ROCrate
+    roCrateMetadata = json.loads(fileContents)
+    # format identifiers for storage
+    _, splitArk = roCrateMetadata["@id"].split("ark:")
+    roCrateMetadata["@id"] = "ark:" + splitArk
+
+    for crateElement in roCrateMetadata["@graph"]:
+        _, splitArk = crateElement["@id"].split("ark:")
+        crateElement["@id"] = "ark:" + splitArk
+
+    with zipfile.ZipFile(io.BytesIO(zipContents), "r") as crateZip:
+
+        def filterDatasets(crateElem):
+            return crateElem.get("@type") == "EVI:Dataset" and crateElem.get("contentURL")
+
+        # filter the rocrate for all datasets with files to extract
+        for crateDataset in filter(lambda crateElem: filterDatasets(crateElem), roCrateMetadata["@graph"]):
+            contentURL = crateDataset.get("contentURL")
+ 
+            if 'file:///' in contentURL:
+                # file to read from within the zipfile 
+                sourcePath = Path(contentURL.strip('file:///'))
+               
+                # get the path of the file relative to inside the crate 
+                # i.e. at the same level of the ro-crate-metadata.json file
+                fileWithinCrate = sourcePath.relative_to(crateParentPath)
+
+                # create the object_name for the upload in minio
+                uploadPath = Path(bucketRootPath) / userCN / 'datasets' / transactionFolder / fileWithinCrate
+
+                # upload the extracted dataset
+                datasetContents = crateZip.read(str(sourcePath))
+
+                uploadResult = minioClient.put_object(
+                        bucket_name=bucketName,
+                        object_name=str(uploadPath),
+                        data=io.BytesIO(datasetContents),
+                        length=len(datasetContents),
+                        metadata={
+                            "guid": crateDataset.get("@id"),
+                            "owner": userCN
+                            }
+                        )
 
                 rocrate_logger.info(
                     "UploadExtractedCrate\t" +
@@ -437,35 +476,130 @@ def UploadExtractedCrate(
                     f"object_etag='{upload_result.etag}'"
                     )
 
-    except Exception as e:
-        return (OperationStatus(False, f"Exception uploading ROCrate: {str(e)}", 500), None)
+                # set the distribution on the metadata
+                datasetDistribution = DatasetDistribution(
+                        distributionType=DistributionTypeEnum.MINIO,
+                        distribution=MinioDistribution(contentURL),
+                        )
+                
+
+                # preserve metadata
+                crateDataset['minioPath'] = str(uploadPath)
+
+
+    return roCrateMetadata
+
+
+
+
+
+
+def UploadExtractedCrate(
+        MinioClient, 
+        BucketName: str, 
+        BucketRootPath: str | None,
+        TransactionFolder: str,
+        userCN: str,
+        ZippedObject, 
+        ) -> Tuple[OperationStatus, List[str]]:
+    """
+    Accepts zipped ROCrate, unzip and upload onto MinIO.
+
+    :param minio.Minio MinioClient: MinIO client
+    :param str ROCrateBucketName: Name of S3 Bucket to upload zip archive of ROCrate,
+    :param str BucketRootPath: Root of the ROCrate Path to Upload To
+    :param str ZippedObject: zipped ROCrate file like object
+    :param str TransactionFolder: UUID created for this upload request
+    :param str userCN: User ID for 
+
+    Returns:
+        OperationStatus: Message
+    """
+
+    extractedPaths = []
+
+    zip_contents = ZippedObject.read()
+            
+    with zipfile.ZipFile(io.BytesIO(zip_contents), "r") as crateZip:
+        
+        crateInfoList = crateZip.infolist()
+
+        # extract the ro-crate-metadata.json from the zipfile
+        metadataInfo = filter(lambda info: 'ro-crate-metadata.json' in info.filename, crateInfoList)
+
+        # extract and upload the content
+        source_filepath = Path(metadataInfo.filename)
+        upload_filepath = Path(BucketRootPath) / userCN / 'rocrates' / TransactionFolder / 'ro-crate-metadata.json'
+
+        # 
+
+        
+
+        # skip first entry on the infolist which is for the folder itself
+        # minio will error if there exist an object which is both a 
+        # directory containing objects and an object itself
+        for file_info in zip_file.infolist()[1::]:
+            file_contents = zip_file.read(file_info.filename)
+
+            # TODO the source filepath will not start at the root of the rocrate
+            # but rather the full passed filename
+            source_filepath = Path(file_info.filename)
+
+            # TODO file_info.filename can be 
+            # Extracted/1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha/ro-crate-metadata.json
+            # this causes the GetROCrateMetadata function to fail later on becaues it looks only in
+            # 1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha/ 
+            if BucketRootPath:
+                upload_filepath = Path(BucketRootPath) / userCN / 'rocrates' / TransactionFolder / source_filepath
+            else: 
+                upload_filepath = Path(userCN) / 'rocrates' / TransactionFolder / source_filepath
+
+            upload_result = MinioClient.put_object(
+                bucket_name= BucketName, 
+                object_name=str(upload_filepath), 
+                data=io.BytesIO(file_contents), 
+                length=len(file_contents)
+                )
+                
+
+            extractedPaths.append(str(upload_filepath))
+
+            rocrate_logger.info(
+                "UploadExtractedCrate\t" +
+                f"transaction={TransactionFolder}\t" +
+                "message='Uploaded File to minio' " +
+                f"object_name='{upload_result.object_name}' " +
+                f"object_etag='{upload_result.etag}'"
+                )
 
     return (OperationStatus(True, "", 200), extractedPaths)
 
 
 
 def DeleteExtractedCrate(
-        MinioClient, 
-        BucketName: str, 
-        TransactionFolder: str,
-        CratePath: str
-        ) -> OperationStatus:
-    """Accepts zipped ROCrate, unzip and upload onto MinIO.
+    minioClient, 
+    bucketName: str, 
+    transactionFolder: str,
+    cratePath: str
+    ) -> OperationStatus:
+    """
+    Delete an Extracted ROCrate
+    :param minio.Minio minioClient: Active minio client
+    :param str bucketName: Name of the bucket to preform the operation on
+    :param str transactionFolder: UUID for the transaction folder
+    :param str cratePath: Path of the Crate
 
-    Args:
-        MinioClient (Any): MinIO client
-        Object (Any): zipped ROCrate file
-
-    Returns:
-        OperationStatus: Message
+    :returns: A status for the operation
+    :rtype: fairscape_mds.utilities.OperationStatus
+    :raises fastapi.HTTPException:  
     """
 
 
     try:
         # remove all listed files
-        minio_listed_objects = MinioClient.list_objects(
-            bucket_name = BucketName, 
-            prefix=CratePath, 
+        minio_listed_objects = minioClient.list_objects(
+            bucket_name = bucketName, 
+            prefix=cratePath, 
             recursive=True
             )
 
@@ -475,7 +609,7 @@ def DeleteExtractedCrate(
 
         delete_list = [DeleteObject(obj) for obj in object_names]
         
-        delete_errors = MinioClient.remove_objects(
+        delete_errors = minioClient.remove_objects(
                 bucket_name=BucketName, 
                 delete_object_list=delete_list
         )
@@ -486,8 +620,8 @@ def DeleteExtractedCrate(
             for error in delete_errors:
                 rocrate_logger.error(
                     "DeleteExtractedCrate\t"+
-                    f"transaction_folder={TransactionFolder}\t" +
-                    f"bucket_name={BucketName}\t" +
+                    f"transaction_folder={transactionFolder}\t" +
+                    f"bucket_name={bucketName}\t" +
                     f"object_names={object}\t" +
                     f"error={str(error)}"
                 )
@@ -497,8 +631,8 @@ def DeleteExtractedCrate(
         
         rocrate_logger.info(
             "DeleteExtractedCrate\t" +
-            f"transaction_folder={TransactionFolder}\t" +
-            f"bucket_name={BucketName}\t" +
+            f"transaction_folder={transactionFolder}\t" +
+            f"bucket_name={bucketName}\t" +
             f"objects={object_names}\t"
         )
 
@@ -704,7 +838,7 @@ def PublishMetadata(
         currentUser = currentUser,
         rocrateJSON = rocrateJSON,
         transactionFolder = transactionFolder,
-        identifierCollectio = identifierCollection
+        identifierCollection = identifierCollection
         )
 
     publishCrateResult = PublishROCrateMetadata(
