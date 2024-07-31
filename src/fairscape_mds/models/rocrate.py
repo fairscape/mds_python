@@ -440,51 +440,49 @@ def ExtractCrate(
             return crateElem.get("@type") == "EVI:Dataset" and crateElem.get("contentURL")
 
         # filter the rocrate for all datasets with files to extract
-        for crateDataset in filter(lambda crateElem: filterDatasets(crateElem), roCrateMetadata["@graph"]):
-            contentURL = crateDataset.get("contentURL")
- 
-            if 'file:///' in contentURL:
-                # file to read from within the zipfile 
-                sourcePath = Path(contentURL.strip('file:///'))
-               
-                # get the path of the file relative to inside the crate 
-                # i.e. at the same level of the ro-crate-metadata.json file
-                fileWithinCrate = sourcePath.relative_to(crateParentPath)
-
-                # create the object_name for the upload in minio
-                uploadPath = Path(bucketRootPath) / userCN / 'datasets' / transactionFolder / fileWithinCrate
-
-                # upload the extracted dataset
-                datasetContents = crateZip.read(str(sourcePath))
-
-                uploadResult = minioClient.put_object(
-                        bucket_name=bucketName,
-                        object_name=str(uploadPath),
-                        data=io.BytesIO(datasetContents),
-                        length=len(datasetContents),
-                        metadata={
-                            "guid": crateDataset.get("@id"),
-                            "owner": userCN
-                            }
-                        )
-
-                rocrate_logger.info(
-                    "UploadExtractedCrate\t" +
-                    f"transaction={TransactionFolder}\t" +
-                    "message='Uploaded File to minio' " +
-                    f"object_name='{upload_result.object_name}' " +
-                    f"object_etag='{upload_result.etag}'"
-                    )
-
-                # set the distribution on the metadata
-                datasetDistribution = DatasetDistribution(
-                        distributionType=DistributionTypeEnum.MINIO,
-                        distribution=MinioDistribution(contentURL),
-                        )
+        for i, crateDataset in enumerate(roCrateMetadata.get("@graph",[])):
+            if filterDatasets(crateDataset):
+                contentURL = crateDataset.get("contentURL")
+                if 'file:///' in contentURL:
+                    # file to read from within the zipfile 
+                    sourcePath = Path(contentURL.strip('file:///'))
                 
+                    # get the path of the file relative to inside the crate 
+                    # i.e. at the same level of the ro-crate-metadata.json file
+                    fileWithinCrate = sourcePath.relative_to(crateParentPath)
 
-                # preserve metadata
-                crateDataset['minioPath'] = str(uploadPath)
+                    # create the object_name for the upload in minio
+                    uploadPath = Path(bucketRootPath) / userCN / 'datasets' / transactionFolder / fileWithinCrate
+
+                    # upload the extracted dataset
+                    datasetContents = crateZip.read(str(sourcePath))
+
+                    uploadResult = minioClient.put_object(
+                            bucket_name=bucketName,
+                            object_name=str(uploadPath),
+                            data=io.BytesIO(datasetContents),
+                            length=len(datasetContents),
+                            metadata={
+                                "guid": crateDataset.get("@id"),
+                                "owner": userCN
+                                }
+                            )
+
+                    rocrate_logger.info(
+                        "UploadExtractedCrate\t" +
+                        f"transaction={TransactionFolder}\t" +
+                        "message='Uploaded File to minio' " +
+                        f"object_name='{upload_result.object_name}' " +
+                        f"object_etag='{upload_result.etag}'"
+                        )
+
+                    # set the distribution on the metadata
+                    datasetDistribution = DatasetDistribution(
+                            distributionType=DistributionTypeEnum.MINIO,
+                            distribution=MinioDistribution(contentURL),
+                            )
+                    
+                    roCrateMetadata["@graph"][i]['minioPath'] = str(uploadPath)
 
 
     return roCrateMetadata
