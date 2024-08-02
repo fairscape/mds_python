@@ -47,7 +47,7 @@ class URLDistribution(BaseModel):
 
 class DatasetDistribution(BaseModel):
     distributionType: DistributionTypeEnum
-    distribution: Union[MinioDistribution, URLDistribution] = Field(default=[])
+    location: Union[MinioDistribution, URLDistribution]
 
 
 class DatasetWriteModel(DatasetCreateModel, extra=Extra.allow):

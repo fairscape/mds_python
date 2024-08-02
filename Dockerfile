@@ -1,4 +1,4 @@
-FROM python:3.12-slim as builder
+FROM python:3.12-slim AS builder
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends gcc
@@ -12,12 +12,12 @@ COPY requirements.txt .
 RUN pip install -r requirements.txt
 
 
-FROM python:3.12-slim as fairscape
+FROM python:3.12-slim AS fairscape
 COPY --from=builder /opt/venv /opt/venv
 
 # copy source code
 COPY src/ /fairscape/src/
-WORKDIR fairscape/src/
+WORKDIR /fairscape/src/
 
 # add users to run fairscape server
 RUN addgroup --system fair && adduser --system --group fair

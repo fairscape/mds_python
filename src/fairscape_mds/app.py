@@ -93,18 +93,18 @@ app = FastAPI(
 #static_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'static')
 
 # mounting templates
-app.mount("/static", StaticFiles(directory='fairscape_mds/static'), name="static")
+app.mount("/api/static", StaticFiles(directory='fairscape_mds/static'), name="static")
 templates = Jinja2Templates(directory="fairscape_mds/templates")
 
 
-@app.get('/', response_class=HTMLResponse, tags=["Root"])
+@app.get('/api', response_class=HTMLResponse, tags=["Root"])
 async def get_root(request: Request):
     context = {
         "request": request
     }
     return templates.TemplateResponse("page/index.html", context=context)
 
-@app.get('/healthz')
+@app.get('/api/healthz')
 async def healthcheck():
     return JSONResponse(
         status_code=200,
@@ -112,19 +112,20 @@ async def healthcheck():
     )
 
 # Routes for the API
-app.include_router(UserRouter, tags=["user"])
-#app.include_router(GroupRouter, tags=["group"])
-app.include_router(SoftwareRouter, tags=["software"])
-app.include_router(DatasetRouter, tags=["dataset"])
-app.include_router(ROCrateRouter, tags=["rocrate"])
-app.include_router(ComputationRouter, tags=["computation"])
-app.include_router(ProjectRouter, tags=["project"])
-app.include_router(OrganizationRouter, tags=["organization"])
-app.include_router(EvidenceGraphRouter, tags=["evidencegraph"])
-app.include_router(TransferRouter, tags=["transfer"])
-app.include_router(ResolverRouter, tags=["resolver"])
-app.include_router(SchemaRouter, tags=["schema"])
-app.include_router(AuthRouter, tags=["auth"])
+#app.include_router(UserRouter, prefix="/api" tags=["user"])
+#app.include_router(GroupRouter, prefix="/api", tags=["group"])
+#app.include_router(ProjectRouter, prefix="/api", tags=["project"])
+#app.include_router(TransferRouter, prefix="/api",tags=["transfer"])
+
+app.include_router(AuthRouter, prefix="/api", tags=["auth"])
+app.include_router(SoftwareRouter, prefix="/api", tags=["software"])
+app.include_router(DatasetRouter,prefix="/api", tags=["dataset"])
+app.include_router(ROCrateRouter, prefix="/api",tags=["rocrate"])
+app.include_router(ComputationRouter, prefix="/api", tags=["computation"])
+app.include_router(OrganizationRouter, prefix="/api", tags=["organization"])
+app.include_router(EvidenceGraphRouter,prefix="/api", tags=["evidencegraph"])
+app.include_router(ResolverRouter, prefix="/api",tags=["resolver"])
+app.include_router(SchemaRouter, prefix="/api", tags=["schema"])
 
 # Routes for Web pages
 #app.include_router(WebIndexRouter, tags=["webindex"])
@@ -132,8 +133,8 @@ app.include_router(AuthRouter, tags=["auth"])
 #app.include_router(WebSignupRouter, tags=["websignup"])
 #app.include_router(WebHomeRouter, tags=["webhome"])
 
-@app.get("/page/{page_name}", response_class=HTMLResponse)
-def show_page(request: Request, page_name: str):
-    return templates.TemplateResponse("page/" + page_name + ".html", {"request": request})
+#@app.get("/page/{page_name}", response_class=HTMLResponse)
+#def show_page(request: Request, page_name: str):
+#    return templates.TemplateResponse("page/" + page_name + ".html", {"request": request})
 
 
