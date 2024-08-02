@@ -86,6 +86,10 @@ app = FastAPI(
         "name": "MIT",
         "url": "https://opensource.org/license/MIT"
     },
+    openapi_url="/api/openapi.json",
+    docs_url="/api/docs",
+    redoc_url="/api/redoc",
+    swagger_ui_oauth2_redirect_url="/api/docs/oauth2-redirect",
     openapi_tags=tags_metadata
 )
 
