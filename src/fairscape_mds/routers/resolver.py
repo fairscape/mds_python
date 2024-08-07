@@ -36,10 +36,11 @@ rocrate_logger = logging.getLogger("rosolver")
 ResolverRouter = APIRouter()
 
 fairscapeConfig = get_fairscape_config()
-mongo_client = fairscapeConfig.CreateMongoClient()
-mongo_db = mongo_client[fairscapeConfig.mongo.db]
-userCollection = mongo_db[fairscapeConfig.mongo.user_collection]
-identifierCollection = mongo_db[fairscapeConfig.mongo.identifier_collection]
+mongoClient = fairscapeConfig.CreateMongoClient()
+mongoDB = mongoClient[fairscapeConfig.mongo.db]
+userCollection = mongoDB[fairscapeConfig.mongo.user_collection]
+identifierCollection = mongoDB[fairscapeConfig.mongo.identifier_collection]
+rocrateCollection = mongoDB[fairscapeConfig.mongo.rocrate_collection]
 FAIRSCAPE_URL = fairscapeConfig.url
 
 def convert_to_rdf(json_data):  
@@ -111,7 +112,6 @@ def resolve(
     """ Resolve Identifier Metadata and Return in JSON-LD
     """
 
-    # TODO return HTML for failed naan
     if len(NAAN) != 5:
         return JSONResponse(
                 status_code=404,
@@ -121,27 +121,26 @@ def resolve(
     # TODO support multiple NAANs
     if NAAN!= fairscapeConfig.NAAN:
         return RedirectResponse(f'https://n2t.net/ark:{NAAN}/{postfix}')
+   
+    # search for metadata
+    arkMetadata = identifierCollection.find_one(
+            {"@id": f"ark:{NAAN}/{postfix}"},
+            projection={"_id": 0, "@graph._id": 0}
+            )
 
 
-    mongo_db = mongo_client[mongo_config.db]
-    collections = [mongo_db[mongo_config.identifier_collection], 
-                   mongo_db[mongo_config.user_collection],
-                   mongo_db[mongo_config.rocrate_collection]]
-    
-    ark_metadata = find_metadata(collections, NAAN, postfix)
-
-    if not ark_metadata:
+    if not arkMetadata:
         return JSONResponse({"@id": f"ark:{NAAN}/{postfix}", "error": "ark not found", "status_code": 404}, status_code=404)
     
     #look and see if an evidence graph exists if it does return it
     # if not return empty dict.
-    eg_ark = ark_metadata.get("hasEvidenceGraph",None)
+    eg_ark = arkMetadata.get("hasEvidenceGraph",None)
     if eg_ark:
         prefix_and_naan, eg_postfix = eg_ark.split("/")
         _, eg_NAAN = prefix_and_naan.split(":")
         
         #far from perfect, but default to shwoing first @graph or normal metadata
-        eg_metadata = find_metadata(collections, eg_NAAN, eg_postfix).get("@graph",[ark_metadata])[0]
+        eg_metadata = find_metadata([identifierCollecion, rocrateCollection], eg_NAAN, eg_postfix).get("@graph",[ark_metadata])[0]
     else:
         eg_metadata = ark_metadata
 
