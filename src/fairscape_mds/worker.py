@@ -181,6 +181,7 @@ def AsyncRegisterROCrate(userCN: str, transactionFolder: str, filePath: str):
         objectResponse.close()
         objectResponse.release_conn()
 
+    # extracting crate from path
     roCrateMetadata = ExtractCrate(
             minioClient=minioClient,
             bucketName = fairscapeConfig.minio.default_bucket,

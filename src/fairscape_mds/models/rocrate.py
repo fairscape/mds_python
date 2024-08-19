@@ -344,28 +344,20 @@ class UploadROCrate():
 def UploadZippedCrate(
         MinioClient: minio.api.Minio, 
         BucketName: str, 
-        BucketRootPath: str | None,
+        ObjectName: str,
         ZippedObject, 
-        TransactionFolder: uuid.UUID, 
         Filename: str,
         ) -> Tuple[OperationStatus, str]:
     """ Upload A Zipped ROCrate
     """
-
-    #source_filepath = Path(ZippedObject.filename).name
-
-    if BucketRootPath:
-        upload_filepath = Path(str(BucketRootPath)) / Path(str(TransactionFolder)) / Path(Filename)
-    else:
-        upload_filepath = Path(str(TransactionFolder)) / Path(Filename)
     
     upload_result = MinioClient.put_object(
-        bucket_name=BucketName, 
-        object_name=str(upload_filepath), 
-        data=ZippedObject, 
-        length=-1,
+        bucket_name= BucketName, 
+        object_name= ObjectName,
+        data= ZippedObject, 
+        length= -1,
         part_size= 5 * 1024 * 1024 ,
-        content_type="application/zip"
+        content_type= "application/zip"
         )                
 
     # log upload of zipped rocrate
@@ -419,26 +411,36 @@ def ExtractCrate(
 
         # extract and upload the content
         fileContents = crateZip.read(metadataFileInfo.filename)
-        uploadFilepath = Path(bucketRootPath) / userCN / 'rocrates' / transactionFolder / 'ro-crate-metadata.json'
-
-        uploadResult = minioClient.put_object(
-            bucket_name= bucketName, 
-            object_name=str(uploadFilepath), 
-            data=io.BytesIO(fileContents), 
-            length=len(fileContents)
-            )
-
         # may have to seek the begining of the file
 
     # TODO validate ROCrate
     roCrateMetadata = json.loads(fileContents)
+
     # format identifiers for storage
-    _, splitArk = roCrateMetadata["@id"].split("ark:")
-    roCrateMetadata["@id"] = "ark:" + splitArk
+    crateArk = parseArk(roCrateMetadata["@id"])
+    if crateArk is None:
+        # TODO assign new identifiers
+        pass
+    else:
+        roCrateMetadata["@id"] = crateArk
 
     for crateElement in roCrateMetadata["@graph"]:
-        _, splitArk = crateElement["@id"].split("ark:")
-        crateElement["@id"] = "ark:" + splitArk
+        elementArk = parseArk(crateElement["@id"])
+        if elementArk is None:
+            pass
+        else:
+            crateElement["@id"] = elementArk
+
+    # upload the ro-crate-metadata.json to the rocrates 
+    uploadFilepath = Path(bucketRootPath) / userCN / 'rocrates' / transactionFolder / 'ro-crate-metadata.json'
+
+    
+    uploadResult = minioClient.put_object(
+        bucket_name= bucketName, 
+        object_name=str(uploadFilepath), 
+        data=io.BytesIO(fileContents), 
+        length=len(fileContents)
+        )
 
 
 
@@ -461,7 +463,7 @@ def ExtractCrate(
             fileWithinCrate = sourcePath.relative_to(crateParentPath)
 
             # create the object_name for the upload in minio
-            uploadPath = Path(bucketRootPath) / userCN / 'datasets' / transactionFolder / fileWithinCrate
+            uploadPath = Path(bucketRootPath) / userCN / 'datasets' / fileWithinCrate
 
             # upload the extracted dataset
             datasetContents = crateZip.read(str(sourcePath))

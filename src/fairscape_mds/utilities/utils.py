@@ -3,6 +3,12 @@ from pathlib import Path
 from zipfile import ZipFile
 import json
 
+def parseArk(arkGUID):
+    arkMatches = re.search(r'ark:\d{5}/(.*)$', arkGUID)
+    if arkMatches is None:
+        return None
+    else:
+        return arkMatches[0]
 
 def validate_ark(guid: str) -> str:
     """Validate ark syntax and return the value of the passed string if correct, otherwise raise a ValueError exeption
