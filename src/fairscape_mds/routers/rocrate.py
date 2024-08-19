@@ -76,7 +76,7 @@ def uploadAsync(
     zipFilename = str(Path(crate.filename).name)
 
     # set the key for uploading the object to minio
-    zippedObjectName = Path(fairscapeConfig.minio.default_bucket_path) \ userCN \ 'rocrates' \ transactionFolder \ zipFilename
+    zippedObjectName = Path(fairscapeConfig.minio.default_bucket_path) / currentUser.cn / 'rocrates' / transactionFolder / zipFilename
 
     # upload the zipped ROCrate 
     zipped_upload_status, zippedPath = UploadZippedCrate(
@@ -84,7 +84,7 @@ def uploadAsync(
         ZippedObject=crate.file,
         ObjectName= str(zippedObjectName),
         BucketName=fairscapeConfig.minio.rocrate_bucket,
-        Filename=zip_filename
+        Filename=zipFilename
     )
 
     if zipped_upload_status is None:
@@ -195,7 +195,7 @@ def rocrate_list(
                 "contentURL": f"{fairscapeConfig.url}/rocrate/download/{crate.get('@id')}",
                 "@graph": [
                     {
-                        "@id": f"{fairscapeConfig.url}/{crateElem.get("@id")}",
+                        "@id": f"{fairscapeConfig.url}/{crateElem.get('@id')}",
                         "@type": crateElem.get("@type"),
                         "name": crateElem.get("name"),
                         "contentURL": f"{fairscapeConfig.url}/dataset/download/{crateElem.get('@id')}"
