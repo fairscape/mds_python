@@ -224,7 +224,7 @@ def dataset_get(NAAN: str, postfix: str):
     """
 
     rocrateGUID = f"ark:{NAAN}/{postfix}"
-    rocrateMetadata = rocrateCollection.find_one({"@id": rocrate_id}, projection={"_id":0}) 
+    rocrateMetadata = rocrateCollection.find_one({"@id": rocrateGUID}, projection={"_id":0}) 
 
     if rocrateMetadata is None:
         return JSONResponse(
