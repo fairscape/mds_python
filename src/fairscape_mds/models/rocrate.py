@@ -46,6 +46,8 @@ from fairscape_mds.models.dataset import (
         DistributionTypeEnum,
         URLDistribution
         )
+
+from fairscape_mds.utilities.utils import parseArk
 from fairscape_mds.utilities.operation_status import OperationStatus
 from fairscape_mds.models.user import UserLDAP
 
@@ -347,7 +349,7 @@ def UploadZippedCrate(
         ObjectName: str,
         ZippedObject, 
         Filename: str,
-        ) -> Tuple[OperationStatus, str]:
+        ) -> OperationStatus:
     """ Upload A Zipped ROCrate
     """
     
@@ -368,7 +370,7 @@ def UploadZippedCrate(
         f"object_etag='{upload_result.etag}'"
         )
 
-    return (OperationStatus(True, "", 200), upload_filepath)
+    return OperationStatus(True, "", 200)
 
 def ExtractCrate(
         minioClient,

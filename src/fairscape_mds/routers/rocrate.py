@@ -79,7 +79,7 @@ def uploadAsync(
     zippedObjectName = Path(fairscapeConfig.minio.default_bucket_path) / currentUser.cn / 'rocrates' / transactionFolder / zipFilename
 
     # upload the zipped ROCrate 
-    zipped_upload_status, zippedPath = UploadZippedCrate(
+    zipped_upload_status= UploadZippedCrate(
         MinioClient=minioClient,
         ZippedObject=crate.file,
         ObjectName= str(zippedObjectName),
