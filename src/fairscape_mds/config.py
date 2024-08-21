@@ -71,20 +71,10 @@ def get_fairscape_config(env_path: str = '/fairscape/.env'):
         check_cert= checkCert
     )
 
-    if config_values.get("FAIRSCAPE_REDIS_DATABASE"):
-        redisDB=int(config_values.get("FAIRSCAPE_REDIS_DATABASE"))
-    else:
-        redisDB=0
-
-    if config_values.get("FAIRSCAPE_REDIS_RESULT_DATABASE"):
-        redisResultDB=int(config_values.get("FAIRSCAPE_REDIS_RESULT_DATABASE"))
-    else:
-        redisResultDB=0
-
-    if config_values.get("FAIRSCAPE_REDIS_PORT"):
-        redisPort= int(config_values.get("FAIRSCAPE_REDIS_PORT"))
-    else:
-        redisPort= 6379
+    # defaulting several redis DB values
+    redisDB=int(config_values.get("FAIRSCAPE_REDIS_DATABASE", 0))
+    redisResultDB=int(config_values.get("FAIRSCAPE_REDIS_RESULT_DATABASE", 1))
+    redisPort= int(config_values.get("FAIRSCAPE_REDIS_PORT", 6379))
 
     server_redis_config = RedisConfig(
         port= redisPort,
