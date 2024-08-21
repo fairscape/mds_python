@@ -363,7 +363,6 @@ def UploadZippedCrate(
     # log upload of zipped rocrate
     rocrate_logger.info(
         "UploadZippedCrate\t" +
-        f"transaction={TransactionFolder}\t" +
         "message='Uploaded Zipped Crate Minio'\t" +
         f"object_name='{upload_result.object_name}\t' " +
         f"object_etag='{upload_result.etag}'"
