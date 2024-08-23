@@ -186,7 +186,7 @@ def AsyncRegisterROCrate(userCN: str, transactionFolder: str, filePath: str):
             minioClient=minioClient,
             bucketName = fairscapeConfig.minio.default_bucket,
             bucketRootPath = fairscapeConfig.minio.default_bucket_path,
-            userCN = userCN,
+            currentUser = currentUser,
             transactionFolder = transactionFolder,
             zippedObject = io.BytesIO(zippedContent)
             )
@@ -216,27 +216,7 @@ def AsyncRegisterROCrate(userCN: str, transactionFolder: str, filePath: str):
         identifierCollection = identifierCollection, 
         ) 
 
-
-    
-    # TODO update the ro-crate-metadata.json inside the archival location in minio
-
-    if publishMetadata:
-        backgroundTaskLogger.info(
-                f"transaction: {str(transactionFolder)}\t" +
-                "message: task succeeded"
-                )
-        updateUploadJob(
-                transactionFolder,
-                {
-                    "status": "Finished",
-                    "timeFinished": datetime.datetime.now(tz=datetime.timezone.utc),
-                    "completed": True,
-                    "success": True,
-                    }
-
-                )
-        return True
-    else:
+    if publishMetadata is None:
         updateUploadJob(
                 transactionFolder,
                 {
@@ -249,7 +229,22 @@ def AsyncRegisterROCrate(userCN: str, transactionFolder: str, filePath: str):
                 )
 
         return False
-
+    else:
+        backgroundTaskLogger.info(
+                f"transaction: {str(transactionFolder)}\t" +
+                "message: task succeeded"
+                )
+        updateUploadJob(
+                transactionFolder,
+                {
+                    "status": "Finished",
+                    "timeFinished": datetime.datetime.now(tz=datetime.timezone.utc),
+                    "completed": True,
+                    "success": True,
+                    "identifiersMinted": publishMetadata
+                    }
+                )
+        return True
 
 
  

@@ -377,7 +377,7 @@ def ExtractCrate(
         bucketName: str,
         bucketRootPath: str,
         transactionFolder: str,
-        userCN: str,
+        currentUser: UserLDAP,
         zippedObject, 
 ) -> dict:
     """
@@ -417,6 +417,7 @@ def ExtractCrate(
     # TODO validate ROCrate
     roCrateMetadata = json.loads(fileContents)
 
+    # TODO reassign identifiers if there is conflict
     # format identifiers for storage
     crateArk = parseArk(roCrateMetadata["@id"])
     if crateArk is None:
@@ -425,6 +426,7 @@ def ExtractCrate(
     else:
         roCrateMetadata["@id"] = crateArk
 
+    # TODO reassign identifiers if there is conflict
     for crateElement in roCrateMetadata["@graph"]:
         elementArk = parseArk(crateElement["@id"])
         if elementArk is None:
@@ -432,8 +434,12 @@ def ExtractCrate(
         else:
             crateElement["@id"] = elementArk
 
+    # TODO get the name of the zip in rocrate
+    # zippedFilepath = Path()
+    # uploadFilepath = Path(bucketRootPath) / userCN / 'rocrates' / zippedFilepath / 'ro-crate-metadata.json'
+
     # upload the ro-crate-metadata.json to the rocrates 
-    uploadFilepath = Path(bucketRootPath) / userCN / 'rocrates' / transactionFolder / 'ro-crate-metadata.json'
+    uploadFilepath = Path(bucketRootPath) / currentUser.cn / 'rocrates' / transactionFolder / 'ro-crate-metadata.json'
 
     
     uploadResult = minioClient.put_object(
@@ -443,8 +449,7 @@ def ExtractCrate(
         length=len(fileContents)
         )
 
-
-
+    # read the zip and filter all datasets
     with zipfile.ZipFile(io.BytesIO(zipContents), "r") as crateZip:
 
         # filter the rocrate for all datasets with files to extract
@@ -464,7 +469,7 @@ def ExtractCrate(
             fileWithinCrate = sourcePath.relative_to(crateParentPath)
 
             # create the object_name for the upload in minio
-            uploadPath = Path(bucketRootPath) / userCN / 'datasets' / fileWithinCrate
+            uploadPath = Path(bucketRootPath) / currentUser.cn / 'datasets' / fileWithinCrate
 
             # upload the extracted dataset
             datasetContents = crateZip.read(str(sourcePath))
@@ -476,7 +481,7 @@ def ExtractCrate(
                     length=len(datasetContents),
                     metadata={
                         "guid": crateDataset.get("@id"),
-                        "owner": userCN
+                        "owner": currentUser.cn
                         }
                     )
 
@@ -496,6 +501,7 @@ def ExtractCrate(
             
             # preserve metadata
             crateDataset['distribution'] = datasetDistribution.model_dump()
+
 
     return roCrateMetadata
 
@@ -540,10 +546,6 @@ def UploadExtractedCrate(
         # extract and upload the content
         source_filepath = Path(metadataInfo.filename)
         upload_filepath = Path(BucketRootPath) / userCN / 'rocrates' / TransactionFolder / 'ro-crate-metadata.json'
-
-        # 
-
-        
 
         # skip first entry on the infolist which is for the folder itself
         # minio will error if there exist an object which is both a 
@@ -809,7 +811,6 @@ class ROCrateException(Exception):
         return self.message
 
 
-
 class ROCrateMetadataExistsException(ROCrateException):
     """ Raised when metadata already exists in mongoDB """
     pass
@@ -821,7 +822,7 @@ def PublishMetadata(
     transactionFolder: str,
     rocrateCollection: pymongo.collection.Collection,
     identifierCollection: pymongo.collection.Collection
-    ) -> bool:
+    ) -> List[str] | None:
     """
     Publish ROCrate Metadata into Mongo Database
     """
@@ -830,7 +831,6 @@ def PublishMetadata(
     rocrateFound = rocrateCollection.find_one(
             {"@id": rocrateJSON['@id']}
             )
-
 
     if rocrateFound:
         raise ROCrateMetadataExistsException(f"ROCrate with @id == {rocrateJSON['@id']} found", None)
@@ -842,7 +842,13 @@ def PublishMetadata(
             "group": currentUser.memberOf[0]
             }
 
-    # set all datasets to have minio content paths
+    # set default permissions for all datasets
+    for crateElem in rocrateJSON['@graph']:
+        # set permissions on all rocrate identifiers
+        crateElem['permissions'] = {
+            "owner": currentUser.dn,
+            "group": currentUser.memberOf[0]
+            }
 
     publishProvResult = PublishProvMetadata(
         currentUser = currentUser,
@@ -850,22 +856,20 @@ def PublishMetadata(
         transactionFolder = transactionFolder,
         identifierCollection = identifierCollection
         )
-
+    
     publishCrateResult = PublishROCrateMetadata(
-        currentUser,
         rocrateJSON,
         rocrateCollection
         )
 
-    if publishCrateResult and publishProvResult:
-        return True
+    if publishCrateResult is None or publishProvResult is None:
+        # TODO log errors
+        return None
     else:
-        # TODO raise exceptions
-        return False
+        return publishProvResult
 
 
 def PublishROCrateMetadata(
-        currentUser: UserLDAP,
         rocrateJSON,
         rocrateCollection: pymongo.collection.Collection
     ) -> bool:  
@@ -876,15 +880,6 @@ def PublishROCrateMetadata(
     :param dict rocrateJSON: ROCrate metadata to instantiate
     :param pymongo.collection.Collection rocrateCollection: Mongo Collection for storing ROCrate metadata
     """ 
-
-
-    # compress @graph property to have minimal metadata
-    compressedGraph = [ 
-        {
-            '@id': crateElem['@id'], 
-            '@type': crateElem['@type'],
-            'name': crateElem['name']
-        }  for crateElem in rocrateJSON['@graph']]
 
     insertResult = rocrateCollection.insert_one(rocrateJSON)
     if insertResult.inserted_id is None:
@@ -898,7 +893,7 @@ def PublishProvMetadata(
         rocrateJSON: dict,
         transactionFolder: str,
         identifierCollection: pymongo.collection.Collection
-        ) -> bool:
+        ) -> List[str] | None:
     """ 
     Insert ROCrate metadata and metadata for all identifiers into the identifier collection
 
@@ -908,22 +903,17 @@ def PublishProvMetadata(
     """
 
     # for every element in the rocrate model dump json
-    insertMetadata = [ elem for elem in rocrateJSON.get("@graph")]
+    insertMetadata = [ elem for elem in rocrateJSON.get("@graph", [])]
     # insert rocrate json into identifier collection
     insertMetadata.append(rocrateJSON)
 
-    # set the permissions for the uploading user
-    for identifierMetadata in insertMetadata:
-        identifierMetadata['permissions'] = {
-                "owner": currentUser.dn,
-                "group": currentUser.memberOf[0]
-                }
+    insertedIdentifiers = [ elem.get("@id") for elem in insertMetadata]
 
     # insert all identifiers into the identifier collection
     insertResult = identifierCollection.insert_many(insertMetadata)
 
     if len(insertResult.inserted_ids) != len(insertMetadata):
-        return False
+        return None
     else:
-        return True
+        return insertedIdentifiers
 
