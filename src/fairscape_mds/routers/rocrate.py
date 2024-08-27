@@ -242,8 +242,6 @@ def dataset_get(NAAN: str, postfix: str):
             content={"@id": rocrateGUID, "error": "ROCrate not found"}
         )
 
-
-    rocrateMetadata = remove_object_id(rocrateMetadata)
     # format json-ld with absolute URIs
     rocrateMetadata['@id'] = f"{fairscapeConfig.url}/{rocrateGUID}"
 
@@ -256,6 +254,9 @@ def dataset_get(NAAN: str, postfix: str):
         crateElem['@id'] = f"{fairscapeConfig.url}/{crateElem['@id']}"
         crateElem.pop("_id", None)
         crateElem.pop("permissions", None)
+        
+        if 'file' in crateElem.get('contentURL'):
+            crateElem["contentURL"] = f"{fairscapeConfig.url}/dataset/download/{crateElem.get('@id')}"
 
 
     return JSONResponse(
