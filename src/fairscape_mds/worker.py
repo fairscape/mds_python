@@ -5,6 +5,7 @@ import pathlib
 import io
 import datetime
 import re
+from pathlib import Path
 
 
 # temporary fix for importing module problems
@@ -140,58 +141,49 @@ def updateUploadJob(transactionFolder: str, update: Dict):
 def AsyncRegisterROCrate(userCN: str, transactionFolder: str, filePath: str):
     """
     Background task for processing Zipped ROCrates.
-
-    :param fairscape_mds.models.user.UserLDAP currentUser: Current User Uploading the ROCrate
+    :param str userCN: Current User's CN uploading the ROCrate
     :param str transactionFolder: UUID folder representing the unique path in minio
-    :param str zippedCratePath: The filename of the zipped crate contents
+    :param str filePath: The filename of the zipped crate contents
     """
-
     # connect to ldap
     ldapConnection = fairscapeConfig.ldap.connectAdmin()
     currentUser = getUserByCN(ldapConnection, userCN)
     ldapConnection.unbind()
 
-
     try:
         objectResponse = minioClient.get_object(
             bucket_name=fairscapeConfig.minio.rocrate_bucket, 
             object_name=filePath
-            )
+        )
         zippedContent = objectResponse.read()
-
     except Exception as minioException:
         backgroundTaskLogger.error(
-                f"transaction: {str(transactionFolder)}" +
-                "\tmessage: failed to read minio object" + f"\terror: {str(minioException)}"
-                )
-
+            f"transaction: {str(transactionFolder)}" +
+            "\tmessage: failed to read minio object" + f"\terror: {str(minioException)}"
+        )
         updateUploadJob(
-                transactionFolder, 
-                {
-                    "completed": True,
-                    "success": False,
-                    "error": f"Failed to read minio Object \terror: {str(minioException)}"
-                    }
-                )
-
-
+            transactionFolder, 
+            {
+                "completed": True,
+                "success": False,
+                "error": f"Failed to read minio Object \terror: {str(minioException)}"
+            }
+        )
         return False
-
     finally:
         objectResponse.close()
         objectResponse.release_conn()
 
     # extracting crate from path
     roCrateMetadata = ExtractCrate(
-            minioClient=minioClient,
-            bucketName = fairscapeConfig.minio.default_bucket,
-            bucketRootPath = fairscapeConfig.minio.default_bucket_path,
-            currentUser = currentUser,
-            transactionFolder = transactionFolder,
-            zippedObject = io.BytesIO(zippedContent)
-            )
+        minioClient=minioClient,
+        bucketName=fairscapeConfig.minio.default_bucket,
+        bucketRootPath=fairscapeConfig.minio.default_bucket_path,
+        currentUser=currentUser,
+        transactionFolder=transactionFolder,
+        zippedObject=io.BytesIO(zippedContent)
+    )
 
-    
     # update the uploadJob record
     if roCrateMetadata is None:
         updateUploadJob(
@@ -200,50 +192,63 @@ def AsyncRegisterROCrate(userCN: str, transactionFolder: str, filePath: str):
                 "completed": True,
                 "success": False,
                 "error": "error reading ro-crate-metadata"
-                }
-            )
+            }
+        )
+        return False
+
+    # Add distribution information if not present
+    if 'distribution' not in roCrateMetadata:
+        crate_name = Path(filePath).stem  # Get filename without extension
+        zip_bucket = fairscapeConfig.minio.rocrate_bucket
+        object_path = f"{transactionFolder}/{crate_name}"
+
+        roCrateMetadata['distribution'] = {
+            "extractedROCrateBucket": fairscapeConfig.minio.default_bucket,
+            "archivedROCrateBucket": zip_bucket,
+            "extractedObjectPath": [f"{object_path}/{file}" for file in roCrateMetadata.get('hasPart', [])],
+            "archivedObjectPath": filePath
+        }
+        roCrateMetadata['contentURL'] = f"s3a://{zip_bucket}/{object_path}.zip"
 
     updateUploadJob(
-            transactionFolder,
-            {"status": "minting identifiers"}
-            )
+        transactionFolder,
+        {"status": "minting identifiers"}
+    )
 
     publishMetadata = PublishMetadata(
         currentUser=currentUser,
         rocrateJSON=roCrateMetadata,
         transactionFolder=transactionFolder,
         rocrateCollection=rocrateCollection,
-        identifierCollection = identifierCollection, 
-        ) 
+        identifierCollection=identifierCollection,
+    )
 
     if publishMetadata is None:
         updateUploadJob(
-                transactionFolder,
-                {
-                    "status": "Failed",
-                    "timeFinished": datetime.datetime.now(tz=datetime.timezone.utc),
-                    "completed": True,
-                    "success": False,
-                    }
-
-                )
-
+            transactionFolder,
+            {
+                "status": "Failed",
+                "timeFinished": datetime.datetime.now(tz=datetime.timezone.utc),
+                "completed": True,
+                "success": False,
+            }
+        )
         return False
     else:
         backgroundTaskLogger.info(
-                f"transaction: {str(transactionFolder)}\t" +
-                "message: task succeeded"
-                )
+            f"transaction: {str(transactionFolder)}\t" +
+            "message: task succeeded"
+        )
         updateUploadJob(
-                transactionFolder,
-                {
-                    "status": "Finished",
-                    "timeFinished": datetime.datetime.now(tz=datetime.timezone.utc),
-                    "completed": True,
-                    "success": True,
-                    "identifiersMinted": publishMetadata
-                    }
-                )
+            transactionFolder,
+            {
+                "status": "Finished",
+                "timeFinished": datetime.datetime.now(tz=datetime.timezone.utc),
+                "completed": True,
+                "success": True,
+                "identifiersMinted": publishMetadata
+            }
+        )
         return True
 
 
