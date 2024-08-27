@@ -263,8 +263,6 @@ def dataset_get(NAAN: str, postfix: str):
         status_code=200,
         content=rocrateMetadata
     )
-    
-
 
 @router.get("/rocrate/download/ark:{NAAN}/{postfix}",
             summary="Download archived form of ROCrate using StreamingResponse",
