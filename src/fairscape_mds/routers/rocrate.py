@@ -211,6 +211,13 @@ def rocrate_list(
         content=responseJSON
     )
 
+def remove_object_id(data):
+    if isinstance(data, dict):
+        return {k: remove_object_id(v) for k, v in data.items() if k != '_id'}
+    elif isinstance(data, list):
+        return [remove_object_id(v) for v in data]
+    else:
+        return data
 
 @router.get("/rocrate/ark:{NAAN}/{postfix}",
     summary="Retrieve metadata about a ROCrate",
@@ -233,6 +240,7 @@ def dataset_get(NAAN: str, postfix: str):
         )
 
 
+    rocrateMetadata = remove_object_id(rocrateMetadata)
     # format json-ld with absolute URIs
     rocrateMetadata['@id'] = f"{fairscapeConfig.url}/{rocrateGUID}"
 
@@ -266,7 +274,7 @@ def archived_rocrate_download(
             status_code=404,
             content={
                 "@id": f"{fairscapeConfig.url}/{rocrateGUID}",
-                "error": f"unable to find record for RO-Crate: {rocrate_id}"
+                "error": f"unable to find record for RO-Crate: {rocrateGUID}"
             }
         )
 
@@ -285,7 +293,7 @@ def archived_rocrate_download(
                 status_code=404,
                 content={
                     "@id": f"{fairscapeConfig.url}/{rocrateGUID}",
-                    "error": f"No downloadable content found for ROCrate: {rocrate_id}"
+                    "error": f"No downloadable content found for ROCrate: {rocrateGUID}"
                 }
             )
 
