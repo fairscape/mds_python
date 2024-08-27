@@ -224,7 +224,10 @@ def dataset_get(NAAN: str, postfix: str):
     """
 
     rocrateGUID = f"ark:{NAAN}/{postfix}"
-    rocrateMetadata = rocrateCollection.find_one({"@id": rocrateGUID}, projection={"_id":0}) 
+    rocrateMetadata = rocrateCollection.find_one(
+        {"@id": rocrateGUID}, 
+        projection={"_id":0}
+        ) 
 
     if rocrateMetadata is None:
         return JSONResponse(
@@ -236,10 +239,21 @@ def dataset_get(NAAN: str, postfix: str):
     # format json-ld with absolute URIs
     rocrateMetadata['@id'] = f"{fairscapeConfig.url}/{rocrateGUID}"
 
+    # remove permissions from top level metadata
+    rocrateMetadata.pop("permissions", None)
+    
+
+    # process every crate elem in @graph of ROCrate 
     for crateElem in rocrateMetadata.get("@graph", []):
         crateElem['@id'] = f"{fairscapeConfig.url}/{crateElem['@id']}"
+        crateElem.pop("_id", None)
+        crateElem.pop("permissions", None)
 
-    return rocrateMetadata
+
+    return JSONResponse(
+        status_code=200,
+        content=rocrateMetadata
+    )
     
 
 
