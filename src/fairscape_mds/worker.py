@@ -166,7 +166,8 @@ def AsyncRegisterROCrate(userCN: str, transactionFolder: str, filePath: str):
             {
                 "completed": True,
                 "success": False,
-                "error": f"Failed to read minio Object \terror: {str(minioException)}"
+                "error": f"Failed to read minio Object \terror: {str(minioException)}",
+                "status": "Failed"
             }
         )
         return False
@@ -175,14 +176,26 @@ def AsyncRegisterROCrate(userCN: str, transactionFolder: str, filePath: str):
         objectResponse.release_conn()
 
     # extracting crate from path
-    roCrateMetadata = ExtractCrate(
-        minioClient=minioClient,
-        bucketName=fairscapeConfig.minio.default_bucket,
-        bucketRootPath=fairscapeConfig.minio.default_bucket_path,
-        currentUser=currentUser,
-        transactionFolder=transactionFolder,
-        zippedObject=io.BytesIO(zippedContent)
-    )
+    try:
+        roCrateMetadata = ExtractCrate(
+            minioClient=minioClient,
+            bucketName=fairscapeConfig.minio.default_bucket,
+            bucketRootPath=fairscapeConfig.minio.default_bucket_path,
+            currentUser=currentUser,
+            transactionFolder=transactionFolder,
+            zippedObject=io.BytesIO(zippedContent)
+        )
+    except:
+        updateUploadJob(
+            transactionFolder,
+            {
+                "completed": True,
+                "success": False,
+                "error": "No ro-crate-metadata.json in zip file",
+                "status": "Failed"
+            }
+        )
+        return False
 
     # update the uploadJob record
     if roCrateMetadata is None:
@@ -191,7 +204,8 @@ def AsyncRegisterROCrate(userCN: str, transactionFolder: str, filePath: str):
             {
                 "completed": True,
                 "success": False,
-                "error": "error reading ro-crate-metadata"
+                "error": "error reading ro-crate-metadata",
+                "status": "Failed"
             }
         )
         return False
@@ -215,13 +229,26 @@ def AsyncRegisterROCrate(userCN: str, transactionFolder: str, filePath: str):
         {"status": "minting identifiers"}
     )
 
-    publishMetadata = PublishMetadata(
-        currentUser=currentUser,
-        rocrateJSON=roCrateMetadata,
-        transactionFolder=transactionFolder,
-        rocrateCollection=rocrateCollection,
-        identifierCollection=identifierCollection,
-    )
+    try:
+        publishMetadata = PublishMetadata(
+            currentUser=currentUser,
+            rocrateJSON=roCrateMetadata,
+            transactionFolder=transactionFolder,
+            rocrateCollection=rocrateCollection,
+            identifierCollection=identifierCollection,
+        )
+    except:
+        updateUploadJob(
+            transactionFolder,
+            {
+                "status": "Failed",
+                "timeFinished": datetime.datetime.now(tz=datetime.timezone.utc),
+                "completed": True,
+                "success": False,
+                "error": "Crate already exists on Fairscape."
+            }
+        )
+        return False
 
     if publishMetadata is None:
         updateUploadJob(
