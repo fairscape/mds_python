@@ -255,7 +255,7 @@ def dataset_get(NAAN: str, postfix: str):
         crateElem.pop("_id", None)
         crateElem.pop("permissions", None)
         
-        if 'file' in crateElem.get('contentURL'):
+        if 'file' in crateElem.get('contentURL',''):
             crateElem["contentURL"] = f"{fairscapeConfig.url}/dataset/download/{crateElem.get('@id')}"
 
 
