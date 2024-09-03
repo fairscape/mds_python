@@ -55,5 +55,6 @@ def resolve(
 
     # Remove _id fields from the result
     cleanedMetadata = remove_object_id(arkMetadata)
+    cleanedMetadata.pop("permissions", None)
 
     return JSONResponse(content=cleanedMetadata)
