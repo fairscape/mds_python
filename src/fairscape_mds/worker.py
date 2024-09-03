@@ -65,6 +65,7 @@ class ROCrateUploadJob(BaseModel):
     zippedCratePath: str
     timeStarted: datetime.datetime | None = Field(default=None)
     timeFinished: datetime.datetime | None = Field(default=None)
+    progress: float = Field(default=0)
     status: Optional[str] = Field(default='in progress')
     completed: Optional[bool] = Field(default=False)
     success: Optional[bool] = Field(default=False)
@@ -210,19 +211,19 @@ def AsyncRegisterROCrate(userCN: str, transactionFolder: str, filePath: str):
         )
         return False
 
+    rocrateGUID = roCrateMetadata.get('@id')
+
     # Add distribution information if not present
     if 'distribution' not in roCrateMetadata:
         crate_name = Path(filePath).stem  # Get filename without extension
-        zip_bucket = fairscapeConfig.minio.rocrate_bucket
         object_path = f"{transactionFolder}/{crate_name}"
 
         roCrateMetadata['distribution'] = {
-            "extractedROCrateBucket": fairscapeConfig.minio.default_bucket,
-            "archivedROCrateBucket": zip_bucket,
-            "extractedObjectPath": [f"{object_path}/{file}" for file in roCrateMetadata.get('hasPart', [])],
+            "archivedROCrateBucket": fairscapeConfig.minio.rocrate_bucket,
             "archivedObjectPath": filePath
         }
-        roCrateMetadata['contentURL'] = f"s3a://{zip_bucket}/{object_path}.zip"
+        # set download link to https download link
+        roCrateMetadata['contentURL'] = f"{fairscapeConfig.url}/rocrate/download/{rocrateGUID}" 
 
     roCrateMetadata['uploadDate'] = datetime.datetime.now(datetime.timezone.utc).isoformat()
 
