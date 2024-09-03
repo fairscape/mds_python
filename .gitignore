@@ -1,3 +1,7 @@
+# vs code settings
+.vscode/*
+.vscode
+
 # local testing data
 deploy/minio/
 deploy/mongo/
