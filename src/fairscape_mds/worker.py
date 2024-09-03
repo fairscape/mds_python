@@ -224,6 +224,8 @@ def AsyncRegisterROCrate(userCN: str, transactionFolder: str, filePath: str):
         }
         roCrateMetadata['contentURL'] = f"s3a://{zip_bucket}/{object_path}.zip"
 
+    roCrateMetadata['uploadDate'] = datetime.datetime.now(datetime.timezone.utc).isoformat()
+
     updateUploadJob(
         transactionFolder,
         {"status": "minting identifiers"}
