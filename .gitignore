@@ -1,5 +1,5 @@
 # vs code settings
-.vscode/*
+.vscode/settings.json
 .vscode
 
 # local testing data
