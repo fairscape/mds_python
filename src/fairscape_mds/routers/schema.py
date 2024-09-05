@@ -7,7 +7,7 @@ from fairscape_mds.config import (
 )
 
 from fairscape_mds.auth.oauth import getCurrentUser
-from fairscape_mds.models.user import User
+from fairscape_mds.models.user import UserLDAP
 from typing_extensions import Annotated
 
 router = APIRouter()
@@ -24,7 +24,7 @@ userCollection = mongoDB[fairscapeConfig.mongo.user_collection]
 @router.post('/schema',
              summary="Create a schema",
              response_description="The created schema")
-def schema_create(schema: Schema, currentUser: Annotated[User, Depends(getCurrentUser)]):
+def schema_create(schema: Schema, currentUser: Annotated[UserLDAP, Depends(getCurrentUser)]):
     """
     Create a schema with the following properties:
 
@@ -69,7 +69,7 @@ def schema_create(schema: Schema, currentUser: Annotated[User, Depends(getCurren
             summary="List all schemas",
             response_description="Retrieved list of schemas")
 def schema_list(
-        currentUser: Annotated[User, Depends(getCurrentUser)]
+        currentUser: Annotated[UserLDAP, Depends(getCurrentUser)]
     ):
     schemas = list_schemas(identifierCollection)
     return schemas
@@ -79,7 +79,7 @@ def schema_list(
             summary="Retrieve a schema",
             response_description="The retrieved schema")
 def schema_get(
-        currentUser: Annotated[User, Depends(getCurrentUser)],
+        currentUser: Annotated[UserLDAP, Depends(getCurrentUser)],
         NAAN: str, 
         postfix: str 
     ):
@@ -110,7 +110,7 @@ def schema_get(
             summary="Update a schema",
             response_description="The updated schema")
 def schema_update(
-        currentUser: Annotated[User, Depends(getCurrentUser)],
+        currentUser: Annotated[UserLDAP, Depends(getCurrentUser)],
         NAAN: str,
         postfix: str,
         schema: Schema
@@ -148,7 +148,7 @@ def schema_update(
                summary="Delete a schema",
                response_description="The deleted schema")
 def schema_delete(
-        currentUser: Annotated[User, Depends(getCurrentUser)],
+        currentUser: Annotated[UserLDAP, Depends(getCurrentUser)],
         NAAN: str, 
         postfix: str
     ):
