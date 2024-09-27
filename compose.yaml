@@ -1,15 +1,14 @@
 # Docker Compose Spec for Local Testing of Fairscape
 services:
-  ldap-frontend:
-    image: dnknth/ldap-ui
-    environment:
-      LDAP_URL: ldap://ldap:1389
-      BASE_DN: "dc=fairscape,dc=net"
-    ports:
-      - 5000:5000
+  #ldap-frontend:
+  #  image: dnknth/ldap-ui
+  #  environment:
+  #    LDAP_URL: ldap://ldap:1389
+  #    BASE_DN: "dc=fairscape,dc=net"
+  #  ports:
+  #    - 5000:5000
 
   ldap:
-#    image: ghcr.io/fairscape/fairscape-ldap
     image: bitnami/openldap
     environment:
       LDAP_ROOT: "dc=fairscape,dc=net"
@@ -36,12 +35,12 @@ services:
     ports:
       - 6379:6379
   mongo:
-    image: mongo:6.0
+    image: mongo:8.0.0-rc20-noble
     restart: always
-    volumes:
-      - type: bind
-        source: ./deploy/mongo/
-        target: /data/db
+    #volumes:
+    #  - type: bind
+    #    source: ./deploy/mongo/
+    #    target: /data/db
     environment:
       MONGO_INITDB_ROOT_USERNAME: mongotestaccess
       MONGO_INITDB_ROOT_PASSWORD: mongotestsecret

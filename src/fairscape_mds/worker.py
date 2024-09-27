@@ -125,12 +125,10 @@ def getUploadJob(
 def updateUploadJob(transactionFolder: str, update: Dict):
     ''' Update async job using the transactionFolder as the primary key
 
-    Keyword arguments:
-    transactionFolder -- (str) the UUID representing the job
-    update            -- (Dict) the update representing the dictionary
+    :param str transactionFolder: the UUID primary key representing the upload job
+    :param dict update: metadata to update the upload job document
     '''
 
-    # update job with extracted status status
     asyncCollection.update_one(
             {
                 "transactionFolder": transactionFolder,
