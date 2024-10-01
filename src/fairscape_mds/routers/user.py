@@ -22,49 +22,49 @@ from fairscape_mds.config import get_fairscape_config
 
 router = APIRouter()
 
-fairscapeConfig = get_fairscape_config()
-mongo_client = fairscapeConfig.CreateMongoClient()
-mongo_db = mongo_client[fairscapeConfig.mongo.db]
-userCollection = mongo_db[fairscapeConfig.mongo.user_collection]
-passwordSalt = fairscapeConfig.passwordSalt
+#fairscapeConfig = get_fairscape_config()
+#mongo_client = fairscapeConfig.CreateMongoClient()
+#mongo_db = mongo_client[fairscapeConfig.mongo.db]
+#userCollection = mongo_db[fairscapeConfig.mongo.user_collection]
+#passwordSalt = fairscapeConfig.passwordSalt
 
 
-@router.post('/user',
-             summary="Create a user",
-             response_description="The created user")
-def user_create(passedUser: User):
-    """
-    Create a user with the following properties:
+#@router.post('/user',
+#             summary="Create a user",
+#             response_description="The created user")
+#def user_create(passedUser: User):
+    #"""
+    #Create a user with the following properties:
 
-    - **@id**: a unique identifier
-    - **@type**: Person
-    - **name**: a name
-    - **email**: an email
-    - **password**: a password
-    """
+    #- **@id**: a unique identifier
+    #- **@type**: Person
+    #- **name**: a name
+    #- **email**: an email
+    #- **password**: a password
+    #"""
 
-    create_status = createUser(
-            passedUser,
-            passwordSalt, 
-            userCollection)
+    #create_status = createUser(
+            #passedUser,
+            #passwordSalt, 
+            #userCollection)
 
-    if create_status.success: 
+    #if create_status.success: 
 
-        return JSONResponse(
-            status_code=201,
-            content={
-                'created': {
-                    '@id': passedUser.guid, 
-                    '@type': 'Person', 
-                    'name': passedUser.name
-                }
-            }
-        )
-    else:
-        return JSONResponse(
-            status_code=create_status.status_code,
-            content={'error': create_status.message}
-        )
+        #return JSONResponse(
+            #status_code=201,
+            #content={
+                #'created': {
+                    #'@id': passedUser.guid, 
+                    #'@type': 'Person', 
+                    #'name': passedUser.name
+                #}
+            #}
+        #)
+    #else:
+        #return JSONResponse(
+            #status_code=create_status.status_code,
+#            content={'error': create_status.message}
+#        )
 
 
 #@router.get('/user', status_code=200,
