@@ -1,13 +1,17 @@
 from bson import SON
 from pydantic import (
+    BaseModel,
     Extra,
     Field,
+    HttpUrl,
 )
 from typing import Optional, List, Union, Literal, Tuple
 from datetime import datetime
-from pymongo.collection import Collection
+import pymongo
+from enum import Enum
 
-from fairscape_mds.models.fairscape_base import *
+from fairscape_mds.models.user import UserLDAP
+from fairscape_mds.models.acl import Permissions 
 from fairscape_mds.utilities.operation_status import OperationStatus
  
 
@@ -28,24 +32,39 @@ class DatasetCreateModel(BaseModel, extra=Extra.allow):
     usedBy: Optional[List[str]] = Field(alias="evi:usedBy", default=[])
     generatedBy: Optional[str] = Field(alias="evi:generatedBy", default=None)
     dataSchema: Optional[str] = Field(alias="evi:Schema", default=None)
+    contentURL: HttpUrl | None  = Field(default=None)
 
-    def read(self, MongoCollection: pymongo.collection.Collection) -> OperationStatus:
-        return super().read(MongoCollection)
+class DistributionTypeEnum(str, Enum):
+    MINIO = 'minio'
+    URL = 'url'
+    GLOBUS = 'globus'
+
+class MinioDistribution(BaseModel):
+    path: str
+
+class URLDistribution(BaseModel):
+    uri: str
+
+class DatasetDistribution(BaseModel):
+    distributionType: DistributionTypeEnum
+    location: Union[MinioDistribution, URLDistribution]
+
 
 class DatasetWriteModel(DatasetCreateModel, extra=Extra.allow):
-    distribution: Optional[List[str]] = Field(default=[])
+    distribution: Optional[List[DatasetDistribution]] = Field(default=[])
     published: bool = Field(default=True)
+    permissions: Permissions
+
 
 
 class DatasetUpdateModel(BaseModel):
-    name: str
-    description: str
-    keywords: List[str]
+    name: str | None
+    description: str | None
+    keywords: Optional[List[str]]
     includedInDataCatalog: Optional[str] = Field(default=None)
     sourceOrganization: Optional[str] = Field(default=None)
     author: Optional[str] = Field(default=None)
-    dateCreated: Optional[datetime] = Field(default_factory=datetime.now)
-    dateModified: Optional[datetime] = Field(default_factory=datetime.now)
+    dateModified: datetime | None = Field(default_factory=datetime.now)
     usedBy: Optional[List[str]] = Field(alias="evi:usedBy", default=[])
     generatedBy: Optional[str] = Field(alias="evi:generatedBy", default=None)
     dataSchema: Optional[str] = Field(alias="evi:Schema", default=None)
@@ -74,7 +93,8 @@ def convertDatasetCreateToWrite(datasetInstance: DatasetCreateModel, ownerGUID: 
                 dateCreated=datasetInstance.dateCreated,
                 dateModified=datasetInstance.dateModified,
                 dataSchema=datasetInstance.dataSchema,
-                published=True
+                published=True,
+                acl=AccessControlList(owner=ownerGUID)
                 )
 
 
@@ -162,9 +182,10 @@ def updateEVIGeneratedBy(
 
 
 def createDataset(
+    userInstance: UserLDAP,
     datasetInstance: DatasetCreateModel,
     identifierCollection: pymongo.collection.Collection,
-    userCollection: pymongo.collection.Collection
+    #userCollection: pymongo.collection.Collection
     )-> OperationStatus:
     # check that dataset does not already exist
     if identifierCollection.find_one({"@id": datasetInstance.guid}) is not None:
@@ -187,7 +208,6 @@ def createDataset(
 
     #    if updateUsedByResult:
     #        return updateUsedByResult
-
 
     # insert dataset
     writeInstance = convertDatasetCreateToWrite(datasetInstance)
@@ -219,7 +239,49 @@ def createDataset(
     return OperationStatus(True, "", 201)
 
 
+def updateDataset(
+    userInstance: UserLDAP,
+    datasetGUID: str,
+    datasetUpdate: DatasetUpdateModel ,
+    identifierCollection: pymongo.collection.Collection
+    ) -> OperationStatus:
+
+    # check that user has permission to update
+    datasetMetadata = identifierCollection.find_one({
+        "@id": datasetGUID,
+        "@type": "evi:Dataset"
+        },
+        projection={"_id": False}
+        ) 
+
+    if datasetMetadata is None:
+        return OperationStatus(False, "dataset not found", 404)
+
+    # check the acl for permissions
+    datasetOwner = datasetMetadata.get('acl', {}).get('owner')
+    datasetUpdateAllowed = datasetMetadata.get('acl', {}).get('update')
+
+    if userInstance.guid != datasetOwner and userInstance.guid not in datasetUpdateAllowed:
+        return OperationStatus(False, "user not allwed to update dataset", 401)
+
+    # TODO check if organization, project are being reassigned
+
+
+    # preform the update operation 
+    updateDataset = identifierCollection.update_one(
+        {"@id": datasetGUID}, 
+        {"$set": datasetUpdate.model_dump(exclude_none=True)} 
+    )
+
+    if updateDataset.modified_count != 1:
+        return OperationStatus(False, "failed to update dataset", 500)
+
+    return OperationStatus(True, "", 200)
+
+
+
 def deleteDataset(
+    userInstance: UserLDAP,
     datasetGUID: str,
     identifierCollection: pymongo.collection.Collection, 
     userCollection: pymongo.collection.Collection
@@ -227,10 +289,14 @@ def deleteDataset(
     """Delete the dataset. Update each user who is an owner of the dataset.
 
     Args:
-        MongoCollection (pymongo.collection.Collection): _description_
+        userInstance (fairscape_mds.models.user.User): user record representing the user making the delete request
+        datasetGUID (str): the guid for the dataset that is being deleted
+        identifierCollection (pymongo.collection.Collection): collection for identifier records
+        userCollection (pymongo.collection.Collection): collection of user records
 
     Returns:
-        OperationStatus: _description_
+        DatasetWriteModel: a copy of the metadata that was deleted
+        OperationStatus: metadata about the deletion operation
     """
 
     # check that record exists
@@ -241,11 +307,16 @@ def deleteDataset(
         },
         projection={"_id": False}
         ) 
-
-
-
+    
     if datasetMetadata is None:
         return None, OperationStatus(False, "dataset not found", 404)
+
+    # check the acl for permissions
+    datasetOwner = datasetMetadata.get('acl', {}).get('owner')
+    datasetDeleteAllowed = datasetMetadata.get('acl', {}).get('delete')
+
+    if userInstance.guid != datasetOwner and userInstance.guid not in datasetDeleteAllowed:
+        return None, OperationStatus(False, "user not allwed to delete dataset", 401)
 
 
     datasetInstance = DatasetWriteModel.model_validate(datasetMetadata)
@@ -269,13 +340,13 @@ def deleteDataset(
     if datasetInstance.includedInDataCatalog is not None:
         updateProject = identifierCollection.update_one(
             {"@id": datasetInstance.includedInDataCatalog}, 
-            pull_operation, 
+            pullOperation, 
             )
 
     if datasetInstance.sourceOrganization is not None:
         update_organization = IdentifierCollection.update_one(
             {"@id": datasetInstance.sourceOrganization},
-            pull_operation, 
+            pullOperation, 
             )
 
     # TODO delete all distributions 
@@ -297,8 +368,8 @@ def deleteDataset(
 
 
 def deleteDownload(
-    identifier_collection: Collection,
-    user_collection: Collection,
+    identifier_collection: pymongo.collection.Collection,
+    user_collection: pymongo.collection.Collection,
     minio_client,
     download_identifier,
 ) -> Tuple[DatasetWriteModel, OperationStatus]:
@@ -308,7 +379,7 @@ def deleteDownload(
 
 
 
-def listDatasets(mongo_collection: Collection):
+def listDatasets(mongo_collection: pymongo.collection.Collection):
     cursor = mongo_collection.find(
         filter={"@type": "evi:Dataset"},
         projection={"_id": False, }

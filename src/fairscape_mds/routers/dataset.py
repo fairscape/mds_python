@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends, UploadFile
 from fastapi.responses import JSONResponse
 
 from fairscape_mds.config import (
@@ -6,68 +6,135 @@ from fairscape_mds.config import (
 ) 
 
 from fairscape_mds.models.dataset import (
-        DatasetCreateModel, 
-        DatasetWriteModel,
-        DatasetUpdateModel,
-        listDatasets, 
-        deleteDataset, 
-        createDataset, 
-        )
+    DatasetCreateModel, 
+    DatasetWriteModel,
+    DatasetUpdateModel,
+    listDatasets, 
+    deleteDataset, 
+    createDataset, 
+)
+from fairscape_mds.models.acl import Permissions
+from typing import Annotated, Optional
+from fairscape_mds.models.user import UserLDAP
+from fairscape_mds.auth.oauth import getCurrentUser
 
 router = APIRouter()
 
 fairscapeConfig = get_fairscape_config()
-mongo_config = fairscapeConfig.mongo
-mongo_client = fairscapeConfig.CreateMongoClient()
 
-mongo_db = mongo_client[mongo_config.db]
-identifier_collection = mongo_db[mongo_config.identifier_collection]
-user_collection = mongo_db[mongo_config.user_collection]
+minioClient = fairscapeConfig.CreateMinioClient()
+
+mongoConfig = fairscapeConfig.mongo
+mongoClient = fairscapeConfig.CreateMongoClient()
+
+mongoDB = mongoClient[fairscapeConfig.mongo.db]
+identifierCollection = mongoDB[fairscapeConfig.mongo.identifier_collection]
+userCollection = mongoDB[fairscapeConfig.mongo.user_collection]
 
 
-@router.post("/dataset",
-             summary="Create a dataset",
-             response_description="The created dataset")
+@router.post(
+     "/dataset",
+    summary="Create a dataset",
+    response_description="The created dataset"
+)
 def dataset_create(
-    dataset: DatasetCreateModel,
-#    currentUser: Annotated[User, Depends(getCurrentUser)]
+    currentUser: Annotated[UserLDAP, Depends(getCurrentUser)],
+    datasetMetadata: DatasetCreateModel,
+    datasetFile: Optional[UploadFile]
     ):
     """
-    Create a dataset with the following properties:
+    API endpoint to create a dataset record in fairscape, optionally uploading a file
 
-    - **@id**: a unique identifier
-    - **@type**: evi:Dataset
-    - **name**: a name
-    - **owner**: an existing user in its compact form with @id, @type, name, and email
     """
 
-    datasetInstance = convertDatasetCreateToWrite(datasetInstance, currentUser.guid)
-    
-    create_status = createDataset(
-            datasetInstance,
-            identifier_collection,
-            user_collection
+
+    datasetPermissions = Permissions(
+            owner= currentUser.dn,
+            group=currentUser.memberOf[0]
+            )
+   
+    distributionMetadata = []
+
+    if datasetMetadata.contentURL:
+        distributionMetadata.append(DatasetDistribution(
+            distributionType= DistributionTypeEnum.URL,
+            distribution=URLDistribution(uri=datasetMetadata.contentURL)
+            ))
+
+    # if a file is provided from user
+    if datasetFile:
+        minioPath = "f{currentUser.cn}/datasets/{datasetMetadata.guid}/{datasetFile.filename}"
+        try:
+            # upload the object to minio
+            uploadOperation = minioClient.put_object(
+                bucket_name=fairscapeConfig.minio.default_bucket,
+                object_name=minioPath,
+                data=datasetFile.file,
+                length=-1,
+                part_size=10 * 1024 * 1024,
+                )
+
+            # get the size of the file from the stats
+            resultStats = minioClient.stat_object(
+                bucket_name=minioConfig.default_bucket,
+                object_name=minioPath
             )
 
-    if create_status.success:
-        return JSONResponse(
-            status_code=201,
-            content={"created": {"@id": dataset.guid, "@type": "evi:Dataset", "name": dataset.name}}
-        )
-    else:
+            # set the distribution metadata
+            distributionMetadata.append(DatasetDistribution(
+                    distributionType= DistributionTypeEnum.minio,
+                    distribution=MinioDistribution(path=minioPath)
+                    ))
+
+        except Exception as e:
+            return JSONResponse(
+                status_code=500,
+                content={"error": "error minting identifier", "message": str(e)}
+            )
+
+    datasetWrite = DatasetWriteModel(
+            distribution = distributionMetadata,
+            published = True,
+            permissions = datasetPermissions,
+            **datasetMetadata
+            )
+
+    datasetJSON = datasetWrite.model_dump(by_alias=True)
+    insertResponse = identifierCollection.insertOne(datasetJSON)
+    
+    if insertResponse.inserted_id is None:
         return JSONResponse(
             status_code=create_status.status_code,
-            content={"error": create_status.message}
+            content={"error": "error minting identifier"}
         )
+
+    else: 
+        return JSONResponse(
+            status_code=201,
+            content={"created": {"@id": datasetMetadata.guid, "@type": "evi:Dataset", "name": datasetMetadata.name}}
+        )
+
+    
+
 
 
 @router.get("/dataset",
             summary="List all datasets",
             response_description="Retrieved list of datasets")
-def dataset_list():
-    datasets = listDatasets(identifier_collection)
+def dataset_list(
+    currentUser: Annotated[UserLDAP, Depends(getCurrentUser)],
+    ):
+    datasets = listDatasets(identifierCollection)
     return datasets
 
+
+@router.get("/dataset/download/ark:{NAAN}/{postfix}")
+def download_dataset(
+    currentUser: Annotated[UserLDAP, Depends(getCurrentUser)],
+    NAAN: str,
+    postfix: str
+    ):
+    pass
 
 @router.get("/dataset/ark:{NAAN}/{postfix}",
             summary="Retrieve a dataset",
@@ -80,9 +147,9 @@ def dataset_get(NAAN: str, postfix: str):
     - **postfix**: a unique string
     """
 
-    dataset_id = f"ark:{NAAN}/{postfix}"
+    datasetGUID = f"ark:{NAAN}/{postfix}"
 
-    dataset = Dataset.construct(guid=dataset_id)
+    dataset = Dataset.construct(guid=datasetGUID)
     read_status = dataset.read(identifier_collection)
 
     if read_status.success:
@@ -94,28 +161,41 @@ def dataset_get(NAAN: str, postfix: str):
         )
 
 
-@router.put("/dataset",
+@router.put("/dataset/ark:{NAAN}/{postfix}",
             summary="Update a dataset",
             response_description="The updated dataset")
-def dataset_update(datasetUpdateInstance: DatasetUpdateModel):
-    update_status = dataset.update(identifier_collection)
+def dataset_update(
+    currentUser: Annotated[UserLDAP, Depends(getCurrentUser)],
+    NAAN: str,
+    postfix: str,
+    datasetUpdateInstance: DatasetUpdateModel,
+    ):
 
-    if update_status.success:
+    datasetGUID = f"ark:{NAAN}/{postfix}"
+
+    updateStatus = updateDataset(currentUser, datasetGUID, datasetUpdateInstance, identifier_collection)
+
+
+    if updateStatus.success:
         return JSONResponse(
             status_code=200,
             content={"updated": {"@id": dataset.id, "@type": "evi:Dataset"}}
         )
     else:
         return JSONResponse(
-            status_code=update_status.status_code,
-            content={"error": update_status.message}
+            status_code=updateStatus.status_code,
+            content={"error": updateStatus.message}
         )
 
 
 @router.delete("/dataset/ark:{NAAN}/{postfix}",
-               summary="Delete a dataset",
-               response_description="The deleted dataset")
-def dataset_delete(NAAN: str, postfix: str):
+    summary="Delete a dataset",
+    response_description="The deleted dataset")
+def dataset_delete(
+    currentUser: Annotated[UserLDAP, Depends(getCurrentUser)],
+    NAAN: str, 
+    postfix: str
+    ):
     """
     Deletes a dataset based on a given identifier:
 
@@ -125,6 +205,7 @@ def dataset_delete(NAAN: str, postfix: str):
     datasetGUID = f"ark:{NAAN}/{postfix}"
 
     datasetMetadata, deleteStatus = deleteDataset(
+            currentUser,
             datasetGUID,
             identifier_collection,
             user_collection

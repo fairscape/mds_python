@@ -1,5 +1,10 @@
 import pymongo
-from fastapi import APIRouter, Response, BackgroundTasks
+from fastapi import (
+        APIRouter, 
+        Response, 
+        Depends,
+        BackgroundTasks
+)
 from fairscape_mds.config import (
     get_fairscape_config,
 ) 
@@ -14,6 +19,11 @@ from fairscape_mds.models.computation import (
         )
 from fairscape_mds.utilities.operation_status import OperationStatus
 from fairscape_mds.utilities.funcs import *
+
+from typing import Annotated
+from fairscape_mds.models.user import User
+from fairscape_mds.auth.oauth import getCurrentUser
+
 from datetime import datetime
 import time
 
@@ -24,16 +34,21 @@ router = APIRouter()
 fairscapeConfig = get_fairscape_config()
 mongo_config = fairscapeConfig.mongo
 mongo_client = fairscapeConfig.CreateMongoClient()
-
 mongo_db = mongo_client[mongo_config.db]
 identifierCollection = mongo_db[mongo_config.identifier_collection]
 userCollection = mongo_db[mongo_config.user_collection]
 
 
-@router.post("/computation",
-             summary="Create a computation",
-             response_description="The created computation")
-def computation_create(computation: Computation, response: Response):
+@router.post(
+        "/computation",
+        summary="Create a computation",
+        response_description="The created computation"
+    )
+def computation_create(
+    currentUser: Annotated[User, Depends(getCurrentUser)],
+    computation: Computation, 
+    response: Response
+    ):
     """
     Create a computation with the following properties:
 
@@ -60,7 +75,10 @@ def computation_create(computation: Computation, response: Response):
 @router.get("/computation",
             summary="List all computations",
             response_description="Retrieved list of computations")
-def computation_list(response: Response):
+def computation_list(
+    currentUser: Annotated[User, Depends(getCurrentUser)],
+    response: Response
+    ):
 
     computation = listComputation(identifierCollection)
     return computation
@@ -69,7 +87,11 @@ def computation_list(response: Response):
 @router.get("/computation/ark:{NAAN}/{postfix}",
             summary="Retrieve a computation",
             response_description="The retrieved computation")
-def computation_get(NAAN: str, postfix: str, response: Response):
+def computation_get(
+        NAAN: str, 
+        postfix: str, 
+        response: Response
+    ):
     """
     Retrieves a computation based on a given identifier:
 
@@ -90,9 +112,15 @@ def computation_get(NAAN: str, postfix: str, response: Response):
 
 
 @router.put("/computation",
-            summary="Update a computation",
-            response_description="The updated computation")
-def computation_update(computation: Computation, response: Response):
+    summary="Update a computation",
+    response_description="The updated computation"
+    )
+def computation_update(
+    currentUser: Annotated[User, Depends(getCurrentUser)],
+    computation: Computation, 
+    response: Response
+    ):
+
     mongo_db = mongo_client[mongo_config.db]
     mongo_collection = mongo_db[mongo_config.identifier_collection]
 
@@ -115,9 +143,14 @@ def computation_update(computation: Computation, response: Response):
 
 
 @router.delete("/computation/ark:{NAAN}/{postfix}",
-               summary="Delete a computation",
-               response_description="The deleted computation")
-def computation_delete(NAAN: str, postfix: str):
+    summary="Delete a computation",
+    response_description="The deleted computation"
+    )
+def computation_delete(
+    currentUser: Annotated[User, Depends(getCurrentUser)],
+    NAAN: str, 
+    postfix: str
+):
     """
     Deletes a computation based on a given identifier:
 

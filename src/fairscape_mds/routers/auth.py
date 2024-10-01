@@ -6,46 +6,41 @@ from fairscape_mds.models.user import getUserByEmail
 from fairscape_mds.config import get_fairscape_config
 from fairscape_mds.auth.oauth import (
         OAuthScheme,
-        createToken
-
+        loginLDAP,
+        LoginExceptionUserNotFound
 )
-import crypt
 from typing import Annotated
 
 
 fairscapeConfig = get_fairscape_config()
-mongoClient = fairscapeConfig.CreateMongoClient()
-mongoDB = mongoClient[fairscapeConfig.mongo.db]
-userCollection = mongoDB[fairscapeConfig.mongo.user_collection]
+ldapConnection = fairscapeConfig.ldap.connectAdmin()
 
 router = APIRouter()
 
-@router.post("/token")
+@router.post("/login")
 def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
 
-    userInstance, findUserResult = getUserByEmail(form_data.username, userCollection)
-    if not findUserResult.success:
+    try:
+        mintedToken = loginLDAP(
+                ldapConnection, 
+                email=form_data.username, 
+                password=form_data.password
+                )
+
+    except LoginExceptionUserNotFound:
         return JSONResponse(
-            status_code= findUserResult.status_code, 
+            status_code= 401, 
             content={
-                "error": findUserResult.message,
+                "error": "login failed",
                 "message": "incorrect combination of username and password" 
                 }
             )
-
-    hashed_password = crypt.crypt(form_data.password, fairscapeConfig.passwordSalt)
-    if not hashed_password == userInstance.password:
-        return JSONResponse(
-            status_code=400, 
-            content={"message": "incorrect combination of username and password" }
-            )
-
-    # create a JWT for the token
-    new_token = createToken(userInstance.email, userInstance.name)
 
 
     return JSONResponse(
             status_code=200,
             content={
-                "access_token": str(new_token), "token_type": "bearer"}
+                "access_token": str(mintedToken), 
+                "token_type": "bearer"
+                }
             )

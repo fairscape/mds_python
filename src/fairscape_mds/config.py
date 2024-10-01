@@ -10,12 +10,14 @@ import os
 import pathlib
 from urllib.parse import quote_plus
 from pymongo import MongoClient, ASCENDING
+import ldap3
 import minio
 from functools import lru_cache
 import uvicorn
 
 from dotenv import dotenv_values
 import urllib3
+
 
 urllib3.disable_warnings()
 
@@ -69,20 +71,10 @@ def get_fairscape_config(env_path: str = '/fairscape/.env'):
         check_cert= checkCert
     )
 
-    if config_values.get("FAIRSCAPE_REDIS_DATABASE"):
-        redisDB=int(config_values.get("FAIRSCAPE_REDIS_DATABASE"))
-    else:
-        redisDB=0
-
-    if config_values.get("FAIRSCAPE_REDIS_RESULT_DATABASE"):
-        redisResultDB=int(config_values.get("FAIRSCAPE_REDIS_RESULT_DATABASE"))
-    else:
-        redisResultDB=0
-
-    if config_values.get("FAIRSCAPE_REDIS_PORT"):
-        redisPort= int(config_values.get("FAIRSCAPE_REDIS_PORT"))
-    else:
-        redisPort= 6379
+    # defaulting several redis DB values
+    redisDB=int(config_values.get("FAIRSCAPE_REDIS_DATABASE", 0))
+    redisResultDB=int(config_values.get("FAIRSCAPE_REDIS_RESULT_DATABASE", 1))
+    redisPort= int(config_values.get("FAIRSCAPE_REDIS_PORT", 6379))
 
     server_redis_config = RedisConfig(
         port= redisPort,
@@ -92,6 +84,19 @@ def get_fairscape_config(env_path: str = '/fairscape/.env'):
         database= redisDB,
         result_database = redisResultDB
     )
+
+    # setup LDAP Config
+    server_ldap_config = LDAPConfig.model_validate(
+        {
+            "hostname": config_values.get("FAIRSCAPE_LDAP_HOST"), 
+            "port": config_values.get("FAIRSCAPE_LDAP_PORT"),
+            "baseDN": config_values.get("FAIRSCAPE_LDAP_BASE_DN"),
+            "usersDN": config_values.get("FAIRSCAPE_LDAP_USERS_DN"),
+            "groupsDN": config_values.get("FAIRSCAPE_LDAP_GROUPS_DN"),
+            "adminDN": config_values.get("FAIRSCAPE_LDAP_ADMIN_DN"),
+            "adminPassword": config_values.get("FAIRSCAPE_LDAP_ADMIN_PASSWORD")
+            }
+        )
 
     # TODO support multiple NAANs
     
@@ -105,6 +110,7 @@ def get_fairscape_config(env_path: str = '/fairscape/.env'):
             mongo = server_mongo_config,
             minio = server_minio_config,
             redis = server_redis_config,
+            ldap = server_ldap_config
             )
 
 
@@ -180,7 +186,69 @@ class RedisConfig(BaseModel):
 
 class K8sComputeConfig(BaseModel):
     redis: RedisConfig
-    
+
+
+class LDAPConfig(BaseModel):
+    hostname: str
+    port: str = Field(default="1389")
+    baseDN: str
+    usersDN: str
+    groupsDN: str
+    adminDN: str
+    adminPassword: str
+
+    def connectAdmin(self) -> ldap3.Connection:
+        """
+        Connect to the LDAP server using the configuration in the LDAPConfig Class, as the user stored in the LDAPConfig
+
+        :param LDAPConfig self: The LDAPConfig class instance
+        :return: An LDAP connection instance bound to the server
+        :rtype: ldap3.Connection
+        :raises ldap3.core.exceptions.LDAPBindError: Failed to connect to the LDAP Server
+        """
+        
+        serverURI = f'ldap://{self.hostname}:{self.port}'
+
+        connection = ldap3.Connection(
+                serverURI,
+                user=self.adminDN,
+                password=self.adminPassword
+            )
+
+        bind_response = connection.bind()
+        return connection
+
+
+    def connectUser(self, username: str, password: str) -> ldap3.Connection:
+        """
+        Connect to the LDAP server using the configuration in the LDAPConfig Class, as the passed identity
+
+        :param LDAPConfig self: The LDAPConfig class instance
+        :param str username: The optional username to bind to the LDAP server as the passed identity
+        :param str password: The optional userpassword to bind to the LDAP server as a passed identity
+        :return: An LDAP connection instance bound to the server
+        :rtype: ldap3.Connection
+        :raises ldap3.core.exceptions.LDAPBindError: Failed to connect to the LDAP Server
+        """ 
+        serverURI = f'ldap://{self.hostname}:{self.port}'
+
+        # format the username into a full distinguished name
+        if self.baseDN not in username:
+            if "cn=" not in username:
+                userDN = f"cn={username},{self.usersDN}"
+            else:
+                userDN = f"{username},{self.usersDN}"
+        else:
+            userDN = username
+
+        connection = ldap3.Connection(
+            serverURI,
+            user=userDN,
+            password=password
+        )
+        bind_response = connection.bind()
+        return connection        
+
 
 class FairscapeConfig(BaseModel):
     host: Optional[str] = Field(default='0.0.0.0')
@@ -192,7 +260,7 @@ class FairscapeConfig(BaseModel):
     mongo: MongoConfig
     minio: MinioConfig
     redis: Optional[RedisConfig]
-
+    ldap: LDAPConfig
 
     def CreateMongoClient(self):
         return self.mongo.CreateClient() 

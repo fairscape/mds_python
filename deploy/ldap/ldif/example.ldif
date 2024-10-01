@@ -1,0 +1,27 @@
+dn: uid=readonlyuser,ou=users,dc=fairscape,dc=net
+objectclass: inetOrgPerson
+cn: Read-only user
+sn: Example
+uid: readonlyuser
+userPassword: ropassword
+
+dn: uid=readwriteuser,ou=users,dc=fairscape,dc=net
+objectclass: inetOrgPerson
+cn: Read-write user
+sn: Example
+uid: readwriteuser
+userPassword: rwpassword
+
+dn: ou=groups,dc=fairscape,dc=net
+objectclass: organizationalUnit
+ou: groups
+
+dn: cn=readonlygroup,ou=groups,dc=fairscape,dc=net
+objectclass: groupOfNames
+cn: readonlygroup
+member: uid=readonlyuser,ou=users,dc=fairscape,dc=net
+
+dn: cn=readwritegroup,ou=groups,dc=fairscape,dc=net
+objectclass: groupOfNames
+cn: readwritegroup
+member: uid=readwriteuser,ou=users,dc=fairscape,dc=net
