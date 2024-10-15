@@ -1,3 +1,6 @@
+# leftover vim edit swp files in source
+src/*.swp
+
 # vs code settings
 .vscode/settings.json
 .vscode
