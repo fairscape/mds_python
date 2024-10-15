@@ -4,14 +4,15 @@ from fastapi.responses import JSONResponse
 from fairscape_mds.models.group import Group, list_groups
 
 from fairscape_mds.config import (
-    get_mongo_config,
+    get_fairscape_config,
     get_mongo_client
 ) 
 
 router = APIRouter()
 
 # setup database clients
-mongo_config = get_mongo_config()
+fairscapeConfig = get_fairscape_config()
+mongo_config = fairscapeConfig.mongo
 mongo_client = get_mongo_client()
 
 

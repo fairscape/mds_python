@@ -7,7 +7,7 @@ from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 from fastapi.security import OAuth2PasswordRequestForm
 
-from fairscape_mds.routers.user import router as UserRouter
+#from fairscape_mds.routers.user import router as UserRouter
 from fairscape_mds.routers.schema import router as SchemaRouter
 from fairscape_mds.routers.auth import router as AuthRouter
 from fairscape_mds.routers.software import router as SoftwareRouter

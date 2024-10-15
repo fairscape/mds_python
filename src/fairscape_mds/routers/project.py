@@ -5,17 +5,17 @@ from fastapi.responses import JSONResponse
 from fairscape_mds.models.project import Project, list_project
 from fairscape_mds.models.auth import ParseAuthHeader, UserNotFound, TokenError
 from fairscape_mds.config import (
-    get_fairscape_config
+    get_fairscape_config,
+    get_mongo_client
 ) 
 
 router = APIRouter()
 
 fairscapeConfig = get_fairscape_config()
-mongoClient = fairscapeConfig.CreateMongoClient()
-
-mongoDB = mongoClient[fairscapeConfig.mongo.db]
-identifierCollection = mongoDB[fairscapeConfig.mongo.identifier_collection]
-userCollection = mongoDB[fairscapeConfig.mongo.user_collection]
+mongo_client = get_mongo_client()
+mongo_db = mongo_client[fairscapeConfig.mongo.db]
+identifierCollection = mongo_db[fairscapeConfig.mongo.identifier_collection]
+userCollection = mongo_db[fairscapeConfig.mongo.user_collection]
 
 
 @router.post("/project",

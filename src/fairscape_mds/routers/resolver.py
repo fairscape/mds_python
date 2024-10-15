@@ -2,14 +2,20 @@ from fastapi import APIRouter, Depends, Path
 from fastapi.responses import JSONResponse, RedirectResponse
 from typing import Annotated
 
-from fairscape_mds.config import get_fairscape_config
+from fairscape_mds.config import (
+    get_fairscape_config,
+    get_mongo_client
+)
 
 ResolverRouter = APIRouter()
 
+
 fairscapeConfig = get_fairscape_config()
-mongoClient = fairscapeConfig.CreateMongoClient()
-mongoDB = mongoClient[fairscapeConfig.mongo.db]
-identifierCollection = mongoDB[fairscapeConfig.mongo.identifier_collection]
+mongo_client = get_mongo_client()
+mongo_db = mongo_client[fairscapeConfig.mongo.db]
+identifierCollection = mongo_db[fairscapeConfig.mongo.identifier_collection]
+userCollection = mongo_db[fairscapeConfig.mongo.user_collection]
+
 
 def remove_object_id(data):
     if isinstance(data, dict):

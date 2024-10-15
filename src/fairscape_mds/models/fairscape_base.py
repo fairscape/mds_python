@@ -13,6 +13,7 @@ from typing import (
     Union
 )
 import pymongo
+from pymongo.collection import Collection
 from fairscape_mds.utilities.utils import validate_ark
 from fairscape_mds.utilities.operation_status import OperationStatus
 
@@ -65,7 +66,7 @@ class FairscapeBaseModel(Identifier):
         # if
         return f"ark:{ARK_NAAN}/rocrate-{self.name.replace(' ', '')}"
 
-    def create(self, MongoCollection: pymongo.collection.Collection, bson=None) -> OperationStatus:
+    def create(self, MongoCollection: Collection, bson=None) -> OperationStatus:
         """Persist instance of model in mongo
 
         This is the superclass method for create operations in fairscape.

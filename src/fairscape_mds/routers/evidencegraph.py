@@ -3,17 +3,16 @@ from fastapi.responses import JSONResponse
 
 from fairscape_mds.models.evidencegraph import EvidenceGraph, list_evidencegraph
 from fairscape_mds.config import (
-    get_fairscape_config
+    get_fairscape_config,
+    get_mongo_client
 ) 
 router = APIRouter()
 
 fairscapeConfig = get_fairscape_config()
-mongo_config = fairscapeConfig.mongo
-mongo_client = fairscapeConfig.CreateMongoClient()
-
-mongo_db = mongo_client[mongo_config.db]
-identifier_collection = mongo_db[mongo_config.identifier_collection]
-user_collection = mongo_db[mongo_config.user_collection]
+mongo_client = get_mongo_client()
+mongo_db = mongo_client[fairscapeConfig.mongo.db]
+identifierCollection = mongo_db[fairscapeConfig.mongo.identifier_collection]
+userCollection = mongo_db[fairscapeConfig.mongo.user_collection]
 
 @router.post("/evidencegraph",
              summary="Create a evidencegraph",

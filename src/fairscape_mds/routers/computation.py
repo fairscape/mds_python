@@ -7,6 +7,7 @@ from fastapi import (
 )
 from fairscape_mds.config import (
     get_fairscape_config,
+    get_mongo_client,
 ) 
 
 from fairscape_mds.models.computation import (
@@ -32,11 +33,10 @@ import time
 router = APIRouter()
 
 fairscapeConfig = get_fairscape_config()
-mongo_config = fairscapeConfig.mongo
-mongo_client = fairscapeConfig.CreateMongoClient()
-mongo_db = mongo_client[mongo_config.db]
-identifierCollection = mongo_db[mongo_config.identifier_collection]
-userCollection = mongo_db[mongo_config.user_collection]
+mongo_client = get_mongo_client()
+mongo_db = mongo_client[fairscapeConfig.mongo.db]
+identifierCollection = mongo_db[fairscapeConfig.mongo.identifier_collection]
+userCollection = mongo_db[fairscapeConfig.mongo.user_collection]
 
 
 @router.post(
