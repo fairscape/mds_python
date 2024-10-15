@@ -1,33 +1,24 @@
 # Docker Compose Spec for Local Testing of Fairscape
 services:
-  #ldap-frontend:
-  #  image: dnknth/ldap-ui
-  #  environment:
-  #    LDAP_URL: ldap://ldap:1389
-  #    BASE_DN: "dc=fairscape,dc=net"
-  #  ports:
-  #    - 5000:5000
-
-  ldap:
-    image: bitnami/openldap
+  setupLdap:
+    build: "./deploy/ldap-setup/Dockerfile"
+    depends_on: ldap
+  fairscape-api:
+    build: "./"
+    env_file: "./deploy/local.env"
+    ports:
+      - 8080:8080
+  ldap-frontend:
+    image: dnknth/ldap-ui
     environment:
-      LDAP_ROOT: "dc=fairscape,dc=net"
-      LDAP_ADMIN_USERNAME: "admin"
-      LDAP_ADMIN_PASSWORD: "adminpassword"
-      LDAP_ADMIN_DN: "cn=admin,dc=fairscape,dc=net"
-      LDAP_CONFIG_ADMIN_ENABLED: "yes"
-      LDAP_CONFIG_ADMIN_USERNAME: "configadmin"
-      LDAP_CONFIG_ADMIN_PASSWORD: "configadminpassword"
-      LDAP_SKIP_DEFAULT_TREE: "no"
-      LDAP_USER_DC: "users"
-      LDAP_GROUP: "admins"
-      LDAP_USERS: "fairscapeUser"
-      LDAP_PASSWORDS: "fairscapePass"
-      #LDAP_CUSTOM_LDIF_DIR: "/lidf"
-    volumes:
-      - type: bind
-        source: ./deploy/ldap
-        target: /ldif
+      LDAP_URL: ldap://ldap:1389
+      BASE_DN: "dc=fairscape,dc=net"
+    ports:
+      - 5000:5000
+  ldap:
+    image: bitnami/openldap:2.5.18
+    restart: always
+    env_file: ./deploy/ldap.env
     ports:
       - 1389:1389
   redis:
