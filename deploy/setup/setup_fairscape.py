@@ -1,11 +1,20 @@
+import time
 import minio
 import ldap3
 from dotenv import dotenv_values
+from os import environ
+import logging 
+
+# setup logger
+ldapSetupLogger = logging.getLogger('ldapSetup')
 
 
 # helper utilities
 
-configValues = dotenv_values(dotenv_path="./setup.env")
+configValues = {
+	**dotenv_values(dotenv_path="./setup.env"),
+	**environ
+} 
 ldapServerURI = f"ldap://{configValues['FAIRSCAPE_LDAP_HOST']}:{configValues['FAIRSCAPE_LDAP_PORT']}"
 ldapBaseDN = configValues['FAIRSCAPE_LDAP_BASE_DN']
 ldapUsersDN = configValues['FAIRSCAPE_LDAP_USERS_DN']
@@ -57,6 +66,7 @@ def connectLDAP(userDN, userPassword):
 			exception=ldapException, 
 			message=f"ldap error: {str(ldapException)}"
 			)
+
 
 def setupOverlay():
     # connect as the config admin
@@ -115,21 +125,43 @@ def setupOverlay():
             ldapSetupLogger.error("failed to find applied memberOf overlay")
             raise Exception("ldap setup failure")
 
-def loadGroups():
-	""" load in all the groups to the fairscape ldap
-	"""
+# add user to fairscape
+def addFairscapeUser(
+    ldapConnection, 
+    userCN: str, 
+    userSN: str, 
+    userGN: str, 
+    userMail: str,
+    userPassword: str,
+):
 
-	pass
+    return ldapConnection.add(
+        dn=f"cn={userCN},ou=users,{ldapBaseDN}",
+        attributes={
+            "objectClass": ["inetOrgPerson", "Person"],
+            "cn": userCN,
+            "sn": userSN,
+            "gn": userGN,
+            "mail": userMail,
+            "userPassword": userPassword
+        }    
+    )
 
+
+# iterate over user data
 def loadUsers():
-	""" load in the users to add to the fairscape ldap
+	""" read all users in user data file 
 	"""
 	with open("/data/user_data.csv", "r") as csvFile:
 
 		# ignore the first line
-		csvFile.readline()
+		userData = csvFile.read()
 
-		userData = csvFile.readline().split(",")
+	userList = []
+
+	lines = userData.splitlines()
+	for userLine in lines[1::]:
+		userData = userLine.replace(" ", "").split(",")
 
 		user = {
 			"firstName": userData[0],
@@ -139,9 +171,107 @@ def loadUsers():
 			"password": userData[4]
 		}
 
+		userList.append(user)
+	return userList
 
 
-	pass
+def loadGroups():
+	""" load all groups from the local files
+	"""
+	with open("/data/group_data.csv", "r") as csvFile:
+		groupData = csvFile.read()
+
+	groupList = []
+
+	lines = groupData.splitlines()
+	for groupLine in lines[1::]:
+		groupData = groupLine.replace(" ", "").split(",")
+
+		group = {
+			"dn": groupData[0],
+			"members": [ f"cn={groupMember},ou=users,{ldapBaseDN}" for groupMember in groupData[1].split(";")],
+		}
+
+		groupList.append(group)
+	return groupList
+
+
+def createUsers(passedLDAPConnection, userList):
+	''' add all users into the LDAP tree
+	'''
+	for userElem in userList[1::]:
+		addSuccess = addFairscapeUser(
+			ldapConnection=passedLDAPConnection, 
+			userCN=userElem['dn'],
+			userSN=userElem['lastName'],
+			userGN=userElem['firstName'],
+			userMail=userElem['email'],
+			userPassword=userElem['password']
+			)
+		ldapSetupLogger.info(f"msg: added user\tsuccess: {addSuccess}\tuser: {userElem['dn']}")
+
+
+def createGroups(ldapConnection, groupList):
+	''' add all loaded groups to the LDAP tree
+	'''
+
+	for groupElem in groupList:
+		addGroup = ldapConnection.add(
+			dn=f"cn={groupElem['dn']},ou=groups,dc=fairscape,dc=net",
+			attributes={
+			"objectClass": "groupOfNames", 
+				"cn": groupElem['dn'], 
+				"member": groupElem['members']
+			}
+		)
+		ldapSetupLogger.info(f"added group\tsuccess:{addGroup}\tgroup: {groupElem['dn']}")
+
+def setupFairscapeUsers():
+
+	# form admin connection to main database
+	adminConnection = connectLDAP(
+		adminDN,
+		adminPassword
+	)
+
+	# add groups OU
+	adminConnection.add(
+		dn="ou=groups,dc=fairscape,dc=net",
+		attributes={
+			"objectClass": "organizationalUnit", 
+			"ou": "groups", 
+			"description": "organizational unit of fairscape groups"
+			}
+	) 
+
+	userList= loadUsers()
+	groupList= loadGroups()
+
+	# create users
+	createUsers(adminConnection, userList)
+	createGroups(adminConnection, groupList)
+
+
+
 
 if __name__ =="__main__":
-	pass
+	time.sleep(10)
+	setupOverlay()
+	setupFairscapeUsers()
+
+	minioClient = minio.Minio(
+		endpoint=f"{configValues['FAIRSCAPE_MINIO_URI']}:{configValues['FAIRSCAPE_MINIO_PORT']}",
+		access_key=configValues['FAIRSCAPE_MINIO_ACCESS_KEY'],
+		secret_key=configValues['FAIRSCAPE_MINIO_SECRET_KEY'],
+		secure=False,
+		cert_check=False
+	)
+
+	defaultBucketName = configValues['FAIRSCAPE_MINIO_DEFAULT_BUCKET']
+	rocrateBucketName = configValues['FAIRSCAPE_MINIO_ROCRATE_BUCKET']
+
+	if not minioClient.bucket_exists(defaultBucketName):
+		minioClient.make_bucket(defaultBucketName)
+
+	if not minioClient.bucket_exists(rocrateBucketName):
+		minioClient.make_bucket(rocrateBucketName)

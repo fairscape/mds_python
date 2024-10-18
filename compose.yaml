@@ -1,10 +1,11 @@
 # Docker Compose Spec for Local Testing of Fairscape
 services:
-  #setup:
-  #  build: "./deploy/setup/Dockerfile"
-  #  env_file: "./deploy/setup/setup.env"
-  #  depends_on: 
-  #  - ldap
+  setup:
+    build: "./deploy/setup/"
+    env_file: "./deploy/setup/setup.env"
+    depends_on: 
+    - ldap
+    - minio
   fairscape-worker:
     build: "./"
     env_file: "./deploy/local.env"

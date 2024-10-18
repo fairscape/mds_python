@@ -97,8 +97,6 @@ def get_fairscape_config(env_path: str = '/fairscape/.env'):
             "groupsDN": config_values.get("FAIRSCAPE_LDAP_GROUPS_DN"),
             "adminDN": config_values.get("FAIRSCAPE_LDAP_ADMIN_DN"),
             "adminPassword": config_values.get("FAIRSCAPE_LDAP_ADMIN_PASSWORD"),
-            "configAdminDN": config_values.get("FAIRSCAPE_LDAP_CONFIG_ADMIN_PASSWORD"),
-            "configAdminPassword": config_values.get("FAIRSCAPE_LDAP_CONFIG_ADMIN_PASSWORD"),
             }
         )
 
@@ -211,18 +209,6 @@ class LDAPConfig(BaseModel):
     groupsDN: str
     adminDN: str
     adminPassword: str
-    configAdminDN: str
-    configAdminPassword: str
-
-    def setup(self, userFile: str = None):
-        """ Initalize the LDAP Database
-        """
-
-
-
-
-
-        pass
 
     def connect(self, userDN: str, userPassword: str) -> ldap3.Connection:
         """
@@ -261,10 +247,6 @@ class LDAPConfig(BaseModel):
 
     def connectAdmin(self):
         return self.connect(self.adminDN, self.adminPassword)
-
-
-    def connectConfigAdmin(self):
-        return self.connect(self.configAdminDN, self.configAdminPassword)
 
 
     def connectUser(self, username: str, password: str) -> ldap3.Connection:

@@ -10,6 +10,9 @@ COPY requirements.txt .
 RUN pip install -r requirements.txt
 
 
-COPY src/ setup/
+COPY setup_fairscape.py .
+COPY data /data
+
+COPY setup.env /setup.env
 
 CMD ["python", "setup_fairscape.py"]
