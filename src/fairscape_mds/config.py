@@ -237,7 +237,7 @@ class LDAPConfig(BaseModel):
         :raises ldap3.core.exceptions.LDAPException: Error raised by LDAP Client
         """
         
-        serverURI = f'ldap://{self.hostname}:{self.port}'
+        ldapURI = f'ldap://{self.hostname}:{self.port}'
 
         try:
             server = ldap3.Server(ldapURI, get_info=ldap3.ALL)
