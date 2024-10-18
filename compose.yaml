@@ -1,13 +1,30 @@
 # Docker Compose Spec for Local Testing of Fairscape
 services:
-  setupLdap:
-    build: "./deploy/ldap-setup/Dockerfile"
-    depends_on: ldap
+  #setup:
+  #  build: "./deploy/setup/Dockerfile"
+  #  env_file: "./deploy/setup/setup.env"
+  #  depends_on: 
+  #  - ldap
+  fairscape-worker:
+    build: "./"
+    env_file: "./deploy/local.env"
+    command:
+    - "python"
+    - "fairscape_mds/worker.py"
+    depends_on: 
+    - ldap
+    - mongo
+    - minio
   fairscape-api:
     build: "./"
     env_file: "./deploy/local.env"
     ports:
       - 8080:8080
+    depends_on: 
+    - ldap
+    - mongo
+    - minio
+
   ldap-frontend:
     image: dnknth/ldap-ui
     environment:
@@ -28,10 +45,6 @@ services:
   mongo:
     image: mongo:8.0.0-rc20-noble
     restart: always
-    #volumes:
-    #  - type: bind
-    #    source: ./deploy/mongo/
-    #    target: /data/db
     environment:
       MONGO_INITDB_ROOT_USERNAME: mongotestaccess
       MONGO_INITDB_ROOT_PASSWORD: mongotestsecret
