@@ -147,18 +147,21 @@ class ROCrateDistribution(BaseModel):
     archivedObjectPath: Optional[str] = Field(default=None)
 
 
-class ROCrate(FairscapeBaseModel):
+class ROCrate(BaseModel):
     guid: str = Field(alias="@id")
     metadataType: Optional[str] = Field(default="https://schema.org/Dataset", alias="@type")
     additionalType: Optional[str] = Field(default=ROCRATE_TYPE)
-    name: constr(max_length=100)
+    name: str = constr(max_length=100)
     sourceOrganization: Optional[str] = Field(default=None)
     metadataGraph: List[Union[
         ROCrateDataset,
         ROCrateSoftware,
         ROCrateComputation,
         ROCrateDatasetContainer
-    ]] = Field(alias="@graph", discriminator='additionalType')
+    ]] = Field(alias="@graph", 
+               # TODO causes TypeError: list is not a valid discriminator
+               #discriminator='additionalType'
+               )
     contentURL: Optional[str] = Field(
         default=None, 
         description="Value for ROCrate S3 URI of zip location"

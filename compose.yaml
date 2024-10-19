@@ -1,33 +1,42 @@
 # Docker Compose Spec for Local Testing of Fairscape
 services:
-  #ldap-frontend:
-  #  image: dnknth/ldap-ui
-  #  environment:
-  #    LDAP_URL: ldap://ldap:1389
-  #    BASE_DN: "dc=fairscape,dc=net"
-  #  ports:
-  #    - 5000:5000
+  setup:
+    build: "./deploy/setup/"
+    env_file: "./deploy/setup/setup.env"
+    depends_on: 
+    - ldap
+    - minio
+  fairscape-worker:
+    build: "./"
+    env_file: "./deploy/local.env"
+    command:
+    - "python"
+    - "fairscape_mds/worker.py"
+    depends_on: 
+    - ldap
+    - mongo
+    - minio
+  fairscape-api:
+    build: "./"
+    env_file: "./deploy/local.env"
+    ports:
+      - 8080:8080
+    depends_on: 
+    - ldap
+    - mongo
+    - minio
 
-  ldap:
-    image: bitnami/openldap
+  ldap-frontend:
+    image: dnknth/ldap-ui
     environment:
-      LDAP_ROOT: "dc=fairscape,dc=net"
-      LDAP_ADMIN_USERNAME: "admin"
-      LDAP_ADMIN_PASSWORD: "adminpassword"
-      LDAP_ADMIN_DN: "cn=admin,dc=fairscape,dc=net"
-      LDAP_CONFIG_ADMIN_ENABLED: "yes"
-      LDAP_CONFIG_ADMIN_USERNAME: "configadmin"
-      LDAP_CONFIG_ADMIN_PASSWORD: "configadminpassword"
-      LDAP_SKIP_DEFAULT_TREE: "no"
-      LDAP_USER_DC: "users"
-      LDAP_GROUP: "admins"
-      LDAP_USERS: "fairscapeUser"
-      LDAP_PASSWORDS: "fairscapePass"
-      #LDAP_CUSTOM_LDIF_DIR: "/lidf"
-    volumes:
-      - type: bind
-        source: ./deploy/ldap
-        target: /ldif
+      LDAP_URL: ldap://ldap:1389
+      BASE_DN: "dc=fairscape,dc=net"
+    ports:
+      - 5000:5000
+  ldap:
+    image: bitnami/openldap:2.5.18
+    restart: always
+    env_file: ./deploy/ldap.env
     ports:
       - 1389:1389
   redis:
@@ -37,10 +46,6 @@ services:
   mongo:
     image: mongo:8.0.0-rc20-noble
     restart: always
-    #volumes:
-    #  - type: bind
-    #    source: ./deploy/mongo/
-    #    target: /data/db
     environment:
       MONGO_INITDB_ROOT_USERNAME: mongotestaccess
       MONGO_INITDB_ROOT_PASSWORD: mongotestsecret

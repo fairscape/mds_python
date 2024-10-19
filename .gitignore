@@ -1,3 +1,6 @@
+# leftover vim edit swp files in source
+src/*.swp
+
 # vs code settings
 .vscode/settings.json
 .vscode
@@ -156,3 +159,4 @@ dmypy.json
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 .idea/
 .vscode/settings.json
+*.swp

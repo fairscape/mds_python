@@ -18,6 +18,8 @@ import uvicorn
 from dotenv import dotenv_values
 import urllib3
 
+import logging
+logging.getLogger('pymongo').setLevel(logging.INFO)
 
 urllib3.disable_warnings()
 
@@ -94,7 +96,7 @@ def get_fairscape_config(env_path: str = '/fairscape/.env'):
             "usersDN": config_values.get("FAIRSCAPE_LDAP_USERS_DN"),
             "groupsDN": config_values.get("FAIRSCAPE_LDAP_GROUPS_DN"),
             "adminDN": config_values.get("FAIRSCAPE_LDAP_ADMIN_DN"),
-            "adminPassword": config_values.get("FAIRSCAPE_LDAP_ADMIN_PASSWORD")
+            "adminPassword": config_values.get("FAIRSCAPE_LDAP_ADMIN_PASSWORD"),
             }
         )
 
@@ -112,6 +114,17 @@ def get_fairscape_config(env_path: str = '/fairscape/.env'):
             redis = server_redis_config,
             ldap = server_ldap_config
             )
+
+
+@lru_cache()
+def get_mongo_client():
+    fairscapeConfig = get_fairscape_config()
+    return fairscapeConfig.mongo.CreateClient()
+
+@lru_cache()
+def get_minio_client():
+    fairscapeConfig = get_fairscape_config()
+    return fairscapeConfig.minio.CreateClient()
 
 
 class MongoConfig(BaseModel):
@@ -197,29 +210,7 @@ class LDAPConfig(BaseModel):
     adminDN: str
     adminPassword: str
 
-    def connectAdmin(self) -> ldap3.Connection:
-        """
-        Connect to the LDAP server using the configuration in the LDAPConfig Class, as the user stored in the LDAPConfig
-
-        :param LDAPConfig self: The LDAPConfig class instance
-        :return: An LDAP connection instance bound to the server
-        :rtype: ldap3.Connection
-        :raises ldap3.core.exceptions.LDAPBindError: Failed to connect to the LDAP Server
-        """
-        
-        serverURI = f'ldap://{self.hostname}:{self.port}'
-
-        connection = ldap3.Connection(
-                serverURI,
-                user=self.adminDN,
-                password=self.adminPassword
-            )
-
-        bind_response = connection.bind()
-        return connection
-
-
-    def connectUser(self, username: str, password: str) -> ldap3.Connection:
+    def connect(self, userDN: str, userPassword: str) -> ldap3.Connection:
         """
         Connect to the LDAP server using the configuration in the LDAPConfig Class, as the passed identity
 
@@ -228,7 +219,38 @@ class LDAPConfig(BaseModel):
         :param str password: The optional userpassword to bind to the LDAP server as a passed identity
         :return: An LDAP connection instance bound to the server
         :rtype: ldap3.Connection
-        :raises ldap3.core.exceptions.LDAPBindError: Failed to connect to the LDAP Server
+        :raises ldap3.core.exceptions.LDAPBindError: Error raised when client fails to connect to the LDAP Server
+        :raises ldap3.core.exceptions.LDAPException: Error raised by LDAP Client
+        """
+        
+        ldapURI = f'ldap://{self.hostname}:{self.port}'
+
+        try:
+            server = ldap3.Server(ldapURI, get_info=ldap3.ALL)
+
+            connection = ldap3.Connection(
+                    server,
+                    user=userDN,
+                    password=userPassword               )
+
+            bind_response = connection.bind()
+            return connection
+
+        except ldap3.core.exceptions.LDAPBindError as bindError:
+            print(bindError)
+            raise bindError
+
+        except ldap3.core.exceptions.LDAPException as ldapError:
+            print(ldapError)
+            raise ldapError
+
+
+    def connectAdmin(self):
+        return self.connect(self.adminDN, self.adminPassword)
+
+
+    def connectUser(self, username: str, password: str) -> ldap3.Connection:
+        """
         """ 
         serverURI = f'ldap://{self.hostname}:{self.port}'
 
@@ -241,13 +263,8 @@ class LDAPConfig(BaseModel):
         else:
             userDN = username
 
-        connection = ldap3.Connection(
-            serverURI,
-            user=userDN,
-            password=password
-        )
-        bind_response = connection.bind()
-        return connection        
+        return self.connect(userDN, password)
+
 
 
 class FairscapeConfig(BaseModel):

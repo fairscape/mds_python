@@ -7,6 +7,8 @@ import datetime
 import re
 from pathlib import Path
 
+logging.getLogger('pymongo').setLevel(logging.INFO)
+
 
 # temporary fix for importing module problems
 # TODO change background tasks to module
