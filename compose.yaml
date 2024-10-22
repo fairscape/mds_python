@@ -69,17 +69,10 @@ services:
   minio:
     image: minio/minio:RELEASE.2023-08-16T20-17-30Z.hotfix.a51234923
     restart: always
-    volumes:
-      - type: bind
-        source: ./deploy/minio_config
-        target: /etc/default/minio
-      - type: bind
-        source: ./deploy/minio/
-        target: /mnt/minio/
     ports:
       - 9000:9000
       - 9001:9001
     environment:
       MINIO_ROOT_USER: miniotestadmin
       MINIO_ROOT_PASSWORD: miniotestsecret
-    command: server /mnt/minio --console-address ":9001"
+    command: server /data --console-address ":9001"
