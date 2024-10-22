@@ -1,5 +1,25 @@
-cff-version: 1.1.0
-message: "If you use this software, please cite it as below."
+cff-version: 1.2.0
+abstract: >\n 
+  FAIRSCAPE is a FAIRness and AI-readiness service providing deep provenance graphs and 
+  data dictionaries with data element validation on uploaded data, software, and computations, 
+  with special reference to biomedical datasets. FAIRSCAPE provenance graphs are represented 
+  using the Evidence Graph Ontology, EVI, an OWL2 representation derived from W3C PROV 
+  and specialized for biomedical research data. The FAIRSCAPE server is a cloud-ready 
+  environment that processes RO-Crate data+metadata packages produced by the 
+  FAIRSCAPE CLI- and GUI-based clients, registers them with persistent IDs, 
+  decomposes and registers their components, computes provenance graph 
+  entailments of each component, and integrates the provenance graphs. 
+  FAIRSCAPE server provides a web-based GUI for inspecting metadata, 
+  visualizing provenance graphs, and obtaining downloads packaged as RO-Crates. 
+  \n
+  FAIRSCAPE is supported by the U.S. National Institutes of Health Bridge2AI program under grants 
+  OT2OD032742 [Bridge2AI: Cell Maps for AI (CM4AI) Data Generation Project] and 
+  OT2OD032701 [Bridge2AI: Patient-Focused Collaborative Hospital Repository Uniting Standards (CHoRUS) for Equitable AI], 
+  and by the Frederick Thomas Fund of the University of Virginia. 
+  \n
+  Authors: Maxwell Adam Levinson (1), Justin Niestroy (1), Sadnan Al Manir (1), Timothy Clark (1)
+  \n
+  Affiliations: (1) University of Virginia
 authors:
   - family-names: Max
     given-names: Levinson
@@ -13,7 +33,12 @@ authors:
   - family-names: Timothy
     given-names: Clark
     orcid: https://orcid.org/0000-0003-4060-7360
-title: "fairscape-cli: A utility for packaging objects and validating metadata for FAIRSCAPE."
-version: 0.2.0
+keywords:
+  - "FAIR"
+  - "Data Science"
+  - "EVI"
+  - "Ontology"
+title: "FAIRSCAPE Server, version 0.7.0"
+version: 0.7.0
 date-released: 2024-03-28
-url: "https://github.com/fairscape/fairscape-cli"
+url: "https://github.com/fairscape/mds_python"
