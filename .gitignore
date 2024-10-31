@@ -160,3 +160,4 @@ dmypy.json
 .idea/
 .vscode/settings.json
 *.swp
+*.zip
