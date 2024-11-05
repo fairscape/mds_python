@@ -2,6 +2,7 @@ from dotenv import dotenv_values
 import os
 import pathlib
 import requests
+import docker
 
 class FairscapeRequest():
 
@@ -46,6 +47,11 @@ class FairscapeRequest():
     )
 		return uploadStatusResponse.json()
 
+def waitForSetup():
+	client = docker.from_env()
+
+	
+
 def uploadCrates():
 
 
@@ -81,23 +87,17 @@ def uploadCrates():
 		transactionIds.append(uploadJSON.get("transactionFolder"))
 
 	# TODO check all request guids are finished
-	while len(transactionIds) != 0:
-		for idx, uploadStatus in enumerate(map(fairscapeAPI.checkUploadStatus, transactionIds)):
-
-			if uploadStatus.get("completed"):	
-				completedTransactionID = transactionIds.pop(idx)
+	for transaction in map(fairscapeAPI.checkUploadStatus, transactionIds):
+		# log success
+		if transaction.get("completed"):	
 				
-				if uploadStatus.get("success"):
-					# TODO log success
-					print(f"Upload Success: {completedTransactionID}")
-					pass
+			if transaction.get("success"):
+				# TODO log success
+				print(f"Upload Success: {transaction.get('transactionFolder')}")
 
-				else:
-					# TODO log failure
-					print(f"Upload Failure: {completedTransactionID}")
-					pass
-
-			continue
+			else:
+				# TODO log failure
+				print(f"Upload Failure: {transaction.get('transactionFolder')}")
 
 	# TODO: check that downloads are functional for ROcrates
 

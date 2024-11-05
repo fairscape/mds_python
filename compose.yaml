@@ -1,5 +1,11 @@
 # Docker Compose Spec for Local Testing of Fairscape
 services:
+
+  seed-data:
+    build: "./deploy/seed-data/"
+    env_file: "./deploy/seed-data/.env"
+    depends_on: 
+    - setup
   setup:
     build: "./deploy/setup/"
     env_file: "./deploy/setup/setup.env"
