@@ -6,7 +6,8 @@ from fairscape_mds.models.user import (
     )
 from fairscape_mds.config import get_fairscape_config
 
-from typing import Annotated
+from typing import Annotated, Optional
+from pydantic import BaseModel, Field
 import crypt
 import jwt
 from datetime import datetime, timezone, timedelta
@@ -194,4 +195,138 @@ def getUserByCN(ldapConnection, user_cn):
             })
 
         return user_instance
+
+
+def getUserTokens(
+    ldapConnection: ldap3.Connection,
+    userDN: str
+    ):
+    '''
+    Return all Tokens stored in LDAP for a user
+
+    Args:
+        ldapConnection (ldap3.Connection): An active LDAP connection to search the DIT
+        userDN (str): DN for the user in LDAP
+
+    Returns:
+        tokens (list[ldap3.abstract.entry.Entry]): List of all stored tokens for a user
+    '''
+    ldapConnection.search(
+        search_base=userDN,
+        search_scope=ldap3.SUBTREE,
+        search_filter="(objectClass=simpleSecurityObject)",
+        attributes=["*"]
+    )
+    tokens = ldapConnection.entries
+    return tokens
+
+
+class UserToken(BaseModel):
+    tokenUID: str
+    tokenValue: str
+    endpointURL: str
+
+class UserTokenUpdate(BaseModel):
+    tokenUID: str
+    tokenValue: Optional[str] = Field(default=None)
+    endpointURL: Optional[str] = Field(default=None)
+
+
+def editUserToken(
+    ldapConnection: ldap3.Connection,
+    userDN: str,
+    tokenUpdate: UserTokenUpdate
+    )-> bool:
+    '''
+    Edit metadata for a single LDAP token
+
+    Args:
+        ldapConnection (ldap3.Connection): An active LDAP connection to search the DIT
+        userDN (str): DN of the user editing this token
+
+    Returns:
+        updateSuccess (bool): Indicates whether the modification was successfull
+
+    '''
+
+    tokenDN = f"uid={tokenUpdate.tokenUID},{userDN}"
+
+    tokenChanges = {}
+
+    if tokenUpdate.endpointURL:
+        tokenChanges['host'] = (ldap3.MODIFY_REPLACE, tokenUpdate.endpointURL)
+
+    if tokenUpdate.tokenValue:
+        tokenChanges['userPassword'] = (ldap3.MODIFY_REPLACE, tokenUpdate.tokenValue)
+
+    updateSuccess = ldapConnection.modify(
+        tokenDN,
+        changes=tokenChanges
+    )
+
+    updateSuccess = True
+    return updateSuccess
+
+
+def deleteUserToken(
+    ldapConnection: ldap3.Connection,
+    userDN: str,
+    tokenID: str
+    )-> bool:
+    '''
+    Remove a specific stored token from a users DIT
+
+    Args:
+        ldapConnection (ldap3.Connection): An active LDAP connection to edit the DIT
+        userDN (str): Distringuished Name of the user in LDAP
+        tokenID (str): Unique ID for this token to be set as the uid for the ldap entry
+
+    Returns:
+        tokenRemoved (bool): Boolean indicating whether the token was removed
+    '''
+    tokenDN = f"uid={tokenID},{userDN}"
+    tokenRemoved = ldapConnection.delete(tokenDN)
+
+    return tokenRemoved
+
+
+def addUserToken(
+    ldapConnection: ldap3.Connection,
+    tokenID: str,
+    userDN: str,
+    tokenValue: str,
+    endpointURL: str
+    )-> bool:
+    '''
+    Store a token in LDAP, adding the token as an account under the Users account RDN
+
+    Args:
+        ldapConnection (ldap3.Connection): An active LDAP connection to edit the DIT
+        tokenID (str): Unique ID for this token to be set as the uid for the ldap entry
+        userDN (str): Distinguished Name of the user in LDAP
+        tokenValue (str): The value of the credentials
+        endpointURL (str): The endpoint of the api against which to use these credentials
+    
+    Returns:
+        addOperation (bool): Boolean indicating if the addition was successfull
+        
+    '''
+
+    tokenDN = f"uid={tokenID},{userDN}"
+
+    addOperation = ldapConnection.add(
+        tokenDN,
+        attributes={
+            "objectClass": [
+                "account",
+                "simpleSecurityObject"
+            ],
+            "uid": tokenID,
+            "userPassword": tokenValue,
+            "description": "dataverse",
+            "host": endpointURL
+        }
+    )
+
+    return addOperation
 
