@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Body
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, Query, Body
 from fastapi.responses import JSONResponse
 from typing import Annotated
 from fairscape_mds.models.user import UserLDAP
@@ -26,8 +26,14 @@ async def create_dataset(
     currentUser: Annotated[UserLDAP, Depends(getCurrentUser)],
     NAAN: str,
     postfix: str,
-    userProvidedMetadata: dict = Body(default={})
+    userProvidedMetadata: dict = Body(default={}),
+    dataverse_url: str | None = Query(default=None, description="Custom Dataverse URL"),
+    database: str | None = Query(default=None, description="Custom database name")
 ):
+
+    dataverse_url = dataverse_url or DEFAULT_DATAVERSE_URL
+    dataverse_db = database or DEFAULT_DATAVERSE_DB
+    
     rocrateGUID = f"ark:{NAAN}/{postfix}"
     rocrateMetadata = rocrateCollection.find_one(
         {"@id": rocrateGUID}, 
@@ -120,7 +126,7 @@ async def create_dataset(
         "X-Dataverse-key": api_token,
         "Content-Type": "application/json"
     }
-    url = f"{DEFAULT_DATAVERSE_URL}/api/dataverses/{DEFAULT_DATAVERSE_DB}/datasets"
+    url = f"{dataverse_url}/api/dataverses/{dataverse_db}/datasets"
     response = requests.post(url, headers=headers, json=metadata)
 
     if response.status_code == 201:
@@ -155,8 +161,12 @@ async def create_dataset(
 async def upload_dataset(
     currentUser: Annotated[UserLDAP, Depends(getCurrentUser)],
     NAAN: str,
-    postfix: str
-):
+    postfix: str,
+    dataverse_url: str | None = Query(default=None, description="Custom Dataverse URL")
+    ):
+
+    dataverse_url = dataverse_url or DEFAULT_DATAVERSE_URL
+    
     rocrateGUID = f"ark:{NAAN}/{postfix}"
     rocrateMetadata = rocrateCollection.find_one(
         {"@id": rocrateGUID}, 
@@ -204,7 +214,7 @@ async def upload_dataset(
         raise HTTPException(status_code=500, detail=f"Error retrieving file from MinIO: {str(e)}")
 
     # Upload file to Dataverse using the persistent ID
-    url = f"{DEFAULT_DATAVERSE_URL}/api/datasets/:persistentId/add?persistentId={persistent_id}"
+    url = f"{dataverse_url}/api/datasets/:persistentId/add?persistentId={persistent_id}"
     headers = {"X-Dataverse-key": api_token}
     
     try:
