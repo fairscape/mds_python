@@ -5,6 +5,7 @@ from fairscape_mds.models.user import UserLDAP
 from fairscape_mds.auth.oauth import getCurrentUser
 from fairscape_mds.config import get_fairscape_config
 from fairscape_mds.models.fairscape_base import FairscapeBaseModel 
+from fairscape_mds.auth.ldap import getUserTokens
 from pathlib import Path
 import requests
 from datetime import datetime
@@ -30,9 +31,22 @@ async def create_dataset(
     dataverse_url: str | None = Query(default=None, description="Custom Dataverse URL"),
     database: str | None = Query(default=None, description="Custom database name")
 ):
-
     dataverse_url = dataverse_url or DEFAULT_DATAVERSE_URL
     dataverse_db = database or DEFAULT_DATAVERSE_DB
+
+    # Get user's tokens and find matching Dataverse token
+    tokens = getUserTokens(fairscapeConfig.ldap.connectAdmin(), currentUser.dn)
+    api_token = None
+    for token in tokens:
+        if token.endpointURL == dataverse_url:
+            api_token = token.tokenValue
+            break
+    
+    if not api_token:
+        raise HTTPException(
+            status_code=401,
+            detail=f"No token found for Dataverse instance: {dataverse_url}. Please add your token first."
+        )
     
     rocrateGUID = f"ark:{NAAN}/{postfix}"
     rocrateMetadata = rocrateCollection.find_one(
@@ -55,8 +69,6 @@ async def create_dataset(
     if rocrateGroup not in currentUser.memberOf and fairscapeConfig.ldap.adminDN not in currentUser.memberOf:
         raise HTTPException(status_code=401, detail="User not authorized to publish this ROCrate")
 
-    api_token = "PLACEHOLDER" #will fill in logic once max gives it to me
-
     dataverseMetadata = rocrateMetadata | userProvidedMetadata
     # Prepare dataset metadata
     metadata = {
@@ -74,7 +86,7 @@ async def create_dataset(
                                 {
                                     "authorName": {"value": author, "typeClass": "primitive", "multiple": False, "typeName": "authorName"},
                                     "authorAffiliation": {"value": "CAMA", "typeClass": "primitive", "multiple": False, "typeName": "authorAffiliation"}
-                                } for author in dataverseMetadata.get("author").split(', ')  # Assuming authors are comma-separated
+                                } for author in dataverseMetadata.get("author").split(', ')
                             ],
                             "typeClass": "compound",
                             "multiple": True,
@@ -133,7 +145,6 @@ async def create_dataset(
         dataset_info = response.json()
         persistent_id = dataset_info['data']['persistentId']
         
-        # Create a FairscapeBaseModel instance to update the ROCrate
         rocrate = FairscapeBaseModel(
             guid=rocrateGUID,
             metadataType=rocrateMetadata.get("@type"),
@@ -141,10 +152,8 @@ async def create_dataset(
             identifier=persistent_id
         )
         
-        # Update the ROCrate with the Dataverse identifier
         update_result = rocrate.update(rocrateCollection)
         if not update_result.success:
-            # Log the error but don't fail the request since dataset was created
             print(f"Failed to update ROCrate with identifier: {update_result.message}")
             
         return JSONResponse(
@@ -163,9 +172,22 @@ async def upload_dataset(
     NAAN: str,
     postfix: str,
     dataverse_url: str | None = Query(default=None, description="Custom Dataverse URL")
-    ):
-
+):
     dataverse_url = dataverse_url or DEFAULT_DATAVERSE_URL
+
+    # Get user's tokens and find matching Dataverse token
+    tokens = getUserTokens(fairscapeConfig.ldap.connectAdmin(), currentUser.dn)
+    api_token = None
+    for token in tokens:
+        if token.endpointURL == dataverse_url:
+            api_token = token.tokenValue
+            break
+    
+    if not api_token:
+        raise HTTPException(
+            status_code=401,
+            detail=f"No token found for Dataverse instance: {dataverse_url}. Please add your token first."
+        )
     
     rocrateGUID = f"ark:{NAAN}/{postfix}"
     rocrateMetadata = rocrateCollection.find_one(
@@ -183,7 +205,6 @@ async def upload_dataset(
         )
 
     # AuthZ: check if user is allowed to download 
-    # if a user is a part of the group that uploaded the ROCrate OR user is an Admin
     rocrateGroup = rocrateMetadata.get("permissions", {}).get("group")
     if rocrateGroup not in currentUser.memberOf and fairscapeConfig.ldap.adminDN not in currentUser.memberOf:
         raise HTTPException(status_code=401, detail="User not authorized to publish this ROCrate")
@@ -196,10 +217,7 @@ async def upload_dataset(
             detail="Dataset has not been created in Dataverse yet. Please create the dataset first using the create endpoint."
         )
 
-    api_token = "PLACEHOLDER" #will fill in logic once max gives it to me
-
     # Get the file path from the ROCrate distribution
-
     file_path = rocrateMetadata.get("distribution", {}).get("archivedObjectPath")
     if not file_path:
         raise HTTPException(status_code=404, detail="No file associated with this ROCrate")
