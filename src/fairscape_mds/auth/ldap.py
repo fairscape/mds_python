@@ -2,7 +2,9 @@ from fairscape_mds.models.user import UserLDAP
 from pydantic import BaseModel, Field
 import ldap3
 from typing import Optional
+from fairscape_mds.config import get_fairscape_config
 
+fairscapeConfig = get_fairscape_config()
 
 class UserToken(BaseModel):
     tokenUID: str
@@ -18,7 +20,7 @@ class UserTokenUpdate(BaseModel):
 def getUserByCN(ldapConnection, user_cn):
     # search users in ldap
     ldapConnection.search(
-            search_base=usersDN,
+            search_base=fairscapeConfig.ldap.usersDN,
             search_filter=f"(cn={user_cn})",
             search_scope=ldap3.SUBTREE,
             attributes=['dn', 'cn', 'mail', 'givenName', 'sn', 'o', 'memberOf']
