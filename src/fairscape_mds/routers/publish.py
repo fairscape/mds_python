@@ -214,7 +214,7 @@ async def upload_dataset(
         raise HTTPException(status_code=500, detail=f"Error retrieving file from MinIO: {str(e)}")
 
     # Upload file to Dataverse using the persistent ID
-    url = f"{dataverse_url}/api/datasets/:persistentId/add?persistentId={persistent_id}"
+    url = f"{dataverse_url}api/datasets/:persistentId/add?persistentId={persistent_id}"
     headers = {"X-Dataverse-key": api_token}
     
     try:
