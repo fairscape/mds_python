@@ -76,8 +76,8 @@ class TestLDAPRouter(unittest.TestCase):
 		)
 
 		userTokens = getTokenResponse.json()
-
 		self.assertEqual(getTokenResponse.status_code, 200)
+		self.assertEqual(len(userTokens), 1)
 
 
 		deleteTokenReponse = client.delete(
@@ -85,7 +85,7 @@ class TestLDAPRouter(unittest.TestCase):
 			headers=authHeaders,
 		)
 
-		self.assertEqual(deleteTokenReponse, 200)
+		self.assertEqual(deleteTokenReponse.status_code, 200)
 
 
 
