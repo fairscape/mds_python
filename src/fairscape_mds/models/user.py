@@ -12,7 +12,7 @@ class UserLDAP(BaseModel):
     email: str
     givenName: str
     surname: str
-    organization: str
+    organization: Optional[str] = Field(default=None)
     memberOf: List[str]
 
 

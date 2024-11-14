@@ -1,4 +1,4 @@
-from fastapi import Depends, HTTPException, status, APIRouter
+from fastapi import Depends, HTTPException, status, APIRouter, Path
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.responses import JSONResponse
 
@@ -100,7 +100,7 @@ def addCredentials(
                 "uploaded": {
                     "tokenUID": newToken.tokenUID
                     }
-            }
+            },
             status_code=201
         )
 
@@ -112,10 +112,10 @@ def addCredentials(
         )
 
 
-@router.delete("/profile/credentials")
+@router.delete("/profile/credentials/{tokenUID}")
 def deleteCredentials(
-   currentUser: Annotated[UserLDAP, Depends(getCurrentUser)],
-   tokenUID: str, 
+    currentUser: Annotated[UserLDAP, Depends(getCurrentUser)],
+    tokenUID: Annotated[str, Path(title="token id")]
 ):
     deleteStatus = deleteUserToken(
         ldapConnection,
@@ -129,8 +129,8 @@ def deleteCredentials(
                 "deleted": {
                     "tokenUID": tokenUID
                     }
-            }
-            status_code=201
+            },
+            status_code=200
         )
 
     # TODO check if token exists    
@@ -161,8 +161,8 @@ def updateCredentials(
                 "updated": {
                     "tokenUID": tkUpdate.tokenUID
                     }
-            }
-            status_code=201
+            },
+            status_code=200
         )
 
     # TODO check if token exists    

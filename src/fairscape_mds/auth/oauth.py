@@ -142,15 +142,19 @@ def getCurrentUser(token: Annotated[str, Depends(OAuthScheme)])->Optional[UserLD
 
         try: 
             # construct the user entry
-            user_instance = UserLDAP.model_validate({
+            userMetadata = {
                 "dn": ldap_user_entry.entry_dn,
                 "cn": str(ldap_user_entry.cn),
                 "email": ldap_user_attributes.get('mail')[0],
                 "givenName": ldap_user_attributes.get('givenName')[0],
                 "surname": ldap_user_attributes.get('sn')[0],
-                "organization": ldap_user_attributes.get('o')[0],
                 "memberOf": ldap_user_attributes.get('memberOf')
-                })
+            }
+
+            if  len(ldap_user_attributes.get('o'))==1:
+                userMetadata['o'] = ldap_user_attributes.get('o')[0]
+
+            user_instance = UserLDAP.model_validate(userMetadata)
                    
             return user_instance
 
