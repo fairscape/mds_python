@@ -1,6 +1,5 @@
 from typing import Optional
 
-import crypt
 from pydantic import Extra
 
 from fairscape_mds.models.fairscape_base import *
@@ -13,7 +12,7 @@ class UserLDAP(BaseModel):
     email: str
     givenName: str
     surname: str
-    organization: str
+    organization: Optional[str] = Field(default=None)
     memberOf: List[str]
 
 
@@ -72,7 +71,7 @@ def createUser(
         return OperationStatus(False, "user already exists", 400)
 
     # hash password 
-    userInstance.password = crypt.crypt(userInstance.password, passwordSalt)
+    #userInstance.password = crypt.crypt(userInstance.password, passwordSalt)
 
     userMetadata = userInstance.model_dump(by_alias=True)
     userCollection.insert_one(userMetadata)

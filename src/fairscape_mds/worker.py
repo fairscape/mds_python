@@ -28,7 +28,7 @@ from fairscape_mds.models.rocrate import (
     ROCrate,
     ROCrateDistribution
 )
-from fairscape_mds.auth.oauth import getUserByCN
+from fairscape_mds.auth.ldap import getUserByCN
 
 from typing import List, Dict, Optional
 from uuid import UUID, uuid4

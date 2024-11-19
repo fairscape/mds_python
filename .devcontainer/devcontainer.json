@@ -1,6 +1,0 @@
-{
-	"name": "mds-dev",
-	"image": "docker/dev-environments-default:stable-1",
-	"remoteUser": "vscode"
-
-}

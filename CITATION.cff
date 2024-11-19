@@ -1,44 +1,66 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
 cff-version: 1.2.0
-abstract: >\n 
-  FAIRSCAPE is a FAIRness and AI-readiness service providing deep provenance graphs and 
-  data dictionaries with data element validation on uploaded data, software, and computations, 
-  with special reference to biomedical datasets. FAIRSCAPE provenance graphs are represented 
-  using the Evidence Graph Ontology, EVI, an OWL2 representation derived from W3C PROV 
-  and specialized for biomedical research data. The FAIRSCAPE server is a cloud-ready 
-  environment that processes RO-Crate data+metadata packages produced by the 
-  FAIRSCAPE CLI- and GUI-based clients, registers them with persistent IDs, 
-  decomposes and registers their components, computes provenance graph 
-  entailments of each component, and integrates the provenance graphs. 
-  FAIRSCAPE server provides a web-based GUI for inspecting metadata, 
-  visualizing provenance graphs, and obtaining downloads packaged as RO-Crates. 
-  \n
-  FAIRSCAPE is supported by the U.S. National Institutes of Health Bridge2AI program under grants 
-  OT2OD032742 [Bridge2AI: Cell Maps for AI (CM4AI) Data Generation Project] and 
-  OT2OD032701 [Bridge2AI: Patient-Focused Collaborative Hospital Repository Uniting Standards (CHoRUS) for Equitable AI], 
-  and by the Frederick Thomas Fund of the University of Virginia. 
-  \n
-  Authors: Maxwell Adam Levinson (1), Justin Niestroy (1), Sadnan Al Manir (1), Timothy Clark (1)
-  \n
-  Affiliations: (1) University of Virginia
+title: FAIRSCAPE Server
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
 authors:
-  - family-names: Max
-    given-names: Levinson
-    orcid: https://orcid.org/0000-0003-0384-8499
-  - family-names: Sadnan
-    given-names: Al Manir
-    orcid: https://orcid.org/0000-0003-4647-3877
-  - family-names: Justin
-    given-names: Niestroy
-    orcid: https://orcid.org/0000-0002-1103-3882
-  - family-names: Timothy
-    given-names: Clark
-    orcid: https://orcid.org/0000-0003-4060-7360
+  - given-names: Maxwell Adam
+    family-names: Levinson
+    email: mal8ch@virginia.edu
+    affiliation: University of Virginia
+    orcid: 'https://orcid.org/0000-0003-0384-8499'
+  - given-names: Sadnan
+    family-names: Al Manir
+    affiliation: University of Virginia
+    email: ma3xy@virginia.edu
+    orcid: 'https://orcid.org/0000-0003-4647-3877'
+  - orcid: 'https://orcid.org/0000-0002-1103-3882'
+    given-names: Justin
+    family-names: Niestroy
+    email: jniestroy@gmail.com
+    affiliation: University of Virginia
+  - given-names: Timothy
+    family-names: Clark
+    email: twclark@virginia.edu
+    affiliation: University of Virginia
+    orcid: 'https://orcid.org/0000-0003-4060-7360'
+repository-code: 'https://github.com/fairscape/mds_python'
+url: 'https://fairscape.net'
+abstract: >-
+  FAIRSCAPE is a FAIRness and AI-readiness service providing
+  deep provenance graphs and data dictionaries with data
+  element validation on uploaded data, software, and
+  computations, with special reference to biomedical
+  datasets. FAIRSCAPE provenance graphs are represented
+  using the Evidence Graph Ontology, EVI, an OWL2
+  representation derived from W3C PROV and specialized for
+  biomedical research data. The FAIRSCAPE server is a
+  cloud-ready environment that processes RO-Crate
+  data+metadata packages produced by the FAIRSCAPE CLI- and
+  GUI-based clients, registers them with persistent IDs,
+  decomposes and registers their components, computes
+  provenance graph entailments of each component, and
+  integrates the provenance graphs. FAIRSCAPE server
+  provides a web-based GUI for inspecting metadata,
+  visualizing provenance graphs, and obtaining downloads
+  packaged as RO-Crates. 
+
+
+  FAIRSCAPE is supported by the U.S. National Institutes of
+  Health Bridge2AI program under grants OT2OD032742
+  [Bridge2AI: Cell Maps for AI (CM4AI) Data Generation
+  Project] and OT2OD032701 [Bridge2AI: Patient-Focused
+  Collaborative Hospital Repository Uniting Standards
+  (CHoRUS) for Equitable AI],  and by the Frederick Thomas
+  Fund of the University of Virginia.
 keywords:
-  - "FAIR"
-  - "Data Science"
-  - "EVI"
-  - "Ontology"
-title: "FAIRSCAPE Server, version 0.7.0"
-version: 0.7.0
-date-released: 2024-03-28
-url: "https://github.com/fairscape/mds_python"
+  - FAIR
+  - Data Science
+  - EVI
+  - Ontology
+  - Provenance
+license: MIT

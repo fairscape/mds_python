@@ -94,13 +94,6 @@ app = FastAPI(
 )
 
 
-#static_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'static')
-
-# mounting templates
-app.mount("/api/static", StaticFiles(directory='fairscape_mds/static'), name="static")
-templates = Jinja2Templates(directory="fairscape_mds/templates")
-
-
 @app.get('/api', response_class=HTMLResponse, tags=["Root"])
 async def get_root(request: Request):
     context = {

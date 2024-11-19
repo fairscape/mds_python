@@ -1,13 +1,10 @@
 from fastapi.security import OAuth2PasswordBearer
 from fastapi import Depends, HTTPException
 
-from fairscape_mds.models.user import (
-    UserLDAP
-    )
+from fairscape_mds.models.user import UserLDAP
 from fairscape_mds.config import get_fairscape_config
 
-from typing import Annotated
-import crypt
+from typing import Annotated, Optional
 import jwt
 from datetime import datetime, timezone, timedelta
 import ldap3
@@ -94,7 +91,7 @@ def loginLDAP(ldapConnection: ldap3.Connection, email: str, password: str) -> st
                 )
 
 
-def getCurrentUser(token: Annotated[str, Depends(OAuthScheme)])->UserLDAP:    
+def getCurrentUser(token: Annotated[str, Depends(OAuthScheme)])->Optional[UserLDAP]:    
     """
     Given a JWT from a request, return the user record from LDAP
 
@@ -118,7 +115,8 @@ def getCurrentUser(token: Annotated[str, Depends(OAuthScheme)])->UserLDAP:
 
     user_cn = token_metadata['sub']
     email = token_metadata['email']
-    
+
+    # TODO change so that new connection is not created for token checking    
     ldapConnection = fairscapeConfig.ldap.connectAdmin()
 
     # search the users 
@@ -144,15 +142,19 @@ def getCurrentUser(token: Annotated[str, Depends(OAuthScheme)])->UserLDAP:
 
         try: 
             # construct the user entry
-            user_instance = UserLDAP.model_validate({
+            userMetadata = {
                 "dn": ldap_user_entry.entry_dn,
                 "cn": str(ldap_user_entry.cn),
                 "email": ldap_user_attributes.get('mail')[0],
                 "givenName": ldap_user_attributes.get('givenName')[0],
                 "surname": ldap_user_attributes.get('sn')[0],
-                "organization": ldap_user_attributes.get('o')[0],
                 "memberOf": ldap_user_attributes.get('memberOf')
-                })
+            }
+
+            if  len(ldap_user_attributes.get('o'))==1:
+                userMetadata['o'] = ldap_user_attributes.get('o')[0]
+
+            user_instance = UserLDAP.model_validate(userMetadata)
                    
             return user_instance
 
@@ -161,37 +163,3 @@ def getCurrentUser(token: Annotated[str, Depends(OAuthScheme)])->UserLDAP:
                 status_code=500,
                 detail=f"Error with User Metadata\tException: {str(e)}\tUser Metadata: {str(ldap_user_attributes)}"
             )
-
-def getUserByCN(ldapConnection, user_cn):
-    # search users in ldap
-    ldapConnection.search(
-            search_base=fairscapeConfig.ldap.usersDN,
-            search_filter=f"(cn={user_cn})",
-            search_scope=ldap3.SUBTREE,
-            attributes=['dn', 'cn', 'mail', 'givenName', 'sn', 'o', 'memberOf']
-            )
-
-    query_results = ldapConnection.entries
-    
-    if len(query_results)==0:
-        raise Exception('User not found')
-
-    elif len(query_results)>1:
-        raise Exception('Multiple Users Found with CN')
-   
-    else:
-        ldap_user_entry = query_results[0]
-        ldap_user_attributes = ldap_user_entry.entry_attributes_as_dict
-
-        user_instance = UserLDAP.model_validate({
-            "dn": ldap_user_entry.entry_dn,
-            "cn": str(ldap_user_entry.cn),
-            "email": ldap_user_attributes.get('mail')[0],
-            "givenName": ldap_user_attributes.get('givenName')[0],
-            "surname": ldap_user_attributes.get('sn')[0],
-            "organization": ldap_user_attributes.get('o')[0],
-            "memberOf": ldap_user_attributes.get('memberOf')
-            })
-
-        return user_instance
-
