@@ -149,11 +149,14 @@ def updateCredentials(
    currentUser: Annotated[UserLDAP, Depends(getCurrentUser)],
    tkUpdate: UserTokenUpdate
 ):
+
+    ldapConnection = fairscapeConfig.ldap.connectAdmin()
     updateTokenStatus = updateUserToken(
         ldapConnection,
         userDN=currentUser.dn,
         tokenUpdate=tkUpdate
     )
+    ldapConnection.unbind()
 
     if updateTokenStatus:
         return JSONResponse(
