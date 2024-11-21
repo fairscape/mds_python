@@ -19,6 +19,7 @@ from fairscape_mds.routers.organization import router as OrganizationRouter
 from fairscape_mds.routers.evidencegraph import router as EvidenceGraphRouter
 from fairscape_mds.routers.transfer import router as TransferRouter
 from fairscape_mds.routers.resolver import ResolverRouter
+from fairscape_mds.routers.publish import router as PublishRouter
 
 
 tags_metadata = [
@@ -123,6 +124,7 @@ app.include_router(OrganizationRouter, prefix="/api", tags=["organization"])
 app.include_router(EvidenceGraphRouter,prefix="/api", tags=["evidencegraph"])
 app.include_router(ResolverRouter, prefix="/api",tags=["resolver"])
 app.include_router(SchemaRouter, prefix="/api", tags=["schema"])
+app.include_router(PublishRouter, prefix="/api", tags=["publish"])
 
 # Routes for Web pages
 #app.include_router(WebIndexRouter, tags=["webindex"])
