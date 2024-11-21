@@ -231,7 +231,9 @@ class LDAPConfig(BaseModel):
             connection = ldap3.Connection(
                     server,
                     user=userDN,
-                    password=userPassword               )
+                    password=userPassword,
+                    authentication=ldap3.SIMPLE 
+                    )
 
             bind_response = connection.bind()
             return connection
