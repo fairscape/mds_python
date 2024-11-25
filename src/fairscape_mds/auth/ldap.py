@@ -23,7 +23,7 @@ def getUserByCN(ldapConnection, user_cn):
             search_base=fairscapeConfig.ldap.usersDN,
             search_filter=f"(cn={user_cn})",
             search_scope=ldap3.SUBTREE,
-            attributes=['dn', 'cn', 'mail', 'givenName', 'sn', 'o', 'memberOf']
+            attributes=['cn', 'mail', 'givenName', 'sn', 'o', 'memberOf']
             )
 
     query_results = ldapConnection.entries
@@ -38,15 +38,24 @@ def getUserByCN(ldapConnection, user_cn):
         ldap_user_entry = query_results[0]
         ldap_user_attributes = ldap_user_entry.entry_attributes_as_dict
 
-        user_instance = UserLDAP.model_validate({
+        user_data= {
             "dn": ldap_user_entry.entry_dn,
             "cn": str(ldap_user_entry.cn),
             "email": ldap_user_attributes.get('mail')[0],
             "givenName": ldap_user_attributes.get('givenName')[0],
             "surname": ldap_user_attributes.get('sn')[0],
-            "organization": ldap_user_attributes.get('o')[0],
             "memberOf": ldap_user_attributes.get('memberOf')
-            })
+            }
+
+        # handle if userOrganization is none
+        userOrganization = ldap_user_attributes.get('o')
+        if isinstance(userOrganization, list):
+            if len(userOrganization)==1:
+                user_data['organization']= ldap_user_attributes.get('o')[0]
+            else:
+                user_data['organization'] = None
+
+        user_instance = UserLDAP.model_validate(user_data)
 
         return user_instance
 
