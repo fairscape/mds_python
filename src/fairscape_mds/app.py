@@ -6,6 +6,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.middleware.cors import CORSMiddleware 
 
 #from fairscape_mds.routers.user import router as UserRouter
 from fairscape_mds.routers.schema import router as SchemaRouter
@@ -94,6 +95,13 @@ app = FastAPI(
     openapi_tags=tags_metadata
 )
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_credentials=True,
+    allow_methods=["*"], 
+    allow_headers=["*"],
+)
 
 @app.get('/api', response_class=HTMLResponse, tags=["Root"])
 async def get_root(request: Request):

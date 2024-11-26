@@ -9,28 +9,42 @@ services:
   setup:
     build: "./deploy/setup/"
     env_file: "./deploy/setup/setup.env"
-    depends_on: 
-    - ldap
-    - minio
+    depends_on:
+      ldap:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+
+  fairscape-frontend:
+    image: ghcr.io/fairscape/fairscapefrontendlocal:RELEASE.2024-11-26
+    ports:
+      - "5173:5173"
+    depends_on:
+      - fairscape-api
+      - ldap
+      - mongo
+      - minio
+
   fairscape-worker:
     build: "./"
     env_file: "./deploy/local.env"
     command:
-    - "python"
-    - "fairscape_mds/worker.py"
-    depends_on: 
-    - ldap
-    - mongo
-    - minio
+      - "python"
+      - "fairscape_mds/worker.py"
+    depends_on:
+      - ldap
+      - mongo
+      - minio
+
   fairscape-api:
     build: "./"
     env_file: "./deploy/local.env"
     ports:
       - 8080:8080
-    depends_on: 
-    - ldap
-    - mongo
-    - minio
+    depends_on:
+      - ldap
+      - mongo
+      - minio
 
   ldap-frontend:
     image: dnknth/ldap-ui
@@ -39,16 +53,33 @@ services:
       BASE_DN: "dc=fairscape,dc=net"
     ports:
       - 5000:5000
+
   ldap:
     image: bitnami/openldap:2.5.18
     restart: always
     env_file: ./deploy/ldap.env
     ports:
       - 1389:1389
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "ldapsearch",
+          "-x",
+          "-H",
+          "ldap://localhost:1389",
+          "-b",
+          "dc=fairscape,dc=net",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   redis:
     image: redis:7.2.4
     ports:
       - 6379:6379
+
   mongo:
     image: mongo:8.0.0-rc20-noble
     restart: always
@@ -58,7 +89,8 @@ services:
       MONGO_INITDB_DATABASE: admin
     ports:
       - 27017:27017
-    command: [ "mongod", "--auth" ]
+    command: ["mongod", "--auth"]
+
   mongo-express:
     image: mongo-express
     restart: always
@@ -72,6 +104,7 @@ services:
       ME_CONFIG_MONGODB_URL: mongodb://mongotestaccess:mongotestsecret@mongo:27017/
     links:
       - mongo:mongo
+
   minio:
     image: minio/minio:RELEASE.2023-08-16T20-17-30Z.hotfix.a51234923
     restart: always
@@ -82,3 +115,8 @@ services:
       MINIO_ROOT_USER: miniotestadmin
       MINIO_ROOT_PASSWORD: miniotestsecret
     command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
