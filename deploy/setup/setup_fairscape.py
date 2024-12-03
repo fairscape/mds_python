@@ -4,17 +4,24 @@ import ldap3
 from dotenv import dotenv_values
 from os import environ
 import logging 
+import pathlib
+import requests
+import docker
+import time
+
 
 # setup logger
 ldapSetupLogger = logging.getLogger('ldapSetup')
+seedDataLogger = logging.getLogger('seedData')
 
-
-# helper utilities
-
+# environment variables
 configValues = {
 	**dotenv_values(dotenv_path="./setup.env"),
 	**environ
 } 
+fairscapeRootURL = configValues['FAIRSCAPE_API_URL']
+userEmail = configValues['USER_EMAIL']
+userPassword = configValues['USER_PASSWORD']
 ldapServerURI = f"ldap://{configValues['FAIRSCAPE_LDAP_HOST']}:{configValues['FAIRSCAPE_LDAP_PORT']}"
 ldapBaseDN = configValues['FAIRSCAPE_LDAP_BASE_DN']
 ldapUsersDN = configValues['FAIRSCAPE_LDAP_USERS_DN']
@@ -23,6 +30,126 @@ configAdminDN = configValues['FAIRSCAPE_LDAP_CONFIG_ADMIN_DN']
 configAdminPassword = configValues['FAIRSCAPE_LDAP_CONFIG_ADMIN_PASSWORD']
 adminDN = configValues['FAIRSCAPE_LDAP_ADMIN_DN']
 adminPassword = configValues['FAIRSCAPE_LDAP_ADMIN_PASSWORD']
+
+
+class FairscapeRequest():
+
+	def __init__(self, username: str, password: str, rootURL: str):
+		self.username = username
+		self.password = password
+		self.rootURL = rootURL
+		self.tokenString = None
+
+	def getTokenString(self):
+		"""
+		Login a User to Fairscape
+		"""
+		loginResponse = requests.post(
+			self.rootURL + 'login', 
+			data={
+				"username": self.username, 
+				"password": self.password
+				})
+		loginResponseBody = loginResponse.json()
+		self.tokenString = loginResponseBody['access_token']
+
+	def uploadCrate(self, cratePath: pathlib.Path):
+		fileName = cratePath.name
+		crateUpload = {
+			'crate': (fileName, open(str(cratePath), 'rb'), 'application/zip')
+			}
+    
+		uploadResponse = requests.post(
+        self.rootURL + 'rocrate/upload-async',
+        files=crateUpload,
+        headers={"Authorization": f"Bearer {self.tokenString}"}
+    )
+		return uploadResponse
+
+	def checkUploadStatus(self, requestID: str) -> dict:
+		uploadStatusResponse = requests.get(
+        self.rootURL + 'rocrate/upload/status/' + requestID,
+        headers={
+					"Authorization": f"Bearer {self.tokenString}"
+					}
+    )
+		return uploadStatusResponse.json()
+
+def waitForSetup():
+	client = docker.from_env()
+
+
+def uploadCrates():
+	configValues = {
+		**dotenv_values(dotenv_path="./setup.env"),
+		**environ
+	} 
+
+	# poll for fairscape api to be live
+	apiLive = False
+	loops = 0
+
+	while not apiLive and loops<5:
+		try:
+			r = requests.get(fairscapeRootURL + 'docs')
+			if r.status_code == 200:
+				apiLive = True
+		except:
+			print("polling fairscape-api")
+			time.sleep(5)
+			loops += 1
+
+	fairscapeAPI = FairscapeRequest(
+		username=userEmail,
+		password=userPassword,
+		rootURL=fairscapeRootURL
+	)
+
+	# get a fairscape token
+	fairscapeAPI.getTokenString()
+
+	# list all crates and upload
+	uploadedCrates = pathlib.Path('/data/rocrates')
+	allUploadedCrates = list(pathlib.Path(uploadedCrates).glob('*.zip'))
+	transactionIDs = []
+
+	for crate in allUploadedCrates:
+		uploadResponse = fairscapeAPI.uploadCrate(crate)
+
+		# check for success
+		# assert uploadResponse.status_code == 201
+		print(f"upload success: {uploadResponse.status_code == 201} status_code: {uploadResponse.status_code}")
+
+		uploadJSON = uploadResponse.json()
+		transactionIDs.append(uploadJSON.get("transactionFolder"))
+
+	# TODO check all request guids are finished
+
+	for transaction in transactionIDs:
+		uploadStatus = fairscapeAPI.checkUploadStatus(transaction)
+		
+		if uploadStatus.get("completed"):	
+				
+			if uploadStatus.get("success"):
+				# TODO log success
+				seedDataLogger.info(f"Upload Success: {transaction}")
+
+			else:
+				# TODO log failure
+				seedDataLogger.error(f"Upload Failure: {transaction}")	
+
+	# TODO: check that downloads are functional for ROcrates
+
+	# TODO: check that access controls apply
+
+	# TODO: check that api endpoints work
+
+	pass
+
+	
+
+# helper utilities
+
 
 
 class LDAPConnectionError(Exception):
@@ -152,7 +279,7 @@ def addFairscapeUser(
 def loadUsers():
 	""" read all users in user data file 
 	"""
-	with open("/data/user_data.csv", "r") as csvFile:
+	with open("/data/ldap/user_data.csv", "r") as csvFile:
 
 		# ignore the first line
 		userData = csvFile.read()
@@ -178,7 +305,7 @@ def loadUsers():
 def loadGroups():
 	""" load all groups from the local files
 	"""
-	with open("/data/group_data.csv", "r") as csvFile:
+	with open("/data/ldap/group_data.csv", "r") as csvFile:
 		groupData = csvFile.read()
 
 	groupList = []
@@ -251,14 +378,7 @@ def setupFairscapeUsers():
 	createUsers(adminConnection, userList)
 	createGroups(adminConnection, groupList)
 
-
-
-
-if __name__ =="__main__":
-	time.sleep(10)
-	setupOverlay()
-	setupFairscapeUsers()
-
+def setupMinio():
 	minioClient = minio.Minio(
 		endpoint=f"{configValues['FAIRSCAPE_MINIO_URI']}:{configValues['FAIRSCAPE_MINIO_PORT']}",
 		access_key=configValues['FAIRSCAPE_MINIO_ACCESS_KEY'],
@@ -275,3 +395,22 @@ if __name__ =="__main__":
 
 	if not minioClient.bucket_exists(rocrateBucketName):
 		minioClient.make_bucket(rocrateBucketName)
+
+
+if __name__ =="__main__":
+	time.sleep(10)
+	try:
+		setupOverlay()
+	except:
+		ldapSetupLogger.error("Error setting up overlay")
+
+	try:
+		setupFairscapeUsers()
+	except:
+		ldapSetupLogger.error("Error setting up users overlay")
+
+	# initalize minio
+	setupMinio()
+
+	# seed data
+	uploadCrates()
