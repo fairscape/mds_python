@@ -11,10 +11,10 @@ run-local:
 	# source deploy/local.env
 
 	# run all backend services
-	docker compose up --build -d ldap mongo minio redis fairscape-worker
+	# docker compose up --build -d ldap mongo minio redis fairscape-worker
 	
 	# run server in current session
-	cd src/ && uvicorn fairscape_mds.app:app --host 0.0.0.0 --port 8080
+	cd src/ && python -m fairscape_mds
 
 setup: requirements.txt
 	pip install -r requirements.txt
