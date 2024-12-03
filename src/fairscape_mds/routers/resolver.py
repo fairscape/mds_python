@@ -14,16 +14,6 @@ fairscapeConfig = get_fairscape_config()
 mongo_client = get_mongo_client()
 mongo_db = mongo_client[fairscapeConfig.mongo.db]
 identifierCollection = mongo_db[fairscapeConfig.mongo.identifier_collection]
-userCollection = mongo_db[fairscapeConfig.mongo.user_collection]
-
-
-def remove_object_id(data):
-    if isinstance(data, dict):
-        return {k: remove_object_id(v) for k, v in data.items() if k != '_id'}
-    elif isinstance(data, list):
-        return [remove_object_id(v) for v in data]
-    else:
-        return data
 
 @ResolverRouter.get(
     "/ark:{NAAN}/{postfix}",
@@ -51,7 +41,10 @@ def resolve(
         return RedirectResponse(f'https://n2t.net/ark:{NAAN}/{postfix}')
 
     arkGUID = f"ark:{NAAN}/{postfix}"
-    arkMetadata = identifierCollection.find_one({"@id": arkGUID})
+    arkMetadata = identifierCollection.find_one(
+        {"@id": arkGUID}, 
+        projection={"_id": False}
+        )
 
     if arkMetadata is None:
         return JSONResponse(
@@ -59,8 +52,4 @@ def resolve(
             content={"@id": arkGUID, "error": "ARK not found"}
         )
 
-    # Remove _id fields from the result
-    cleanedMetadata = remove_object_id(arkMetadata)
-    cleanedMetadata.pop("permissions", None)
-
-    return JSONResponse(content=cleanedMetadata)
+    return JSONResponse(content=arkMetadata)
