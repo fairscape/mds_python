@@ -13,7 +13,6 @@ from fairscape_mds.routers.software import router as SoftwareRouter
 from fairscape_mds.routers.dataset import router as DatasetRouter
 from fairscape_mds.routers.rocrate import router as ROCrateRouter
 from fairscape_mds.routers.computation import router as ComputationRouter
-from fairscape_mds.routers.organization import router as OrganizationRouter
 from fairscape_mds.routers.evidencegraph import router as EvidenceGraphRouter
 from fairscape_mds.routers.resolver import ResolverRouter
 from fairscape_mds.routers.publish import router as PublishRouter
@@ -73,7 +72,9 @@ app = FastAPI(
 
 
 @app.get('/api/healthz')
-async def healthcheck():
+def healthcheck():
+    # TODO check that configured connections are working
+
     return JSONResponse(
         status_code=200,
         content={"status": "server is healthy"}
@@ -84,7 +85,6 @@ app.include_router(SoftwareRouter, prefix="/api", tags=["software"])
 app.include_router(DatasetRouter,prefix="/api", tags=["dataset"])
 app.include_router(ROCrateRouter, prefix="/api",tags=["rocrate"])
 app.include_router(ComputationRouter, prefix="/api", tags=["computation"])
-app.include_router(OrganizationRouter, prefix="/api", tags=["organization"])
 app.include_router(EvidenceGraphRouter,prefix="/api", tags=["evidencegraph"])
 app.include_router(ResolverRouter, prefix="/api",tags=["resolver"])
 app.include_router(SchemaRouter, prefix="/api", tags=["schema"])
