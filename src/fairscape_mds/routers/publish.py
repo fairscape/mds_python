@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, Query, Body
 from fastapi.responses import JSONResponse
-from typing import Annotated
+from typing import Annotated, Dict
 from fairscape_mds.models.user import UserLDAP
 from fairscape_mds.auth.oauth import getCurrentUser
 from fairscape_mds.config import get_fairscape_config
@@ -10,6 +10,42 @@ from pathlib import Path
 import requests
 from datetime import datetime
 
+# License mapping based on dataverse options
+LICENSE_MAP = {
+    "CC0 1.0": {
+        "name": "CC0 1.0",
+        "uri": "http://creativecommons.org/publicdomain/zero/1.0"
+    },
+    "CC BY 4.0": {
+        "name": "CC BY 4.0",
+        "uri": "https://creativecommons.org/licenses/by/4.0"
+    },
+    "CC BY-SA 4.0": {
+        "name": "CC BY-SA 4.0",
+        "uri": "https://creativecommons.org/licenses/by-sa/4.0"
+    },
+    "CC BY-NC 4.0": {
+        "name": "CC BY-NC 4.0",
+        "uri": "https://creativecommons.org/licenses/by-nc/4.0"
+    },
+    "CC BY-NC-SA 4.0": {
+        "name": "CC BY-NC-SA 4.0",
+        "uri": "https://creativecommons.org/licenses/by-nc-sa/4.0"
+    },
+    "CC BY-ND 4.0": {
+        "name": "CC BY-ND 4.0",
+        "uri": "https://creativecommons.org/licenses/by-nd/4.0"
+    },
+    "CC BY-NC-ND 4.0": {
+        "name": "CC BY-NC-ND 4.0",
+        "uri": "https://creativecommons.org/licenses/by-nc-nd/4.0"
+    }
+}
+
+DEFAULT_LICENSE = "CC BY 4.0"
+DEFAULT_DATAVERSE_URL = "https://dataversedev.internal.lib.virginia.edu/"
+DEFAULT_DATAVERSE_DB = "libradata"
+
 router = APIRouter()
 
 fairscapeConfig = get_fairscape_config()
@@ -18,9 +54,6 @@ minioClient = fairscapeConfig.CreateMinioClient()
 mongoClient = fairscapeConfig.CreateMongoClient()
 mongoDB = mongoClient[fairscapeConfig.mongo.db]
 rocrateCollection = mongoDB[fairscapeConfig.mongo.rocrate_collection]
-
-DEFAULT_DATAVERSE_URL = "https://dataversedev.internal.lib.virginia.edu/"
-DEFAULT_DATAVERSE_DB = "libradata"
 
 @router.post("/publish/create/ark:{NAAN}/{postfix}")
 async def create_dataset(
@@ -69,14 +102,21 @@ async def create_dataset(
     if rocrateGroup not in currentUser.memberOf and fairscapeConfig.ldap.adminDN not in currentUser.memberOf:
         raise HTTPException(status_code=401, detail="User not authorized to publish this ROCrate")
 
+    # Get license from user metadata or use default
+    license_name = userProvidedMetadata.get("license", DEFAULT_LICENSE)
+    if license_name not in LICENSE_MAP:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid license. Please choose from: {', '.join(LICENSE_MAP.keys())}"
+        )
+    
+    license_info = LICENSE_MAP[license_name]
     dataverseMetadata = rocrateMetadata | userProvidedMetadata
+
     # Prepare dataset metadata
     metadata = {
         "datasetVersion": {
-            "license": {
-                "name": "CC0 1.0",
-                "uri": "http://creativecommons.org/publicdomain/zero/1.0"
-            },
+            "license": license_info,
             "metadataBlocks": {
                 "citation": {
                     "fields": [
@@ -165,7 +205,7 @@ async def create_dataset(
         )
     else:
         raise HTTPException(status_code=response.status_code, detail=response.text)
-
+    
 @router.post("/publish/upload/ark:{NAAN}/{postfix}")
 async def upload_dataset(
     currentUser: Annotated[UserLDAP, Depends(getCurrentUser)],
