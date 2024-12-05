@@ -4,8 +4,8 @@ from pydantic import (
     ConfigDict,
     Field,
     constr,
-    Extra,
 )
+from pydantic.networks import AnyUrl
 from typing import (
     List,
     Optional,
@@ -17,22 +17,34 @@ from pymongo.collection import Collection
 from fairscape_mds.utilities.utils import validate_ark
 from fairscape_mds.utilities.operation_status import OperationStatus
 
-ARK_NAAN = "59852"
-IdentifierPattern = "^ark:[0-9]{5}\\/[a-zA-Z0-9_\\-]*.$"
-DEFAULT_LICENSE = " https://creativecommons.org/licenses/by/4.0/"
 
-default_context = {
+IdentifierPattern = "^ark:[0-9]{5}\\/[a-zA-Z0-9_\\-]*.$"
+
+# TODO get from config
+DEFAULT_ARK_NAAN = "59852"
+DEFAULT_LICENSE = " https://creativecommons.org/licenses/by/4.0/"
+defaultContext = {
     "@vocab": "https://schema.org/",
     "evi": "https://w3id.org/EVI#"
 }
 
+from enum import Enum
+class ClassEnum(str, Enum):
+    dataset = 'Dataset'
+    software = 'Software'
+    computation = 'Computation'
+    schema = 'Schema'
+    evidenceGraph = 'EvidenceGraph'
+    rocrate = 'ROCrate'
+
 
 class Identifier(BaseModel, extra='allow'):
+    model_config = ConfigDict(extra='allow')
     guid: str = Field(
         title="guid",
         alias="@id"
     )
-    metadataType: str = Field(
+    metadataType: ClassEnum = Field(
         title="metadataType",
         alias="@type"
     )
@@ -51,12 +63,12 @@ class FairscapeBaseModel(Identifier):
         validate_assignment=True,
         extra='allow'
     )
-    context: Dict[str, str] = Field(
-        default=default_context,
+    context: Optional[Dict[str, str]] = Field(
+        default=defaultContext,
         title="context",
         alias="@context"
     )
-    url: Optional[str] = Field(default=None)
+    url: Optional[AnyUrl] = Field(default=None)
 
 
     def generate_guid(self) -> str:
@@ -64,7 +76,7 @@ class FairscapeBaseModel(Identifier):
         # TODO add random hash digest
 
         # if
-        return f"ark:{ARK_NAAN}/rocrate-{self.name.replace(' ', '')}"
+        return f"ark:{DEFAULT_ARK_NAAN}/rocrate-{self.name.replace(' ', '')}"
 
     def create(self, MongoCollection: Collection, bson=None) -> OperationStatus:
         """Persist instance of model in mongo
