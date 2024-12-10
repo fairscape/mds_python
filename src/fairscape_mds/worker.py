@@ -156,7 +156,7 @@ def AsyncRegisterROCrate(userCN: str, transactionFolder: str, filePath: str):
             bucket_name=fairscapeConfig.minio.rocrate_bucket, 
             object_name=filePath
         )
-        zippedContent = objectResponse.read()
+        zippedContent = io.BytesIO(objectResponse.read())
     except Exception as minioException:
         backgroundTaskLogger.error(
             f"transaction: {str(transactionFolder)}" +
@@ -184,8 +184,21 @@ def AsyncRegisterROCrate(userCN: str, transactionFolder: str, filePath: str):
             bucketRootPath=fairscapeConfig.minio.default_bucket_path,
             currentUser=currentUser,
             transactionFolder=transactionFolder,
-            zippedObject=io.BytesIO(zippedContent)
+            zippedObject=zippedContent
         )
+
+        # update the uploadJob record
+        if roCrateMetadata is None:
+            updateUploadJob(
+                transactionFolder,
+                {
+                    "completed": True,
+                    "success": False,
+                    "error": "error reading ro-crate-metadata",
+                    "status": "Failed"
+                }
+            )
+        return False
     except:
         updateUploadJob(
             transactionFolder,
@@ -198,19 +211,8 @@ def AsyncRegisterROCrate(userCN: str, transactionFolder: str, filePath: str):
         )
         return False
 
-    # update the uploadJob record
-    if roCrateMetadata is None:
-        updateUploadJob(
-            transactionFolder,
-            {
-                "completed": True,
-                "success": False,
-                "error": "error reading ro-crate-metadata",
-                "status": "Failed"
-            }
-        )
-        return False
 
+    # Process rocrate metadata
     rocrateGUID = roCrateMetadata.get('@id')
 
     # Add distribution information if not present
@@ -231,6 +233,16 @@ def AsyncRegisterROCrate(userCN: str, transactionFolder: str, filePath: str):
         transactionFolder,
         {"status": "minting identifiers"}
     )
+
+    # TODO reason the rocrate metadata locally 
+    # TODO reason over the rocrate metadata globally
+    
+    # TODO overwrite the rocrate metadata
+    # overwriteZippedCrateMetadata(
+    #    crateMetadata = rocrateMetadata,
+    #    transactionFolder= transactionFolder,
+    #)
+
 
     try:
         publishMetadata = PublishMetadata(

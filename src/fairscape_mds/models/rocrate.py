@@ -2,6 +2,7 @@ from fastapi.responses import StreamingResponse
 import hashlib
 import json
 import re
+import tempfile
 
 import io
 import os
@@ -314,37 +315,6 @@ class ROCrate(BaseModel):
                 500
                 )
 
-class ProcessROCrate():
-    """ Class for Processing an ROCrate
-    """
-
-    def __init__(self, crate_file):
-        self.crate_file = crate_file
-
-    def UploadZippedCrate():
-        """ Function to take
-        """
-        pass
-
-    def UploadExtractedCrate():
-        pass
-
-    def Process(self):
-        pass
-        
-class UploadROCrate():
-    """ Class for Uploading ROCrate to Minio
-    """
-
-    def __init__(self, crate_file):
-        pass
-
-    def UploadZipped():
-        pass
-
-    def UploadExtracted():
-        pass
-
 
 def UploadZippedCrate(
         MinioClient: minio.api.Minio, 
@@ -396,62 +366,96 @@ def ExtractCrate(
     :rtype: dict
     """
     zipContents = zippedObject.read()
-            
-    with zipfile.ZipFile(io.BytesIO(zipContents), "r") as crateZip:
-        
-        crateInfoList = crateZip.infolist()
 
-        # extract the ro-crate-metadata.json from the zipfile
-        metadataInfo = list(filter(lambda info: 'ro-crate-metadata.json' in info.filename, crateInfoList))
+    # write zip to temporary file and alter metadata
+    with tempfile.TemporaryDirectory() as tempDir:
+        # write out zipfile to file
+        crateTemp = tempfile.TemporaryFile(prefix=tempDir, delete=False)
+        crateTemp.write(zippedContents)
+        crateTemp.close()
 
-        # TODO raise a more descriptive exception
-        if len(metadataInfo) != 1:
-            raise Exception('ro-crate-metadata.json not found in crate')
 
-        metadataFileInfo = metadataInfo[0]
+        # create a directory for extracted files
+        with tempfile.TemporaryDirectory(prefix=tempDir) as extractTempDir:
 
-        # uploaded crate path must be trimmed from all uploaded elements
-        crateParentPath = Path(metadataFileInfo.filename).parent
 
-        # extract and upload the content
-        fileContents = crateZip.read(metadataFileInfo.filename)
-        # may have to seek the begining of the file
+            # read in zipped crate
+            with open(crateTemp.name, 'rb') as zippedCrateFileObj:
+                crateZipFile = ZipFile(zippedCrateFileObj)
+                # extract all files in temporary directory
+                crateZipFile.extractall(path=extractTempDir)
 
-    # TODO validate ROCrate
-    roCrateMetadata = json.loads(fileContents)
 
-    # TODO reassign identifiers if there is conflict
-    # format identifiers for storage
-    crateArk = parseArk(roCrateMetadata["@id"])
-    if crateArk is None:
-        # TODO assign new identifiers
-        pass
-    else:
-        roCrateMetadata["@id"] = crateArk
+            # get the json ld
+            metadataSearch = list(pathlib.Path(extractTempDir).glob("*/ro-crate-metadata.json"))
+            if len(metadataSearch) != 1:
+                raise Exception("ro-crate-metadata.json not found in crate")	
 
-    # TODO reassign identifiers if there is conflict
-    for crateElement in roCrateMetadata["@graph"]:
-        elementArk = parseArk(crateElement["@id"])
-        if elementArk is None:
-            pass
-        else:
-            crateElement["@id"] = elementArk
+            crateMetadataPath = metadataSearch[0]
 
-    # TODO get the name of the zip in rocrate
-    # zippedFilepath = Path()
-    # uploadFilepath = Path(bucketRootPath) / userCN / 'rocrates' / zippedFilepath / 'ro-crate-metadata.json'
+            with crateMetadataPath.open("r") as crateMetadataFileObj:
+                crateMetadata = json.load(crateMetadataFileObj)
 
-    # upload the ro-crate-metadata.json to the rocrates 
-    uploadFilepath = Path(bucketRootPath) / currentUser.cn / 'rocrates' / transactionFolder / 'ro-crate-metadata.json'
+            # TODO modify metadata
+            crateMetadata = ProcessMetadata(crateMetadata)
+
+            # TODO validate ROCrate
+
+            # TODO reassign identifiers if there is conflict
+            # format identifiers for storage
+
+            # TODO get the name of the zip in rocrate
+            # zippedFilepath = Path()
+
+            # overwrite extracted rocrate metadata 
+            with crateMetadataPath.open("w") as crateMetadataFileObj:
+                json.dump(crateMetadata, crateMetadataFileObj, indent=2)
+
+            # compress directory to new zipfile
+            crateFolder = crateMetadataPath.parent
+
+            pathlib.Path(crateTemp.name).unlink()
+
+            with ZipFile(crateTemp.name, "w") as overwriteZip:
+                addFiles = list(pathlib.Path(extractTempDir).rglob("*"))
+                for fileElem in addFiles:
+                    if fileElem.is_file():
+                        keyName = fileElem.relative_to(crateFolder.parent)
+                        print(fileElem)
+                        overwriteZip.write(filename=fileElem, arcname=keyName)
+
+
+            archiveName = crateFolder.name + '.zip' 
+            archiveUploadFilepath = Path(bucketRootPath) / userCN / 'rocrates' / archiveName
+
+
+            minioClient.fput_object(
+                bucket_name=bucketName,
+                object_name=str(archiveUploadFilepath),
+                file_path = crateTemp.name
+            )
+
 
     
+    # TODO remove, usefull for debugging transactions
+    # upload the ro-crate-metadata.json to the rocrates 
+    uploadFilepath = Path(bucketRootPath) / currentUser.cn / 'rocrates' / transactionFolder / 'ro-crate-metadata.json'
+ 
     uploadResult = minioClient.put_object(
         bucket_name= bucketName, 
         object_name=str(uploadFilepath), 
         data=io.BytesIO(fileContents), 
         length=len(fileContents)
         )
+    
+    rocrate_logger.info(
+        "UploadExtractedCrate\t" +
+        f"transaction={transactionFolder}\t" +
+        "message='Overwriting Metadata' " +
+        f"success='{uploadResult.success}'"                
+        )
 
+    # TODO move extraction inside of temp file context
     # read the zip and filter all datasets
     with zipfile.ZipFile(io.BytesIO(zipContents), "r") as crateZip:
 
@@ -920,3 +924,22 @@ def PublishProvMetadata(
     else:
         return insertedIdentifiers
 
+def ProcessMetadata(roCrateMetadata):
+    """ Function for processing metadata
+    """
+
+
+    crateArk = parseArk(roCrateMetadata["@id"])
+    if crateArk is None:
+        # TODO assign new identifiers
+        pass
+    else:
+        roCrateMetadata["@id"] = crateArk
+
+    # TODO reassign identifiers if there is conflict
+    for crateElement in roCrateMetadata["@graph"]:
+        elementArk = parseArk(crateElement["@id"])
+        if elementArk is None:
+            pass
+        else:
+            crateElement["@id"] = elementArk

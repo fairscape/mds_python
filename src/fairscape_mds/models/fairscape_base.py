@@ -25,7 +25,29 @@ DEFAULT_ARK_NAAN = "59852"
 DEFAULT_LICENSE = " https://creativecommons.org/licenses/by/4.0/"
 defaultContext = {
     "@vocab": "https://schema.org/",
-    "evi": "https://w3id.org/EVI#"
+    "evi": "https://w3id.org/EVI#",
+
+    # TODO fully specify default context
+    "usedSoftware": {
+        "@id": "https://w3id.org/EVI#",
+        "@type": "@id"
+    },
+    "usedDataset": {
+        "@id": "https://w3id.org/EVI#",
+        "@type": "@id"
+    },
+    "generatedBy": {
+        "@id": "https://w3id.org/EVI#generated",
+        "@type": "@id"
+    },
+    "generated": {
+        "@id": "https://w3id.org/EVI#generatedBy",
+        "@type": "@id"
+    },
+    "hasDistribution": {
+        "@id": "https://w3id.org/EVI#hasDistribution",
+        "@type": "@id"
+    }
 }
 
 from enum import Enum
