@@ -223,6 +223,8 @@ def AsyncRegisterROCrate(userCN: str, transactionFolder: str, filePath: str):
 
     mongoDB = mongoClient[fairscapeConfig.mongo.db]
     asyncCollection = mongoDB[fairscapeConfig.mongo.async_collection]
+    identifierCollection = mongoDB[fairscapeConfig.mongo.identifier_collection]
+    rocrateCollection = mongoDB[fairscapeConfig.mongo.rocrate_collection]
 
     # download crate from minio and store in a temporary file
     # write zip to temporary file and alter metadata
@@ -314,42 +316,6 @@ def AsyncRegisterROCrate(userCN: str, transactionFolder: str, filePath: str):
 
 
     
-    # persist changes to extract dir 
-    with crateMetadataPath.open("w") as crateMetadataFileObj:
-        json.dump(crateMetadata, crateMetadataFileObj, indent=2)
-
-    # overwrite zipfile    
-    with zipfile.ZipFile(tmpZipFilepath, mode="w") as zipCrate:
-        
-        crateName = pathlib.Path(filePath).name
-        contentDir = extractDir / crateStem
-
-        for crateElement in contentDir.rglob("*"):
-            keyName = crateElement.relative_to(
-                f'/tmp/jobs/{transactionFolder}/extracts/{crateStem}'
-            )
-            zipCrate.write(filename=crateElement, arcname=keyName)
-
-    # write final rocrate into archive at the path   
-    # / default / {userCN} / rocrates / crateName
-    try:
-        objectResponse = minioClient.fput_object(
-            bucket_name=fairscapeConfig.minio.rocrate_bucket, 
-            object_name=str(zipUploadPath),
-            file_path=str(tmpZipFilepath)
-        )
-        
-        backgroundTaskLogger.info(
-            f"transaction: {str(transactionFolder)}" +
-            "\tmessage: uploaded new zip" 
-            )
-
-    except Exception as e:
-        backgroundTaskLogger.error(
-            f"transaction: {str(transactionFolder)}" +
-            "\tmessage: error uploading processed ROCrate Archive" +
-            f"\texception: {str(e)}"
-            )
 
     # upload extracted files to datasets
 
@@ -416,15 +382,54 @@ def AsyncRegisterROCrate(userCN: str, transactionFolder: str, filePath: str):
             )
 
 
-        # add archive to datasetElem metadata
-
-        # TODO set download link relative to fairscape
+        # add distribution to metadata to enable download enpoints
         datasetElem['distribution'] = {
-
+            'distributionType': 'minio',
+            'location': {
+                'path': str(uploadPath)
+            }
         }
+
         # TODO check that dataset enpoint works and is accurate
+        # set download link relative to fairscape
         datasetElem['contentUrl']=f"{fairscapeConfig.url}/dataset/download/{datasetElem['@id']}"
         
+    # persist changes to extract dir 
+    with crateMetadataPath.open("w") as crateMetadataFileObj:
+        json.dump(crateMetadata, crateMetadataFileObj, indent=2)
+
+    # overwrite zipfile    
+    with zipfile.ZipFile(tmpZipFilepath, mode="w") as zipCrate:
+        
+        crateName = pathlib.Path(filePath).name
+        contentDir = extractDir / crateStem
+
+        for crateElement in contentDir.rglob("*"):
+            keyName = crateElement.relative_to(
+                f'/tmp/jobs/{transactionFolder}/extracts/{crateStem}'
+            )
+            zipCrate.write(filename=crateElement, arcname=keyName)
+
+    # write final rocrate into archive at the path   
+    # / default / {userCN} / rocrates / crateName
+    try:
+        objectResponse = minioClient.fput_object(
+            bucket_name=fairscapeConfig.minio.rocrate_bucket, 
+            object_name=str(zipUploadPath),
+            file_path=str(tmpZipFilepath)
+        )
+        
+        backgroundTaskLogger.info(
+            f"transaction: {str(transactionFolder)}" +
+            "\tmessage: uploaded new zip" 
+            )
+
+    except Exception as e:
+        backgroundTaskLogger.error(
+            f"transaction: {str(transactionFolder)}" +
+            "\tmessage: error uploading processed ROCrate Archive" +
+            f"\texception: {str(e)}"
+            )
 
         # publish metadata
 
