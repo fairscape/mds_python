@@ -76,7 +76,7 @@ def uploadAsync(
     zipFilename = str(Path(crate.filename).name)
 
     # set the key for uploading the object to minio
-    zippedObjectName = Path(fairscapeConfig.minio.default_bucket_path) / currentUser.cn / 'rocrates' / transactionFolder / zipFilename
+    zippedObjectName = Path(fairscapeConfig.minio.default_bucket_path) / currentUser.cn / 'transactions' / transactionFolder / zipFilename
 
     # upload the zipped ROCrate 
     zipped_upload_status= UploadZippedCrate(
@@ -105,6 +105,7 @@ def uploadAsync(
 
     # create the
     uploadJob = createUploadJob(
+        asyncCollection,
         userCN=currentUser.cn,
         transactionFolder=str(transactionUUID), 
         zippedCratePath=str(zippedObjectName)
@@ -128,7 +129,7 @@ def getROCrateStatus(
     submissionUUID: str
     ):
 
-    jobMetadata = getUploadJob(submissionUUID)
+    jobMetadata = getUploadJob(asyncCollection, submissionUUID)
 
     # check authorization to view upload status
     if currentUser.cn != jobMetadata.userCN:

@@ -3,6 +3,7 @@ import hashlib
 import json
 import re
 import tempfile
+import pathlib
 
 import io
 import os
@@ -48,14 +49,19 @@ from fairscape_mds.models.dataset import (
         URLDistribution
         )
 
-from fairscape_mds.utilities.utils import parseArk
 from fairscape_mds.utilities.operation_status import OperationStatus
 from fairscape_mds.models.user import UserLDAP
 
 
 # setup logger for minio operations
-logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
+#rocrateLoggerOutput="/tmp/logs/rocrate.log"
+# touch file?
+#logging.basicConfig(filename=rocrateLoggerOutput, level=logging.INFO)
 rocrate_logger = logging.getLogger("rocrate")
+
+##fh = logging.FileHandler(rocrateLoggerOutput)
+#rocrate_logger.addHandler(fh)
+#rocrate_logger.info("started rocrate logger")
 
 
 DATASET_TYPE = "Dataset"
@@ -346,12 +352,10 @@ def UploadZippedCrate(
     return OperationStatus(True, "", 200)
 
 def ExtractCrate(
-        minioClient,
-        bucketName: str,
-        bucketRootPath: str,
+        fairscapeConfig,
         transactionFolder: str,
-        currentUser: UserLDAP,
-        zippedObject, 
+        userCN: str,
+        objectPath: str
 ) -> dict:
     """
     Extract the ro-crate-metadata.json file from a zipped ROCrate
@@ -365,29 +369,55 @@ def ExtractCrate(
     :returns: Metadata Extracted from Crate
     :rtype: dict
     """
-    zipContents = zippedObject.read()
+    
+    # connect to ldap and get user
+    ldapConnection = fairscapeConfig.ldap.connectAdmin()
+    currentUser = getUserByCN(ldapConnection, userCN)
+    ldapConnection.unbind()
 
-    # write zip to temporary file and alter metadata
+
+    minioClient = fairscapeConfig.minio.CreateClient()
+    mongoClient = fairscapeConfig.mongo.CreateClient()
+
+    # crate zip name  
+    tmpZipFilepath = jobDir / filePath.name
+    with tmpZipFilepath.open("wb") as tmpZipfile:
+        try:
+            tmpZipfile.write(zippedContents)
+
+        except:
+            rocrate_logger.error(f"Transaction: {transactionFolder}\tError: failed to write zipped contents to tmp file")
+
+            updateUploadJob(
+                transactionFolder,
+                {
+                    "completed": True,
+                    "success": False,
+                    "error": "error copying rocrate to tmp file",
+                    "status": "Failed"
+                }
+            )
+
+    tmpExtractFolder = jobDir / 'extract'
+    tmpExtractFolder.mdkir(exists_ok=True)
+
+    # read in zipped crate
+    with tmpZipFilepath.open('rb') as zippedCrateFileObj:
+        crateZipFile = ZipFile(zippedCrateFileObj)
+        # extract all files in temporary directory
+        crateZipFile.extractall(path=tmpExtractFolder)
+        metadataSearch = list(pathlib.Path(extractTempDir).glob("*ro-crate-metadata.json"))
+
+
     with tempfile.TemporaryDirectory() as tempDir:
-        # write out zipfile to file
-        crateTemp = tempfile.TemporaryFile(prefix=tempDir, delete=False)
-        crateTemp.write(zippedContents)
-        crateTemp.close()
-
-
         # create a directory for extracted files
         with tempfile.TemporaryDirectory(prefix=tempDir) as extractTempDir:
 
 
-            # read in zipped crate
-            with open(crateTemp.name, 'rb') as zippedCrateFileObj:
-                crateZipFile = ZipFile(zippedCrateFileObj)
-                # extract all files in temporary directory
-                crateZipFile.extractall(path=extractTempDir)
 
 
             # get the json ld
-            metadataSearch = list(pathlib.Path(extractTempDir).glob("*/ro-crate-metadata.json"))
+            metadataSearch = list(pathlib.Path(extractTempDir).glob("*ro-crate-metadata.json"))
             if len(metadataSearch) != 1:
                 raise Exception("ro-crate-metadata.json not found in crate")	
 
@@ -427,6 +457,7 @@ def ExtractCrate(
 
             archiveName = crateFolder.name + '.zip' 
             archiveUploadFilepath = Path(bucketRootPath) / userCN / 'rocrates' / archiveName
+            print(f"UPLOADING ARCHIVE FILEPATH AT: {archiveUploadFilepath}")
 
 
             minioClient.fput_object(
@@ -434,6 +465,8 @@ def ExtractCrate(
                 object_name=str(archiveUploadFilepath),
                 file_path = crateTemp.name
             )
+
+
 
 
     
@@ -923,23 +956,3 @@ def PublishProvMetadata(
         return None
     else:
         return insertedIdentifiers
-
-def ProcessMetadata(roCrateMetadata):
-    """ Function for processing metadata
-    """
-
-
-    crateArk = parseArk(roCrateMetadata["@id"])
-    if crateArk is None:
-        # TODO assign new identifiers
-        pass
-    else:
-        roCrateMetadata["@id"] = crateArk
-
-    # TODO reassign identifiers if there is conflict
-    for crateElement in roCrateMetadata["@graph"]:
-        elementArk = parseArk(crateElement["@id"])
-        if elementArk is None:
-            pass
-        else:
-            crateElement["@id"] = elementArk
