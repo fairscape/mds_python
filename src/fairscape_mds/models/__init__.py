@@ -1,5 +1,4 @@
-from fairscape_mds.models.user import User, listUsers
-from fairscape_mds.models.group import Group, list_groups
+from fairscape_mds.models.user import UserLDAP, listUsers
 from fairscape_mds.models.dataset import (
         DatasetCreateModel, 
         DatasetWriteModel, 
@@ -17,8 +16,6 @@ from fairscape_mds.models.computation import (
         getComputation, 
         updateComputation
 )
-from fairscape_mds.models.organization import Organization, list_organization
-from fairscape_mds.models.project import Project, list_project
 from fairscape_mds.models.download import (
         DownloadCreateModel, 
         DownloadReadModel,
@@ -36,15 +33,12 @@ from fairscape_mds.models.acl import AccessControlList
 
 
 __all__ = [ 
-    'User', 'listUsers', 
-    'Group', 'list_groups',
+    'UserLDAP', 'listUsers', 
     'DatasetCreateModel', 'DatasetWriteModel', 'DatasetUpdateModel', 'listDatasets', 'deleteDataset', 'createDataset',
     'Software', 'listSoftware', 'createSoftware', 'deleteSoftware',
     'Computation', 'listComputation', 'getComputation', 'deleteComputation', 'getComputation', 'updateComputation',
-    'Organization', 
-    'Project', 'list_project',
     'DownloadCreateModel', 'DownloadReadModel', 'listDownloads', 'createDownload', 'getDownloadMetadata', 'getDownloadContent', 'deleteDownload',
-    'EvidenceGraph', 
+    'EvidenceGraph', 'list_evidencegraph',
     'ROCrate',
     'Schema',
     'IdentifierPattern',

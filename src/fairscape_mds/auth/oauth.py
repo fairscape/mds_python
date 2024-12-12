@@ -25,7 +25,7 @@ def createToken(email: str, fullname: str, userCN: str) -> str:
     :param str userDN: Users's LDAP Common Name
     """
     now = datetime.now(timezone.utc)
-    exp = datetime.now(timezone.utc) + timedelta(hours=1)
+    exp = datetime.now(timezone.utc) + timedelta(hours=24)
 
     nowTimestamp = datetime.timestamp(now)
     expTimestamp = datetime.timestamp(exp)

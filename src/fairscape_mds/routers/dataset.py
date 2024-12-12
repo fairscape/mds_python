@@ -130,7 +130,24 @@ def download_dataset(
     NAAN: str,
     postfix: str
     ):
-    pass
+    # TODO download dataset with new 
+    return JSONResponse(
+        {"message": "endpoint not available"},
+        status_code=200
+    )
+
+@router.put("/dataset/download/ark:{NAAN}/{postfix}")
+def put_download(
+    currentUser: Annotated[UserLDAP, Depends(getCurrentUser)],
+    NAAN: str,
+    postfix: str,
+    # multipart dataset
+    ):
+    # TODO dataset with new 
+    return JSONResponse(
+        {"message": "endpoint not available"},
+        status_code=200
+    )
 
 @router.get("/dataset/ark:{NAAN}/{postfix}",
             summary="Retrieve a dataset",

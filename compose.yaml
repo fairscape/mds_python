@@ -9,7 +9,7 @@ services:
     - fairscape-api
   fairscape-worker:
     build: "./"
-    env_file: "./deploy/local.env"
+    env_file: "./deploy/docker.env"
     command:
     - "python"
     - "fairscape_mds/worker.py"
@@ -19,7 +19,7 @@ services:
     - minio
   fairscape-api:
     build: "./"
-    env_file: "./deploy/local.env"
+    env_file: "./deploy/docker.env"
     ports:
       - 8080:8080
     depends_on: 
