@@ -69,6 +69,7 @@ class ROCrateUploadJob(BaseModel):
     timeStarted: datetime.datetime | None = Field(default=None)
     timeFinished: datetime.datetime | None = Field(default=None)
     progress: float = Field(default=0)
+    stage: Optional[str] = Field(default='started')
     status: Optional[str] = Field(default='in progress')
     completed: Optional[bool] = Field(default=False)
     success: Optional[bool] = Field(default=False)
@@ -127,21 +128,6 @@ def getUploadJob(
         return None
 
 
-def updateUploadJob(transactionFolder: str, update: Dict):
-    ''' Update async job using the transactionFolder as the primary key
-
-    :param str transactionFolder: the UUID primary key representing the upload job
-    :param dict update: metadata to update the upload job document
-    '''
-
-    asyncCollection.update_one(
-            {
-                "transactionFolder": transactionFolder,
-                }, 
-            {"$set": update}
-            )
-
-
 def ProcessMetadata(roCrateMetadata, userCN: str, zipname: str):
     """ Function for processing metadata
     """ 
@@ -177,33 +163,6 @@ def ProcessMetadata(roCrateMetadata, userCN: str, zipname: str):
 
 
 
-def relativeCratePath(nestedFile: str, crateStem: str):
-	""" Utility for generating nested filepaths relative to the crate folder
-	"""
-
-	nestedFilepath = pathlib.Path(nestedFile)
-	relativePath = pathlib.Path(nestedFilepath.name)
-	nextLevel = nestedFilepath.parent
-	relativePath = nextLevel.name / relativePath 
-
-	nestedDepth = 1
-	if nextLevel.name != crateStem:
-
-		finished = False
-		while finished != True or nestedDepth >= 10:
-			nextLevel= nextLevel.parent
-			relativePath = nextLevel.name / relativePath 
-			print(relativePath)
-
-			nestedDepth + 1
-
-			if nextLevel.name == crateStem:
-				finished = True
-		
-	return relativePath 
-
-
-
 @celeryApp.task(name='async-register-ro-crate')
 def AsyncRegisterROCrate(userCN: str, transactionFolder: str, filePath: str):
     """
@@ -215,7 +174,7 @@ def AsyncRegisterROCrate(userCN: str, transactionFolder: str, filePath: str):
 
     # connect to ldap and get user
     ldapConnection = fairscapeConfig.ldap.connectAdmin()
-    currentUser = getUserByCN(ldapConnection, userCN)
+    currentUserLDAP = getUserByCN(ldapConnection, userCN)
     ldapConnection.unbind()
 
     minioClient = fairscapeConfig.minio.CreateClient()
@@ -231,6 +190,14 @@ def AsyncRegisterROCrate(userCN: str, transactionFolder: str, filePath: str):
     jobDir = pathlib.Path(f"/tmp/jobs/{transactionFolder}")
     jobDir.mkdir(exist_ok=True)
     tmpZipFilepath = jobDir / pathlib.Path(filePath).name
+    crateStem = pathlib.Path(filePath).stem
+
+    backgroundTaskLogger.info(
+        f"transaction: {str(transactionFolder)}" +
+        "\tmessage: extracting rocrate" +
+        f"\tcrateStem: {str(crateStem)}" +
+        f"\tzipFilepath: {str(tmpZipFilepath)}"
+    )
 
     try:
         objectResponse = minioClient.fget_object(
@@ -243,19 +210,32 @@ def AsyncRegisterROCrate(userCN: str, transactionFolder: str, filePath: str):
             f"transaction: {str(transactionFolder)}" +
             "\tmessage: failed to read minio object" + f"\terror: {str(minioException)}"
         )
-        updateUploadJob(
-            transactionFolder, 
-            {
-                "completed": True,
-                "success": False,
-                "error": f"Failed to read minio Object \terror: {str(minioException)}",
-                "status": "Failed"
+
+        asyncCollection.update_one(
+            {"transactionFolder": str(transactionFolder)},
+            {"$set": 
+                {
+                    "completed": True,
+                    "success": False,
+                    "error": f"Failed to read minio Object \terror: {str(minioException)}",
+                    "status": "Failed"
+                }
             }
         )
+
         return False
     #finally:
     #    objectResponse.close()
     #    objectResponse.release_conn()
+
+    asyncCollection.update_one(
+        {"transactionFolder": str(transactionFolder)},
+        {"$set": 
+            {
+                "stage": "extracting ro crate"
+            }
+        }
+    )
 
     jobDir = pathlib.Path(f"/tmp/jobs/{transactionFolder}")
     extractDir = jobDir / 'extracts'
@@ -270,7 +250,7 @@ def AsyncRegisterROCrate(userCN: str, transactionFolder: str, filePath: str):
             f"transaction: {str(transactionFolder)}" +
             "\tmessage: extracted files"  
         )
-
+    
     # find the ro-crate-metadata.json file and read it in
     metadataSearch = list(pathlib.Path(extractDir).rglob("*ro-crate-metadata.json"))
     if len(metadataSearch) != 1:
@@ -281,21 +261,30 @@ def AsyncRegisterROCrate(userCN: str, transactionFolder: str, filePath: str):
     with crateMetadataPath.open("r") as crateMetadataFileObj:
         crateMetadata = json.load(crateMetadataFileObj)
 
+    # ------------------------------------
+    #         Process Metadata 
+    # -----------------------------------
     
-    # edit metadata
-    # - format identifiers
-    # - add distribution
-    
+    asyncCollection.update_one(
+        {"transactionFolder": str(transactionFolder)},
+        {"$set": 
+            {
+                "stage": "processing metadata"
+            }
+        }
+    )
+ 
     
     # TODO reassign identifiers if there is conflict
     crateGUID = parseArk(crateMetadata["@id"])
+
+    # TODO add default project for a user
 
     # TODO if no ROCrate ARK is assigned 
     # if crateMetadata.get("@id") is None:
     #    pass
 
     # Add distribution information if not present
-    crateStem = pathlib.Path(filePath).stem
     if crateMetadata.get('distribution') is None:
         zipUploadPath = pathlib.Path(fairscapeConfig.minio.rocrate_bucket_path) / userCN / 'rocrates' / pathlib.Path(filePath).name
         crateMetadata['distribution'] = {
@@ -303,7 +292,7 @@ def AsyncRegisterROCrate(userCN: str, transactionFolder: str, filePath: str):
             "archivedObjectPath": str(zipUploadPath)
         }
         # set download link to https download link
-        crateMetadata['contentURL'] = f"{fairscapeConfig.url}/rocrate/download/{crateGUID}" 
+        crateMetadata['contentUrl'] = f"{fairscapeConfig.url}/rocrate/download/{crateGUID}" 
 
     crateMetadata['uploadDate'] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
@@ -315,11 +304,7 @@ def AsyncRegisterROCrate(userCN: str, transactionFolder: str, filePath: str):
         crateElement['isPartOf'] = {"@id": crateGUID}
 
 
-    
-
-    # upload extracted files to datasets
-
-    # TODO preform before finalizing 
+    # upload extracted files to datasets 
     # filter out all datasets
     crateDatasets = filter(
         lambda crateElem: crateElem.get("@type") == "EVI:Dataset" and  crateElem.get("contentUrl") is not None,
@@ -350,7 +335,7 @@ def AsyncRegisterROCrate(userCN: str, transactionFolder: str, filePath: str):
                 break
 
         
-        uploadPath = pathlib.Path(fairscapeConfig.minio.default_bucket_path) / currentUser.cn / 'datasets' / relativePath
+        uploadPath = pathlib.Path(fairscapeConfig.minio.default_bucket_path) / currentUserLDAP.cn / 'datasets' / relativePath
         tmpFilePath = pathlib.Path('/tmp/jobs/') / transactionFolder / 'extracts' / relativePath
 
 
@@ -381,6 +366,22 @@ def AsyncRegisterROCrate(userCN: str, transactionFolder: str, filePath: str):
             f"\texception: {str(e)}"
             )
 
+            asyncCollection.update_one(
+                {"transactionFolder": transactionFolder},
+                { 
+                    "$set": {
+                        "complete": True,
+                        "success": False,
+                        "errors": {
+                            "message": "error uploading processed crate datasets",
+                            "exception": str(e)
+                        }
+                    }
+                }
+            )
+
+            return False
+
 
         # add distribution to metadata to enable download enpoints
         datasetElem['distribution'] = {
@@ -397,6 +398,16 @@ def AsyncRegisterROCrate(userCN: str, transactionFolder: str, filePath: str):
     # persist changes to extract dir 
     with crateMetadataPath.open("w") as crateMetadataFileObj:
         json.dump(crateMetadata, crateMetadataFileObj, indent=2)
+    
+
+    asyncCollection.update_one(
+        {"transactionFolder": str(transactionFolder)},
+        {"$set": 
+            {
+                "stage": "zipping rocrate with processed metadata"
+            }
+        }
+    )
 
     # overwrite zipfile    
     with zipfile.ZipFile(tmpZipFilepath, mode="w") as zipCrate:
@@ -431,14 +442,119 @@ def AsyncRegisterROCrate(userCN: str, transactionFolder: str, filePath: str):
             f"\texception: {str(e)}"
             )
 
-        # publish metadata
+    # --------------------------- 
+    #    PUBLISH METADATA
+    # --------------------------
 
+    asyncCollection.update_one(
+        {"transactionFolder": transactionFolder},
+        {"$set": 
+            {
+                "stage": "publishing metadata"
+            }
+        }
+    )
 
+    # Check if @id already exsists
+    rocrateFound = rocrateCollection.find_one(
+            {"@id": crateMetadata['@id']}
+            )
 
+    if rocrateFound:
+        raise ROCrateMetadataExistsException(
+            f"ROCrate with @id == {crateMetadata['@id']} found", None)
+    
 
+    # set default permissions for uploaded crate
+    crateMetadata['permissions'] = {
+            "owner": currentUserLDAP.dn,
+            "group": currentUserLDAP.memberOf[0]
+            }
+
+    # set default permissions for all datasets
+    for crateElem in crateMetadata['@graph']:
+        # set permissions on all rocrate identifiers
+        crateElem['permissions'] = {
+            "owner": currentUserLDAP.dn,
+            "group": currentUserLDAP.memberOf[0]
+            }
+
+    # for every element in the rocrate model dump json
+    insertMetadata = [ elem for elem in crateMetadata.get("@graph", [])]
+    # insert rocrate json into identifier collection
+    insertMetadata.append(crateMetadata)
+
+    insertedIdentifiers = [ elem.get("@id") for elem in insertMetadata]
+
+    # TODO check for already existing identifiers and mark as conflicts
+    #     - should reassign identifiers at metadata processing stage
+
+    # insert all identifiers into the identifier collection
+    insertResult = identifierCollection.insert_many(insertMetadata)
+
+    if len(insertResult.inserted_ids) != len(insertMetadata):
+        # raise an exception
+        backgroundTaskLogger.error(
+            f"transaction: {str(transactionFolder)}" +
+            "\tmessage: error uploading provenance identifiers" 
+        )
+        raise Exception(f"Error Minting Provenance Identifiers")
+
+    else:
+        # log success
+        backgroundTaskLogger.info(
+            f"transaction: {str(transactionFolder)}" +
+            "\tmessage: minted provenance identifiers" +
+            f"\tcrateGUID: {crateMetadata['@id']}" +
+            f"\tnumberOfIdentifiers: {len(insertResult.inserted_ids)}"
+        )
+
+    # insert rocrate result 
+    insertResult = rocrateCollection.insert_one(crateMetadata)
+
+    if insertResult.inserted_id is None:
+        backgroundTaskLogger.error(
+            f"transaction: {str(transactionFolder)}" +
+            "\tmessage: error uploading rocrate identifier"  +
+            f"\tcrateGUID: {crateMetadata['@id']}"
+        )
+        raise Exception(f"Error Minting Provenance Identifiers")
+
+    else:
+        backgroundTaskLogger.info(
+            f"transaction: {str(transactionFolder)}" +
+            "\tmessage: minted rocrate identifiers" +
+            f"\tcrateGUID: {crateMetadata['@id']}" 
+        )
+
+    # update the job as success 
+    # upsert because some jobs can't find their metadata
+    asyncCollection.update_one(
+        {"transactionFolder": str(transactionFolder)},
+        {"$set": 
+            {
+                "userCN": userCN,
+                "transactionFolder": str(transactionFolder),
+                "zippedCratePath": filePath,
+                "completed": True,
+                "success": True,
+                "status": "finished",
+                "stage": "completed all tasks successfully"
+            }
+        },
+        upsert=True
+    )
 
     # close clients
     mongoClient.close()
+
+    # ---------------------
+    # Delete Transaction
+    # ---------------------
+    minioClient.remove_object(
+        bucket_name=fairscapeConfig.minio.rocrate_bucket,
+        object_name=filePath
+    )
 
 
     return crateMetadata

@@ -858,7 +858,7 @@ class ROCrateMetadataExistsException(ROCrateException):
 
 def PublishMetadata(
     currentUser: UserLDAP,
-    rocrateJSON,
+    crateJSON,
     transactionFolder: str,
     rocrateCollection: pymongo.collection.Collection,
     identifierCollection: pymongo.collection.Collection
@@ -869,21 +869,22 @@ def PublishMetadata(
     
     # Check if @id already exsists
     rocrateFound = rocrateCollection.find_one(
-            {"@id": rocrateJSON['@id']}
+            {"@id": crateJSON['@id']}
             )
 
     if rocrateFound:
-        raise ROCrateMetadataExistsException(f"ROCrate with @id == {rocrateJSON['@id']} found", None)
+        raise ROCrateMetadataExistsException(
+            f"ROCrate with @id == {crateJSON['@id']} found", None)
     
 
     # set default permissions for uploaded crate
-    rocrateJSON['permissions'] = {
+    crateJSON['permissions'] = {
             "owner": currentUser.dn,
             "group": currentUser.memberOf[0]
             }
 
     # set default permissions for all datasets
-    for crateElem in rocrateJSON['@graph']:
+    for crateElem in crateJSON['@graph']:
         # set permissions on all rocrate identifiers
         crateElem['permissions'] = {
             "owner": currentUser.dn,
@@ -892,13 +893,13 @@ def PublishMetadata(
 
     publishProvResult = PublishProvMetadata(
         currentUser = currentUser,
-        rocrateJSON = rocrateJSON,
+        rocrateJSON = crateJSON,
         transactionFolder = transactionFolder,
         identifierCollection = identifierCollection
         )
     
     publishCrateResult = PublishROCrateMetadata(
-        rocrateJSON,
+        crateJSON,
         rocrateCollection
         )
 
