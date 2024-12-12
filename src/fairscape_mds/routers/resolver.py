@@ -46,6 +46,8 @@ def resolve(
         projection={"_id": False}
         )
 
+    arkMetadata.pop("_id", None)
+
     if arkMetadata is None:
         return JSONResponse(
             status_code=404,
