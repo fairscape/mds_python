@@ -6,6 +6,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.middleware.cors import CORSMiddleware 
 
 from fairscape_mds.routers.schema import router as SchemaRouter
 from fairscape_mds.routers.auth import router as AuthRouter
@@ -68,6 +69,14 @@ app = FastAPI(
     redoc_url="/api/redoc",
     swagger_ui_oauth2_redirect_url="/api/docs/oauth2-redirect",
     openapi_tags=tags_metadata
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_credentials=True,
+    allow_methods=["*"], 
+    allow_headers=["*"],
 )
 
 
