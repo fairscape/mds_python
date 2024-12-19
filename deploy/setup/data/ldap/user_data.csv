@@ -4,3 +4,4 @@ max, headroom, maxheadroom, max_headroom@example.org, testpassword
 tim, heidecker, tim, tim_heidecker@example.org, timanderic
 eric, weirheim, eric, eric_weirheim@example.rog, ericandtim
 eric, andre, ericandre, eric_andre@example.org, birdup
+test, user, testuser, test@fairscape.org, password
