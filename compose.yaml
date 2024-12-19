@@ -1,11 +1,5 @@
 # Docker Compose Spec for Local Testing of Fairscape
 services:
-
-  seed-data:
-    build: "./deploy/seed-data/"
-    env_file: "./deploy/seed-data/.env"
-    depends_on: 
-    - setup
   setup:
     build: "./deploy/setup/"
     env_file: "./deploy/setup/setup.env"
@@ -16,7 +10,7 @@ services:
         condition: service_healthy
 
   fairscape-frontend:
-    image: ghcr.io/fairscape/fairscapefrontendlocal:RELEASE.2024-11-26
+    image: ghcr.io/fairscape/fairscapefrontendlocal:RELEASE.2024-12-18
     ports:
       - "5173:5173"
     depends_on:

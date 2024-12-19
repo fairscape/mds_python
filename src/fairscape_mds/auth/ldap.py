@@ -23,7 +23,7 @@ def getUserByCN(ldapConnection, user_cn):
             search_base=fairscapeConfig.ldap.usersDN,
             search_filter=f"(cn={user_cn})",
             search_scope=ldap3.SUBTREE,
-            attributes=['dn', 'cn', 'mail', 'givenName', 'sn', 'o', 'memberOf']
+            attributes=[ 'cn', 'mail', 'givenName', 'sn', 'o', 'memberOf']
             )
 
     query_results = ldapConnection.entries

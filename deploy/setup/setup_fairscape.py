@@ -28,7 +28,6 @@ configAdminPassword = configValues['FAIRSCAPE_LDAP_CONFIG_ADMIN_PASSWORD']
 adminDN = configValues['FAIRSCAPE_LDAP_ADMIN_DN']
 adminPassword = configValues['FAIRSCAPE_LDAP_ADMIN_PASSWORD']
 
-# Keep your original LDAPConnectionError class
 class LDAPConnectionError(Exception):
     def __init__(self,exception: Exception | None=None, message: str="failed to connect to ldap"):
         self.message = message
@@ -126,12 +125,13 @@ def addFairscapeUser(ldapConnection, userCN, userSN, userGN, userMail, userPassw
     return ldapConnection.add(
         dn=f"cn={userCN},ou=users,{ldapBaseDN}",
         attributes={
-            "objectClass": ["inetOrgPerson", "Person"],
+            "objectClass": ["inetOrgPerson", "Person", "organizationalPerson"],  # Added organizationalPerson
             "cn": userCN,
             "sn": userSN,
             "gn": userGN,
             "mail": userMail,
-            "userPassword": userPassword
+            "userPassword": userPassword,
+            "o": "UVA"  # Added organization attribute
         }    
     )
 
