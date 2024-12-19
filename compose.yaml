@@ -26,6 +26,15 @@ services:
     - ldap
     - mongo
     - minio
+  fairscape-frontend:
+    image: ghcr.io/fairscape/fairscapefrontendlocal:RELEASE.2024-12-19
+    ports:
+      - "5173:5173"
+    depends_on:
+      - fairscape-api
+      - ldap
+      - mongo
+      - minio
 
   ldap-frontend:
     image: dnknth/ldap-ui
