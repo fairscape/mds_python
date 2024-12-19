@@ -30,28 +30,33 @@ def resolve(
     postfix: Annotated[str, Path(title="Persistent Identifier")]
 ):
     """Resolve Identifier Metadata and Return in JSON-LD"""
-
     if len(NAAN) != 5:
         return JSONResponse(
             status_code=404,
             content={"error": "NAAN must be 5 digits"}
         )
-
+    
     if NAAN != fairscapeConfig.NAAN:
         return RedirectResponse(f'https://n2t.net/ark:{NAAN}/{postfix}')
-
+        
     arkGUID = f"ark:{NAAN}/{postfix}"
     arkMetadata = identifierCollection.find_one(
-        {"@id": arkGUID}, 
+        {"@id": arkGUID},
         projection={"_id": False}
-        )
-
-    arkMetadata.pop("_id", None)
-
+    )
+    
     if arkMetadata is None:
         return JSONResponse(
             status_code=404,
             content={"@id": arkGUID, "error": "ARK not found"}
         )
-
+    
+    # Remove _id from top level
+    arkMetadata.pop("_id", None)
+    
+    # Process @graph section if it exists
+    if "@graph" in arkMetadata:
+        for item in arkMetadata["@graph"]:
+            item.pop("_id", None)
+    
     return JSONResponse(content=arkMetadata)
